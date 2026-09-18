@@ -2,6 +2,12 @@
 ARG BASE_IMAGE=debian:trixie-slim
 FROM ${BASE_IMAGE} AS guest
 
+FROM debian:trixie-slim AS guest-archive
+COPY --from=guest / /guest/
+RUN mkdir -p /guest/workspace \
+    && tar -C /guest -cf /rootfs.tar . \
+    && chmod 644 /rootfs.tar
+
 FROM debian:trixie-slim AS proot-build
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential pkg-config libtalloc-dev uthash-dev git ca-certificates \
@@ -19,12 +25,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && useradd --uid 1000 --create-home --home-dir /home/container container
 COPY --from=proot-build /src/proot/src/proot /usr/local/bin/proot
 COPY --from=proot-build /tmp/proot-source.tar.gz /usr/share/doc/proot/source.tar.gz
-COPY --from=guest --chown=1000:1000 / /opt/soneyko/rootfs/
+COPY --from=guest-archive /rootfs.tar /opt/soneyko/rootfs.tar
 COPY entrypoint.sh /usr/local/bin/soneyko-entrypoint
 COPY instance.sh /usr/local/bin/soneyko-instance
-RUN chmod 755 /usr/local/bin/soneyko-entrypoint /usr/local/bin/soneyko-instance \
-    && mkdir -p /opt/soneyko/rootfs/workspace /opt/soneyko/rootfs/root \
-    && chmod 755 /opt/soneyko/rootfs/root
+RUN chmod 755 /usr/local/bin/soneyko-entrypoint /usr/local/bin/soneyko-instance
 LABEL org.opencontainers.image.source="https://github.com/trusted-technologies/eggs-for-soneyko"
 USER container
 ENV HOME=/home/container USER=container TERM=xterm-256color

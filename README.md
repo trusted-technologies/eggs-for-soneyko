@@ -3,6 +3,8 @@
 The sole application-template source for [soneyko.ai](https://soneyko.ai).
 Contains 1,076 normalized Pterodactyl Eggs, including Pelican variants and three
 persistent Linux environments: Debian 13, Ubuntu 24.04 and Alpine 3.22.
+Normal discovery shows 379 preferred applications and environments; alternative
+upstream variants remain available through the variants filter.
 
 ## Catalog
 
@@ -49,13 +51,14 @@ when the catalog changes or a recipe disappears.
 `images/instance` builds an unprivileged PRoot userland. The guest filesystem,
 installed packages and configuration live in `/home/container/.instance/rootfs`,
 inside the normal Wings server volume. Root is emulated inside the guest; the
-outer container remains UID 1000, with a read-only image, dropped capabilities
+outer container uses the node-configured unprivileged UID, with a read-only image, dropped capabilities
 and `no-new-privileges`. These are Linux userland environments, **not VMs**:
 no dedicated kernel, systemd, nested Docker or additional host privileges.
 Package operations requiring kernel features may not work.
 
-The GitHub Actions image workflow builds amd64 variants and checks persistence
-across container recreation before publishing to
+The GitHub Actions image workflow builds amd64 variants and checks package
+installation and persistence across container recreation under UIDs 1000 and 988
+before publishing to
 `ghcr.io/trusted-technologies/soneyko-instance`. Public repositories do not
 automatically make new GHCR packages public: the package owner must allow public
 pulls. The panel reports unavailable images instead of substituting another one.
@@ -63,3 +66,5 @@ pulls. The panel reports unavailable images instead of substituting another one.
 Runtime images contain OS packages under their respective licenses. The root
 license covers Soneyko code; copied upstream recipes retain their original
 licenses and attribution in `licenses/` and each catalog entry.
+PRoot is built from a pinned upstream commit; its corresponding source archive
+is included at `/usr/share/doc/proot/source.tar.gz` in every image.
