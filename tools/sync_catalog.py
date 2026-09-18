@@ -214,6 +214,17 @@ def build(offline=False):
                  "upstream_aliases": [], "runtime_tested": False, **metadata}
         entries.append(entry)
         records.append({"entry": entry, "egg": egg})
+    # Preserve all variants, but default discovery shows one recipe per app.
+    # Input order prefers official Pterodactyl, then maintained Pelican, then archives.
+    groups = {}
+    for record in records:
+        entry = record["entry"]
+        group = (entry["category"], entry["name"].strip().casefold())
+        groups.setdefault(group, []).append(entry)
+    for group in groups.values():
+        for index, entry in enumerate(group):
+            entry["preferred"] = index == 0
+            entry["variant_count"] = len(group)
     records.sort(key=lambda record: (record["entry"]["kind"] != "instance", record["entry"]["category"], record["entry"]["name"].lower(), record["entry"]["id"]))
     bundles = []
     for offset in range(0, len(records), 10):

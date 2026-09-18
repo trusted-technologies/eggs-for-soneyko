@@ -40,7 +40,7 @@ jobs:
           run_guest() {
             docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges \
               --memory 512m --cpus 1 --pids-limit 128 \
-              --tmpfs /tmp:rw,nosuid,size=64m \
+              --tmpfs /tmp:rw,exec,nosuid,size=64m \
               -v "$RUNNER_TEMP/instance-volume:/home/container" \
               soneyko-instance:test /bin/sh -lc "$1"
           }
