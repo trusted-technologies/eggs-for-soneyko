@@ -45,7 +45,7 @@ jobs:
               soneyko-instance:test /bin/sh -lc "$1"
           }
           run_guest 'echo persisted > /root/soneyko-check; test "$(id -u)" = 0; cat /etc/os-release'
-          run_guest 'if command -v apk >/dev/null; then apk add --no-cache curl; else apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl; fi'
+          run_guest 'if command -v apk >/dev/null; then apk add --no-cache curl; else apt-get -o Debug::Acquire::gpgv=true update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl; fi'
           run_guest 'test "$(cat /root/soneyko-check)" = persisted; curl --version'
       - uses: docker/login-action@v3
         if: github.event_name != 'pull_request'
