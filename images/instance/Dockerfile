@@ -2,11 +2,23 @@
 ARG BASE_IMAGE=debian:trixie-slim
 FROM ${BASE_IMAGE} AS guest
 
+FROM debian:trixie-slim AS proot-build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential pkg-config libtalloc-dev uthash-dev git ca-certificates \
+    && git clone https://github.com/proot-me/proot.git /src/proot \
+    && cd /src/proot \
+    && git checkout d4b49e2243dee34e41c13dfeca6a3d07e9cf0f00 \
+    && tar --exclude=.git -czf /tmp/proot-source.tar.gz . \
+    && make -C src -j2 proot \
+    && strip src/proot
+
 FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash ca-certificates proot tar tini \
+    bash ca-certificates libtalloc2 tar tini \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --uid 1000 --create-home --home-dir /home/container container
+COPY --from=proot-build /src/proot/src/proot /usr/local/bin/proot
+COPY --from=proot-build /tmp/proot-source.tar.gz /usr/share/doc/proot/source.tar.gz
 COPY --from=guest --chown=1000:1000 / /opt/soneyko/rootfs/
 COPY entrypoint.sh /usr/local/bin/soneyko-entrypoint
 COPY instance.sh /usr/local/bin/soneyko-instance
