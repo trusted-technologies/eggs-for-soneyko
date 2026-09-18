@@ -8,6 +8,12 @@ if [ ! -f "$state/initialized" ]; then
     # All guest files live in the ordinary Wings server volume, including /etc
     # and package-manager state. Recreating the Docker container preserves them.
     tar -C /opt/soneyko/rootfs -cf - . | tar --no-same-owner -C "$rootfs" -xf -
+    if [ -d "$rootfs/etc/apt/apt.conf.d" ]; then
+        # PRoot cannot give _apt a separate host UID. Keep APT inside the same
+        # emulated guest identity; Docker still enforces unprivileged UID 1000.
+        # Repository signature verification remains enabled.
+        printf 'APT::Sandbox::User "root";\n' > "$rootfs/etc/apt/apt.conf.d/99soneyko-proot"
+    fi
     touch "$state/initialized"
 fi
 mkdir -p "$rootfs/etc" "$rootfs/root" "$rootfs/workspace" "$rootfs/tmp"
