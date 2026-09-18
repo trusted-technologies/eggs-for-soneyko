@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash ca-certificates proot tar tini \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --uid 1000 --create-home --home-dir /home/container container
-COPY --from=guest / /opt/soneyko/rootfs/
+COPY --from=guest --chown=1000:1000 / /opt/soneyko/rootfs/
 COPY entrypoint.sh /usr/local/bin/soneyko-entrypoint
 COPY instance.sh /usr/local/bin/soneyko-instance
 RUN chmod 755 /usr/local/bin/soneyko-entrypoint /usr/local/bin/soneyko-instance \
