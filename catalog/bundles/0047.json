@@ -1,0 +1,1161 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "killing-floor-2-5938283faef8",
+        "name": "Killing Floor 2",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/killing-floor-2-5938283faef8.json",
+        "sha256": "071c77c673bec6c63bc3d16e1d6c86788ab346e183f631c68606f0ea0424c21b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "killing_floor_2/egg-killing-floor2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/5938283faef8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Killing Floor 2",
+        "author": "parker@parkervcp.com",
+        "uuid": "1c46cac5-9cca-414c-9a72-244372ac7efc",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Binaries/Win64/KFGameSteamServer.bin.x86_64 {{MAP_NAME}}?Port={{SERVER_PORT}}?QueryPort={{QUERY_PORT}}?AdminPassword={{ADMIN_PASS}}?Difficulty={{DIFFICULTY}}$( [ \"$WEB_ADMIN\" == \"true\" ] || printf %s '??WebAdminPort={{WEB_ADMIN_PORT}}' )",
+        "config": {
+          "files": "{\"KFGame/Config/KFWeb.ini\": {\"parser\": \"file\", \"find\": {\"bEnabled\": \"benabled={{server.build.env.WEB_ADMIN}}\", \"ListenPort\": \"ListenPort={{server.build.env.WEB_ADMIN_PORT}}\"}}, \"KFGame/Config/LinuxServer-KFGame.ini\": {\"parser\": \"file\", \"find\": {\"AdminPassword\": \"AdminPassword={{server.build.env.ADMIN_PASS}}\", \"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"DevOnline: Playfab server registered with lobby ID \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username to use to install the server.\r\n\r\nOnly needed for games that need a user that owns the server",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for the Steam account to install a server.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Will most likely time out before it gets used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:6",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Server App ID",
+            "description": "The App ID for the Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232130",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232130",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Only needed for specific situations.",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "The map to load when the server starts\r\n\r\ndefault - 'kf-bioticslab'",
+            "env_variable": "MAP_NAME",
+            "default_value": "kf-bioticslab",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The port steam will use to query the server.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable WebAdmin (beta)",
+            "description": "",
+            "env_variable": "WEB_ADMIN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "An admin password for the server.",
+            "env_variable": "ADMIN_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "This is the displayed server name to all players in the server and the server browser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Difficulty",
+            "description": "0 = Normal, 1 = Hard, 2 = Suicidal, 3 = Hell on Earth",
+            "env_variable": "DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Web Admin Port",
+            "description": "The port the webadmin panel should use. This is a beta feature.",
+            "env_variable": "WEB_ADMIN_PORT",
+            "default_value": "8089",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "killing-floor-2-c40633c05014",
+        "name": "Killing Floor 2",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/killing-floor-2-c40633c05014.json",
+        "sha256": "7acc3bc300d255d7485c511d9986ccfd1adedb7d90d170442bc3a10414102513",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "killing_floor_2/egg-killing-floor2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c40633c05014.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:20:07+02:00",
+        "name": "Killing Floor 2",
+        "author": "parker@parkervcp.com",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Binaries/Win64/KFGameSteamServer.bin.x86_64 {{MAP_NAME}}?Port={{SERVER_PORT}}?QueryPort={{QUERY_PORT}}?AdminPassword={{ADMIN_PASS}}?Difficulty={{DIFFICULTY}}$( [ \"$WEB_ADMIN\" == \"true\" ] || printf %s '??WebAdminPort={{WEB_ADMIN_PORT}}' )",
+        "config": {
+          "files": "{\"KFGame/Config/KFWeb.ini\": {\"parser\": \"file\", \"find\": {\"bEnabled\": \"benabled={{server.build.env.WEB_ADMIN}}\", \"ListenPort\": \"ListenPort={{server.build.env.WEB_ADMIN_PORT}}\"}}, \"KFGame/Config/LinuxServer-KFGame.ini\": {\"parser\": \"file\", \"find\": {\"AdminPassword\": \"AdminPassword={{server.build.env.ADMIN_PASS}}\", \"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"DevOnline: Playfab server registered with lobby ID \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username to use to install the server.\r\n\r\nOnly needed for games that need a user that owns the server",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for the Steam account to install a server.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Will most likely time out before it gets used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Server App ID",
+            "description": "The App ID for the Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232130",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232130",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Only needed for specific situations.",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "The map to load when the server starts\r\n\r\ndefault - 'kf-bioticslab'",
+            "env_variable": "MAP_NAME",
+            "default_value": "kf-bioticslab",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The port steam will use to query the server.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable WebAdmin (beta)",
+            "description": "",
+            "env_variable": "WEB_ADMIN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "An admin password for the server.",
+            "env_variable": "ADMIN_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "This is the displayed server name to all players in the server and the server browser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Difficulty",
+            "description": "0 = Normal, 1 = Hard, 2 = Suicidal, 3 = Hell on Earth",
+            "env_variable": "DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Web Admin Port",
+            "description": "The port the webadmin panel should use. This is a beta feature.",
+            "env_variable": "WEB_ADMIN_PORT",
+            "default_value": "8089",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "kissmp-server-26c26479ff3e",
+        "name": "KissMP Server",
+        "description": "Server for the KISS Multiplayer BeamNG.drive mod",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/kissmp-server-26c26479ff3e.json",
+        "sha256": "b2a320e27a1b83b61e348783852f39ee5abec1480f827af0bb081f97769083ee",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "beamng/kissmp/egg-kissmp.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/26c26479ff3e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:01:56+02:00",
+        "name": "KissMP Server",
+        "author": "me@weilbyte.dev",
+        "description": "Server for the KISS Multiplayer BeamNG.drive mod",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./kissmp-server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server is running!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y wget unzip \r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nLATEST_RELEASE=$(wget -qO- https://api.github.com/repos/TheHellBox/KISS-multiplayer/releases/latest | grep browser_download_url | cut -d '\"' -f 4)\r\necho -e Install repo set to ${INSTALL_REPO}\r\necho -e \"/mnt/server is empty.\\nDownloading latest release ${LATEST_RELEASE}\"\r\n\r\nwget $LATEST_RELEASE -O kissmp.zip\r\nunzip -j kissmp.zip '*/kissmp-server'\r\n\r\nrm -rf kissmp.zip\r\n\r\nif [ -f /mnt/server/kissmp-server ]; then\r\n    echo -e \"Install complete\"\r\n    chmod +x /mnt/server/kissmp-server\r\n    \r\n    # Generate config\r\n    ./kissmp-server & serverpid=$! \r\n    sleep 1\r\n    kill $serverpid\r\n    \r\n    exit 0\r\nelse \r\n    echo -e \"Install failed (no /mnt/server/kissmp-server file present)\"\r\n    exit 1\r\nfi",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "kissmp-server-fc4ec80f19bd",
+        "name": "KissMP Server",
+        "description": "Server for the KISS Multiplayer BeamNG.drive mod",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/kissmp-server-fc4ec80f19bd.json",
+        "sha256": "c24283c13d0afecaab202f4ea2d379902b227a72d0e62998eab8fd5f5391edaf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "beamng/kissmp/egg-kiss-m-p-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/games-standalone",
+            "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+            "path": "beamng/kissmp/egg-pterodactyl-kiss-m-p-server.json",
+            "format": "PTDL_v2"
+          },
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/beamng/kissmp/egg-kissmp.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/fc4ec80f19bd.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:50+00:00",
+        "name": "KissMP Server",
+        "author": "me@weilbyte.dev",
+        "uuid": "a8a4b220-d583-4a31-b003-fb1246d999ca",
+        "description": "Server for the KISS Multiplayer BeamNG.drive mod",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./kissmp-server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server is running!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y wget unzip \r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nLATEST_RELEASE=$(wget -qO- https://api.github.com/repos/TheHellBox/KISS-multiplayer/releases/latest | grep browser_download_url | cut -d '\"' -f 4)\r\necho -e Install repo set to ${INSTALL_REPO}\r\necho -e \"/mnt/server is empty.\\nDownloading latest release ${LATEST_RELEASE}\"\r\n\r\nwget $LATEST_RELEASE -O kissmp.zip\r\nunzip -j kissmp.zip '*/kissmp-server'\r\n\r\nrm -rf kissmp.zip\r\n\r\nif [ -f /mnt/server/kissmp-server ]; then\r\n    echo -e \"Install complete\"\r\n    chmod +x /mnt/server/kissmp-server\r\n    \r\n    # Generate config\r\n    ./kissmp-server & serverpid=$! \r\n    sleep 1\r\n    kill $serverpid\r\n    \r\n    exit 0\r\nelse \r\n    echo -e \"Install failed (no /mnt/server/kissmp-server file present)\"\r\n    exit 1\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "ksp-lmp-ebceb0271e56",
+        "name": "KSP - LMP",
+        "description": "Dedicated server for the LunaMultiplayer (LMP) mod for Kerbal Space Program. Automatically installs the latest or specified version from GitHub. Runs on .NET 5 using the official Ptero-Eggs yolk.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ksp-lmp-ebceb0271e56.json",
+        "sha256": "bee0d498b60265626d30b18e6cb2269d23a0d299de58a93bdda52ebf35008688",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "ksp/LMP/egg-k-s-p--l-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/ebceb0271e56.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-30T16:08:41+01:00",
+        "name": "KSP - LMP",
+        "author": "brainshead@gmail.com",
+        "description": "Dedicated server for the LunaMultiplayer (LMP) mod for Kerbal Space Program. Automatically installs the latest or specified version from GitHub. Runs on .NET 5 using the official Ptero-Eggs yolk.",
+        "features": null,
+        "docker_images": {
+          "Dotnet 5 ": "ghcr.io/ptero-eggs/yolks:dotnet_5"
+        },
+        "file_denylist": [],
+        "startup": "dotnet ./LMPServer/Server.dll",
+        "config": {
+          "files": "{\"LMPServer/Config/ConnectionSettings.xml\": {\"parser\": \"xml\", \"find\": {\"ConnectionSettingsDefinition.Port\": \"{{server.build.default.port}}\"}}, \"LMPServer/Config/GeneralSettings.xml\": {\"parser\": \"xml\", \"find\": {\"GeneralSettingsDefinition.ServerName\": \"{{server.build.env.SERVER_NAME}}\", \"GeneralSettingsDefinition.Password\": \"{{server.build.env.PASSWORD}}\", \"GeneralSettingsDefinition.AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"GeneralSettingsDefinition.MaxPlayers\": \"{{server.build.env.MaxPlayers}}\", \"GeneralSettingsDefinition.GameDifficulty\": \"{{server.build.env.GameDifficulty}}\", \"GeneralSettingsDefinition.GameMode\": \"{{server.build.env.GameMode}}\"}}}",
+          "startup": "{\"done\": \"All systems up and running\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# ==================================================\r\n# Kerbal Space Program - LunaMultiplayer Server Installer\r\n# ==================================================\r\n# Runs inside container using Ptero-Eggs .NET 5 yolk base\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\ncd /mnt/server\r\n\r\n# Determine version to install\r\nif [ -z \"${LMP_VERSION}\" ]; then\r\n    echo \"No version specified, downloading latest release...\"\r\n    RELEASE_URL=$(curl -s https://api.github.com/repos/LunaMultiplayer/LunaMultiplayer/releases/latest | grep browser_download_url | grep 'Server-Release.zip' | cut -d '\"' -f 4)\r\nelse\r\n    echo \"Downloading specified version: ${LMP_VERSION}\"\r\n    RELEASE_URL=\"https://github.com/LunaMultiplayer/LunaMultiplayer/releases/download/${LMP_VERSION}/LunaMultiplayer-Server-Release.zip\"\r\nfi\r\n\r\nif [ -z \"${RELEASE_URL}\" ]; then\r\n    echo \"Failed to fetch release URL from GitHub!\"\r\n    exit 1\r\nfi\r\n\r\necho \"Downloading LunaMultiplayer Server from: ${RELEASE_URL}\"\r\ncurl -L -o LMPServer.zip \"${RELEASE_URL}\"\r\nunzip -o LMPServer.zip -d .\r\nrm -f LMPServer.zip\r\n\r\n# Normalize extracted structure if necessary\r\nif [ -d LMPServer/Server ]; then\r\n    mv LMPServer/Server/* LMPServer/ || true\r\nfi\r\n\r\n# Ensure executable permissions\r\nchmod +x LMPServer/Server 2>/dev/null || true\r\n\r\n# Create default config if missing\r\nmkdir -p LMPServer/Config\r\nif [ ! -f LMPServer/Config/ConnectionSettings.xml ]; then\r\n    cat > LMPServer/Config/ConnectionSettings.xml <<EOF\r\n<?xml version=\"1.0\" encoding=\"utf-16\"?>\r\n<ConnectionSettingsDefinition xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n  <!--The address the server listens on. If set to the unspecified IPv6 address [::], the server listens for both IPv6 and IPv4-->\r\n  <ListenAddress>0.0.0.0</ListenAddress>\r\n  <!--The UDP port the server listens on. You don't need to open it on your router if RegisterWithMasterServer = true. If you want that players can connect against your server MANUALLY you will need to open it on your router-->\r\n  <Port>${SERVER_PORT}</Port>\r\n  <!--Heartbeat interval in ms. MUST be lower than the ConnectionMsTimeout value.-->\r\n  <HearbeatMsInterval>1000</HearbeatMsInterval>\r\n  <!--Connection timeout in ms. If no heartbeats are received after this interval, the client is disconnected.-->\r\n  <ConnectionMsTimeout>30000</ConnectionMsTimeout>\r\n  <!--Tries to use UPnP to open the ports in your router-->\r\n  <Upnp>true</Upnp>\r\n  <!--UPnP timeout in ms for trying to open the ports-->\r\n  <UpnpMsTimeout>5000</UpnpMsTimeout>\r\n  <!--Maximum transmission unit (MTU) size in bytes. Min value is 1. Default value is 1408. Max value is 8192.-->\r\n  <MaximumTransmissionUnit>1408</MaximumTransmissionUnit>\r\n  <!--Try to expand MTU size-->\r\n  <AutoExpandMtu>false</AutoExpandMtu>\r\n</ConnectionSettingsDefinition>\r\nEOF\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "LMP Version",
+            "description": "Leave blank to install the latest LunaMultiplayer release, or specify a version tag (e.g. 0.29.3).",
+            "env_variable": "LMP_VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server. Max 30 char.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "Password for the server. Leave it empty if you want to make a public server. Max 30 chars.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Admin password for the server. Leave it empty if you don't want to allow server administration from KSP. Max 30 chars.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "Nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "MaxPlayers",
+            "description": "Maximum amount of players that can join the server.",
+            "env_variable": "MaxPlayers",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "Specify the gameplay difficulty of the server. Values: Easy, Normal, Moderate, Hard, Custom.\r\n\r\nChanging value gives an message : Your GameplaySettings file is different than your GeneralSettings - Difficulty value. \r\n\r\nSo the difficulty setting will be set as \"Custom\". In case you want to use the default setting values for the difficulty you have chosen.\r\nRemove the GameplaySettings.xml file so it's recreated again.",
+            "env_variable": "GameDifficulty",
+            "default_value": "Easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Easy,Normal,Moderate,Hard,Custom",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Specify the game Type. Values: Sandbox, Career, Science",
+            "env_variable": "GameMode",
+            "default_value": "Sandbox",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Sandbox,Career,Science",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ksp-dmp-4b9d89c4a54d",
+        "name": "KSP DMP",
+        "description": "Dark Multiplayer mod server for Kerbal Space Program",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ksp-dmp-4b9d89c4a54d.json",
+        "sha256": "51d54e03a4c022a0a8b3d39486f9b52c732352566f13dcd9c4274d959e16fddc",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "ksp/egg-k-s-p-d-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/4b9d89c4a54d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:51+00:00",
+        "name": "KSP DMP",
+        "author": "rufanyin29@gmail.com",
+        "uuid": "8e9458cb-014a-4995-94b9-cebfe658d687",
+        "description": "Dark Multiplayer mod server for Kerbal Space Program",
+        "features": null,
+        "docker_images": {
+          "Mono": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono DMPServer.exe",
+        "config": {
+          "files": "{\"Config/Settings.txt\": {\"parser\": \"properties\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"modpackMode\": \"{{server.build.env.MODPACKMODE}}\", \"warpMode\": \"{{server.build.env.WARPMODE}}\", \"gameMode\": \"{{server.build.env.GAMEMODE}}\", \"gameDifficulty\": \"{{server.build.env.DIFFICULTY}}\", \"whitelisted\": \"{{server.build.env.WHITELIST}}\", \"serverName\": \"{{server.build.env.SERVERNAME}}\"}}}",
+          "startup": "{\"done\": \"Ready!\"}",
+          "logs": "{}",
+          "stop": "/exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nV=$(curl -s https://d-mp.org/downloads | grep \"DMP Server\" | awk -F 'href=\"' 'NR==2 {print $2}' | awk -F '\"' '{print $1}') # /builds/release/v0.3.8.3/DMPServer.zip\r\n\r\necho \"Download link: https://d-mp.org${V}\"\r\ncurl -sSL -o DMPServer.zip https://d-mp.org${V}\r\n\r\nunzip -o DMPServer.zip\r\nmv DMPServer/* ./\r\n\r\nrm -rf DMPServer\r\nrm DMPServer.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mod Pack Mode",
+            "description": "Specify the modpack type.",
+            "env_variable": "MODPACKMODE",
+            "default_value": "NONE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:NONE,CKAN,GAMEDATA",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Warp Mode",
+            "description": "Specify the warp type.",
+            "env_variable": "WARPMODE",
+            "default_value": "SUBSPACE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:MCW_FORCE,MCW_VOTE,MCW_LOWEST,SUBSPACE_SIMPLE,SUBSPACE,NONE",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Specify the game type.",
+            "env_variable": "GAMEMODE",
+            "default_value": "SANDBOX",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:SANDBOX,CAREER,SCIENCE",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "Specify the gameplay difficulty of the server.",
+            "env_variable": "DIFFICULTY",
+            "default_value": "NORMAL",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:EASY,NORMAL,MODERATE,HARD,CUSTOM",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Whitelisted",
+            "description": "Enable white-listing.",
+            "env_variable": "WHITELIST",
+            "default_value": "False",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True,False",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server.",
+            "env_variable": "SERVERNAME",
+            "default_value": "DMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:48",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ksp-dmp-679cc3ea90aa",
+        "name": "KSP DMP",
+        "description": "Dark Multiplayer mod server for Kerbal Space Program",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ksp-dmp-679cc3ea90aa.json",
+        "sha256": "d3809527f9e6c5c697d3fa0bcb1509f96d46c841f8b4e086bab87a558ae5a830",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "ksp/DMP/egg-k-s-p-d-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/679cc3ea90aa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-09-22T19:54:35+02:00",
+        "name": "KSP DMP",
+        "author": "rufanyin29@gmail.com",
+        "description": "Dark Multiplayer mod server for Kerbal Space Program",
+        "features": null,
+        "docker_images": {
+          "Mono": "ghcr.io/ptero-eggs/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono DMPServer.exe",
+        "config": {
+          "files": "{\"Config/Settings.txt\": {\"parser\": \"properties\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"modpackMode\": \"{{server.build.env.MODPACKMODE}}\", \"warpMode\": \"{{server.build.env.WARPMODE}}\", \"gameMode\": \"{{server.build.env.GAMEMODE}}\", \"gameDifficulty\": \"{{server.build.env.DIFFICULTY}}\", \"whitelisted\": \"{{server.build.env.WHITELIST}}\", \"serverName\": \"{{server.build.env.SERVERNAME}}\"}}}",
+          "startup": "{\"done\": \"Ready!\"}",
+          "logs": "{}",
+          "stop": "/exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nV=$(curl -s https://d-mp.org/downloads | grep \"DMP Server\" | awk -F 'href=\"' 'NR==2 {print $2}' | awk -F '\"' '{print $1}') # /builds/release/v0.3.8.3/DMPServer.zip\r\n\r\necho \"Download link: https://d-mp.org${V}\"\r\ncurl -sSL -o DMPServer.zip https://d-mp.org${V}\r\n\r\nunzip -o DMPServer.zip\r\nmv DMPServer/* ./\r\n\r\nrm -rf DMPServer\r\nrm DMPServer.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mod Pack Mode",
+            "description": "Specify the modpack type.",
+            "env_variable": "MODPACKMODE",
+            "default_value": "NONE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:NONE,CKAN,GAMEDATA",
+            "field_type": "text"
+          },
+          {
+            "name": "Warp Mode",
+            "description": "Specify the warp type.",
+            "env_variable": "WARPMODE",
+            "default_value": "SUBSPACE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:MCW_FORCE,MCW_VOTE,MCW_LOWEST,SUBSPACE_SIMPLE,SUBSPACE,NONE",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Specify the game type.",
+            "env_variable": "GAMEMODE",
+            "default_value": "SANDBOX",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:SANDBOX,CAREER,SCIENCE",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "Specify the gameplay difficulty of the server.",
+            "env_variable": "DIFFICULTY",
+            "default_value": "NORMAL",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:EASY,NORMAL,MODERATE,HARD,CUSTOM",
+            "field_type": "text"
+          },
+          {
+            "name": "Whitelisted",
+            "description": "Enable white-listing.",
+            "env_variable": "WHITELIST",
+            "default_value": "False",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server.",
+            "env_variable": "SERVERNAME",
+            "default_value": "DMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:48",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ksp-dmp-fc054c3a7f50",
+        "name": "KSP DMP",
+        "description": "Dark Multiplayer mod server for Kerbal Space Program",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ksp-dmp-fc054c3a7f50.json",
+        "sha256": "b0f12cf6d8cdd2a8a7ec04b7f333bba09677e503b0aae74aea8e42504467d2f3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "ksp/egg-pterodactyl-k-s-p-d-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/ksp/egg-k-s-p-d-m-p.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/fc054c3a7f50.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:51+00:00",
+        "name": "KSP DMP",
+        "author": "rufanyin29@gmail.com",
+        "description": "Dark Multiplayer mod server for Kerbal Space Program",
+        "features": null,
+        "docker_images": {
+          "Mono": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono DMPServer.exe",
+        "config": {
+          "files": "{\"Config/Settings.txt\": {\"parser\": \"properties\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"modpackMode\": \"{{server.build.env.MODPACKMODE}}\", \"warpMode\": \"{{server.build.env.WARPMODE}}\", \"gameMode\": \"{{server.build.env.GAMEMODE}}\", \"gameDifficulty\": \"{{server.build.env.DIFFICULTY}}\", \"whitelisted\": \"{{server.build.env.WHITELIST}}\", \"serverName\": \"{{server.build.env.SERVERNAME}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Ready!\"}",
+          "stop": "/exit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nV=$(curl -s https://d-mp.org/downloads | grep \"DMP Server\" | awk -F 'href=\"' 'NR==2 {print $2}' | awk -F '\"' '{print $1}') # /builds/release/v0.3.8.3/DMPServer.zip\r\n\r\necho \"Download link: https://d-mp.org${V}\"\r\ncurl -sSL -o DMPServer.zip https://d-mp.org${V}\r\n\r\nunzip -o DMPServer.zip\r\nmv DMPServer/* ./\r\n\r\nrm -rf DMPServer\r\nrm DMPServer.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Mod Pack Mode",
+            "description": "Specify the modpack type.",
+            "env_variable": "MODPACKMODE",
+            "default_value": "NONE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:NONE,CKAN,GAMEDATA",
+            "field_type": "text"
+          },
+          {
+            "name": "Warp Mode",
+            "description": "Specify the warp type.",
+            "env_variable": "WARPMODE",
+            "default_value": "SUBSPACE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:MCW_FORCE,MCW_VOTE,MCW_LOWEST,SUBSPACE_SIMPLE,SUBSPACE,NONE",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Specify the game type.",
+            "env_variable": "GAMEMODE",
+            "default_value": "SANDBOX",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:SANDBOX,CAREER,SCIENCE",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "Specify the gameplay difficulty of the server.",
+            "env_variable": "DIFFICULTY",
+            "default_value": "NORMAL",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:EASY,NORMAL,MODERATE,HARD,CUSTOM",
+            "field_type": "text"
+          },
+          {
+            "name": "Whitelisted",
+            "description": "Enable white-listing.",
+            "env_variable": "WHITELIST",
+            "default_value": "False",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server.",
+            "env_variable": "SERVERNAME",
+            "default_value": "DMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:48",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "lac-online-public-server-1fef36aef715",
+        "name": "LAC-Online Public Server",
+        "description": "To make the Los Angeles Crimes public server. Los Angeles Crimes lets you play, create, and discover a variety of immersive worlds created by a global community!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/lac-online-public-server-1fef36aef715.json",
+        "sha256": "401b5410a3289ef10f91a4b2e5d2cbef2d08b0e177e9eab8af21e0da8a736ed0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "losangelescrimes/egg-pterodactyl-l-a-c--online-public-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/losangelescrimes/egg-l-a-c--online-public-server.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/1fef36aef715.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:51+00:00",
+        "name": "LAC-Online Public Server",
+        "author": "jastinlt16@gmail.com",
+        "description": "To make the Los Angeles Crimes public server. Los Angeles Crimes lets you play, create, and discover a variety of immersive worlds created by a global community!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./LAC_Linux_v{{VER}}.x86_64",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Done!\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\ncd /mnt/server\r\n\r\n# delete the previous file (if it is in the file manager)\r\nrm -f LAC_Linux_v${VER}.x86_64 && rm -rf LAC_Linux_v${VER}_Data\r\n\r\n# Using another version still under development!\r\n#echo \"checking the given version file and download it... v${VER}.\"\r\n#wget https://dl.lacrimesonline.com/builds/LAC_v${VER}/LAC_Linux_Server_v${VER}.zip -O LAC_Linux_Server_v${VER}.zip || echo \"VERSION v${VER} IS NOT FOUND! Use v1.6 instead...\" && exit 1\r\n\r\nwget https://dl.lacrimesonline.com/builds/LAC_Linux_v${VER}.zip -O LAC_Linux_Server_v${VER}.zip\r\necho \"successfully downloaded v${VER} files.!\" &&\r\n\r\n# Extracting & remove the zip file\r\nunzip ./LAC_Linux_Server_v${VER}.zip\r\nrm -f ./LAC_Linux_Server_v${VER}.zip\r\n\r\n# Make the main file executable....\r\nchmod +x LAC_Linux_v${VER}.x86_64\r\n\r\necho \"INSTALATION COMPLETE!\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "The build version is available at https://dl.lacrimesonline.com/builds/. Just write a numeric version like 1.6, don't use any other characters than numbers and periods. If the entered version is incorrect/non-existent it will use version 1.6 (for now). After replacing it, then reinstall this server. [ THIS FEATURE IS STILL IN DEVELOPMENT ]",
+            "env_variable": "VER",
+            "default_value": "1.6.2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "lac-online-public-server-62b9d69a3cd9",
+        "name": "LAC-Online Public Server",
+        "description": "To make the Los Angeles Crimes public server. Los Angeles Crimes lets you play, create, and discover a variety of immersive worlds created by a global community!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/lac-online-public-server-62b9d69a3cd9.json",
+        "sha256": "1318dd761f7d8623179362fb7c33cfbb7c17cc8634153dcfbf1a47edd383e96a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "losangelescrimes/egg-l-a-c--online-public-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/62b9d69a3cd9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:51+00:00",
+        "name": "LAC-Online Public Server",
+        "author": "jastinlt16@gmail.com",
+        "uuid": "9e371a1d-5755-4b5c-a3e0-4ad4fdf46a06",
+        "description": "To make the Los Angeles Crimes public server. Los Angeles Crimes lets you play, create, and discover a variety of immersive worlds created by a global community!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./LAC_Linux_v{{VER}}.x86_64",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Done!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\ncd /mnt/server\r\n\r\n# delete the previous file (if it is in the file manager)\r\nrm -f LAC_Linux_v${VER}.x86_64 && rm -rf LAC_Linux_v${VER}_Data\r\n\r\n# Using another version still under development!\r\n#echo \"checking the given version file and download it... v${VER}.\"\r\n#wget https://dl.lacrimesonline.com/builds/LAC_v${VER}/LAC_Linux_Server_v${VER}.zip -O LAC_Linux_Server_v${VER}.zip || echo \"VERSION v${VER} IS NOT FOUND! Use v1.6 instead...\" && exit 1\r\n\r\nwget https://dl.lacrimesonline.com/builds/LAC_Linux_v${VER}.zip -O LAC_Linux_Server_v${VER}.zip\r\necho \"successfully downloaded v${VER} files.!\" &&\r\n\r\n# Extracting & remove the zip file\r\nunzip ./LAC_Linux_Server_v${VER}.zip\r\nrm -f ./LAC_Linux_Server_v${VER}.zip\r\n\r\n# Make the main file executable....\r\nchmod +x LAC_Linux_v${VER}.x86_64\r\n\r\necho \"INSTALATION COMPLETE!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "The build version is available at https://dl.lacrimesonline.com/builds/. Just write a numeric version like 1.6, don't use any other characters than numbers and periods. If the entered version is incorrect/non-existent it will use version 1.6 (for now). After replacing it, then reinstall this server. [ THIS FEATURE IS STILL IN DEVELOPMENT ]",
+            "env_variable": "VER",
+            "default_value": "1.6.2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

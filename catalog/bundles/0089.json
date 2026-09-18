@@ -1,0 +1,778 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "always-auth-f8066ffc2b04",
+        "name": "Always Auth",
+        "description": "A simple proxy that sits between your server and Mojang's auth services that ensures even when they're offline, you stay online!",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/always-auth-f8066ffc2b04.json",
+        "sha256": "3bb4274a40b6984aa60a0f40e3b19565a5ad5a62c2fdc393e29152d3754f920d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "proxy/java/alwaysauth/egg-pterodactyl-always-auth.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/f8066ffc2b04.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-24T22:04:11+00:00",
+        "name": "Always Auth",
+        "author": "contact@quacks.media",
+        "description": "A simple proxy that sits between your server and Mojang's auth services that ensures even when they're offline, you stay online!",
+        "features": null,
+        "docker_images": {
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{JARFILE}}",
+        "config": {
+          "files": "{\"data/config.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "[]",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\necho \"======================================\"\necho \" AlwaysAuth Installer\"\necho \"======================================\"\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nJAR_NAME=\"AlwaysAuth.jar\"\n\ncommand -v curl >/dev/null 2>&1 || {\n    echo \"ERROR: curl is required.\"\n    exit 1\n}\n\n# --------------------------------------\n# Resolve version\n# --------------------------------------\n\nif [ \"$VERSION\" = \"latest\" ]; then\n    echo \"Resolving latest standalone version...\"\n\n    STANDALONE_VERSION=\"$(curl -fsSL \"https://raw.githubusercontent.com/GamerDuck123/AlwaysAuth/refs/heads/master/standalone-latest.txt\" | tr -d '[:space:]')\"\n\n    if [ -z \"$STANDALONE_VERSION\" ]; then\n        echo \"ERROR: standalone-latest.txt is empty.\"\n        exit 1\n    fi\nelse\n    echo \"Using user-specified version: $VERSION\"\n    STANDALONE_VERSION=\"$VERSION\"\nfi\n\necho \"Resolved version: $STANDALONE_VERSION\"\n\n# --------------------------------------\n# Download\n# --------------------------------------\n\nDOWNLOAD_URL=\"https://github.com/GamerDuck123/AlwaysAuth/releases/download/v${STANDALONE_VERSION}/AlwaysAuth-standalone-${STANDALONE_VERSION}.jar\"\n\necho \"Download URL: $DOWNLOAD_URL\"\necho \"Downloading AlwaysAuth...\"\n\ncurl -fL \"$DOWNLOAD_URL\" -o \"$JAR_NAME\"\n\nif [ ! -f \"$JAR_NAME\" ]; then\n    echo \"ERROR: Download failed.\"\n    exit 1\nfi\n\necho \"Install completed successfully!\"\necho \"======================================\"\nexit 0\n",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "JARFILE",
+            "description": "The name of the jar to use.",
+            "env_variable": "JARFILE",
+            "default_value": "AlwaysAuth.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "The version of AlwaysAuth to install. Use \"latest\" to install the latest version.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "arclight-fccb09e66c37",
+        "name": "Arclight",
+        "description": "A Bukkit server implementation on common mod loaders.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/arclight-fccb09e66c37.json",
+        "sha256": "48790a6c54eb0a29634bf3a7c450e9cf8118065b5620d627b6b7ea119e85b1be",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/arclight/egg-arclight.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/fccb09e66c37.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "Arclight",
+        "author": "chredeur@pastanetwork.com",
+        "description": "A Bukkit server implementation on common mod loaders.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 19": "ghcr.io/ptero-eggs/yolks:java_19",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}} nogui",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Arclight Installation Script\r\n#\r\n# Server Files: /mnt/server\r\ncd /mnt/server\r\n\r\nBASE_API_URL=\"https://files.hypoglycemia.icu/v1/files/arclight\"\r\n\r\nif [ -n \"${DOWNLOAD_URL}\" ]; then\r\n    echo \"Using custom download URL: ${DOWNLOAD_URL}\"\r\nelse\r\n    echo \"Fetching available Minecraft versions for Arclight...\"\r\n    ARCLIGHT_VERSION=$(curl -s \"${BASE_API_URL}/minecraft\" | jq -r '.files[].name' | sort -Vr)\r\n    if [ -z \"$ARCLIGHT_VERSION\" ] || [ \"$ARCLIGHT_VERSION\" == \"null\" ]; then\r\n        echo \"Error: Could not fetch version list from API.\"\r\n        exit 1\r\n    fi\r\n    if [ \"$MINECRAFT_VERSION\" == \"auto\" ]; then\r\n        MINECRAFT_VERSION=$(echo \"$ARCLIGHT_VERSION\" | head -n 1)\r\n        echo \"Auto-selected Minecraft version: ${MINECRAFT_VERSION}\"\r\n    else\r\n        VERSION_EXISTS=$(echo \"$ARCLIGHT_VERSION\" | grep -Fx \"$MINECRAFT_VERSION\")\r\n        if [ -z \"$VERSION_EXISTS\" ]; then\r\n            echo \"Warning: Specified version '${MINECRAFT_VERSION}' not found. Falling back to the latest available version.\"\r\n            MINECRAFT_VERSION=$(echo \"$ARCLIGHT_VERSION\" | head -n 1)\r\n            echo \"Fallback version: ${MINECRAFT_VERSION}\"\r\n        fi\r\n    fi\r\n\r\n    echo \"Fetching available loaders for version ${MINECRAFT_VERSION}...\"\r\n    LOADER_LIST=$(curl -s \"${BASE_API_URL}/minecraft/${MINECRAFT_VERSION}/loaders\" | jq -r '.files[].name')\r\n    if [ -z \"$LOADER_LIST\" ] || [ \"$LOADER_LIST\" == \"null\" ]; then\r\n        echo \"Error: Could not fetch loader list from API.\"\r\n        exit 1\r\n    fi\r\n    LOADER_EXISTS=$(echo \"$LOADER_LIST\" | grep -Fx \"$ARCLIGHT_LOADER\")\r\n    if [ -z \"$LOADER_EXISTS\" ]; then\r\n        echo \"Warning: Specified loader '${ARCLIGHT_LOADER}' not found for version ${MINECRAFT_VERSION}\"\r\n        exit 1\r\n    fi\r\n\r\n    echo \"Fetching available channels for version ${MINECRAFT_VERSION} and loader ${ARCLIGHT_LOADER}...\"\r\n    CHANNEL_LIST=$(curl -s \"${BASE_API_URL}/minecraft/${MINECRAFT_VERSION}/loaders/${ARCLIGHT_LOADER}\")\r\n    CHANNEL_LIST_NAME=$(echo \"$CHANNEL_LIST\" | jq -r '.files[].name')\r\n    if [ \"$ARCLIGHT_CHANNEL\" == \"auto\" ]; then\r\n        echo \"Selecting preferred channel for loader ${ARCLIGHT_LOADER} ${MINECRAFT_VERSION}...\"\r\n        ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | grep -E 'latest-stable|version-stable|latest-snapshot|version-snapshot' | \\\r\n            grep -x 'latest-stable' || \\\r\n            echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-stable' || \\\r\n            echo \"$CHANNEL_LIST_NAME\" | grep -x 'latest-snapshot' || \\\r\n            echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-snapshot' | head -n 1)\r\n    \r\n        if [ -z \"$ARCLIGHT_CHANNEL\" ]; then\r\n            echo \"No preferred channel found. Falling back to last in list.\"\r\n            ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | tail -n 1)\r\n        fi\r\n\r\n        CHANNEL_TYPE=$(echo \"$CHANNEL_LIST\" | jq -r \".files[] | select(.name==\\\"${ARCLIGHT_CHANNEL}\\\") | .type\")\r\n        echo \"Auto-selected channel: ${ARCLIGHT_CHANNEL}\"\r\n    else\r\n        if [ \"$ARCLIGHT_CHANNEL\" == \"beta\" ]; then\r\n            CHANNELS=(\"latest-snapshot\" \"versions-snapshot\")\r\n        elif [ \"$ARCLIGHT_CHANNEL\" == \"stable\" ]; then\r\n            CHANNELS=(\"latest-stable\" \"versions-stable\")\r\n        fi\r\n        \r\n        for CHANNEL in \"${CHANNELS[@]}\"; do\r\n            if echo \"$CHANNEL_LIST_NAME\" | grep -q \"$CHANNEL\"; then\r\n                ARCLIGHT_CHANNEL=\"$CHANNEL\"\r\n                break\r\n            fi\r\n        done\r\n        \r\n        if [ -z \"$ARCLIGHT_CHANNEL\" ]; then\r\n            echo \"Warning: Specified channel '${ARCLIGHT_CHANNEL}' not found for loader ${ARCLIGHT_LOADER} and Minecraft version ${MINECRAFT_VERSION}. Falling back to default channel.\"\r\n    \r\n            ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | grep -E 'latest-stable|version-stable|latest-snapshot|version-snapshot' | \\\r\n                grep -x 'latest-stable' || \\\r\n                echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-stable' || \\\r\n                echo \"$CHANNEL_LIST_NAME\" | grep -x 'latest-snapshot' || \\\r\n                echo \"$CHANNEL_LIST_NAME\" | grep -x 'version-snapshot' | head -n 1)\r\n    \r\n            if [ -z \"$ARCLIGHT_CHANNEL\" ]; then\r\n                ARCLIGHT_CHANNEL=$(echo \"$CHANNEL_LIST_NAME\" | tail -n 1)\r\n            fi\r\n    \r\n            echo \"Fallback channel: ${ARCLIGHT_CHANNEL}\"\r\n        fi\r\n\r\n        CHANNEL_TYPE=$(echo \"$CHANNEL_LIST\" | jq -r \".files[] | select(.name==\\\"${ARCLIGHT_CHANNEL}\\\") | .type\")\r\n    fi\r\n\r\n    echo \"Fetching builds for ${ARCLIGHT_LOADER}-${MINECRAFT_VERSION}-${ARCLIGHT_CHANNEL}...\"\r\n    if [ -z \"$CHANNEL_TYPE\" ] || [ \"$CHANNEL_TYPE\" == \"null\" ] || [ \"$CHANNEL_TYPE\" == \"link\" ]; then\r\n        BUILD_NAME=${ARCLIGHT_CHANNEL}\r\n        DOWNLOAD_URL=\"${BASE_API_URL}/minecraft/${MINECRAFT_VERSION}/loaders/${ARCLIGHT_LOADER}/${ARCLIGHT_CHANNEL}\"\r\n    elif [ \"$CHANNEL_TYPE\" == \"directory\" ]; then\r\n        BUILD=$(curl -s \"${BASE_API_URL}/minecraft/${MINECRAFT_VERSION}/loaders/${ARCLIGHT_LOADER}/${ARCLIGHT_CHANNEL}\" | jq -r '.files[0]')\r\n        BUILD_NAME=$(echo \"${BUILD}\" | jq -r '.name')\r\n        DOWNLOAD_URL=\"${BASE_API_URL}/minecraft/${MINECRAFT_VERSION}/loaders/${ARCLIGHT_LOADER}/${ARCLIGHT_CHANNEL}/${BUILD_NAME}\"\r\n    else\r\n        echo \"Error: Unknown channel type. Exiting.\"\r\n        exit 1\r\n    fi\r\n\r\n\r\n    echo \"Selected build: ${BUILD_NAME}\"\r\nfi\r\n\r\necho \"Downloading Arclight from: ${DOWNLOAD_URL}\"\r\n\r\nif [ -f \"${SERVER_JARFILE}\" ]; then\r\n    echo \"Backing up existing server jar...\"\r\n    mv \"${SERVER_JARFILE}\" \"${SERVER_JARFILE}.old\"\r\nfi\r\n\r\ncurl -s -L -o \"${SERVER_JARFILE}\" \"${DOWNLOAD_URL}\"\r\n\r\nif [ $? -ne 0 ]; then\r\n    echo \"Download failed. Please check the URL or your internet connection.\"\r\n    exit 1\r\nfi\r\n\r\necho \"Download complete. File saved as ${SERVER_JARFILE}\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "Name of the server JAR file that will be created (e.g. server.jar).",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "Optional custom download URL. Leave empty to use the Arclight API.",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Arclight Channel",
+            "description": "Select the Arclight build channel (e.g. stable, beta). Use 'auto' to use the most recent one.",
+            "env_variable": "ARCLIGHT_CHANNEL",
+            "default_value": "auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:stable,beta,auto",
+            "field_type": "text"
+          },
+          {
+            "name": "Arclight Loader",
+            "description": "Select the mod loader you want to use (forge, neoforge, fabric).",
+            "env_variable": "ARCLIGHT_LOADER",
+            "default_value": "forge",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:forge,neoforge,fabric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "attack-of-the-b-team-55fbe2e1be85",
+        "name": "Attack of the B-Team",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/attack-of-the-b-team-55fbe2e1be85.json",
+        "sha256": "b917e7ed814aab299d90f5680e84ceae6e29e5436b30f5e194d04f745a33a89e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/attack-of-the-bteam/egg-pterodactyl-attack-of-the-b--team.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/55fbe2e1be85.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:48+00:00",
+        "name": "Attack of the B-Team",
+        "author": "support@pterodactyl.io",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar BTeam.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/bteam/BTeam_Server_v$MODPACK_VERSION.zip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nunzip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nrm -rf BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "1.0.12c",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "attack-of-the-b-team-5c9f2183badb",
+        "name": "Attack of the B-Team",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/attack-of-the-b-team-5c9f2183badb.json",
+        "sha256": "50c91fb268bea48e568ee9f9984d3543d601f46bf2631c73b18257407a4c590a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/technic/attack-of-the-bteam/egg-attack-of-the-b--team.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5c9f2183badb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:48+00:00",
+        "name": "Attack of the B-Team",
+        "author": "support@pterodactyl.io",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:java_8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar BTeam.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/bteam/BTeam_Server_v$MODPACK_VERSION.zip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nunzip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nrm -rf BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "1.0.12c",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "attack-of-the-b-team-8b01d0d027aa",
+        "name": "Attack of the B-Team",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/attack-of-the-b-team-8b01d0d027aa.json",
+        "sha256": "24344bc18f4f281c07ba8638c1a9688851f1e8dd3ea90d0e4ee4254b822cf17d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/technic/attack-of-the-bteam/egg-attack-of-the-b--team.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/8b01d0d027aa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T11:45:08+02:00",
+        "name": "Attack of the B-Team",
+        "author": "support@pterodactyl.io",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar BTeam.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/bteam/BTeam_Server_v$MODPACK_VERSION.zip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nunzip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nrm -rf BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "1.0.12c",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "attack-of-the-b-team-ad2c3f8b7651",
+        "name": "Attack of the B-Team",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/attack-of-the-b-team-ad2c3f8b7651.json",
+        "sha256": "cf2696f3442f21187391d5f1cea851d2ff7f4ce3838e5168df1c2b7a8a70daec",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/attack-of-the-bteam/egg-attack-of-the-b--team.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/ad2c3f8b7651.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Attack of the B-Team",
+        "author": "support@pterodactyl.io",
+        "uuid": "306019ab-6a62-4fa8-953c-c2ac499c6736",
+        "description": "This modpack was designed with one thing in mind, crazy mad science! With the help of the B-Team we hand picked the wackiest mods we could find and shoved them all in a modpack for you guys. The result is Attack of the B-Team!",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar BTeam.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/bteam/BTeam_Server_v$MODPACK_VERSION.zip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nunzip -o BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\nrm -rf BTeam_Server_v$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "1.0.12c",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "blightfall-03a6df49ce72",
+        "name": "Blightfall",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/blightfall-03a6df49ce72.json",
+        "sha256": "8e573c4b2eac27bca8d606943cab313563dbf7c97953523b99e50bd787b6ff12",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/blightfall/egg-pterodactyl-blightfall.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/03a6df49ce72.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:49+00:00",
+        "name": "Blightfall",
+        "author": "aevum@decess.us",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Blightfall.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/blightfall/Blightfall_Server_$MODPACK_VERSION.zip -o Blightfall_$MODPACK_VERSION.zip\r\n\r\nunzip Blightfall_$MODPACK_VERSION.zip\r\n\r\nrm -rf Blightfall_$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "3.1.1-CE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "blightfall-0cae328e2a08",
+        "name": "Blightfall",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/blightfall-0cae328e2a08.json",
+        "sha256": "833bbb89e8cdad5ebab37813150a02136f1c6d02a7bc2e53bf21711e6fbf348b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/technic/blightfall/egg-blightfall.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0cae328e2a08.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:49+00:00",
+        "name": "Blightfall",
+        "author": "aevum@decess.us",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:java_8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Blightfall.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/blightfall/Blightfall_Server_$MODPACK_VERSION.zip -o Blightfall_$MODPACK_VERSION.zip\r\n\r\nunzip Blightfall_$MODPACK_VERSION.zip\r\n\r\nrm -rf Blightfall_$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "3.1.1-CE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "blightfall-cb1053195dc0",
+        "name": "Blightfall",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/blightfall-cb1053195dc0.json",
+        "sha256": "ed8e2db0557e6edcc4dc5e8064f5c1869da4e6e0b991c50da99cf197b4cd3e7e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/blightfall/egg-blightfall.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/cb1053195dc0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Blightfall",
+        "author": "aevum@decess.us",
+        "uuid": "0474df64-2339-4aef-86ce-2507e91aca78",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Blightfall.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/blightfall/Blightfall_Server_$MODPACK_VERSION.zip -o Blightfall_$MODPACK_VERSION.zip\r\n\r\nunzip Blightfall_$MODPACK_VERSION.zip\r\n\r\nrm -rf Blightfall_$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "3.1.1-CE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "blightfall-ec6b78657728",
+        "name": "Blightfall",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/blightfall-ec6b78657728.json",
+        "sha256": "867957b087c6682fdb9f96fc392ae6c77c456a1f9ec7d761830ba5539c4a9abc",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/technic/blightfall/egg-blightfall.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/ec6b78657728.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T11:48:01+02:00",
+        "name": "Blightfall",
+        "author": "aevum@decess.us",
+        "description": "Blightfall is a combination modpack and adventure map about surviving on an alien planet. It uses magic mods and tech mods to create a novel gameplay experience. Can you survive on a world completely covered by Thaumcraft taint?\r\n\r\nhttps://www.technicpack.net/modpack/blightfall.592618",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Blightfall.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/blightfall/Blightfall_Server_$MODPACK_VERSION.zip -o Blightfall_$MODPACK_VERSION.zip\r\n\r\nunzip Blightfall_$MODPACK_VERSION.zip\r\n\r\nrm -rf Blightfall_$MODPACK_VERSION.zip\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "3.1.1-CE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1119 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "lavalink-f4fa871df4f1",
+        "name": "Lavalink",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\nDescription taken from https://github.com/lavalink-devs/Lavalink",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/lavalink-f4fa871df4f1.json",
+        "sha256": "fef6d3d5dfb679991ea6d6ee300476d912617b5a647b3bca47866190e1837ef0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "lavalink/egg-lavalink.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/f4fa871df4f1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-20T10:10:31+00:00",
+        "name": "Lavalink",
+        "author": "damuffin36@gmail.com",
+        "uuid": "1c859893-2259-4972-82ca-e909737cea78",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\nDescription taken from https://github.com/lavalink-devs/Lavalink",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_21": "ghcr.io/parkervcp/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -jar Lavalink.jar",
+        "config": {
+          "files": "{\"application.yml\": {\"parser\": \"yml\", \"find\": {\"server.address\": \"0.0.0.0\", \"server.port\": \"{{server.allocations.default.port}}\"}}}",
+          "startup": "{\"done\": \"Started Launcher in \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (match is to match the filename in some way)\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y curl jq git\r\n\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -L -o Lavalink.jar ${DOWNLOAD_URL}\r\ncurl -L -o application.yml https://raw.githubusercontent.com/freyacodes/Lavalink/master/LavalinkServer/application.yml.example\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installation completed\"\r\necho \"-------------------------------------------------------\"",
+            "container": "debian:bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string"
+          },
+          {
+            "sort": 2,
+            "name": "GITHUB_PACKAGE",
+            "description": "",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "lavalink-devs/Lavalink",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string"
+          },
+          {
+            "sort": 3,
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "Lavalink.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "loki-0736516e378e",
+        "name": "Loki",
+        "description": "Prometheus but for logs. This egg is for Loki instance only! You usually need pushing agents like Promtail to put logs in this",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/loki-0736516e378e.json",
+        "sha256": "361025ce4ee75e071941e77c5acc349ec358e828161dc3b53dccee43cb0beb99",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "monitoring/loki/egg-loki.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/0736516e378e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-11T19:05:03+00:00",
+        "name": "Loki",
+        "author": "unknown@unknown.com",
+        "description": "Prometheus but for logs. This egg is for Loki instance only! You usually need pushing agents like Promtail to put logs in this",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./loki-linux -config.file=loki-docker-config.yaml",
+        "config": {
+          "files": "{\"loki-docker-config.yaml\": {\"parser\": \"yaml\", \"find\": {\"server.http_listen_port\": \"{{server.build.default.port}}\", \"common.ring.instance_addr\": \"0.0.0.0\", \"common.path_prefix\": \"/home/container/loki\", \"common.storage.filesystem.chunks_directory\": \"/home/container/loki/chunks\", \"common.storage.filesystem.rules_directory\": \"/home/container/loki/rules\"}}}",
+          "startup": "{\"done\": \"Loki started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Switch to mounted working install directory\r\ncd /mnt/server\r\n\r\napt update\r\napt install -y zip unzip wget curl git file\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n# Download and extract Loki\r\n\r\nif [ \"$LOKI_VERSION\" = \"latest\" ]; then LOKI_VERSION=$(curl --silent \"https://api.github.com/repos/grafana/loki/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\necho -e \"running curl -L https://github.com/grafana/loki/releases/download/v${LOKI_VERSION}/loki-linux-${ARCH}.zip --output loki-linux-amd64.zip\"\r\ncurl -L https://github.com/grafana/loki/releases/download/v${LOKI_VERSION}/loki-linux-${ARCH}.zip --output loki-linux-${ARCH}.zip\r\nunzip loki-linux-${ARCH}.zip\r\nrm -rf loki-linux-${ARCH}.zip\r\ncurl -L https://raw.githubusercontent.com/grafana/loki/v${LOKI_VERSION}/cmd/loki/loki-docker-config.yaml --output loki-docker-config.yaml\r\nmv loki-linux-* loki-linux\r\necho -e \"installation completed\"",
+            "container": "ghcr.io/pterodactyl/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Loki Version",
+            "description": "The version of Loki to use.\r\n\r\nFind all versions from https://github.com/grafana/loki",
+            "env_variable": "LOKI_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "loki-a42b25488212",
+        "name": "Loki",
+        "description": "Prometheus but for logs. This egg is for Loki instance only! You usually need pushing agents like Promtail to put logs in this",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/loki-a42b25488212.json",
+        "sha256": "33119edaf040fa7b099b4e72a32a9f120a0dde699a286f50581956694c47e5c3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "monitoring/loki/egg-loki.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/a42b25488212.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-07-08T15:50:16+02:00",
+        "name": "Loki",
+        "author": "unknown@unknown.com",
+        "description": "Prometheus but for logs. This egg is for Loki instance only! You usually need pushing agents like Promtail to put logs in this",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./loki-linux -config.file=loki-docker-config.yaml",
+        "config": {
+          "files": "{\"loki-docker-config.yaml\": {\"parser\": \"yaml\", \"find\": {\"server.http_listen_port\": \"{{server.build.default.port}}\", \"common.ring.instance_addr\": \"0.0.0.0\", \"common.path_prefix\": \"/home/container/loki\", \"common.storage.filesystem.chunks_directory\": \"/home/container/loki/chunks\", \"common.storage.filesystem.rules_directory\": \"/home/container/loki/rules\"}}}",
+          "startup": "{\"done\": \"Loki started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Switch to mounted working install directory\r\ncd /mnt/server\r\n\r\napt update\r\napt install -y zip unzip wget curl git file\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n# Download and extract Loki\r\n\r\nif [ \"$LOKI_VERSION\" = \"latest\" ]; then LOKI_VERSION=$(curl --silent \"https://api.github.com/repos/grafana/loki/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\necho -e \"running curl -L https://github.com/grafana/loki/releases/download/v${LOKI_VERSION}/loki-linux-${ARCH}.zip --output loki-linux-amd64.zip\"\r\ncurl -L https://github.com/grafana/loki/releases/download/v${LOKI_VERSION}/loki-linux-${ARCH}.zip --output loki-linux-${ARCH}.zip\r\nunzip loki-linux-${ARCH}.zip\r\nrm -rf loki-linux-${ARCH}.zip\r\ncurl -L https://raw.githubusercontent.com/grafana/loki/v${LOKI_VERSION}/cmd/loki/loki-docker-config.yaml --output loki-docker-config.yaml\r\nmv loki-linux-* loki-linux\r\necho -e \"installation completed\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Loki Version",
+            "description": "The version of Loki to use.\r\n\r\nFind all versions from https://github.com/grafana/loki",
+            "env_variable": "LOKI_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "loki-c1e18410eac6",
+        "name": "Loki",
+        "description": "Prometheus but for logs. This egg is for Loki instance only! You usually need pushing agents like Promtail to put logs in this",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/loki-c1e18410eac6.json",
+        "sha256": "930e09c6bfdbf1e488329d9b0a3fd7dd15a0f2b2f4b837a86a045ab7a10a9a54",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/monitoring",
+          "commit": "cbdd5ec966dffdf174968f3d60d52ca7270dad8e",
+          "path": "loki/egg-loki.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--monitoring/c1e18410eac6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:38:07+00:00",
+        "name": "Loki",
+        "author": "unknown@unknown.com",
+        "uuid": "7332d56e-b829-42ee-83ff-9008dc2d621a",
+        "description": "Prometheus but for logs. This egg is for Loki instance only! You usually need pushing agents like Promtail to put logs in this",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./loki-linux -config.file=loki-docker-config.yaml",
+        "config": {
+          "files": "{\"loki-docker-config.yaml\": {\"parser\": \"yaml\", \"find\": {\"server.http_listen_port\": \"{{server.build.default.port}}\", \"common.ring.instance_addr\": \"0.0.0.0\", \"common.path_prefix\": \"/home/container/loki\", \"common.storage.filesystem.chunks_directory\": \"/home/container/loki/chunks\", \"common.storage.filesystem.rules_directory\": \"/home/container/loki/rules\"}}}",
+          "startup": "{\"done\": \"Loki started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Switch to mounted working install directory\r\ncd /mnt/server\r\n\r\napt update\r\napt install -y zip unzip wget curl git file\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n# Download and extract Loki\r\n\r\nif [ \"$LOKI_VERSION\" = \"latest\" ]; then LOKI_VERSION=$(curl --silent \"https://api.github.com/repos/grafana/loki/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\necho -e \"running curl -L https://github.com/grafana/loki/releases/download/v${LOKI_VERSION}/loki-linux-${ARCH}.zip --output loki-linux-amd64.zip\"\r\ncurl -L https://github.com/grafana/loki/releases/download/v${LOKI_VERSION}/loki-linux-${ARCH}.zip --output loki-linux-${ARCH}.zip\r\nunzip loki-linux-${ARCH}.zip\r\nrm -rf loki-linux-${ARCH}.zip\r\ncurl -L https://raw.githubusercontent.com/grafana/loki/v${LOKI_VERSION}/cmd/loki/loki-docker-config.yaml --output loki-docker-config.yaml\r\nmv loki-linux-* loki-linux\r\necho -e \"installation completed\"",
+            "container": "ghcr.io/pterodactyl/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Loki Version",
+            "description": "The version of Loki to use.\r\n\r\nFind all versions from https://github.com/grafana/loki",
+            "env_variable": "LOKI_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "luvit-generic-6e6e3189b1c0",
+        "name": "luvit generic",
+        "description": "A generic luvit egg This will clone a git repo. It defaults to master if no branch is specified.\r\n\r\nSupports the discordia lua framework.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/luvit-generic-6e6e3189b1c0.json",
+        "sha256": "4348fcec38806e7e3521cc69af192a8062e68698bb92798a87d236af3b918fbf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "lua/luvit/egg-luvit-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/6e6e3189b1c0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:50+00:00",
+        "name": "luvit generic",
+        "author": "parker@parkervcp.com",
+        "uuid": "f36e1177-60a6-421b-b078-9edba7422c76",
+        "description": "A generic luvit egg This will clone a git repo. It defaults to master if no branch is specified.\r\n\r\nSupports the discordia lua framework.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./luvit {{LUA_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change me\"}",
+          "logs": "{}",
+          "stop": "^c"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n## luvit generic install script\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\n## get git files\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install luvit for install time\r\ncurl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh\r\n\r\n## Install luvit packages\r\n./lit install ${LIT_PACKAGES}\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "lua file",
+            "description": "The Lua file to run",
+            "env_variable": "LUA_FILE",
+            "default_value": "app.lua",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Lit Packages",
+            "description": "Lit Packages to install\r\n\r\nexample\r\nSinisterRectus/discordia lduboeuf/cjson",
+            "env_variable": "LIT_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "luvit-generic-91b5d00dbf2a",
+        "name": "luvit generic",
+        "description": "A generic luvit egg This will clone a git repo. It defaults to master if no branch is specified.\r\n\r\nSupports the discordia lua framework.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/luvit-generic-91b5d00dbf2a.json",
+        "sha256": "2f1ee7866676af845a84bff4c3e539514f0a377ae05776335d3e9de730205299",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "lua/luvit/egg-luvit-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/91b5d00dbf2a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:46:37+02:00",
+        "name": "luvit generic",
+        "author": "parker@parkervcp.com",
+        "description": "A generic luvit egg This will clone a git repo. It defaults to master if no branch is specified.\r\n\r\nSupports the discordia lua framework.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./luvit {{LUA_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change me\"}",
+          "logs": "{}",
+          "stop": "^c"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n## luvit generic install script\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\n## get git files\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install luvit for install time\r\ncurl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh\r\n\r\n## Install luvit packages\r\n./lit install ${LIT_PACKAGES}\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "lua file",
+            "description": "The Lua file to run",
+            "env_variable": "LUA_FILE",
+            "default_value": "app.lua",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Lit Packages",
+            "description": "Lit Packages to install\r\n\r\nexample\r\nSinisterRectus/discordia lduboeuf/cjson",
+            "env_variable": "LIT_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "luvit-generic-be51c73991e6",
+        "name": "luvit generic",
+        "description": "A generic luvit egg This will clone a git repo. It defaults to master if no branch is specified.\r\n\r\nSupports the discordia lua framework.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/luvit-generic-be51c73991e6.json",
+        "sha256": "0bdd7b80576e4b5aec580165dc2b7deb943d2e038c4f93c72ca1625125b5db21",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "lua/luvit/egg-pterodactyl-luvit-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "generic/lua/luvit/egg-luvit-generic.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--generic/be51c73991e6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:50+00:00",
+        "name": "luvit generic",
+        "author": "parker@parkervcp.com",
+        "description": "A generic luvit egg This will clone a git repo. It defaults to master if no branch is specified.\r\n\r\nSupports the discordia lua framework.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./luvit {{LUA_FILE}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"change me\"}",
+          "stop": "^c"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n## luvit generic install script\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\n## get git files\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install luvit for install time\r\ncurl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh\r\n\r\n## Install luvit packages\r\n./lit install ${LIT_PACKAGES}\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "lua file",
+            "description": "The Lua file to run",
+            "env_variable": "LUA_FILE",
+            "default_value": "app.lua",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Lit Packages",
+            "description": "Lit Packages to install\r\n\r\nexample\r\nSinisterRectus/discordia lduboeuf/cjson",
+            "env_variable": "LIT_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "meilisearch-4ab3704f7c1d",
+        "name": "Meilisearch",
+        "description": "A lightning-fast search engine that fits effortlessly into your apps, websites, and workflow.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/meilisearch-4ab3704f7c1d.json",
+        "sha256": "33ea809e8a95459eaa0e05d291e91cb86e975c5b78de8db6ecbb38681279e83e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "meilisearch/egg-meilisearch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/4ab3704f7c1d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:52+00:00",
+        "name": "Meilisearch",
+        "author": "josdekurk@gmail.com",
+        "uuid": "9e9ce9be-10a7-47a3-8e54-2528145a3bf3",
+        "description": "A lightning-fast search engine that fits effortlessly into your apps, websites, and workflow.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./meilisearch --http-addr \"0.0.0.0:{{SERVER_PORT}}\"  --max-indexing-memory=\"{{SERVER_MEMORY}}mb\" $([ \"$NO_ANALYTICS\" -eq 1 ] && echo \"--no-analytics\")",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Actix runtime found; starting in Actix runtime\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/meilisearch/meilisearch/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/meilisearch/meilisearch/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-amd64\" || echo \"linux-aarch64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## Config file\r\nFILE=/mnt/server/config.toml\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config file exits\"\r\nelse \r\n    echo \"Config does not exist. Making one\"\r\n    curl -sSL -o config.toml https://raw.githubusercontent.com/meilisearch/meilisearch/latest/config.toml\r\nfi\r\n\r\ncurl -sSL -o meilisearch ${DOWNLOAD_URL}\r\nchmod +x meilisearch\r\n\r\n# Make the needed directory's \r\nmkdir -p /mnt/server/dumps\r\nmkdir -p /mnt/server/data.ms\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Master key",
+            "description": "In production, a Master key of at least 16 bytes is mandatory\r\nSets the instance's master key, automatically protecting all routes except GET /health. This means you will need a valid API key to access all other endpoints.",
+            "env_variable": "MEILI_MASTER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Environment",
+            "description": "Configures the instance's environment. Value must be either production or development.",
+            "env_variable": "MEILI_ENV",
+            "default_value": "development",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:development,production",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Disable analytics",
+            "description": "Deactivates Meilisearch's built-in telemetry when provided.",
+            "env_variable": "NO_ANALYTICS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Dumps dir",
+            "description": "Sets the directory where Meilisearch will create dump files.",
+            "env_variable": "MEILI_DUMP_DIR",
+            "default_value": "/home/container/dumps",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "DB PATH",
+            "description": "Designates the location where database files will be created and retrieved.",
+            "env_variable": "MEILI_DB_PATH",
+            "default_value": "/home/container/data.ms",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Log level",
+            "description": "Defines how much detail should be present in Meilisearch's logs.",
+            "env_variable": "MEILI_LOG_LEVEL",
+            "default_value": "INFO",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:INFO,WARN,ERROR,TRACE",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Config Path",
+            "description": "Designates the location of the configuration file to load at launch.",
+            "env_variable": "MEILI_CONFIG_FILE_PATH",
+            "default_value": "/home/container/config.toml",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max threads",
+            "description": "Sets the maximum number of threads Meilisearch can use during indexing",
+            "env_variable": "MEILI_MAX_INDEXING_THREADS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "meilisearch-5fcd0ea376d0",
+        "name": "Meilisearch",
+        "description": "A lightning-fast search engine that fits effortlessly into your apps, websites, and workflow.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/meilisearch-5fcd0ea376d0.json",
+        "sha256": "52b3d148a94325b0f204164ab0554d0bb7234baf04cdddbe83e6ad72bca126de",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "meilisearch/egg-pterodactyl-meilisearch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/meilisearch/egg-meilisearch.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/5fcd0ea376d0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:52+00:00",
+        "name": "Meilisearch",
+        "author": "josdekurk@gmail.com",
+        "description": "A lightning-fast search engine that fits effortlessly into your apps, websites, and workflow.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./meilisearch --http-addr \"0.0.0.0:{{SERVER_PORT}}\"  --max-indexing-memory=\"{{SERVER_MEMORY}}mb\" $([ \"$NO_ANALYTICS\" -eq 1 ] && echo \"--no-analytics\")",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Actix runtime found; starting in Actix runtime\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/meilisearch/meilisearch/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/meilisearch/meilisearch/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-amd64\" || echo \"linux-aarch64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## Config file\r\nFILE=/mnt/server/config.toml\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config file exits\"\r\nelse \r\n    echo \"Config does not exist. Making one\"\r\n    curl -sSL -o config.toml https://raw.githubusercontent.com/meilisearch/meilisearch/latest/config.toml\r\nfi\r\n\r\ncurl -sSL -o meilisearch ${DOWNLOAD_URL}\r\nchmod +x meilisearch\r\n\r\n# Make the needed directory's \r\nmkdir -p /mnt/server/dumps\r\nmkdir -p /mnt/server/data.ms\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Master key",
+            "description": "In production, a Master key of at least 16 bytes is mandatory\r\nSets the instance's master key, automatically protecting all routes except GET /health. This means you will need a valid API key to access all other endpoints.",
+            "env_variable": "MEILI_MASTER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Environment",
+            "description": "Configures the instance's environment. Value must be either production or development.",
+            "env_variable": "MEILI_ENV",
+            "default_value": "development",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:development,production",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable analytics",
+            "description": "Deactivates Meilisearch's built-in telemetry when provided.",
+            "env_variable": "NO_ANALYTICS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Dumps dir",
+            "description": "Sets the directory where Meilisearch will create dump files.",
+            "env_variable": "MEILI_DUMP_DIR",
+            "default_value": "/home/container/dumps",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "DB PATH",
+            "description": "Designates the location where database files will be created and retrieved.",
+            "env_variable": "MEILI_DB_PATH",
+            "default_value": "/home/container/data.ms",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Log level",
+            "description": "Defines how much detail should be present in Meilisearch's logs.",
+            "env_variable": "MEILI_LOG_LEVEL",
+            "default_value": "INFO",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:INFO,WARN,ERROR,TRACE",
+            "field_type": "text"
+          },
+          {
+            "name": "Config Path",
+            "description": "Designates the location of the configuration file to load at launch.",
+            "env_variable": "MEILI_CONFIG_FILE_PATH",
+            "default_value": "/home/container/config.toml",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max threads",
+            "description": "Sets the maximum number of threads Meilisearch can use during indexing",
+            "env_variable": "MEILI_MAX_INDEXING_THREADS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "meilisearch-ce2b1fa33356",
+        "name": "Meilisearch",
+        "description": "A lightning-fast search engine that fits effortlessly into your apps, websites, and workflow.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/meilisearch-ce2b1fa33356.json",
+        "sha256": "65bf140f8598a3a5ac2bb59a7b6835a5e3f34b3450a4f7cc3744fb41863e115e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "meilisearch/egg-meilisearch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/ce2b1fa33356.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:52+00:00",
+        "name": "Meilisearch",
+        "author": "josdekurk@gmail.com",
+        "description": "A lightning-fast search engine that fits effortlessly into your apps, websites, and workflow.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./meilisearch --http-addr \"0.0.0.0:{{SERVER_PORT}}\"  --max-indexing-memory=\"{{SERVER_MEMORY}}mb\" $([ \"$NO_ANALYTICS\" -eq 1 ] && echo \"--no-analytics\")",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Actix runtime found; starting in Actix runtime\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/meilisearch/meilisearch/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/meilisearch/meilisearch/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-amd64\" || echo \"linux-aarch64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## Config file\r\nFILE=/mnt/server/config.toml\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config file exits\"\r\nelse \r\n    echo \"Config does not exist. Making one\"\r\n    curl -sSL -o config.toml https://raw.githubusercontent.com/meilisearch/meilisearch/latest/config.toml\r\nfi\r\n\r\ncurl -sSL -o meilisearch ${DOWNLOAD_URL}\r\nchmod +x meilisearch\r\n\r\n# Make the needed directory's \r\nmkdir -p /mnt/server/dumps\r\nmkdir -p /mnt/server/data.ms\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Master key",
+            "description": "In production, a Master key of at least 16 bytes is mandatory\r\nSets the instance's master key, automatically protecting all routes except GET /health. This means you will need a valid API key to access all other endpoints.",
+            "env_variable": "MEILI_MASTER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Environment",
+            "description": "Configures the instance's environment. Value must be either production or development.",
+            "env_variable": "MEILI_ENV",
+            "default_value": "development",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:development,production",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable analytics",
+            "description": "Deactivates Meilisearch's built-in telemetry when provided.",
+            "env_variable": "NO_ANALYTICS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Dumps dir",
+            "description": "Sets the directory where Meilisearch will create dump files.",
+            "env_variable": "MEILI_DUMP_DIR",
+            "default_value": "/home/container/dumps",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "DB PATH",
+            "description": "Designates the location where database files will be created and retrieved.",
+            "env_variable": "MEILI_DB_PATH",
+            "default_value": "/home/container/data.ms",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Log level",
+            "description": "Defines how much detail should be present in Meilisearch's logs.",
+            "env_variable": "MEILI_LOG_LEVEL",
+            "default_value": "INFO",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:INFO,WARN,ERROR,TRACE",
+            "field_type": "text"
+          },
+          {
+            "name": "Config Path",
+            "description": "Designates the location of the configuration file to load at launch.",
+            "env_variable": "MEILI_CONFIG_FILE_PATH",
+            "default_value": "/home/container/config.toml",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max threads",
+            "description": "Sets the maximum number of threads Meilisearch can use during indexing",
+            "env_variable": "MEILI_MAX_INDEXING_THREADS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

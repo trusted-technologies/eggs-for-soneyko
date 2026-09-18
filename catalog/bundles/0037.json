@@ -1,0 +1,1270 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "ddracenetwork-21395dcadf23",
+        "name": "DDRaceNetwork",
+        "description": "DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ddracenetwork-21395dcadf23.json",
+        "sha256": "f7f2c8d040ba0569584b5340e17c3f00cc8c87ca44b23a679dc54de07a5755bf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "ddracenetwork/egg-d-d-race-network.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/21395dcadf23.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:36+00:00",
+        "name": "DDRaceNetwork",
+        "author": "diedyesterdaywashere@gmail.com",
+        "uuid": "4bb46f79-198d-48cd-b424-8d51bdf0b152",
+        "description": "DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./DDNet-Server",
+        "config": {
+          "files": "{\"data/autoexec_server.cfg\": {\"parser\": \"file\", \"find\": {\"sv_port\": \"sv_port {{server.build.default.port}}\", \"sv_name\": \"sv_name \\\"{{server.build.env.SERVER_NAME}}\\\"\", \"password\": \"password \\\"{{server.build.env.SERVER_PASSWORD}}\\\"\", \"sv_map\": \"sv_map \\\"{{server.build.env.SERVER_MAP}}\\\"\", \"sv_register\": \"sv_register {{server.build.env.SERVER_REGISTER}}\"}}}",
+          "startup": "{\"done\": \" server name is \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\napt update\r\napt -y install curl xz-utils tar\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    A=$(curl -sSL https://ddnet.org/downloads/ | grep -io '<a href=['\"'\"'\"][^\"'\"'\"']*['\"'\"'\"]' | grep linux_x86_64.tar.xz | awk '{print $2}' |cut -c7- | sed 's/.$//' | head -1)\r\n    DOWNLOAD_URL=https://ddnet.org/downloads/${A}\r\nelse\r\n    A=$(curl -sSL https://ddnet.org/downloads/ | grep -io '<a href=['\"'\"'\"][^\"'\"'\"']*['\"'\"'\"]' | grep linux_x86_64.tar.xz | awk '{print $2}' |cut -c7- | sed 's/.$//' | grep -i ${VERSION})\r\n    DOWNLOAD_URL=https://ddnet.org/downloads/${A}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o ddnet_linux_x86_64.tar.xz ${DOWNLOAD_URL}\r\ntar -xf ddnet_linux_x86_64.tar.xz --strip-components=1\r\nrm ddnet_linux_x86_64.tar.xz\r\n\r\ncd /mnt/server/data\r\nsed -i 's/#\\(sv_port [0-9]\\+\\)/\\1/' autoexec_server.cfg\r\n\r\ncd /mnt/server\r\necho \"# Check /data/autoexec_config.cfg for more info!\" >> myServerconfig.cfg\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game Version",
+            "description": "Latest is the default, put \"nightly\" for beta, or enter the version number, for example \"17.0\".",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "My DDNet server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "Password for joining the server, empty for no password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server map",
+            "description": "Map to start server with",
+            "env_variable": "SERVER_MAP",
+            "default_value": "Tutorial",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Register server",
+            "description": "Register the server to the server list.\r\n0 is disabled\r\nipv4 is enabled listening ipv4",
+            "env_variable": "SERVER_REGISTER",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,ipv4",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ddracenetwork-dc34b0ef3fb4",
+        "name": "DDRaceNetwork",
+        "description": "DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ddracenetwork-dc34b0ef3fb4.json",
+        "sha256": "00e4fd467049a5540d080ae0774115c45561ffbaa530d24fde31491aed1bb883",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "ddracenetwork/egg-pterodactyl-d-d-race-network.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/ddracenetwork/egg-d-d-race-network.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/dc34b0ef3fb4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:36+00:00",
+        "name": "DDRaceNetwork",
+        "author": "diedyesterdaywashere@gmail.com",
+        "description": "DDraceNetwork (DDNet) is an actively maintained version of DDRace, a Teeworlds modification with a unique cooperative gameplay.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./DDNet-Server",
+        "config": {
+          "files": "{\"data/autoexec_server.cfg\": {\"parser\": \"file\", \"find\": {\"sv_port\": \"sv_port {{server.build.default.port}}\", \"sv_name\": \"sv_name \\\"{{server.build.env.SERVER_NAME}}\\\"\", \"password\": \"password \\\"{{server.build.env.SERVER_PASSWORD}}\\\"\", \"sv_map\": \"sv_map \\\"{{server.build.env.SERVER_MAP}}\\\"\", \"sv_register\": \"sv_register {{server.build.env.SERVER_REGISTER}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \" server name is \"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\napt update\r\napt -y install curl xz-utils tar\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    A=$(curl -sSL https://ddnet.org/downloads/ | grep -io '<a href=['\"'\"'\"][^\"'\"'\"']*['\"'\"'\"]' | grep linux_x86_64.tar.xz | awk '{print $2}' |cut -c7- | sed 's/.$//' | head -1)\r\n    DOWNLOAD_URL=https://ddnet.org/downloads/${A}\r\nelse\r\n    A=$(curl -sSL https://ddnet.org/downloads/ | grep -io '<a href=['\"'\"'\"][^\"'\"'\"']*['\"'\"'\"]' | grep linux_x86_64.tar.xz | awk '{print $2}' |cut -c7- | sed 's/.$//' | grep -i ${VERSION})\r\n    DOWNLOAD_URL=https://ddnet.org/downloads/${A}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o ddnet_linux_x86_64.tar.xz ${DOWNLOAD_URL}\r\ntar -xf ddnet_linux_x86_64.tar.xz --strip-components=1\r\nrm ddnet_linux_x86_64.tar.xz\r\n\r\ncd /mnt/server/data\r\nsed -i 's/#\\(sv_port [0-9]\\+\\)/\\1/' autoexec_server.cfg\r\n\r\ncd /mnt/server\r\necho \"# Check /data/autoexec_config.cfg for more info!\" >> myServerconfig.cfg\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game Version",
+            "description": "Latest is the default, put \"nightly\" for beta, or enter the version number, for example \"17.0\".",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "My DDNet server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "Password for joining the server, empty for no password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server map",
+            "description": "Map to start server with",
+            "env_variable": "SERVER_MAP",
+            "default_value": "Tutorial",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Register server",
+            "description": "Register the server to the server list.\r\n0 is disabled\r\nipv4 is enabled listening ipv4",
+            "env_variable": "SERVER_REGISTER",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,ipv4",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "dead-matter-2aa467e6a21a",
+        "name": "Dead Matter",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/dead-matter-2aa467e6a21a.json",
+        "sha256": "ee375e88bae17037a68c46725dc424be8e4ab0470b013804e1383e38c715ff95",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "dead_matter/egg-pterodactyl-dead-matter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/2aa467e6a21a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:09+00:00",
+        "name": "Dead Matter",
+        "author": "josdekurk@gmail.com",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/DeadMatter/Saved/Logs/DeadMatter.log; proton run DeadMatter/Binaries/Win64/DeadMatterServer-Win64-Test.exe -SteamServerName=\"{{SERVER_NAME}}\" -port={{SERVER_PORT}} -queryport={{QUERY_PORT}}  & DM_PID=$!; tail -c0 -F  /home/container/DeadMatter/Saved/Logs/DeadMatter.log --pid=$DM_PID",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/DeadMatter/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/DeadMatter/Saved/Config/WindowsServer\r\n\r\ncd /mnt/server\r\necho \"2184150\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2584780",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2584780",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7002",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "dead-matter-9e4506e30308",
+        "name": "Dead Matter",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/dead-matter-9e4506e30308.json",
+        "sha256": "7bd184170c76fd48786e89b5d671aca87f32a4714e56d4f5bef69ba69a79325c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/dead_matter/egg-dead-matter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/9e4506e30308.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-13T10:06:00+01:00",
+        "name": "Dead Matter",
+        "author": "josdekurk@gmail.com",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/DeadMatter/Saved/Logs/DeadMatter.log; proton run DeadMatter/Binaries/Win64/DeadMatterServer-Win64-Test.exe -SteamServerName=\"{{SERVER_NAME}}\" -port={{SERVER_PORT}} -queryport={{QUERY_PORT}}  & DM_PID=$!; tail -c0 -F  /home/container/DeadMatter/Saved/Logs/DeadMatter.log --pid=$DM_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/DeadMatter/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/DeadMatter/Saved/Config/WindowsServer\r\n\r\ncd /mnt/server\r\necho \"2184150\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2584780",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2584780",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7002",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "dead-matter-c93db2ee3ff7",
+        "name": "Dead Matter",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/dead-matter-c93db2ee3ff7.json",
+        "sha256": "7d685ab49325745ec997fa390a689f04b4232166af0e46ae8247506dade4f858",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "dead_matter/egg-dead-matter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c93db2ee3ff7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-13T10:06:00+01:00",
+        "name": "Dead Matter",
+        "author": "josdekurk@gmail.com",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/DeadMatter/Saved/Logs/DeadMatter.log; proton run DeadMatter/Binaries/Win64/DeadMatterServer-Win64-Test.exe -SteamServerName=\"{{SERVER_NAME}}\" -port={{SERVER_PORT}} -queryport={{QUERY_PORT}}  & DM_PID=$!; tail -c0 -F  /home/container/DeadMatter/Saved/Logs/DeadMatter.log --pid=$DM_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/DeadMatter/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/DeadMatter/Saved/Config/WindowsServer\r\n\r\ncd /mnt/server\r\necho \"2184150\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2584780",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2584780",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7002",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "dead-matter-c9fac471d06a",
+        "name": "Dead Matter",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/dead-matter-c9fac471d06a.json",
+        "sha256": "5e48509a3a9563e159b9ec578f835e192e5aae13415ea82c0acfdf2cc1a9fed4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "dead_matter/egg-dead-matter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/c9fac471d06a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Dead Matter",
+        "author": "josdekurk@gmail.com",
+        "uuid": "97567451-7e0a-46ec-98f0-a670881785cf",
+        "description": "After a rampant viral outbreak causes global society to collapse, you must survive the harsh wilderness of the Canadian Rockies amidst vast hordes of Infected and rival survivors.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/DeadMatter/Saved/Logs/DeadMatter.log; proton run DeadMatter/Binaries/Win64/DeadMatterServer-Win64-Test.exe -SteamServerName=\"{{SERVER_NAME}}\" -port={{SERVER_PORT}} -queryport={{QUERY_PORT}}  & DM_PID=$!; tail -c0 -F  /home/container/DeadMatter/Saved/Logs/DeadMatter.log --pid=$DM_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/DeadMatter/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/DeadMatter/Saved/Config/WindowsServer\r\n\r\ncd /mnt/server\r\necho \"2184150\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2584780",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2584780",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7002",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "don-t-starve-together-0d290259a91b",
+        "name": "Don't Starve Together",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/don-t-starve-together-0d290259a91b.json",
+        "sha256": "1e136c45891ed4347e5a1999e89522f3e22fd571041c92bf8b85a1ea0f7caaf6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/dont_starve/egg-don-t-starve-together.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/0d290259a91b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-07T09:58:40-05:00",
+        "name": "Don't Starve Together",
+        "author": "parker@parkervcp.com",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "cd bin64 && coproc caves ( ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port 11000 -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Caves ); ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port {{SERVER_PORT}} -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Master && echo 'c_shutdown()' >&\"${caves[1]}\"",
+        "config": {
+          "files": "{\"DoNotStarveTogether/config/server/cluster.ini\": {\"parser\": \"ini\", \"find\": {\"GAMEPLAY.game_mode\": \"{{server.build.env.GAME_MODE}}\", \"GAMEPLAY.max_players\": \"{{server.build.env.MAX_PLAYERS}}\", \"NETWORK.cluster_name\": \"{{server.build.env.CLUSTER_NAME}}\", \"NETWORK.cluster_description\": \"{{server.build.env.CLUSTER_DESC}}\", \"SHARD.shard_enabled\": \"true\", \"SHARD.bind_ip\": \"127.0.0.1\", \"SHARD.master_ip\": \"127.0.0.1\", \"SHARD.master_port\": \"11001\"}}, \"DoNotStarveTogether/config/server/Master/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"{{server.build.default.port}}\", \"SHARD.is_master\": \"true\"}}, \"DoNotStarveTogether/config/server/Caves/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"11000\", \"SHARD.is_master\": \"false\", \"SHARD.name\": \"Caves\"}}}",
+          "startup": "{\"done\": \"Setting breakpad minidump AppID\"}",
+          "logs": "{}",
+          "stop": "c_shutdown()"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'debian:buster-slim'\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## DST specific\r\n## cluster token file\r\necho -e \"getting cluster configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt ]; then\r\n    echo \"${SERVER_TOKEN}\" >> /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt\r\nfi\r\n\r\n## cluster configs \r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster.ini ]; then\r\n    curl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/dont_starve/server.cluster.ini -o /mnt/server/DoNotStarveTogether/config/server/cluster.ini\r\nfi\r\n\r\n## master configs\r\necho -e \"getting master configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Master/\r\n## master ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/server.ini ]; then\r\n    curl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/dont_starve/server.master.ini -o /mnt/server/DoNotStarveTogether/config/server/Master/server.ini\r\nfi\r\n\r\n## master worldgen override\r\nif [ ! -z ${MASTER_WORLDGEN}  ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua ]; then\r\n    curl -sSL ${MASTER_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua\r\nfi\r\n\r\n## caves configs\r\necho -e \"getting cave configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Caves/\r\n## caves ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini ]; then\r\n    curl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/dont_starve/server.caves.ini -o /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini\r\nfi\r\n\r\n## caves worldgen override\r\nif [ ! -z ${CAVES_WORLDGEN} ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua ]; then\r\n    curl -sSL ${CAVES_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Set the maximum number of players that will be allowed to join the game. This option overrides the [GAMEPLAY] / max_players setting in cluster.ini.\r\n\r\ndefault is 16",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,31",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Required to run a public server. This needs to be generated from in game.\r\n\r\nGet your token here:\r\nhttps://accounts.klei.com/account/game/servers?game=DontStarveTogether",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "Steam Server App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "343050",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game mode",
+            "description": "Valid values are survival, endless or wilderness",
+            "env_variable": "GAME_MODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Name",
+            "description": "This is the name that will show up in server browser.",
+            "env_variable": "CLUSTER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Description",
+            "description": "This will show up in the server details area on the “Browse Games” screen.",
+            "env_variable": "CLUSTER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Worldgen Override",
+            "description": "Link to the lua file used to generate the master server map. Only used during the install phase.",
+            "env_variable": "MASTER_WORLDGEN",
+            "default_value": "https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/dont_starve/worldgenoverride.master.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Worldgen Override",
+            "description": "Link to the lua file used to generate the caves server map. Only used during the install phase.\r\n\r\nDefault generates a cave map",
+            "env_variable": "CAVES_WORLDGEN",
+            "default_value": "https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/dont_starve/worldgenoverride.caves.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "don-t-starve-together-5b9083779951",
+        "name": "Don't Starve Together",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/don-t-starve-together-5b9083779951.json",
+        "sha256": "8a8d5add37d5ce8b87f4dedc34028331fc0ccb0125d97eb2a2ff682f1ca50aae",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "dont_starve/egg-don-t-starve-together.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5b9083779951.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-07T09:58:40-05:00",
+        "name": "Don't Starve Together",
+        "author": "parker@parkervcp.com",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "cd bin64 && coproc caves ( ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port 11000 -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Caves ); ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port {{SERVER_PORT}} -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Master && echo 'c_shutdown()' >&\"${caves[1]}\"",
+        "config": {
+          "files": "{\"DoNotStarveTogether/config/server/cluster.ini\": {\"parser\": \"ini\", \"find\": {\"GAMEPLAY.game_mode\": \"{{server.build.env.GAME_MODE}}\", \"GAMEPLAY.max_players\": \"{{server.build.env.MAX_PLAYERS}}\", \"NETWORK.cluster_name\": \"{{server.build.env.CLUSTER_NAME}}\", \"NETWORK.cluster_description\": \"{{server.build.env.CLUSTER_DESC}}\", \"SHARD.shard_enabled\": \"true\", \"SHARD.bind_ip\": \"127.0.0.1\", \"SHARD.master_ip\": \"127.0.0.1\", \"SHARD.master_port\": \"11001\"}}, \"DoNotStarveTogether/config/server/Master/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"{{server.build.default.port}}\", \"SHARD.is_master\": \"true\"}}, \"DoNotStarveTogether/config/server/Caves/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"11000\", \"SHARD.is_master\": \"false\", \"SHARD.name\": \"Caves\"}}}",
+          "startup": "{\"done\": \"Setting breakpad minidump AppID\"}",
+          "logs": "{}",
+          "stop": "c_shutdown()"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'debian:buster-slim'\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## DST specific\r\n## cluster token file\r\necho -e \"getting cluster configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt ]; then\r\n    echo \"${SERVER_TOKEN}\" >> /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt\r\nfi\r\n\r\n## cluster configs \r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster.ini ]; then\r\n    curl -sSL https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/dont_starve/server.cluster.ini -o /mnt/server/DoNotStarveTogether/config/server/cluster.ini\r\nfi\r\n\r\n## master configs\r\necho -e \"getting master configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Master/\r\n## master ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/server.ini ]; then\r\n    curl -sSL https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/dont_starve/server.master.ini -o /mnt/server/DoNotStarveTogether/config/server/Master/server.ini\r\nfi\r\n\r\n## master worldgen override\r\nif [ ! -z ${MASTER_WORLDGEN}  ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua ]; then\r\n    curl -sSL ${MASTER_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua\r\nfi\r\n\r\n## caves configs\r\necho -e \"getting cave configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Caves/\r\n## caves ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini ]; then\r\n    curl -sSL https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/dont_starve/server.caves.ini -o /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini\r\nfi\r\n\r\n## caves worldgen override\r\nif [ ! -z ${CAVES_WORLDGEN} ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua ]; then\r\n    curl -sSL ${CAVES_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Set the maximum number of players that will be allowed to join the game. This option overrides the [GAMEPLAY] / max_players setting in cluster.ini.\r\n\r\ndefault is 16",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,31",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Required to run a public server. This needs to be generated from in game.\r\n\r\nGet your token here:\r\nhttps://accounts.klei.com/account/game/servers?game=DontStarveTogether",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "Steam Server App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "343050",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game mode",
+            "description": "Valid values are survival, endless or wilderness",
+            "env_variable": "GAME_MODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Name",
+            "description": "This is the name that will show up in server browser.",
+            "env_variable": "CLUSTER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Description",
+            "description": "This will show up in the server details area on the “Browse Games” screen.",
+            "env_variable": "CLUSTER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Worldgen Override",
+            "description": "Link to the lua file used to generate the master server map. Only used during the install phase.",
+            "env_variable": "MASTER_WORLDGEN",
+            "default_value": "https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/dont_starve/worldgenoverride.master.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Worldgen Override",
+            "description": "Link to the lua file used to generate the caves server map. Only used during the install phase.\r\n\r\nDefault generates a cave map",
+            "env_variable": "CAVES_WORLDGEN",
+            "default_value": "https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/dont_starve/worldgenoverride.caves.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "don-t-starve-together-5d6597d322d9",
+        "name": "Don't Starve Together",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/don-t-starve-together-5d6597d322d9.json",
+        "sha256": "0bb11b818b06d9d1966d4cb23626fc0c001a419bd3f2ce290ed03caa5619e309",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "dont_starve/egg-don-t-starve-together.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/5d6597d322d9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Don't Starve Together",
+        "author": "parker@parkervcp.com",
+        "uuid": "66cba527-a8b8-4b1e-aa39-c10f92cdeeba",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "image": null,
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd Debian": "ghcr.io/pelican-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"DoNotStarveTogether/config/server/cluster.ini\": {\"parser\": \"ini\", \"find\": {\"GAMEPLAY.game_mode\": \"{{server.environment.GAME_MODE}}\", \"GAMEPLAY.max_players\": \"{{server.environment.MAX_PLAYERS}}\", \"NETWORK.cluster_name\": \"{{server.environment.CLUSTER_NAME}}\", \"NETWORK.cluster_description\": \"{{server.environment.CLUSTER_DESC}}\", \"SHARD.shard_enabled\": \"true\", \"SHARD.bind_ip\": \"127.0.0.1\", \"SHARD.master_ip\": \"127.0.0.1\", \"SHARD.master_port\": \"11001\"}}, \"DoNotStarveTogether/config/server/Master/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"{{server.allocations.default.port}}\", \"SHARD.is_master\": \"true\"}}, \"DoNotStarveTogether/config/server/Caves/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"11000\", \"SHARD.is_master\": \"false\", \"SHARD.name\": \"Caves\"}}}",
+          "startup": "{\"done\": \"Setting breakpad minidump AppID\"}",
+          "logs": "{}",
+          "stop": "c_shutdown()"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'debian:buster-slim'\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## DST specific\r\n## cluster token file\r\necho -e \"getting cluster configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt ]; then\r\n    echo \"${SERVER_TOKEN}\" >> /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt\r\nfi\r\n\r\n## cluster configs \r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster.ini ]; then\r\n    curl -sSL https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/server.cluster.ini -o /mnt/server/DoNotStarveTogether/config/server/cluster.ini\r\nfi\r\n\r\n## master configs\r\necho -e \"getting master configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Master/\r\n## master ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/server.ini ]; then\r\n    curl -sSL https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/server.master.ini -o /mnt/server/DoNotStarveTogether/config/server/Master/server.ini\r\nfi\r\n\r\n## master worldgen override\r\nif [ ! -z ${MASTER_WORLDGEN}  ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua ]; then\r\n    curl -sSL ${MASTER_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua\r\nfi\r\n\r\n## caves configs\r\necho -e \"getting cave configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Caves/\r\n## caves ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini ]; then\r\n    curl -sSL https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/server.caves.ini -o /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini\r\nfi\r\n\r\n## caves worldgen override\r\nif [ ! -z ${CAVES_WORLDGEN} ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua ]; then\r\n    curl -sSL ${CAVES_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Set the maximum number of players that will be allowed to join the game. This option overrides the [GAMEPLAY] / max_players setting in cluster.ini.\r\n\r\ndefault is 16",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,31",
+            "sort": 1
+          },
+          {
+            "name": "Server Token",
+            "description": "Required to run a public server. This needs to be generated from in game.\r\n\r\nGet your token here:\r\nhttps://accounts.klei.com/account/game/servers?game=DontStarveTogether",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 2
+          },
+          {
+            "name": "App ID",
+            "description": "Steam Server App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "343050",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 3
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 4
+          },
+          {
+            "name": "Game mode",
+            "description": "Valid values are survival, endless or wilderness",
+            "env_variable": "GAME_MODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 5
+          },
+          {
+            "name": "Cluster Name",
+            "description": "This is the name that will show up in server browser.",
+            "env_variable": "CLUSTER_NAME",
+            "default_value": "A Panel hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 6
+          },
+          {
+            "name": "Cluster Description",
+            "description": "This will show up in the server details area on the “Browse Games” screen.",
+            "env_variable": "CLUSTER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 7
+          },
+          {
+            "name": "Master Worldgen Override",
+            "description": "Link to the lua file used to generate the master server map. Only used during the install phase.",
+            "env_variable": "MASTER_WORLDGEN",
+            "default_value": "https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/worldgenoverride.master.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": 8
+          },
+          {
+            "name": "Caves Worldgen Override",
+            "description": "Link to the lua file used to generate the caves server map. Only used during the install phase.\r\n\r\nDefault generates a cave map",
+            "env_variable": "CAVES_WORLDGEN",
+            "default_value": "https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/worldgenoverride.caves.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": 9
+          }
+        ],
+        "startup": "cd bin64 && coproc caves ( ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port 11000 -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Caves ); ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port {{SERVER_PORT}} -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Master && echo 'c_shutdown()' >&\"${caves[1]}\""
+      }
+    },
+    {
+      "entry": {
+        "id": "don-t-starve-together-dacedbb2811a",
+        "name": "Don't Starve Together",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/don-t-starve-together-dacedbb2811a.json",
+        "sha256": "a6e6d5b347b5458742aefe74a88e5d1ba4f174356708b5d21d00ef84c85690e2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "dont_starve/egg-pterodactyl-don-t-starve-together.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/dacedbb2811a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-25T09:38:15+00:00",
+        "name": "Don't Starve Together",
+        "author": "parker@parkervcp.com",
+        "description": "Don’t Starve Together is an uncompromising wilderness survival game full of science and magic.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd Debian": "ghcr.io/pelican-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "cd bin64 && coproc caves ( ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port 11000 -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Caves ); ./dontstarve_dedicated_server_nullrenderer_x64 -bind_ip 0.0.0.0 -port {{SERVER_PORT}} -persistent_storage_root /home/container/DoNotStarveTogether -conf_dir config -cluster server -players {{MAX_PLAYERS}} -shard Master && echo 'c_shutdown()' >&\"${caves[1]}\"",
+        "config": {
+          "files": "{\"DoNotStarveTogether/config/server/cluster.ini\": {\"parser\": \"ini\", \"find\": {\"GAMEPLAY.game_mode\": \"{{server.build.env.GAME_MODE}}\", \"GAMEPLAY.max_players\": \"{{server.build.env.MAX_PLAYERS}}\", \"NETWORK.cluster_name\": \"{{server.build.env.CLUSTER_NAME}}\", \"NETWORK.cluster_description\": \"{{server.build.env.CLUSTER_DESC}}\", \"SHARD.shard_enabled\": \"true\", \"SHARD.bind_ip\": \"127.0.0.1\", \"SHARD.master_ip\": \"127.0.0.1\", \"SHARD.master_port\": \"11001\"}}, \"DoNotStarveTogether/config/server/Master/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"{{server.build.default.port}}\", \"SHARD.is_master\": \"true\"}}, \"DoNotStarveTogether/config/server/Caves/server.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.server_port\": \"11000\", \"SHARD.is_master\": \"false\", \"SHARD.name\": \"Caves\"}}}",
+          "startup": "{\"done\": \"Setting breakpad minidump AppID\"}",
+          "logs": "{}",
+          "stop": "c_shutdown()"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'debian:buster-slim'\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## DST specific\r\n## cluster token file\r\necho -e \"getting cluster configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt ]; then\r\n    echo \"${SERVER_TOKEN}\" >> /mnt/server/DoNotStarveTogether/config/server/cluster_token.txt\r\nfi\r\n\r\n## cluster configs \r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/cluster.ini ]; then\r\n    curl -sSL https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/server.cluster.ini -o /mnt/server/DoNotStarveTogether/config/server/cluster.ini\r\nfi\r\n\r\n## master configs\r\necho -e \"getting master configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Master/\r\n## master ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/server.ini ]; then\r\n    curl -sSL https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/server.master.ini -o /mnt/server/DoNotStarveTogether/config/server/Master/server.ini\r\nfi\r\n\r\n## master worldgen override\r\nif [ ! -z ${MASTER_WORLDGEN}  ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua ]; then\r\n    curl -sSL ${MASTER_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Master/worldgenoverride.lua\r\nfi\r\n\r\n## caves configs\r\necho -e \"getting cave configs\"\r\nmkdir -p /mnt/server/DoNotStarveTogether/config/server/Caves/\r\n## caves ini\r\nif [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini ]; then\r\n    curl -sSL https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/server.caves.ini -o /mnt/server/DoNotStarveTogether/config/server/Caves/server.ini\r\nfi\r\n\r\n## caves worldgen override\r\nif [ ! -z ${CAVES_WORLDGEN} ] && [ ! -f /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua ]; then\r\n    curl -sSL ${CAVES_WORLDGEN} -o /mnt/server/DoNotStarveTogether/config/server/Caves/worldgenoverride.lua\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Set the maximum number of players that will be allowed to join the game. This option overrides the [GAMEPLAY] / max_players setting in cluster.ini.\r\n\r\ndefault is 16",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,31",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Required to run a public server. This needs to be generated from in game.\r\n\r\nGet your token here:\r\nhttps://accounts.klei.com/account/game/servers?game=DontStarveTogether",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "Steam Server App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "343050",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game mode",
+            "description": "Valid values are survival, endless or wilderness",
+            "env_variable": "GAME_MODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Name",
+            "description": "This is the name that will show up in server browser.",
+            "env_variable": "CLUSTER_NAME",
+            "default_value": "A Panel hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Description",
+            "description": "This will show up in the server details area on the “Browse Games” screen.",
+            "env_variable": "CLUSTER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Worldgen Override",
+            "description": "Link to the lua file used to generate the master server map. Only used during the install phase.",
+            "env_variable": "MASTER_WORLDGEN",
+            "default_value": "https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/worldgenoverride.master.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Caves Worldgen Override",
+            "description": "Link to the lua file used to generate the caves server map. Only used during the install phase.\r\n\r\nDefault generates a cave map",
+            "env_variable": "CAVES_WORLDGEN",
+            "default_value": "https://github.com/pelican-eggs/games-steamcmd/blob/main/dont_starve/worldgenoverride.caves.lua",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

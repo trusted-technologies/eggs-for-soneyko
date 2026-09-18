@@ -1,0 +1,1625 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "palworld-06ac48f63bd9",
+        "name": "Palworld",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/palworld-06ac48f63bd9.json",
+        "sha256": "13ad8bec667af6ff18811f6f76845a5c1b8d711918263bf8ec070d631c32dd4b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/palworld/egg-palworld.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/06ac48f63bd9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-04T09:32:39+02:00",
+        "name": "Palworld",
+        "author": "admin@ballaual.de",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "SteamCMD_Debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [
+          "PalServer.sh"
+        ],
+        "startup": "./PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < /dev/stdin & /home/container/Pal/Binaries/Linux/PalServer-Linux-Shipping Pal -publiclobby -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Setting breakpad minidump AppID = 2394010\"}",
+          "logs": "{}",
+          "stop": "shutdown 15"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## add below your custom commands if needed\r\n\r\n## copy template config file\r\necho \"Copy template config file into config folder!\"\r\nif [ -f \"/mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\" ]; then\r\n    echo \"Config file already exitis, backing up and overwriting with a new one\"\r\n    mv /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings_$(date +\"%Y%m%d%H%M%S\").ini\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\r\nelse\r\n    echo \"Creating new config file\"\r\n    mkdir -p /mnt/server/Pal/Saved/Config/LinuxServer\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\r\nfi\r\n\r\ncd /mnt/server\r\n# Download self made replace tool\r\necho \"Downloading config parser application\"\r\ncurl -sSL -o PalworldServerConfigParser https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/palworld/PalworldServerConfigParser-linux-amd64\r\nchmod +x PalworldServerConfigParser\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Do not edit!",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2394010",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2394010",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Public IP",
+            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted Palworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Does not need to be allocated!",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Must Be ON",
+            "env_variable": "RCON_ENABLE",
+            "default_value": "True",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True",
+            "field_type": "text"
+          },
+          {
+            "name": "bEnableInvaderEnemy",
+            "description": "Turns off or on bEnableInvaderEnemy,\r\nCan be used to slow download memory leaks.\r\nOff should slow down the memory leaks.",
+            "env_variable": "ENABLE_ENEMY",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "The description of the server.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "palworld-533c1a114371",
+        "name": "Palworld",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/palworld-533c1a114371.json",
+        "sha256": "391ae90e0ff4f26d58e4c99653d6d3ae12821f05432895703cf2e3d821f15be7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "palworld/egg-pterodactyl-palworld.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/533c1a114371.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-07-10T11:58:12+00:00",
+        "name": "Palworld",
+        "author": "admin@ballaual.de",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "SteamCMD_Debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [
+          "PalServer.sh"
+        ],
+        "startup": "./PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < /dev/stdin & /home/container/Pal/Binaries/Linux/PalServer-Linux-Shipping Pal -publiclobby -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Setting breakpad minidump AppID = 2394010\"}",
+          "logs": "{}",
+          "stop": "shutdown 15"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## add below your custom commands if needed\r\n\r\n## copy template config file\r\necho \"Copy template config file into config folder!\"\r\nif [ -f \"/mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\" ]; then\r\n    echo \"Config file already exitis, backing up and overwriting with a new one\"\r\n    mv /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings_$(date +\"%Y%m%d%H%M%S\").ini\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\r\nelse\r\n    echo \"Creating new config file\"\r\n    mkdir -p /mnt/server/Pal/Saved/Config/LinuxServer\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\r\nfi\r\n\r\ncd /mnt/server\r\n# Download self made replace tool\r\necho \"Downloading config parser application\"\r\ncurl -sSL -o PalworldServerConfigParser https://github.com/pelican-eggs/Palworld-Config-Parser-Tool/releases/latest/download/PalworldServerConfigParser-linux-amd64\r\nchmod +x PalworldServerConfigParser\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Do not edit!",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2394010",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2394010",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Public IP",
+            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted Palworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Does not need to be allocated!",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Must Be ON",
+            "env_variable": "RCON_ENABLE",
+            "default_value": "True",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "The description of the server.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Crossplay Platforms",
+            "description": "Comma-separated list of platforms allowed to connect. Valid values: Steam, Xbox, PS5, Mac. Example: Steam,Xbox,PS5,Mac",
+            "env_variable": "CROSSPLAY_PLATFORMS",
+            "default_value": "Steam,Xbox,PS5,Mac",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "palworld-72f23e947074",
+        "name": "Palworld",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/palworld-72f23e947074.json",
+        "sha256": "59607a2023ee24da163bed87d96c3a4f32ed0b3120ed1bd3ac67b63266c2283e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "palworld/egg-palworld.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/72f23e947074.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-07-15T18:52:08+02:00",
+        "name": "Palworld",
+        "author": "admin@ballaual.de",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "SteamCMD_Debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [
+          "PalServer.sh"
+        ],
+        "startup": "./PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < /dev/stdin & /home/container/Pal/Binaries/Linux/PalServer-Linux-Shipping Pal -publiclobby -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Setting breakpad minidump AppID = 2394010\"}",
+          "logs": "{}",
+          "stop": "shutdown 15"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## add below your custom commands if needed\r\n\r\n## copy template config file\r\necho \"Copy template config file into config folder!\"\r\nif [ -f \"/mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\" ]; then\r\n    echo \"Config file already exitis, backing up and overwriting with a new one\"\r\n    mv /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings_$(date +\"%Y%m%d%H%M%S\").ini\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\r\nelse\r\n    echo \"Creating new config file\"\r\n    mkdir -p /mnt/server/Pal/Saved/Config/LinuxServer\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini\r\nfi\r\n\r\ncd /mnt/server\r\n# Download self made replace tool\r\necho \"Downloading config parser application\"\r\ncurl -sSL -o PalworldServerConfigParser https://github.com/pelican-eggs/Palworld-Config-Parser-Tool/releases/latest/download/PalworldServerConfigParser-linux-amd64\r\nchmod +x PalworldServerConfigParser\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Do not edit!",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2394010",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2394010",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Public IP",
+            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted Palworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Does not need to be allocated!",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Must Be ON",
+            "env_variable": "RCON_ENABLE",
+            "default_value": "True",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "The description of the server.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Connection Platfrom",
+            "description": "The platform players will be able to connect from",
+            "env_variable": "ALLOW_CONNECT_PLATFORM",
+            "default_value": "Steam",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Steam,Xbox",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "palworld-proton-2e4f0565b9c6",
+        "name": "Palworld Proton",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/palworld-proton-2e4f0565b9c6.json",
+        "sha256": "afae4652dce2b0fead57339927abdfedadda798476ca039619da865783948e09",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "palworld/egg-pterodactyl-palworld-proton.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/2e4f0565b9c6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-07-10T11:58:12+00:00",
+        "name": "Palworld Proton",
+        "author": "josdekurk@gmail.com",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "./PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < /dev/stdin & proton run /home/container/Pal/Binaries/Win64/PalServer-Win64-Shipping.exe -publiclobby -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"up and running.\"}",
+          "logs": "{}",
+          "stop": "shutdown 5"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## copy template config file\r\necho \"Copy template config file into config folder!\"\r\n\r\nif [ -f \"/mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\" ]; then\r\n    echo \"Config file already exitis, backing up and overwriting with a new one\"\r\n    mv /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings_$(date +\"%Y%m%d%H%M%S\").ini\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\r\nelse \r\n    echo \"Creating new config file\"\r\n    mkdir -p /mnt/server/Pal/Saved/Config/WindowsServer\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\r\nfi\r\n\r\ncd /mnt/server\r\n# Download self made replace tool\r\necho \"Downloading config parser aplication\"\r\ncurl -sSL -o PalworldServerConfigParser https://github.com/pelican-eggs/Palworld-Config-Parser-Tool/releases/latest/download/PalworldServerConfigParser-linux-amd64\r\nchmod +x PalworldServerConfigParser\r\n\r\ncd /tmp\r\ncurl -sSL -o /mnt/server/Pal/Binaries/Win64/winmm.dll https://raw.githubusercontent.com/pelican-eggs/games-steamcmd/main/palworld/winmm.dll\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/UE4SS-RE/RE-UE4SS/releases/latest\")\r\nMATCH=\"UE4SS_\"\r\nDOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\necho ${DOWNLOAD_URL}\r\ncurl -sSL -o ue4ss.zip ${DOWNLOAD_URL}\r\nunzip -o ue4ss.zip -d /mnt/server/Pal/Binaries/Win64\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Do not edit!",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2394010",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2394010",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted Palworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Public IP",
+            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Does not need to be allocated!",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Must Be ON",
+            "env_variable": "RCON_ENABLE",
+            "default_value": "True",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "The description of the server.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Crossplay Platforms",
+            "description": "Comma-separated list of platforms allowed to connect. Valid values: Steam, Xbox, PS5, Mac. Example: Steam,Xbox,PS5,Mac",
+            "env_variable": "CROSSPLAY_PLATFORMS",
+            "default_value": "Steam,Xbox,PS5,Mac",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "palworld-proton-bb38292fdbe5",
+        "name": "Palworld Proton",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/palworld-proton-bb38292fdbe5.json",
+        "sha256": "ae976a1788664810a6d641550c8eb9f8f46c96158228c8b6b783fb7310869095",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/palworld/egg-palworld-proton.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/bb38292fdbe5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-04T09:33:27+02:00",
+        "name": "Palworld Proton",
+        "author": "josdekurk@gmail.com",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "./PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < /dev/stdin & proton run /home/container/Pal/Binaries/Win64/PalServer-Win64-Shipping.exe -publiclobby -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"up and running.\"}",
+          "logs": "{}",
+          "stop": "shutdown 5"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## copy template config file\r\necho \"Copy template config file into config folder!\"\r\n\r\nif [ -f \"/mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\" ]; then\r\n    echo \"Config file already exitis, backing up and overwriting with a new one\"\r\n    mv /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings_$(date +\"%Y%m%d%H%M%S\").ini\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\r\nelse \r\n    echo \"Creating new config file\"\r\n    mkdir -p /mnt/server/Pal/Saved/Config/WindowsServer\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\r\nfi\r\n\r\ncd /mnt/server\r\n# Download self made replace tool\r\necho \"Downloading config parser aplication\"\r\ncurl -sSL -o PalworldServerConfigParser https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/palworld/PalworldServerConfigParser-linux-amd64\r\nchmod +x PalworldServerConfigParser\r\n\r\ncd /tmp\r\ncurl -sSL -o /mnt/server/Pal/Binaries/Win64/winmm.dll https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/palworld/winmm.dll\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/UE4SS-RE/RE-UE4SS/releases/latest\")\r\nMATCH=\"UE4SS_\"\r\nDOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\necho ${DOWNLOAD_URL}\r\ncurl -sSL -o ue4ss.zip ${DOWNLOAD_URL}\r\nunzip -o ue4ss.zip -d /mnt/server/Pal/Binaries/Win64\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Do not edit!",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2394010",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2394010",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted Palworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Public IP",
+            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Does not need to be allocated!",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Must Be ON",
+            "env_variable": "RCON_ENABLE",
+            "default_value": "True",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True",
+            "field_type": "text"
+          },
+          {
+            "name": "bEnableInvaderEnemy",
+            "description": "Turns off or on bEnableInvaderEnemy,\r\nCan be used to slow download memory leaks.\r\nOff should slow down the memory leaks.",
+            "env_variable": "ENABLE_ENEMY",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "The description of the server.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "palworld-proton-d1ec0495dea9",
+        "name": "Palworld Proton",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/palworld-proton-d1ec0495dea9.json",
+        "sha256": "0986e1bd23f968514fb27f1c94a35f8e48397e2c61f9c997f6182fa59c09fc22",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "palworld/egg-palworld-proton.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d1ec0495dea9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-07-15T19:00:34+02:00",
+        "name": "Palworld Proton",
+        "author": "josdekurk@gmail.com",
+        "description": "Fight, farm, build and work alongside mysterious creatures called \"Pals\" in this completely new multiplayer, open world survival and crafting game!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "./PalworldServerConfigParser; (while read cmd; do rcon -s -a \"localhost:$RCON_PORT\" -p \"$ADMIN_PASSWORD\" \"$cmd\";done) < /dev/stdin & proton run /home/container/Pal/Binaries/Win64/PalServer-Win64-Shipping.exe -publiclobby -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -port={{SERVER_PORT}} -publicport={{SERVER_PORT}} -servername=\"{{SERVER_NAME}}\" -players={{MAX_PLAYERS}} $(if [ -n \"$SERVER_PASSWORD\" ]; then echo \"-serverpassword=\\\"${SERVER_PASSWORD}\\\"\"; fi) -adminpassword=\"{{ADMIN_PASSWORD}}\" -rcon",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"up and running.\"}",
+          "logs": "{}",
+          "stop": "shutdown 5"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## copy template config file\r\necho \"Copy template config file into config folder!\"\r\n\r\nif [ -f \"/mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\" ]; then\r\n    echo \"Config file already exitis, backing up and overwriting with a new one\"\r\n    mv /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings_$(date +\"%Y%m%d%H%M%S\").ini\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\r\nelse \r\n    echo \"Creating new config file\"\r\n    mkdir -p /mnt/server/Pal/Saved/Config/WindowsServer\r\n    cp /mnt/server/DefaultPalWorldSettings.ini /mnt/server/Pal/Saved/Config/WindowsServer/PalWorldSettings.ini\r\nfi\r\n\r\ncd /mnt/server\r\n# Download self made replace tool\r\necho \"Downloading config parser aplication\"\r\ncurl -sSL -o PalworldServerConfigParser https://github.com/pelican-eggs/Palworld-Config-Parser-Tool/releases/latest/download/PalworldServerConfigParser-linux-amd64\r\nchmod +x PalworldServerConfigParser\r\n\r\ncd /tmp\r\ncurl -sSL -o /mnt/server/Pal/Binaries/Win64/winmm.dll https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/palworld/winmm.dll\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/UE4SS-RE/RE-UE4SS/releases/latest\")\r\nMATCH=\"UE4SS_\"\r\nDOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\necho ${DOWNLOAD_URL}\r\ncurl -sSL -o ue4ss.zip ${DOWNLOAD_URL}\r\nunzip -o ue4ss.zip -d /mnt/server/Pal/Binaries/Win64\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Do not edit!",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2394010",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2394010",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted Palworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game chat or RCON) to gain access to administrator commands on the server.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Public IP",
+            "description": "Set this to the server public ip address.\r\nOnly needed if the allocation is a local ip, else the allocate ip will be used automatically",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Does not need to be allocated!",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Must Be ON",
+            "env_variable": "RCON_ENABLE",
+            "default_value": "True",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "The description of the server.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Connection Platfrom",
+            "description": "The platform players will be able to connect from",
+            "env_variable": "ALLOW_CONNECT_PLATFORM",
+            "default_value": "Steam",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Steam,Xbox",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "path-of-titans-0a9294e8bdb0",
+        "name": "Path Of Titans",
+        "description": "Path of Titans is a multiplayer dinosaur survival video game. Survive as a dinosaur in a rich ecosystem filled with intelligent AI creatures and up to 200 other players.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/path-of-titans-0a9294e8bdb0.json",
+        "sha256": "463a7d8692cccde60b3ef89bffd8a93997b3c9a10814c9a5e5686941a321f56e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "path_of_titans/egg-path-of-titans.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0a9294e8bdb0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT IF YOU DO NOT KNOW WHAT YOU ARE DOING!",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-14T10:05:12+08:00",
+        "name": "Path Of Titans",
+        "author": "danielivanvladimir.revin@gmail.com",
+        "description": "Path of Titans is a multiplayer dinosaur survival video game. Survive as a dinosaur in a rich ecosystem filled with intelligent AI creatures and up to 200 other players.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./AlderonGamesCmd-Linux --game path-of-titans --server true --beta-branch {{BETA_BRANCH}} --auth-token {{AG_AUTH_TOKEN}} --install-dir ./server/ && ./server/PathOfTitansServer.sh {{SERVER_MAP}}?listen?MaxPlayers={{SERVER_MAX_PLAYERS}} -RconPort={{RCON_PORT}} -nullRHI -ServerName={{SERVER_NAME}} -ServerGUID={{SERVER_GUID}} -BranchKey={{BETA_BRANCH}} -Database={{SERVER_DB}} -log",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{QUERY_PORT}}\"}}}",
+          "startup": "{\"done\": \"Server ready\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\napt-get update && apt-get install -y --no-install-recommends apt-utils apt-transport-https ca-certificates libunwind8 icu-devtools openssl libkrb5-3 zlib1g libuuid1 dos2unix gnupg gnupg2 debian-archive-keyring gcc g++ lib32gcc-s1 lib32z1 lib32stdc++6 iproute2 gdb libsdl1.2debian libfontconfig libcurl4\r\napt-get autoremove --purge -y\r\nmkdir -p /mnt/server\r\ncd /mnt/server && curl -o AlderonGamesCmd-Linux https://launcher-cdn.alderongames.com/AlderonGamesCmd-Linux-x64\r\nchmod +x /mnt/server/AlderonGamesCmd-Linux\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Map",
+            "description": "",
+            "env_variable": "SERVER_MAP",
+            "default_value": "Island",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "SERVER_MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "YoutServerName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "field_type": "text"
+          },
+          {
+            "name": "GUID",
+            "description": "Use https://guidgenerator.com/",
+            "env_variable": "SERVER_GUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Choose between production or demo-public-test",
+            "env_variable": "BETA_BRANCH",
+            "default_value": "production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:15",
+            "field_type": "text"
+          },
+          {
+            "name": "Database mode",
+            "description": "Server can use a Local or Remote Database. Specified using Local or Remote. We recommend using a Local Database unless you plan on connecting shared character data between servers.",
+            "env_variable": "SERVER_DB",
+            "default_value": "Local",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Local,Remote",
+            "field_type": "text"
+          },
+          {
+            "name": "Auth Token",
+            "description": "Get your AUTH token there https://alderongames.com/oauth/hosting-token !!YOU NEED TO OWN THE GAME!!",
+            "env_variable": "AG_AUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:1500",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7778",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "7779",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "path-of-titans-add9136626c0",
+        "name": "Path Of Titans",
+        "description": "Path of Titans is a multiplayer dinosaur survival video game. Survive as a dinosaur in a rich ecosystem filled with intelligent AI creatures and up to 200 other players.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/path-of-titans-add9136626c0.json",
+        "sha256": "99a7a1b17b45062e43f13c070977aa5caa0d4860ae6effbf5c6bb3a34b08a124",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "path_of_titans/egg-pterodactyl-path-of-titans.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/add9136626c0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:02+00:00",
+        "name": "Path Of Titans",
+        "author": "danielivanvladimir.revin@gmail.com",
+        "description": "Path of Titans is a multiplayer dinosaur survival video game. Survive as a dinosaur in a rich ecosystem filled with intelligent AI creatures and up to 200 other players.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./AlderonGamesCmd-Linux --game path-of-titans --server true --beta-branch {{BETA_BRANCH}} --auth-token {{AG_AUTH_TOKEN}} --install-dir ./server/ && ./server/PathOfTitansServer.sh {{SERVER_MAP}}?listen?MaxPlayers={{SERVER_MAX_PLAYERS}} -RconPort={{RCON_PORT}} -nullRHI -ServerName={{SERVER_NAME}} -ServerGUID={{SERVER_GUID}} -BranchKey={{BETA_BRANCH}} -Database={{SERVER_DB}} -log",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{QUERY_PORT}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server ready\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\napt-get update && apt-get install -y --no-install-recommends apt-utils apt-transport-https ca-certificates libunwind8 icu-devtools openssl libkrb5-3 zlib1g libuuid1 dos2unix gnupg gnupg2 debian-archive-keyring gcc g++ lib32gcc-s1 lib32z1 lib32stdc++6 iproute2 gdb libsdl1.2debian libfontconfig libcurl4\r\napt-get autoremove --purge -y\r\nmkdir -p /mnt/server\r\ncd /mnt/server && curl -o AlderonGamesCmd-Linux https://launcher-cdn.alderongames.com/AlderonGamesCmd-Linux-x64\r\nchmod +x /mnt/server/AlderonGamesCmd-Linux\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Map",
+            "description": "",
+            "env_variable": "SERVER_MAP",
+            "default_value": "Island",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "SERVER_MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "YoutServerName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "field_type": "text"
+          },
+          {
+            "name": "GUID",
+            "description": "Use https://guidgenerator.com/",
+            "env_variable": "SERVER_GUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Choose between production or demo-public-test",
+            "env_variable": "BETA_BRANCH",
+            "default_value": "production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:15",
+            "field_type": "text"
+          },
+          {
+            "name": "Database mode",
+            "description": "Server can use a Local or Remote Database. Specified using Local or Remote. We recommend using a Local Database unless you plan on connecting shared character data between servers.",
+            "env_variable": "SERVER_DB",
+            "default_value": "Local",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "field_type": "text"
+          },
+          {
+            "name": "Auth Token",
+            "description": "Get your AUTH token there https://alderongames.com/oauth/hosting-token !!YOU NEED TO OWN THE GAME!!",
+            "env_variable": "AG_AUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:1500",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7778",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:8",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "7779",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:8",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "path-of-titans-e9d2eed8594c",
+        "name": "Path Of Titans",
+        "description": "Path of Titans is a multiplayer dinosaur survival video game. Survive as a dinosaur in a rich ecosystem filled with intelligent AI creatures and up to 200 other players.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/path-of-titans-e9d2eed8594c.json",
+        "sha256": "9eaef898e57b0a7cd75757449678c271f006615cfe9aaa6c4c6b549ae80751a8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "path_of_titans/egg-path-of-titans.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/e9d2eed8594c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:02+00:00",
+        "name": "Path Of Titans",
+        "author": "danielivanvladimir.revin@gmail.com",
+        "uuid": "7e8c45fc-5f30-4366-bfb4-aa55f10f227e",
+        "description": "Path of Titans is a multiplayer dinosaur survival video game. Survive as a dinosaur in a rich ecosystem filled with intelligent AI creatures and up to 200 other players.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./AlderonGamesCmd-Linux --game path-of-titans --server true --beta-branch {{BETA_BRANCH}} --auth-token {{AG_AUTH_TOKEN}} --install-dir ./server/ && ./server/PathOfTitansServer.sh {{SERVER_MAP}}?listen?MaxPlayers={{SERVER_MAX_PLAYERS}} -RconPort={{RCON_PORT}} -nullRHI -ServerName={{SERVER_NAME}} -ServerGUID={{SERVER_GUID}} -BranchKey={{BETA_BRANCH}} -Database={{SERVER_DB}} -log",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{QUERY_PORT}}\"}}}",
+          "startup": "{\"done\": \"Server ready\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\napt-get update && apt-get install -y --no-install-recommends apt-utils apt-transport-https ca-certificates libunwind8 icu-devtools openssl libkrb5-3 zlib1g libuuid1 dos2unix gnupg gnupg2 debian-archive-keyring gcc g++ lib32gcc-s1 lib32z1 lib32stdc++6 iproute2 gdb libsdl1.2debian libfontconfig libcurl4\r\napt-get autoremove --purge -y\r\nmkdir -p /mnt/server\r\ncd /mnt/server && curl -o AlderonGamesCmd-Linux https://launcher-cdn.alderongames.com/AlderonGamesCmd-Linux-x64\r\nchmod +x /mnt/server/AlderonGamesCmd-Linux\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Map",
+            "description": "",
+            "env_variable": "SERVER_MAP",
+            "default_value": "Island",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "SERVER_MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:200",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "YoutServerName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "GUID",
+            "description": "Use https://guidgenerator.com/",
+            "env_variable": "SERVER_GUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Choose between production or demo-public-test",
+            "env_variable": "BETA_BRANCH",
+            "default_value": "production",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:15",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Database mode",
+            "description": "Server can use a Local or Remote Database. Specified using Local or Remote. We recommend using a Local Database unless you plan on connecting shared character data between servers.",
+            "env_variable": "SERVER_DB",
+            "default_value": "Local",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auth Token",
+            "description": "Get your AUTH token there https://alderongames.com/oauth/hosting-token !!YOU NEED TO OWN THE GAME!!",
+            "env_variable": "AG_AUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:1500",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7778",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:8",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "7779",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:8",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "pavlov-vr-1dd7fd643950",
+        "name": "Pavlov VR",
+        "description": "Pavlov VR is a multiplayer shooter in VR with heavy focus on community features. Realistic reloading features and fast paced combat as part of the core experience. Play the #1 most popular VR shooter on PC today.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/pavlov-vr-1dd7fd643950.json",
+        "sha256": "1044fc6999135e5b6c673071712df5143d3d7df849eeecae7f58feaf8b2f8839",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/pavlov_vr/egg-pavlov-v-r.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/1dd7fd643950.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-02T17:55:48+02:00",
+        "name": "Pavlov VR",
+        "author": "admin@devil.wtf",
+        "description": "Pavlov VR is a multiplayer shooter in VR with heavy focus on community features. Realistic reloading features and fast paced combat as part of the core experience. Play the #1 most popular VR shooter on PC today.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "./Pavlov/Binaries/Linux/PavlovServer-Linux-Shipping  Pavlov -PORT={{SERVER_PORT}} -KEY=\"{{API_KEY}}\"",
+        "config": {
+          "files": "{\"Pavlov/Saved/Config/RconSettings.txt\": {\"parser\": \"file\", \"find\": {\"Password=\": \"Password={{env.RCON_PASSWORD}}\", \"Port=\": \"Port={{env.RCON_PORT}}\"}}}",
+          "startup": "{\"done\": \"Starting Server Status Helper on Port\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nchmod +x \"/mnt/server/Pavlov/Binaries/Linux/PavlovServer-Linux-Shipping\"\r\n\r\n# Install Configuration Files\r\nmkdir -p /mnt/server/Pavlov/Saved/Logs\r\nmkdir -p /mnt/server/Pavlov/Saved/Config/LinuxServer\r\nmkdir -p /mnt/server/Pavlov/Saved/maps\r\n\r\n\r\ncd /mnt/server/Pavlov/Saved/Config/LinuxServer\r\nif [ ! -f Game.ini ]; then\r\n    echo -e \"Downloading Pavlov VR Game.ini\"\r\n    curl -ssL -o Game.ini https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/pavlov_vr/Game.ini\r\nfi\r\n\r\ncd /mnt/server/Pavlov/Saved/Config\r\nif [ ! -f RconSettings.txt ]; then\r\n    echo -e \"Downloading Pavlov VR RconSettings.txt\"\r\n    curl -ssL -o RconSettings.txt https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/pavlov_vr/RconSettings.txt\r\nfi\r\n\r\ncd /mnt/server/\r\nif [ -f PavlovServer.sh ]; then\r\n    rm PavlovServer.sh\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Pavlov VR steam app id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "622970",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:622970",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "Enter a password for your RCON Configuration.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "CHANGE_ME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for your RCON Configuration.",
+            "env_variable": "RCON_PORT",
+            "default_value": "8188",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta id",
+            "description": "Beta branch of a steam app",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,beta_server",
+            "field_type": "text"
+          },
+          {
+            "name": "Api key",
+            "description": "For your server to show up in the server list, there is now a requirement to have an ApiKey issued by vankrupt. This is to prevent DOS attacks against the master server.\r\nGet it here: https://pavlov-ms.vankrupt.com/servers/v1/key",
+            "env_variable": "API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

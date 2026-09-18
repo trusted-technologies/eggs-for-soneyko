@@ -1,0 +1,1484 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "stay-in-tarkov-e8628d36890b",
+        "name": "Stay In Tarkov",
+        "description": "The Stay in Tarkov project was born due to Battlestate Games' (BSG) reluctance to create the pure PvE version of Escape from Tarkov. The project's aim is simple, create a Cooperation PvE experience that retains progression.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stay-in-tarkov-e8628d36890b.json",
+        "sha256": "1e77752ca6ac3aa57c6ade95e7b9c60c1876a38ee89dde5f13a0035785c17f51",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "eft/egg-stay-in-tarkov.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/e8628d36890b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-24T16:58:22+02:00",
+        "name": "Stay In Tarkov",
+        "author": "dino@papertots.page",
+        "description": "The Stay in Tarkov project was born due to Battlestate Games' (BSG) reluctance to create the pure PvE version of Escape from Tarkov. The project's aim is simple, create a Cooperation PvE experience that retains progression.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Aki.Server.exe",
+        "config": {
+          "files": "{\"Aki_Data/Server/configs/http.json\": {\"parser\": \"json\", \"find\": {\"ip\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server is running, do not close while playing SPT, Happy playing!!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Stay In Tarkov Server Installation Script\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Install git-lfs python3\r\napt update && apt install -yq git-lfs python3 jq tar\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## Get SIT coop mod release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${SIT_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${SIT_PACKAGE}/releases\")\r\n\r\nif [ -z \"${SIT_VERSION}\" ] || [ \"${SIT_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i linux)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${SIT_VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${SIT_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${SIT_VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i linux)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\nwget ${DOWNLOAD_URL} -O ${SIT_NAME}\r\ntar -xvzf ${SIT_NAME}\r\nrm ${SIT_NAME}",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SITCoop Version",
+            "description": "Version of the SIT co-op mod for the server. Use \"latest\" for latest release, or the github release/tag/hash.\r\n\r\nSITCoop: https://github.com/stayintarkov/SIT.Aki-Server-Mod",
+            "env_variable": "SIT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "SIT Mod Github Package",
+            "description": "Github package for the SIT Aki server co-op mod. \r\n\r\nSITCoop: https://github.com/stayintarkov/SIT.Aki-Server-Mod",
+            "env_variable": "SIT_PACKAGE",
+            "default_value": "stayintarkov/SIT.Aki-Server-Mod",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "SIT Mod asset name",
+            "description": "SIT mod release file's asset name.",
+            "env_variable": "SIT_NAME",
+            "default_value": "SITCoop.tar.gz",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Github Username",
+            "description": "Optional, a github username to use to avoid Github API rate limit",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "present",
+            "field_type": "text"
+          },
+          {
+            "name": "Github OAuth token",
+            "description": "Optional, A Github OAuth token to use to avoid API rate limit.",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "present",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stormworks-build-and-rescue-3765c057a60f",
+        "name": "Stormworks: Build and Rescue",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stormworks-build-and-rescue-3765c057a60f.json",
+        "sha256": "39dc66bcbedfed768b18bda87cf28fe2c9d34a54eabc5a2aae861b9abf6b6e71",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "stormworks/egg-stormworks--build-and-rescue.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3765c057a60f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Stormworks: Build and Rescue",
+        "author": "iamkubi@gmail.com",
+        "uuid": "f717abc8-3ff1-469f-8b6c-e1e4688aea79",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "xvfb-run wine server64.exe +server_dir /home/container/server_data",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server: ready to spawn for peer\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n# apt -y update\r\n# apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## installation end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1247090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "This will auto-update SteamCMD on boot.\r\n0 is disabled, 1 is enabled.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stormworks-build-and-rescue-3a7612a556bc",
+        "name": "Stormworks: Build and Rescue",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stormworks-build-and-rescue-3a7612a556bc.json",
+        "sha256": "456cb73302eac53f85d3247095ee80772e69e0ac1920a52a3e6bed7f7deeb35c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "stormworks/egg-pterodactyl-stormworks--build-and-rescue.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3a7612a556bc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:05:10+00:00",
+        "name": "Stormworks: Build and Rescue",
+        "author": "iamkubi@gmail.com",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "xvfb-run wine server64.exe +server_dir /home/container/server_data",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server: ready to spawn for peer\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n# apt -y update\r\n# apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## installation end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1247090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "This will auto-update SteamCMD on boot.\r\n0 is disabled, 1 is enabled.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stormworks-build-and-rescue-757d28f49f11",
+        "name": "Stormworks: Build and Rescue",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stormworks-build-and-rescue-757d28f49f11.json",
+        "sha256": "a57a52c67e49f9442066449eec3a2ca808e31bad3eaeefeaa7bece4321b645b4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/stormworks/egg-stormworks--build-and-rescue.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/757d28f49f11.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-10-27T20:06:01-06:00",
+        "name": "Stormworks: Build and Rescue",
+        "author": "iamkubi@gmail.com",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "xvfb-run wine server64.exe +server_dir /home/container/server_data",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server: ready to spawn for peer\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n# apt -y update\r\n# apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## installation end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1247090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "This will auto-update SteamCMD on boot.\r\n0 is disabled, 1 is enabled.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stormworks-build-and-rescue-8f032b3a6ce2",
+        "name": "Stormworks: Build and Rescue",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.\r\nStormworks now requires a steam account that owns a copy of the game to download/update the server files, as the server files are now shipped with the base-game",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stormworks-build-and-rescue-8f032b3a6ce2.json",
+        "sha256": "f5f534646a8357fdf1e7a4feae24c4bbd39f821b2d4fcf8b6551b2306f51ed80",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "stormworks/egg-stormworks--build-and-rescue.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/8f032b3a6ce2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-12T12:31:51+02:00",
+        "name": "Stormworks: Build and Rescue",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Join a world where you design, create and pilot your own air sea rescue service. Release your inner hero as you battle fierce storms out at sea to rescue those in need.\r\nStormworks now requires a steam account that owns a copy of the game to download/update the server files, as the server files are now shipped with the base-game",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "xvfb-run wine server64.exe +server_dir /home/container/server_data",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connected to steam\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n# apt -y update\r\n# apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# Create server_data directory\r\nmkdir -p /mnt/server/server_data\r\n\r\nRANDOM_SEED=$(shuf -i 1-999999999 -n 1)\r\n\r\ncat > /mnt/server/server_data/server_config.xml <<EOF\r\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<server_data port=\"${SERVER_PORT}\" name=\"${SERVER_NAME}\" seed=\"${RANDOM_SEED}\" save_name=\"autosave_server\" max_players=\"${MAX_PLAYERS}\" password=\"${SERVER_PASSWORD}\" day_length=\"30\" night_length=\"30\" infinite_resources=\"false\" unlock_all_islands=\"false\" settings_menu=\"false\" base_island=\"data/tiles/island12.xml\" settings_menu_lock=\"false\" infinite_batteries=\"false\" infinite_fuel=\"false\" engine_overheating=\"false\" ceasefire=\"false\" infinite_ammo=\"false\" no_clip=\"false\" map_teleport=\"false\" vehicle_spawn=\"false\" photo_mode=\"false\" respawning=\"false\" cleanup_vehicle=\"false\" clear_fow=\"false\" third_person=\"true\" third_person_vehicle=\"true\" vehicle_damage=\"false\" player_damage=\"false\" npc_damage=\"false\" aggressive_animals=\"false\" sea_monsters=\"false\" lightning=\"true\" teleport_vehicle=\"true\" fast_travel=\"true\" starting_currency=\"201111\" despawn_on_leave=\"false\" map_show_players=\"false\" map_show_vehicles=\"false\" show_3d_waypoints=\"false\" show_name_plates=\"false\" override_weather=\"false\" override_time=\"false\" override_wind=\"false\" physics_timestep=\"0\" wildlife_enabled=\"true\" unlock_components=\"true\" dlc_weapons=\"false\" dlc_arid=\"false\" dlc_space=\"false\">\r\n\t<admins>\r\n\t\t<id value=\"${STEAM64_ID}\"/>\r\n\t</admins>\r\n\t<authorized/>\r\n\t<blacklist/>\r\n\t<whitelist/>\r\n\t<playlists>\r\n\t\t<path path=\"rom/data/missions/default_ai\"/>\r\n\t\t<path path=\"rom/data/missions/default_ai_aircraft\"/>\r\n\t\t<path path=\"rom/data/missions/default_cargo\"/>\r\n\t\t<path path=\"rom/data/missions/default_dock_bollards\"/>\r\n\t\t<path path=\"rom/data/missions/default_elevators\"/>\r\n\t\t<path path=\"rom/data/missions/default_forest_fire_missions\"/>\r\n\t\t<path path=\"rom/data/missions/default_resource_storage\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_locations\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_transport_locations\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_arctic\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_building\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_delivery\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_main\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_sawyer\"/>\r\n\t\t<path path=\"rom/data/missions/default_natural_disasters\"/>\r\n\t\t<path path=\"rom/data/missions/default_paths\"/>\r\n\t\t<path path=\"rom/data/missions/default_resource_trading\"/>\r\n\t\t<path path=\"rom/data/missions/default_tutorial\"/>\r\n\t\t<path path=\"rom/data/missions/dlc_weapons_ai\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_underwater\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_arid\"/>\r\n\t\t<path path=\"rom/data/missions/default_railroad_signals\"/>\r\n\t\t<path path=\"rom/data/missions/default_landmarks\"/>\r\n\t\t<path path=\"rom/data/missions/default_oil_survey\"/>\r\n\t\t<path path=\"rom/data/missions/default_mission_zones_moon\"/>\r\n\t\t<path path=\"rom/data/missions/default_fish_survey\"/>\r\n\t</playlists>\r\n\t<mods/>\r\n</server_data>\r\nEOF\r\n\r\n## installation end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"Note; The server will generate a config file based on your set variables, any changes to these variables after install will also need to be manually changed in /home/container/server_data/server_config.xml\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "The user has to own the game; it cannot be installed without it / an anonymous user.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "The user has to own the game; it cannot be installed without it / an anonymous user.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Authentication",
+            "description": "To be used with Steam's authenticator.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Stormworks",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "This is not required to be set, but it is highly recommended that you do so.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "DefaultPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin (Steam64ID)",
+            "description": "This user will be an admin on the server.\r\nExample of a website that can help u find it;\r\nhttps://www.steamidfinder.com/",
+            "env_variable": "STEAM64_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|size:17|regex:/^\\d{17}$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that are allowed to be in the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "Steam App ID.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "573090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:573090",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "This will auto-update SteamCMD on boot. 0 is disabled, 1 is enabled.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "subnautica-8d86a0a85525",
+        "name": "Subnautica",
+        "description": "Subnautica is an open world survival action-adventure video game developed and published by Unknown Worlds Entertainment. In it, players are free to explore the ocean on an alien planet, known as planet 4546B, after their spaceship, the Aurora, crashes on the planet's surface.\r\n\r\nNote: NitroxMod version >=1.7.0.0 is required",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/subnautica-8d86a0a85525.json",
+        "sha256": "65c42414b384baf91944177649afb6a286883185b6db972ecdd2e1d25aa9792d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "subnautica_nitrox_mod/egg-subnautica.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8d86a0a85525.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Subnautica",
+        "author": "tueye@tuworld.de",
+        "uuid": "1edc68bc-7654-4012-a994-591bc01b705b",
+        "description": "Subnautica is an open world survival action-adventure video game developed and published by Unknown Worlds Entertainment. In it, players are free to explore the ocean on an alien planet, known as planet 4546B, after their spaceship, the Aurora, crashes on the planet's surface.\r\n\r\nNote: NitroxMod version >=1.7.0.0 is required",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:dotnet_9": "ghcr.io/parkervcp/yolks:dotnet_9"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"properties\", \"find\": {\"ServerPort\": \"{{server.allocations.default.port}}\", \"SaveInterval\": \"{{server.environment.SAVE_INTERVAL}}\", \"DisableAutoSave\": \"{{server.environment.SAVE_DISABLE}}\", \"ServerPassword\": \"{{server.environment.SUBNAUTICA_PASSWORD}}\", \"AdminPassword\": \"{{server.environment.SUBNAUTICA_ADMIN_PASSWORD}}\", \"GameMode\": \"{{server.environment.SERVER_MODE}}\", \"AutoPortForward\": \"{{server.environment.PORTFORWARD_ENABLE}}\", \"SerializerMode\": \"{{server.environment.SERIALIZER_MODE}}\", \"CreateFullEntityCache\": \"{{server.environment.CACHE_ENTITIES}}\", \"KeepInventoryOnDeath\": \"{{server.environment.KEEP_INVENTORY}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Installation Script\r\n#\r\n# Install dependencies\r\ndpkg --add-architecture i386\r\napt update\r\napt -y --no-install-recommends install curl jq unzip libstdc++6 ca-certificates libsdl2-2.0-0:i386\r\n\r\n## Get latest Nitrox-Mod build\r\n#latest_NitroxMod=$(curl --silent \"https://api.github.com/repos/SubnauticaNitrox/Nitrox/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/')\r\n\r\n#if [ -z \"${NITROX_VERSION}\" ] || [ \"${NITROX_VERSION}\" == \"latest\" ]; then\r\n#  DL_VERSION=$latest_NitroxMod\r\n#else\r\n#  DL_VERSION=${NITROX_VERSION}\r\n#fi\r\n\r\n## get release info and download links\r\nGITHUB_PACKAGE=\"SubnauticaNitrox/Nitrox\"\r\nVERSION=${NITROX_VERSION}\r\nMATCH=\"Linux_x64\"\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## Install game using steamcmd\r\nGUARDCODE=\"${STEAM_GUARDCODE}\"\r\nif [ -z $GUARDCODE ]\r\nthen\r\n    echo \"\"\r\n    echo \"### You did not specify a Steam Guardcode\"\r\n    echo \"### A new one should be send to you shortly\"\r\n    echo \"### Enter it in the startup-config after this installation is finished and reinstall the Server\"\r\n    sleep 10\r\n    timeout 60 ./steamcmd.sh +login ${STEAM_USERNAME} ${STEAM_PASSWORD} +quit\r\n    exit 1\r\nfi\r\n\r\n[ ! -d \"$HOME/subnautica\" ] && mkdir $HOME/subnautica\r\n./steamcmd.sh +set_steam_guard_code ${STEAM_GUARDCODE} +login ${STEAM_USERNAME} ${STEAM_PASSWORD} +@sSteamCmdForcePlatformType windows +force_install_dir $HOME/subnautica +app_update ${APPID} ${EXTRA_FLAGS} validate +quit\r\nstatus=$?\r\n\r\nif [ $status -ne 0 ]\r\nthen\r\n    echo \"\"\r\n    echo \"### The Download was not successful\"\r\n    echo \"### Probably the entered Guardcode was wrong\"\r\n    echo \"### A new one should be send to you shortly\"\r\n    echo \"### Enter it in the startup-config after this installation is finished and reinstall the Server\"\r\n    sleep 10\r\n    sleep 10\r\n    timeout 30 ./steamcmd.sh +login ${STEAM_USERNAME} ${STEAM_PASSWORD} +quit\r\n    exit 1\r\nfi\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p $HOME/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p $HOME/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## Download and extract Nitrox\r\n[ -d \"$HOME/nitrox\" ] && rm -r $HOME/nitrox\r\nmkdir $HOME/nitrox\r\ncd $HOME/nitrox\r\ncurl -sL $DOWNLOAD_URL -o Nitrox.zip\r\nunzip $HOME/nitrox/Nitrox.zip\r\n\r\nmkdir -p $HOME/Nitrox/saves/${SAVE_NAME} \r\n\r\nSAVE_NAME=\"${SAVE_NAME}\"\r\n## Create config\r\nif [ -e $HOME/server.cfg ]; then\r\n    cp -f $HOME/server.cfg $HOME/Nitrox/saves/$SAVE_NAME/server.cfg\r\nelse\r\n    echo \"writing server default settings\"\r\n    cat <<EOT > $HOME/Nitrox/saves/$SAVE_NAME/server.cfg\r\n    CreateFullEntityCache=$CACHE_ENTITIES\r\n    Seed=\r\n    ServerPort=$Server.build.default.port\r\n    SaveInterval=$SAVE_INTERVAL\r\n    PostSaveCommandPath=\r\n    MaxConnections=100\r\n    InitialSyncTimeout=300000\r\n    DisableConsole=False\r\n    KeepInventoryOnDeath=$KEEP_INVENTORY\r\n    DisableAutoSave=$SAVE_DISABLE\r\n    ServerPassword=$SUBNAUTICA_PASSWORD\r\n    AdminPassword=$SUBNAUTICA_ADMIN_PASSWORD\r\n    GameMode=$SERVER_MODE\r\n    SerializerMode=$SERIALIZER_MODE\r\n    DefaultPlayerPerm=PLAYER\r\n    DefaultOxygenValue=45\r\n    DefaultMaxOxygenValue=45\r\n    DefaultHealthValue=80\r\n    DefaultHungerValue=50.5\r\n    DefaultThirstValue=90.5\r\n    DefaultInfectionValue=0.1\r\n    AutoPortForward=$PORTFORWARD_ENABLE\r\nEOT\r\nfi\r\n\r\necho \"Install Script Finished.\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "APP ID",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "APPID",
+            "default_value": "264710",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,6",
+            "sort": 1
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password to gain access to administrator commands on the server.",
+            "env_variable": "SUBNAUTICA_ADMIN_PASSWORD",
+            "default_value": "PleaseChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,16",
+            "sort": 2
+          },
+          {
+            "name": "Auto Portforward via UPnP",
+            "description": "If set to true, the server will try to open port on your router via UPnP",
+            "env_variable": "PORTFORWARD_ENABLE",
+            "default_value": "False",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True,False",
+            "sort": 3
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in milliseconds",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "120000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:6,7",
+            "sort": 4
+          },
+          {
+            "name": "Cache-Entities",
+            "description": "Set to true to Cache entities for the whole map on next run. \nWARNING! Will make server load take longer on the cache run but players will gain a performance boost when entering new areas.",
+            "env_variable": "CACHE_ENTITIES",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "sort": 16
+          },
+          {
+            "name": "Disable Auto Save",
+            "description": "Disables Auto Save: False / True",
+            "env_variable": "SAVE_DISABLE",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "sort": 5
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Extra flags for steamcmd download. Do not edit",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|max:20",
+            "sort": 6
+          },
+          {
+            "name": "Game Mode",
+            "description": "Game Mode setting: SURVIVAL, FREEDOM, HARDCORE, CREATIVE",
+            "env_variable": "SERVER_MODE",
+            "default_value": "SURVIVAL",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:SURVIVAL,FREEDOM,HARDCORE,CREATIVE",
+            "sort": 7
+          },
+          {
+            "name": "Install-Path",
+            "description": "DO NOT CHANGE",
+            "env_variable": "SUBNAUTICA_INSTALLATION_PATH",
+            "default_value": "/home/container/subnautica",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 15
+          },
+          {
+            "name": "Keep-Inventory",
+            "description": "Keep Inventory on Death",
+            "env_variable": "KEEP_INVENTORY",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|required|in:True,False",
+            "sort": 17
+          },
+          {
+            "name": "Nitrox Version",
+            "description": "Which version of Nitrox to install and use. Use the version e.g. 1.5.0.1 or latest for the newest release",
+            "env_variable": "NITROX_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "sort": 8
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "sort": 9
+          },
+          {
+            "name": "Serializer Mode",
+            "description": "Switch between savegame formats.\r\nPossible values: PROTOBUF, JSON",
+            "env_variable": "SERIALIZER_MODE",
+            "default_value": "JSON",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:PROTOBUF,JSON",
+            "sort": 10
+          },
+          {
+            "name": "Server Password",
+            "description": "Password neccessary for connecting to the Server",
+            "env_variable": "SUBNAUTICA_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|between:3,12",
+            "sort": 11
+          },
+          {
+            "name": "Steam-GuardCode",
+            "description": "Yout Steam Guard Code",
+            "env_variable": "STEAM_GUARDCODE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:6",
+            "sort": 12
+          },
+          {
+            "name": "Steam-Password",
+            "description": "Your Steam Account Password",
+            "env_variable": "STEAM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 13
+          },
+          {
+            "name": "Steam-Username",
+            "description": "Your Steam-Account SUername",
+            "env_variable": "STEAM_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 14
+          }
+        ],
+        "startup": "cp -f ./server.cfg ./Nitrox/saves/${SAVE_NAME}/server.cfg && dotnet ./nitrox/Nitrox.Server.Subnautica.dll --save ${SAVE_NAME}"
+      }
+    },
+    {
+      "entry": {
+        "id": "subnautica-90eb1dd0b4e4",
+        "name": "Subnautica",
+        "description": "Subnautica is an open world survival action-adventure video game developed and published by Unknown Worlds Entertainment. In it, players are free to explore the ocean on an alien planet, known as planet 4546B, after their spaceship, the Aurora, crashes on the planet's surface.\r\n\r\nNote: NitroxMod version >=1.7.0.0 is required",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/subnautica-90eb1dd0b4e4.json",
+        "sha256": "de28a6ca24964d890779f1a20a1ab76eb32b5fb288f56ec33a75360758205894",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "subnautica_nitrox_mod/egg-pterodactyl-subnautica.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/subnautica_nitrox_mod/egg-subnautica.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/90eb1dd0b4e4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:05:11+00:00",
+        "name": "Subnautica",
+        "author": "tueye@tuworld.de",
+        "description": "Subnautica is an open world survival action-adventure video game developed and published by Unknown Worlds Entertainment. In it, players are free to explore the ocean on an alien planet, known as planet 4546B, after their spaceship, the Aurora, crashes on the planet's surface.\r\n\r\nNote: NitroxMod version >=1.7.0.0 is required",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono ./nitrox/NitroxServer-Subnautica.exe",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"properties\", \"find\": {\"ServerPort\": \"{{server.build.default.port}}\", \"SaveInterval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"DisableAutoSave\": \"{{server.build.env.SAVE_DISABLE}}\", \"SaveName\": \"{{server.build.env.SAVE_NAME}}\", \"ServerPassword\": \"{{server.build.env.SUBNAUTICA_PASSWORD}}\", \"AdminPassword\": \"{{server.build.env.SUBNAUTICA_ADMIN_PASSWORD}}\", \"GameMode\": \"{{server.build.env.SERVER_MODE}}\", \"AutoPortForward\": \"{{server.build.env.PORTFORWARD_ENABLE}}\", \"SerializerMode\": \"{{server.build.env.SERIALIZER_MODE}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server started\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Installation Script\r\n#\r\n# Install dependencies\r\ndpkg --add-architecture i386\r\napt update\r\napt -y --no-install-recommends install curl jq unzip libstdc++6 ca-certificates libsdl2-2.0-0:i386\r\n\r\n## Get latest Nitrox-Mod build\r\n#latest_NitroxMod=$(curl --silent \"https://api.github.com/repos/SubnauticaNitrox/Nitrox/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/')\r\n\r\n#if [ -z \"${NITROX_VERSION}\" ] || [ \"${NITROX_VERSION}\" == \"latest\" ]; then\r\n#  DL_VERSION=$latest_NitroxMod\r\n#else\r\n#  DL_VERSION=${NITROX_VERSION}\r\n#fi\r\n\r\n## get release info and download links\r\nGITHUB_PACKAGE=\"SubnauticaNitrox/Nitrox\"\r\nVERSION=${NITROX_VERSION}\r\nMATCH=\"Nitrox\"\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## Install game using steamcmd\r\nGUARDCODE=\"${STEAM_GUARDCODE}\"\r\nif [ -z $GUARDCODE ]\r\nthen\r\n    echo \"\"\r\n    echo \"### You did not specify a Steam Guardcode\"\r\n    echo \"### A new one should be send to you shortly\"\r\n    echo \"### Enter it in the startup-config after this installation is finished and reinstall the Server\"\r\n    sleep 10\r\n    timeout 60 ./steamcmd.sh +login ${STEAM_USERNAME} ${STEAM_PASSWORD} +quit\r\n    exit 1\r\nfi\r\n\r\n[ ! -d \"$HOME/subnautica\" ] && mkdir $HOME/subnautica\r\n./steamcmd.sh +set_steam_guard_code ${STEAM_GUARDCODE} +login ${STEAM_USERNAME} ${STEAM_PASSWORD} +@sSteamCmdForcePlatformType windows +force_install_dir $HOME/subnautica +app_update ${APPID} ${EXTRA_FLAGS} validate +quit\r\nstatus=$?\r\n\r\nif [ $status -ne 0 ]\r\nthen\r\n    echo \"\"\r\n    echo \"### The Download was not successful\"\r\n    echo \"### Probably the entered Guardcode was wrong\"\r\n    echo \"### A new one should be send to you shortly\"\r\n    echo \"### Enter it in the startup-config after this installation is finished and reinstall the Server\"\r\n    sleep 10\r\n    sleep 10\r\n    timeout 30 ./steamcmd.sh +login ${STEAM_USERNAME} ${STEAM_PASSWORD} +quit\r\n    exit 1\r\nfi\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p $HOME/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p $HOME/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## Download and extract Nitrox\r\n[ -d \"$HOME/nitrox\" ] && rm -r $HOME/nitrox\r\nmkdir $HOME/nitrox\r\ncd $HOME/nitrox\r\ncurl -sL $DOWNLOAD_URL -o Nitrox.zip\r\nunzip $HOME/nitrox/Nitrox.zip\r\n\r\n\r\n## Create path files to Subnautica Install-Dir. Needed for versions pre 1.6.0\r\necho \"/home/container/subnautica\" > $HOME/path.txt\r\n\r\n## Create mono registry entry for Subnautica Install-Dir. Needed for versions since 1.6.0\r\nmkdir -p $HOME/.mono/registry/CurrentUser\r\n    cat <<EOT > $HOME/.mono/registry/CurrentUser/values.xml\r\n    <values>\r\n    <value name=\"SOFTWARE\\Nitrox\\PreferredGamePath\"\r\n    type=\"string\">/home/container/subnautica</value>\r\n    </values>\r\nEOT\r\n\r\n\r\n## Create config\r\nif [ -e $HOME/server.cfg ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"writing server default settings\"\r\n    cat <<EOT > $HOME/server.cfg\r\n    # Server settings can be changed here\r\n    # Set to true to Cache entities for the whole map on next run. \r\n    # WARNING! Will make server load take longer on the cache run but players will gain a performance boost when entering new areas.\r\n    CreateFullEntityCache=False\r\n    # Leave blank for a random spawn position\r\n    Seed=\r\n    ServerPort=11000\r\n    # Measured in milliseconds\r\n    SaveInterval=120000\r\n    # Command to run following a successful world save (e.g. .exe, .bat, or PowerShell script). \r\n    PostSaveCommandPath=\r\n    MaxConnections=100\r\n    InitialSyncTimeout=300000\r\n    DisableConsole=False\r\n    DisableAutoSave=False\r\n    SaveName=world\r\n    ServerPassword=\r\n    AdminPassword=PleaseChangeMe\r\n    # Possible values: SURVIVAL, FREEDOM, HARDCORE, CREATIVE\r\n    GameMode=SURVIVAL\r\n    # Possible values: PROTOBUF, JSON\r\n    SerializerMode=JSON\r\n    # Possible values: NONE, PLAYER, MODERATOR, ADMIN, CONSOLE\r\n    DefaultPlayerPerm=PLAYER\r\n    #\r\n    # Default player stats below here\r\n    DefaultOxygenValue=45\r\n    DefaultMaxOxygenValue=45\r\n    DefaultHealthValue=80\r\n    DefaultHungerValue=50.5\r\n    DefaultThirstValue=90.5\r\n    # Recommended to keep at 0.1f which is the default starting value. If set to 0 then new players are cured by default.\r\n    DefaultInfectionValue=0.1\r\n    # If set to true, the server will try to open port on your router via UPnP\r\n    AutoPortForward=False\r\nEOT\r\nfi"
+          }
+        },
+        "variables": [
+          {
+            "name": "APP ID",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "APPID",
+            "default_value": "264710",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam-Username",
+            "description": "Your Steam-Account SUername",
+            "env_variable": "STEAM_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam-Password",
+            "description": "Your Steam Account Password",
+            "env_variable": "STEAM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam-GuardCode",
+            "description": "Yout Steam Guard Code",
+            "env_variable": "STEAM_GUARDCODE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "Nitrox Version",
+            "description": "Which version of Nitrox to install and use. Use the version e.g. 1.5.0.1 or latest for the newest release",
+            "env_variable": "NITROX_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in milliseconds",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "120000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:6,7",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable Auto Save",
+            "description": "Disables Auto Save: False / True",
+            "env_variable": "SAVE_DISABLE",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password neccessary for connecting to the Server",
+            "env_variable": "SUBNAUTICA_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password to gain access to administrator commands on the server.",
+            "env_variable": "SUBNAUTICA_ADMIN_PASSWORD",
+            "default_value": "PleaseChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,16",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Game Mode setting: SURVIVAL, FREEDOM, HARDCORE, CREATIVE",
+            "env_variable": "SERVER_MODE",
+            "default_value": "SURVIVAL",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:SURVIVAL,FREEDOM,HARDCORE,CREATIVE",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Portforward via UPnP",
+            "description": "If set to true, the server will try to open port on your router via UPnP",
+            "env_variable": "PORTFORWARD_ENABLE",
+            "default_value": "False",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Serializer Mode",
+            "description": "Switch between savegame formats.\r\nPossible values: PROTOBUF, JSON",
+            "env_variable": "SERIALIZER_MODE",
+            "default_value": "JSON",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:PROTOBUF,JSON",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Extra flags for steamcmd download. Do not edit",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "-beta legacy",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "subnautica-a5106311c557",
+        "name": "Subnautica",
+        "description": "Subnautica is an open world survival action-adventure video game developed and published by Unknown Worlds Entertainment. In it, players are free to explore the ocean on an alien planet, known as planet 4546B, after their spaceship, the Aurora, crashes on the planet's surface.\r\n\r\nNote: NitroxMod version 1.8+ is required",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/subnautica-a5106311c557.json",
+        "sha256": "f3f71edebe5fceb24dab935a547e86c96c3da3020093f67552d938264e63a221",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "subnautica_nitrox_mod/egg-subnautica.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/a5106311c557.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-20T01:14:11+10:00",
+        "name": "Subnautica",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Subnautica is an open world survival action-adventure video game developed and published by Unknown Worlds Entertainment. In it, players are free to explore the ocean on an alien planet, known as planet 4546B, after their spaceship, the Aurora, crashes on the planet's surface.\r\n\r\nNote: NitroxMod version 1.8+ is required",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:dotnet_9": "ghcr.io/ptero-eggs/yolks:dotnet_9"
+        },
+        "file_denylist": [],
+        "startup": "SUBNAUTICA_INSTALLATION_PATH=/home/container/subnautica XDG_CONFIG_HOME=/home/container/.config ./nitrox/server --save nitrox_world --data-path /home/container/NitroxData",
+        "config": {
+          "files": "{\"NitroxData/saves/nitrox_world/server.cfg\": {\"parser\": \"properties\", \"find\": {\"ServerPort\": \"{{server.build.default.port}}\", \"SaveInterval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"DisableAutoSave\": \"{{server.build.env.SAVE_DISABLE}}\", \"ServerPassword\": \"{{server.build.env.SUBNAUTICA_PASSWORD}}\", \"AdminPassword\": \"{{server.build.env.SUBNAUTICA_ADMIN_PASSWORD}}\", \"GameMode\": \"{{server.build.env.SERVER_MODE}}\", \"AutoPortForward\": \"{{server.build.env.PORTFORWARD_ENABLE}}\", \"SerializerMode\": \"{{server.build.env.SERIALIZER_MODE}}\", \"MaxConnections\": \"{{server.build.env.MAX_CONNECTIONS}}\", \"DefaultPlayerPerm\": \"{{server.build.env.DEFAULT_PERMISSION}}\", \"DisableConsole\": \"{{server.build.env.DISABLE_CONSOLE}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Installation Script for Subnautica + Nitrox\r\n\r\n# Install dependencies\r\ndpkg --add-architecture i386\r\napt update\r\napt -y --no-install-recommends install curl jq unzip libstdc++6 ca-certificates libsdl2-2.0-0:i386\r\n\r\n# Resolve Nitrox download URL (latest or pinned NITROX_VERSION)\r\nGITHUB_PACKAGE=\"SubnauticaNitrox/Nitrox\"\r\ncase \"$(uname -m)\" in\r\n  aarch64|arm64) ARCH_TAG=\"linux_arm64\" ;;\r\n  *) ARCH_TAG=\"linux_x64\" ;;\r\nesac\r\n\r\nif [ -z \"${NITROX_VERSION}\" ] || [ \"${NITROX_VERSION}\" = \"latest\" ]; then\r\n    RELEASE_JSON=$(curl -fsSL \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nelse\r\n    ALL_RELEASES=$(curl -fsSL \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n    RELEASE_JSON=$(printf '%s' \"${ALL_RELEASES}\" | jq -c --arg v \"${NITROX_VERSION}\" '.[] | select(.tag_name == $v)')\r\n    if [ -z \"${RELEASE_JSON}\" ]; then\r\n        echo \"Nitrox version ${NITROX_VERSION} not found; falling back to latest\"\r\n        RELEASE_JSON=$(curl -fsSL \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    fi\r\nfi\r\n\r\nDOWNLOAD_URL=$(printf '%s' \"${RELEASE_JSON}\" | jq -r --arg arch \"${ARCH_TAG}\" '.assets[] | select(.name | test($arch; \"i\")) | .browser_download_url' | head -n1)\r\n\r\nif [ -z \"${DOWNLOAD_URL}\" ] || [ \"${DOWNLOAD_URL}\" = \"null\" ]; then\r\n    echo \"Could not determine Nitrox download URL for ${ARCH_TAG}\"\r\n    printf '%s' \"${RELEASE_JSON}\" | jq '.assets[] | {name, browser_download_url}'\r\n    exit 1\r\nfi\r\n\r\n# Install SteamCMD\r\nmkdir -p /mnt/server/steamcmd\r\ncd /tmp\r\ncurl -fsSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\nif [ -z \"${STEAM_GUARDCODE}\" ]; then\r\n    echo \"### No Steam Guard code provided.\"\r\n    echo \"### One should be emailed to you shortly; set STEAM_GUARDCODE and reinstall.\"\r\n    sleep 5\r\n    timeout 60 ./steamcmd.sh +force_install_dir \"${HOME}/subnautica\" +login \"${STEAM_USERNAME}\" \"${STEAM_PASSWORD}\" +quit\r\n    exit 1\r\nfi\r\n\r\nmkdir -p \"${HOME}/subnautica\"\r\n./steamcmd.sh +force_install_dir \"${HOME}/subnautica\" +@sSteamCmdForcePlatformType windows +set_steam_guard_code \"${STEAM_GUARDCODE}\" +login \"${STEAM_USERNAME}\" \"${STEAM_PASSWORD}\" +app_update \"${APPID}\" ${EXTRA_FLAGS} validate +quit\r\nstatus=$?\r\n\r\nif [ $status -ne 0 ]; then\r\n    echo \"### Subnautica download failed (likely a bad/expired Steam Guard code).\"\r\n    echo \"### A new code should arrive shortly; update STEAM_GUARDCODE and reinstall.\"\r\n    sleep 5\r\n    timeout 30 ./steamcmd.sh +force_install_dir \"${HOME}/subnautica\" +login \"${STEAM_USERNAME}\" \"${STEAM_PASSWORD}\" +quit\r\n    exit 1\r\nfi\r\n\r\nmkdir -p \"${HOME}/.steam/sdk32\" \"${HOME}/.steam/sdk64\"\r\ncp -v linux32/steamclient.so \"${HOME}/.steam/sdk32/steamclient.so\"\r\ncp -v linux64/steamclient.so \"${HOME}/.steam/sdk64/steamclient.so\"\r\n\r\nrm -rf \"${HOME}/nitrox\"\r\nmkdir -p \"${HOME}/nitrox\"\r\ncd \"${HOME}/nitrox\"\r\ncurl -fsSL \"${DOWNLOAD_URL}\" -o Nitrox.zip\r\nunzip -q Nitrox.zip\r\nrm Nitrox.zip\r\nif [ \"$(find . -mindepth 1 -maxdepth 1 | wc -l)\" = \"1\" ]; then\r\n    WRAPPER=$(find . -mindepth 1 -maxdepth 1 -type d)\r\n    if [ -n \"${WRAPPER}\" ]; then\r\n        mv \"${WRAPPER}\"/* \"${WRAPPER}\"/.[!.]* . 2>/dev/null || true\r\n        rmdir \"${WRAPPER}\"\r\n    fi\r\nfi\r\nif [ -f \"${HOME}/nitrox/Nitrox.Server.Subnautica\" ]; then\r\n    ln -sf Nitrox.Server.Subnautica \"${HOME}/nitrox/server\"\r\nelse\r\n    ln -sf NitroxServer-Subnautica \"${HOME}/nitrox/server\"\r\nfi\r\nchmod +x \"${HOME}/nitrox/server\" 2>/dev/null || true\r\n\r\nmkdir -p \"${HOME}/.config\"\r\n\r\nmkdir -p \"${HOME}/NitroxData/saves/nitrox_world\"\r\nCFG=\"${HOME}/NitroxData/saves/nitrox_world/server.cfg\"\r\nif [ ! -e \"${CFG}\" ]; then\r\n    {\r\n        echo \"CreateFullEntityCache=False\"\r\n        echo \"Seed=\"\r\n        echo \"ServerPort=11000\"\r\n        echo \"SaveInterval=120000\"\r\n        echo \"PostSaveCommandPath=\"\r\n        echo \"MaxConnections=${MAX_CONNECTIONS}\"\r\n        echo \"InitialSyncTimeout=300000\"\r\n        echo \"DisableConsole=${DISABLE_CONSOLE}\"\r\n        echo \"DisableAutoSave=False\"\r\n        echo \"ServerPassword=\"\r\n        echo \"AdminPassword=PleaseChangeMe\"\r\n        echo \"GameMode=SURVIVAL\"\r\n        echo \"SerializerMode=JSON\"\r\n        echo \"DefaultPlayerPerm=${DEFAULT_PERMISSION}\"\r\n        echo \"DefaultOxygenValue=45\"\r\n        echo \"DefaultMaxOxygenValue=45\"\r\n        echo \"DefaultHealthValue=80\"\r\n        echo \"DefaultHungerValue=50.5\"\r\n        echo \"DefaultThirstValue=90.5\"\r\n        echo \"DefaultInfectionValue=0.1\"\r\n        echo \"AutoPortForward=False\"\r\n    } > \"${CFG}\"\r\nfi",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam App ID",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "APPID",
+            "default_value": "264710",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Your Steam account username",
+            "env_variable": "STEAM_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Your Steam account password",
+            "env_variable": "STEAM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Guard Code",
+            "description": "Your Steam Guard Code",
+            "env_variable": "STEAM_GUARDCODE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:8",
+            "field_type": "text"
+          },
+          {
+            "name": "Nitrox Version",
+            "description": "Which version of Nitrox to install and use. Use the version e.g. 1.8.1.0 or latest for the newest release",
+            "env_variable": "NITROX_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in milliseconds. Default is 2 minutes (120000ms).",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "120000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:6,7",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable Auto Save",
+            "description": "Disables Auto Save: False / True",
+            "env_variable": "SAVE_DISABLE",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "nitrox_world",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password neccessary for connecting to the Server",
+            "env_variable": "SUBNAUTICA_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password to gain access to administrator commands on the server.",
+            "env_variable": "SUBNAUTICA_ADMIN_PASSWORD",
+            "default_value": "PleaseChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,16",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Subnautica game mode. SURVIVAL = manage food/water/oxygen. FREEDOM = no survival meters. HARDCORE = permadeath survival. CREATIVE = unlimited resources, no damage.",
+            "env_variable": "SERVER_MODE",
+            "default_value": "SURVIVAL",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:SURVIVAL,FREEDOM,HARDCORE,CREATIVE",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Portforward via UPnP",
+            "description": "If set to true, the server will try to open port on your router via UPnP",
+            "env_variable": "PORTFORWARD_ENABLE",
+            "default_value": "False",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Serializer Mode",
+            "description": "Switch between savegame formats.\r\nPossible values: PROTOBUF, JSON",
+            "env_variable": "SERIALIZER_MODE",
+            "default_value": "JSON",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:PROTOBUF,JSON",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players that can be connected simultaneously. Nitrox alpha is generally tested up to ~10; higher counts work but stability varies. (200 max)",
+            "env_variable": "MAX_CONNECTIONS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,200",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Player Permissions",
+            "description": "Permission level new players are assigned when they first join. NONE = guest (no commands). PLAYER = standard. MODERATOR = can kick. ADMIN = full server control. CONSOLE = reserved for server console.",
+            "env_variable": "DEFAULT_PERMISSION",
+            "default_value": "PLAYER",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:NONE,PLAYER,MODERATOR,ADMIN,CONSOLE",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable In-Game Console",
+            "description": "Set to True to disable the in-game developer console for connected players. Leave False for normal use.",
+            "env_variable": "DISABLE_CONSOLE",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sunkenland-a06ae01e9505",
+        "name": "Sunkenland",
+        "description": "Get ready for a Waterworld-themed survival game with modular base building, sunken city scavenging, crafting, base defense, and invasions of NPC clans for resources and territory. Ready for the water apocalypse?",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sunkenland-a06ae01e9505.json",
+        "sha256": "6325bb4ccce0926c43296804613f1bde3c99313ccf8ffb021ca3142c647bda75",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "sunkenland/egg-sunkenland.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/a06ae01e9505.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-08-06T01:23:58+02:00",
+        "name": "Sunkenland",
+        "author": "brainshead@gmail.com",
+        "description": "Get ready for a Waterworld-themed survival game with modular base building, sunken city scavenging, crafting, base defense, and invasions of NPC clans for resources and territory. Ready for the water apocalypse?",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./Sunkenland-DedicatedServer.exe -nographics -batchmode -worldGuid {{WORLD_GUID}} -region {{REGION}} -password {{PASSWORD}}  -maxPlayerCapacity {{MAX_PLAYER}} -publicIP {{SERVER_IP}} -publicPort {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server Start Complete, Ready for Clients to Join. ServerID is \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Sunkenland SteamCMD Base Installation Script\r\n# Image: ghcr.io/ptero-eggs/installers:debian\r\n# Server Files: /mnt/server\r\n\r\n# --- Install dependencies ---\r\napt update -y\r\napt install -y rsync curl tar git\r\n\r\n# --- Steam Variables ---\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam login info (optional)\r\n# SRCDS_APPID - Steam App ID (Sunkenland = 2512750)\r\n# SRCDS_BETAID, SRCDS_BETAPASS - Optional beta branch/password\r\n# WINDOWS_INSTALL - Set to 1 for Windows game\r\n# INSTALL_FLAGS - Extra steamcmd flags\r\n# AUTO_UPDATE - Set to 1 or 0\r\n\r\n# --- Validate Steam credentials ---\r\nif [[ -z \"${STEAM_USER}\" || -z \"${STEAM_PASS}\" ]]; then\r\n    echo \"No Steam credentials provided. Using anonymous login.\"\r\n    STEAM_USER=\"anonymous\"\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo \"Steam user set to: ${STEAM_USER}\"\r\nfi\r\n\r\n# --- Install SteamCMD ---\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps\r\ncd /mnt/server/steamcmd\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# --- Run SteamCMD to install the game ---\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && echo '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -n \"${SRCDS_BETAID}\" ]] && echo \"-beta ${SRCDS_BETAID}\" ) $( [[ -n \"${SRCDS_BETAPASS}\" ]] && echo \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n# --- Setup Steam client libraries ---\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# --- Validate SERVER_NAME ---\r\nif [[ -z \"${SERVER_NAME}\" ]]; then\r\n    echo \"SERVER_NAME is empty. Using fallback: 'Pterodactyl Sunkenland'\"\r\n    SERVER_NAME=\"Pterodactyl Sunkenland\"\r\nelse\r\n    echo \"SERVER_NAME is: ${SERVER_NAME}\"\r\nfi\r\n\r\n# --- Define world file directory ---\r\nWORLD_BASE=\"/mnt/server/.wine/drive_c/users/container/AppData/LocalLow/Vector3 Studio/Sunkenland\"\r\nWORLD_DIR=\"$WORLD_BASE/Worlds\"\r\n\r\n# --- Optional world file setup ---\r\nTARGET_GUID=\"11223344-5566-7788-99aa-bbccddeeff00\"\r\n\r\nif [[ \"${WORLD_GUID}\" == \"$TARGET_GUID\" ]]; then\r\n    echo \"Detected matching GUID '$TARGET_GUID' — Downloading standard world files...\"\r\n\r\n    # Clone specific folder from GitHub (sparse checkout)\r\n    mkdir -p /tmp/world_files\r\n    git clone --depth 1 --filter=blob:none --sparse --branch main https://github.com/Ptero-Eggs/game-eggs/sunkenland /tmp/world_files/worlds\r\n    cd /tmp/world_files/worlds\r\n    git sparse-checkout init --cone\r\n    git sparse-checkout set sunkenland/world_files\r\n    git pull origin main\r\n\r\n    # Copy world files into place\r\n    mkdir -p \"$WORLD_BASE\"\r\n    rsync -a /tmp/world_files/worlds/sunkenland/world_files/Worlds/ \"$WORLD_DIR/\"\r\n\r\n    # Rename downloaded world folder\r\n    ORIGINAL_FOLDER=\"$WORLD_DIR/World~${WORLD_GUID}\"\r\n    NEW_FOLDER=\"$WORLD_DIR/${SERVER_NAME}~${WORLD_GUID}\"\r\n\r\n    if [[ -d \"$ORIGINAL_FOLDER\" ]]; then\r\n        if [[ \"$ORIGINAL_FOLDER\" != \"$NEW_FOLDER\" ]]; then\r\n            if [[ -d \"$NEW_FOLDER\" ]]; then\r\n                echo \"Removing existing folder at $NEW_FOLDER to avoid nesting.\"\r\n                rm -rf \"$NEW_FOLDER\"\r\n            fi\r\n            mv \"$ORIGINAL_FOLDER\" \"$NEW_FOLDER\"\r\n            echo \"World folder renamed from 'World' to '${SERVER_NAME}', with GUID: ${WORLD_GUID}\"\r\n        else\r\n            echo \"World folder already named correctly: $ORIGINAL_FOLDER\"\r\n        fi\r\n    else\r\n        echo \"Expected world folder not found at: $ORIGINAL_FOLDER\"\r\n    fi\r\n\r\n    rm -rf /tmp/world_files\r\nelse\r\n    echo \"WORLD_GUID is '${WORLD_GUID}' — skipping auto world setup.\"\r\nfi\r\n\r\n# --- Handle manually uploaded world folder ---\r\nFOUND_FOLDERS=$(find \"$WORLD_DIR\" -maxdepth 1 -type d -name \"*~${WORLD_GUID}\" -printf \"%f\\n\")\r\n\r\nif [[ -n \"$FOUND_FOLDERS\" ]]; then\r\n    while IFS= read -r folder; do\r\n        ORIGINAL_FOLDER=\"$WORLD_DIR/$folder\"\r\n        NEW_FOLDER=\"$WORLD_DIR/${SERVER_NAME}~${WORLD_GUID}\"\r\n\r\n        if [[ \"$ORIGINAL_FOLDER\" != \"$NEW_FOLDER\" ]]; then\r\n            if [[ -d \"$NEW_FOLDER\" ]]; then\r\n                echo \"Removing existing folder at $NEW_FOLDER to avoid nesting.\"\r\n                rm -rf \"$NEW_FOLDER\"\r\n            fi\r\n            mv \"$ORIGINAL_FOLDER\" \"$NEW_FOLDER\"\r\n            echo \"Manually uploaded world folder renamed to: $NEW_FOLDER\"\r\n        else\r\n            echo \"World folder already correctly named: $ORIGINAL_FOLDER\"\r\n        fi\r\n    done <<< \"$FOUND_FOLDERS\"\r\nelse\r\n    echo \"No folder found with GUID: $WORLD_GUID\"\r\nfi\r\n\r\n# --- Ensure AdminSteamIDs.txt and BanSteamIDs.txt exist ---\r\nFINAL_WORLD_DIR=\"$WORLD_DIR/${SERVER_NAME}~${WORLD_GUID}\"\r\n\r\nif [[ -d \"$FINAL_WORLD_DIR\" ]]; then\r\n    ADMIN_FILE=\"$FINAL_WORLD_DIR/AdminSteamIDs.txt\"\r\n    BAN_FILE=\"$FINAL_WORLD_DIR/BanSteamIDs.txt\"\r\n\r\n    if [[ ! -f \"$ADMIN_FILE\" ]]; then\r\n        touch \"$ADMIN_FILE\"\r\n        echo \"Created missing AdminSteamIDs.txt\"\r\n    else\r\n        echo \"AdminSteamIDs.txt already exists\"\r\n    fi\r\n\r\n    if [[ ! -f \"$BAN_FILE\" ]]; then\r\n        touch \"$BAN_FILE\"\r\n        echo \"Created missing BanSteamIDs.txt\"\r\n    else\r\n        echo \"BanSteamIDs.txt already exists\"\r\n    fi\r\nelse\r\n    echo \"World folder not found at: $FINAL_WORLD_DIR — skipping admin/ban file creation\"\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Sunkenland installation completed.\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2667530",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "This is required to install the correct version. Removing or touching this will overwrite the files with a non-existing Linux releases.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] WINEDEBUG",
+            "description": "don't change this !!!",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "World GUID",
+            "description": "The world GUID is the later part of the world save file, for example, in this save file\r\n'YourWorldName~11223344-5566-7788-99aa-bbccffeeff00', \r\nthe part after '~' symbol is the guid, i.e.'11223344-5566-7788-99aa-bbccffeeff00'.\r\nSpecify Which World to start the game, if the world save file with\r\nentered GUID cannot be found, the server will fail to start and shut down itself",
+            "env_variable": "WORLD_GUID",
+            "default_value": "11223344-5566-7788-99aa-bbccddeeff00",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Region",
+            "description": "Set the custom Region. Default is ASIA. Please check Region Code Table below.\r\nAsia=asia, Chinese Mainland=cn, Japan=jp, Europe=eu, South America=sa\r\nSouth Korea=kr, USA, East=us, USA, West=usw",
+            "env_variable": "REGION",
+            "default_value": "asia",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Player",
+            "description": "Set the Max Player Count. The minimum value is 3\r\nand the maximum value is 15. Default is 3",
+            "env_variable": "MAX_PLAYER",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set the password. Default is empty; Note that\r\nusing characters other than ASCII may result in password\r\nverification failure. The length limit is 8",
+            "env_variable": "PASSWORD",
+            "default_value": "12345678",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl World",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "supertuxkart-24c2f7c2e81d",
+        "name": "SuperTuxKart",
+        "description": "Egg for hosting a SuperTuxKart Server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/supertuxkart-24c2f7c2e81d.json",
+        "sha256": "622f376d0a7cd78703936d83283f02804d759733e1d846581100c61f82d22e0d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "SuperTuxKart/egg-super-tux-kart.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/24c2f7c2e81d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:12+00:00",
+        "name": "SuperTuxKart",
+        "author": "mattamn107@github.com",
+        "uuid": "9eec81aa-b165-4233-aa30-1244c6c96e9f",
+        "description": "Egg for hosting a SuperTuxKart Server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/supertuxkart --server-config={{CONFIG_NAME}} --lan-server={{SERVER_NAME}} --network-console --port=\"{{SERVER_PORT}}\" --difficulty={{DIFFICULTY}} --mode={{MODE}} --max-players={{MAX_PLAYERS}} --motd=\"{{MOTD}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Available command:\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# Install build tools\r\necho \"deb http://deb.debian.org/debian bullseye-backports main\" >> /etc/apt/sources.list && \\\r\napt-get update && apt-get -y full-upgrade && \\\r\n    apt-get install -y build-essential cmake libbluetooth-dev libsdl2-dev \\\r\n    libcurl4-openssl-dev libenet-dev libfreetype6-dev libharfbuzz-dev \\\r\n    libjpeg-dev libogg-dev libopenal-dev libpng-dev \\\r\n    libssl-dev libvorbis-dev libmbedtls-dev pkg-config zlib1g-dev subversion\r\n\r\nif [ ! -d \"/mnt/server/stk-code\" ] && [ ! -d \"/mnt/server/stk-assets\" ]; then\r\n    \r\n    #clone code repo\r\n    git clone https://github.com/supertuxkart/stk-code /mnt/server/stk-code\r\n    \r\n    #get assets\r\n    svn co https://svn.code.sf.net/p/supertuxkart/code/stk-assets /mnt/server/stk-assets\r\n    \r\n    # go into the stk-code directory\r\n    cd /mnt/server/stk-code\r\n    \r\n    # create and enter the cmake_build directory\r\n    mkdir cmake_build\r\n    \r\nelse\r\n\r\n    #update existing stuff\r\n    cd /mnt/server/stk-assets\r\n    svn up\r\n    \r\n    cd /mnt/server/stk-code\r\n    git pull\r\n\r\n\r\nfi\r\n\r\n#build the server\r\ncd cmake_build\r\ncmake .. -DSERVER_ONLY=ON\r\nmake\r\n\r\n#copy binary to root/bin and make it executable\r\nmkdir /mnt/server/bin\r\ncp /mnt/server/stk-code/cmake_build/bin/supertuxkart /mnt/server/bin/supertuxkart\r\nchmod +x /mnt/server/bin/supertuxkart\r\n\r\n#copy data folder\r\ncp -r /mnt/server/stk-code/data /mnt/server/data\r\n\r\n#copy extra assets to data folder\r\ncd /mnt/server/stk-assets\r\ncp -r library models music sfx textures tracks karts /mnt/server/data/\r\n\r\n# Delete repo's to save disk space.\r\n#rm -rf /mnt/server/stk-code && rm -rf /mnt/server/stk-assets",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Config File Name",
+            "description": "Name of the Config File.",
+            "env_variable": "CONFIG_NAME",
+            "default_value": "config.xml",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.xml)$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Mode",
+            "description": "0 = Normal Race\r\n1 = Time Trial\r\n2 = Battle\r\n3 = Soccer\r\n4 = Follow The Leader\r\n5 = Capture the Flag",
+            "env_variable": "MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3,4,5",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Speed of the carts and AI difficulty\r\n0 = Beginner\r\n1 = Intermediate\r\n2 = Expert\r\n3 = SuperTux",
+            "env_variable": "DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "How many players can there be in the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,24",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Message of the Day",
+            "description": "Message of the Day displayed in the server.",
+            "env_variable": "MOTD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

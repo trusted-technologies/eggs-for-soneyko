@@ -1,0 +1,1392 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "7-days-to-die-242f877a61a8",
+        "name": "7 Days To Die",
+        "description": "7 days to die server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/7-days-to-die-242f877a61a8.json",
+        "sha256": "bbc57b277edd20e02e1cc235d0f84d41e6c6b428cd28fd6d2b869029a8a5abb4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "7_days_to_die/egg-7-days-to-die.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/242f877a61a8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "7 Days To Die",
+        "author": "kristoffer.norman@bahnhof.se",
+        "uuid": "b7a88721-15c1-4081-beed-e3add926a372",
+        "description": "7 days to die server",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./7DaysToDieServer.x86_64 -configfile=serverconfig.xml -quit -batchmode -nographics -dedicated -ServerPort=${SERVER_PORT} -ServerDisabledNetworkProtocols=${SERVER_DISABLED_NETWORK_PROTOCOLS} -ServerMaxPlayerCount=${MAX_PLAYERS} -GameDifficulty=${GAME_DIFFICULTY} -ControlPanelEnabled=false -TelnetEnabled=true -TelnetPort=${TELNET_PORT} -TelnetPassword=${PASSWORD} -logfile logs/latest.log & echo -e \"Checking on telnet connection\" && until nc -z -v -w5 127.0.0.1 ${TELNET_PORT}; do echo \"Waiting for telnet connection...\"; sleep 5; done && $( [[ -z ${PASSWORD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\" || printf %s \"rcon -t telnet -a 127.0.0.1:${TELNET_PORT} -p {{PASSWORD}}\" )",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connected with 7DTD server\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Maximum Concurrent Players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "0 - 5, 0=easiest, 5=hardest",
+            "env_variable": "GAME_DIFFICULTY",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,5",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "This is the app id for 7dtd please no step on snek.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "294420",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "This is to auto update the server on start.\r\n\r\nOptions are 0 or 1\r\nDefault is 1",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is really annoying that more games are doing this.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Installs beta branch if specified. For example, latest_experimental would install the latest experimental branch release. Requires a reinstall to switch branches properly.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Password",
+            "description": "Telnet listens on a local interface by default without a password. However, you can specify a password if  you wish to expose telnet.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Port",
+            "description": "",
+            "env_variable": "TELNET_PORT",
+            "default_value": "8081",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Network Protocols",
+            "description": "Networking protocols that should NOT be used. Separated by comma. Possible values: LiteNetLib, SteamNetworking. Dedicated servers should disable SteamNetworking if there is no NAT router in between your users and the server or when port-forwarding is set up correctly. lets it empty if you are connecting your self hosted server behind a NAT",
+            "env_variable": "SERVER_DISABLED_NETWORK_PROTOCOLS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "7-days-to-die-b6806dd856f0",
+        "name": "7 Days To Die",
+        "description": "7 days to die server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/7-days-to-die-b6806dd856f0.json",
+        "sha256": "2573ae91df5930ba7157ca68e13ac615d8a26b57933fdc8e30a5c23e2a7ef3d2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/7_days_to_die/egg-7-days-to-die.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/b6806dd856f0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-02-20T02:33:05+01:00",
+        "name": "7 Days To Die",
+        "author": "kristoffer.norman@bahnhof.se",
+        "description": "7 days to die server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./7DaysToDieServer.x86_64 -configfile=serverconfig.xml -quit -batchmode -nographics -dedicated -ServerPort=${SERVER_PORT} -ServerDisabledNetworkProtocols=${SERVER_DISABLED_NETWORK_PROTOCOLS} -ServerMaxPlayerCount=${MAX_PLAYERS} -GameDifficulty=${GAME_DIFFICULTY} -ControlPanelEnabled=false -TelnetEnabled=true -TelnetPort=${TELNET_PORT} -TelnetPassword=${PASSWORD} -logfile logs/latest.log & echo -e \"Checking on telnet connection\" && until nc -z -v -w5 127.0.0.1 ${TELNET_PORT}; do echo \"Waiting for telnet connection...\"; sleep 5; done && $( [[ -z ${PASSWORD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\" || printf %s \"rcon -t telnet -a 127.0.0.1:${TELNET_PORT} -p {{PASSWORD}}\" )",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connected with 7DTD server\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Maximum Concurrent Players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "0 - 5, 0=easiest, 5=hardest",
+            "env_variable": "GAME_DIFFICULTY",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "This is the app id for 7dtd please no step on snek.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "294420",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "This is to auto update the server on start.\r\n\r\nOptions are 0 or 1\r\nDefault is 1",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is really annoying that more games are doing this.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Installs beta branch if specified. For example, latest_experimental would install the latest experimental branch release. Requires a reinstall to switch branches properly.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Password",
+            "description": "Telnet listens on a local interface by default without a password. However, you can specify a password if  you wish to expose telnet.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Port",
+            "description": "",
+            "env_variable": "TELNET_PORT",
+            "default_value": "8081",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Network Protocols",
+            "description": "Networking protocols that should NOT be used. Separated by comma. Possible values: LiteNetLib, SteamNetworking. Dedicated servers should disable SteamNetworking if there is no NAT router in between your users and the server or when port-forwarding is set up correctly. lets it empty if you are connecting your self hosted server behind a NAT",
+            "env_variable": "SERVER_DISABLED_NETWORK_PROTOCOLS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "7-days-to-die-da80d463268b",
+        "name": "7 Days To Die",
+        "description": "7 days to die server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/7-days-to-die-da80d463268b.json",
+        "sha256": "389cde425ede0682a5afd79f1e0a98c7690ae045fddba38f80d249c6c9ee9152",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "7_days_to_die/egg-7-days-to-die.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/da80d463268b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-02-20T02:33:05+01:00",
+        "name": "7 Days To Die",
+        "author": "kristoffer.norman@bahnhof.se",
+        "description": "7 days to die server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./7DaysToDieServer.x86_64 -configfile=serverconfig.xml -quit -batchmode -nographics -dedicated -ServerPort=${SERVER_PORT} -ServerDisabledNetworkProtocols=${SERVER_DISABLED_NETWORK_PROTOCOLS} -ServerMaxPlayerCount=${MAX_PLAYERS} -GameDifficulty=${GAME_DIFFICULTY} -ControlPanelEnabled=false -TelnetEnabled=true -TelnetPort=${TELNET_PORT} -TelnetPassword=${PASSWORD} -logfile logs/latest.log & echo -e \"Checking on telnet connection\" && until nc -z -v -w5 127.0.0.1 ${TELNET_PORT}; do echo \"Waiting for telnet connection...\"; sleep 5; done && $( [[ -z ${PASSWORD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\" || printf %s \"rcon -t telnet -a 127.0.0.1:${TELNET_PORT} -p {{PASSWORD}}\" )",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connected with 7DTD server\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Maximum Concurrent Players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "0 - 5, 0=easiest, 5=hardest",
+            "env_variable": "GAME_DIFFICULTY",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "This is the app id for 7dtd please no step on snek.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "294420",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "This is to auto update the server on start.\r\n\r\nOptions are 0 or 1\r\nDefault is 1",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is really annoying that more games are doing this.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Installs beta branch if specified. For example, latest_experimental would install the latest experimental branch release. Requires a reinstall to switch branches properly.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Password",
+            "description": "Telnet listens on a local interface by default without a password. However, you can specify a password if  you wish to expose telnet.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Port",
+            "description": "",
+            "env_variable": "TELNET_PORT",
+            "default_value": "8081",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Network Protocols",
+            "description": "Networking protocols that should NOT be used. Separated by comma. Possible values: LiteNetLib, SteamNetworking. Dedicated servers should disable SteamNetworking if there is no NAT router in between your users and the server or when port-forwarding is set up correctly. lets it empty if you are connecting your self hosted server behind a NAT",
+            "env_variable": "SERVER_DISABLED_NETWORK_PROTOCOLS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "7-days-to-die-e30ff77241e9",
+        "name": "7 Days To Die",
+        "description": "7 days to die server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/7-days-to-die-e30ff77241e9.json",
+        "sha256": "76ae1651fb906f4813e866aae62e85e667da49e6a36143cf6ab116479dd4d726",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "7_days_to_die/egg-pterodactyl-7-days-to-die.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e30ff77241e9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:45+00:00",
+        "name": "7 Days To Die",
+        "author": "kristoffer.norman@bahnhof.se",
+        "description": "7 days to die server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./7DaysToDieServer.x86_64 -configfile=serverconfig.xml -quit -batchmode -nographics -dedicated -ServerPort=${SERVER_PORT} -ServerDisabledNetworkProtocols=${SERVER_DISABLED_NETWORK_PROTOCOLS} -ServerMaxPlayerCount=${MAX_PLAYERS} -GameDifficulty=${GAME_DIFFICULTY} -ControlPanelEnabled=false -TelnetEnabled=true -TelnetPort=${TELNET_PORT} -TelnetPassword=${PASSWORD} -logfile logs/latest.log & echo -e \"Checking on telnet connection\" && until nc -z -v -w5 127.0.0.1 ${TELNET_PORT}; do echo \"Waiting for telnet connection...\"; sleep 5; done && $( [[ -z ${PASSWORD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\" || printf %s \"rcon -t telnet -a 127.0.0.1:${TELNET_PORT} -p {{PASSWORD}}\" )",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Connected with 7DTD server\"}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "Maximum Concurrent Players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Difficulty",
+            "description": "0 - 5, 0=easiest, 5=hardest",
+            "env_variable": "GAME_DIFFICULTY",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "This is the app id for 7dtd please no step on snek.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "294420",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "This is to auto update the server on start.\r\n\r\nOptions are 0 or 1\r\nDefault is 1",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is really annoying that more games are doing this.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Installs beta branch if specified. For example, latest_experimental would install the latest experimental branch release. Requires a reinstall to switch branches properly.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Password",
+            "description": "Telnet listens on a local interface by default without a password. However, you can specify a password if  you wish to expose telnet.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Port",
+            "description": "",
+            "env_variable": "TELNET_PORT",
+            "default_value": "8081",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Network Protocols",
+            "description": "Networking protocols that should NOT be used. Separated by comma. Possible values: LiteNetLib, SteamNetworking. Dedicated servers should disable SteamNetworking if there is no NAT router in between your users and the server or when port-forwarding is set up correctly. lets it empty if you are connecting your self hosted server behind a NAT",
+            "env_variable": "SERVER_DISABLED_NETWORK_PROTOCOLS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "abiotic-factor-2d2d5e6c7ef4",
+        "name": "Abiotic Factor",
+        "description": "Abiotic Factor is a survival crafting experience for 1-6 players set in the depths of an underground research facility. Caught between paranormal containment failure, a military crusade, and chaos from a dozen realms, the world’s greatest minds must survive against the universe’s biggest threats.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/abiotic-factor-2d2d5e6c7ef4.json",
+        "sha256": "7b373cd99206361f5dcba4a740ac71242a2fa5d9756f97b7bb798693d8d0eaa9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "abiotic_factor/egg-abiotic-factor.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/2d2d5e6c7ef4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-13T10:10:32+00:00",
+        "name": "Abiotic Factor",
+        "author": "git@robsti.dev",
+        "description": "Abiotic Factor is a survival crafting experience for 1-6 players set in the depths of an underground research facility. Caught between paranormal containment failure, a military crusade, and chaos from a dozen realms, the world’s greatest minds must survive against the universe’s biggest threats.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "cd /home/container/AbioticFactor/Binaries/Win64; proton run ./AbioticFactorServer-Win64-Shipping.exe -log -useperfthreads -NoAsyncLoadingThread -MaxServerPlayers=${NUM_PLAYERS} -PORT=${SERVER_PORT} -QueryPort=${QUERY_PORT} -ServerPassword=\"${SERVER_PASSWORD}\" -SteamServerName=\"${SERVER_NAME}\" & AF_PID=$!; tail -c0 -F /home/container/AbioticFactor/Saved/Logs/AbioticFactor.log --pid=$AF_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Engine is initialized.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[STEAM] SRCDS_APPID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2857200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Auto Update",
+            "description": "Should Auto Update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Server access password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Query Port",
+            "description": "Steam query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Number of Players",
+            "description": "Number of allowed player connections",
+            "env_variable": "NUM_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "abiotic-factor-e87d430cfb1b",
+        "name": "Abiotic Factor",
+        "description": "Abiotic Factor is a survival crafting experience for 1-6 players set in the depths of an underground research facility. Caught between paranormal containment failure, a military crusade, and chaos from a dozen realms, the world’s greatest minds must survive against the universe’s biggest threats.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/abiotic-factor-e87d430cfb1b.json",
+        "sha256": "88ad5c3a90803e786fc5dc6e17455111641691e2f63240d97fa2643e9891f724",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "abiotic_factor/egg-pterodactyl-abiotic-factor.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e87d430cfb1b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-08-03T07:48:24+00:00",
+        "name": "Abiotic Factor",
+        "author": "git@robsti.dev",
+        "description": "Abiotic Factor is a survival crafting experience for 1-6 players set in the depths of an underground research facility. Caught between paranormal containment failure, a military crusade, and chaos from a dozen realms, the world’s greatest minds must survive against the universe’s biggest threats.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd Proton": "ghcr.io/pelican-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "cd /home/container/AbioticFactor/Binaries/Win64; xvfb-run -a proton run ./AbioticFactorServer-Win64-Shipping.exe -log -useperfthreads -NoAsyncLoadingThread -MaxServerPlayers={{NUM_PLAYERS}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -ServerPassword=\"{{SERVER_PASSWORD}}\" -SteamServerName=\"{{SERVER_NAME}}\" -SandboxIniPath=\"{{SANDBOX_INI_PATH}}\" & AF_PID=$!; tail -c0 -F /home/container/AbioticFactor/Saved/Logs/AbioticFactor.log --pid=$AF_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Engine is initialized.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## download the default server settings file\nmkdir -p /mnt/server/AbioticFactor/Saved/Config/WindowsServer/\ncurl -sS -o /mnt/server/AbioticFactor/Saved/Config/WindowsServer/SandboxSettings.ini https://raw.githubusercontent.com/DFJacob/AbioticFactorDedicatedServer/refs/heads/main/SandboxSettings.ini\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[STEAM] SRCDS_APPID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2857200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:2857200",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Auto Update",
+            "description": "Should Auto Update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pelican Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Server access password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Query Port",
+            "description": "Steam query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Number of Players",
+            "description": "Number of allowed player connections",
+            "env_variable": "NUM_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Sandbox Ini Path",
+            "description": "Path to the sandbox ini file",
+            "env_variable": "SANDBOX_INI_PATH",
+            "default_value": "Config/WindowsServer/SandboxSettings.ini",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "aloft-8594d1222624",
+        "name": "Aloft",
+        "description": "Soar the skies in Aloft, the co-op sandbox survival game set in a world of floating islands. Build any island into a skyship, your home in the clouds. Find lost knowledge, cure the fungal corruption, and brave the hurricane to restore the ecosystem.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/aloft-8594d1222624.json",
+        "sha256": "6242c93308bb2222094945e2276d3b432e22146765e7e6b2e693897528b242d2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "aloft/egg-aloft.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/8594d1222624.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-19T10:12:33+00:00",
+        "name": "Aloft",
+        "author": "eggs@purpleflaghosting.com",
+        "description": "Soar the skies in Aloft, the co-op sandbox survival game set in a world of floating islands. Build any island into a skyship, your home in the clouds. Find lost knowledge, cure the fungal corruption, and brave the hurricane to restore the ecosystem.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "[ ! -d \"${SAVE_PATH}/w_{{SAVE_NAME}}\" ] && wine Aloft.exe -batchmode -nographics -server -logFile create.log create#{{SAVE_NAME}}#{{NUM_ISLANDS}}#{{CREATIVE_MODE}}# log#ERROR# ; wine Aloft.exe -batchmode -nographics -server -logFile server.log load#{{SAVE_NAME}}# servername#{{SERVER_NAME}}# log#ERROR# isvisible#{{IS_VISIBLE}}# privateislands#{{PRIVATE_ISLANDS}}# playercount#{{MAX_PLAYERS}}# serverport#{{SERVER_PORT}}#  $(printf \"admin#%s# \" ${ADMIN_IDS}) & tail -F server.log -c0 --pid=$?",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server Ready\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "Steam App ID to install",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1660080",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2022 wmp11 mf sound=disabled",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "Map name is the name of the map and save file you want to create. No spaces allowed.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "Aloft",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_num|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server to appear in the server list. Currently doesn't support spaces.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A_Pterodactyl_Hosted_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Number of players allowed on the server at any one time. Max 8.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+          },
+          {
+            "name": "Creative Mode",
+            "description": "Whether the game is set in creative mode or not. Only applies when the world is first generated.",
+            "env_variable": "CREATIVE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Number of Islands",
+            "description": "The number of islands in the map. Only applies when the world is first generated.",
+            "env_variable": "NUM_ISLANDS",
+            "default_value": "500",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin IDs",
+            "description": "One or more Steam64ID numbers. Multiple admin IDs can be provided by separating with spaces.",
+            "env_variable": "ADMIN_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255|regex:/^[0-9\\s]+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Is Visible",
+            "description": "If your server is going to be visible through the lobby browser or just accessible through a code.",
+            "env_variable": "IS_VISIBLE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Private Islands",
+            "description": "If home island spawning is protected or not in game.",
+            "env_variable": "PRIVATE_ISLANDS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam User",
+            "description": "Steam username used to install the server",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam account password used to install the server",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Flag to install windows depot from steam",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Path",
+            "description": "Stores the save path for use in the startup command",
+            "env_variable": "SAVE_PATH",
+            "default_value": ".wine/drive_c/users/container/AppData/LocalLow/Astrolabe Interactive/Aloft/Data01/Saves",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDLLOVERRIDES",
+            "description": "",
+            "env_variable": "WINEDLLOVERRIDES",
+            "default_value": "mscoree,mshtml=",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "alt-v-6d4dd23f56f8",
+        "name": "alt:V",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/alt-v-6d4dd23f56f8.json",
+        "sha256": "3dd2f9f02c7a5b90db280ba22000704f676d9ef8c3ee0847b818a5bc3b67e257",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/gta/altv/egg-alt--v.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/6d4dd23f56f8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-06-18T11:34:24+02:00",
+        "name": "alt:V",
+        "author": "parker@parkervcp.com",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "features": null,
+        "docker_images": {
+          "ALT:V": "ghcr.io/parkervcp/games:altv"
+        },
+        "file_denylist": [],
+        "startup": "./altv-server",
+        "config": {
+          "files": "{\"server.toml\": {\"parser\": \"file\", \"find\": {\"host:\": \"host: 0.0.0.0\", \"port:\": \"port: {{server.build.default.port}}\", \"password:\": \"password: {{server.build.env.PASSWORD}}\", \"description:\": \"description: {{server.build.env.SERVER_DESC}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n\r\napt update\r\napt install -y wget jq curl \r\n\r\ncd /mnt/server\r\nNEWVERSION=$(curl -sSL https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json | jq -r .version)\r\n\r\n\r\nif [ -f \"/mnt/server/altv-server\" ]; then\r\n    CURRENTVERSION=$(cat update.json | jq -r .version)\r\n    if [[ \"${CURRENTVERSION}\" == \"${NEWVERSION}\" ]]; then\r\n        echo \"No update found\"\r\n        exit 0\r\n    fi\r\n    echo \"Backing up version ${CURRENTVERSION}\"\r\n    mkdir -p /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv altv-server /mnt/server/backup/${CURRENTVERSION}/\r\n    cd /mnt/server/data\r\n    mv clothes.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmods.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv pedmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv weaponmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv rpfdata.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    rm /mnt/server/update.json\r\nfi\r\n\r\n\r\ncd /mnt/server\r\n\r\n\r\necho \"Installing version: ${NEWVERSION}\"\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/altv-server\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json\r\nchmod +x ./altv-server\r\n\r\n\r\nmkdir -p /mnt/server/data\r\ncd /mnt/server/data\r\n\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmods.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/clothes.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/pedmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/weaponmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/rpfdata.bin\r\n\r\n\r\n\r\n\r\ncd /mnt/server\r\nif [ ! -f \"/mnt/server/server.toml\" ]; then\r\ncat << EOF >> server.toml\r\nname = 'alt:V Server'\r\nhost = '0.0.0.0'\r\nport = ${SERVER_PORT}\r\nplayers = 128\r\npassword = '${PASSWORD}'\r\nannounce = false\r\ntoken = 'YOUR_TOKEN'\r\ngamemode = 'Freeroam'\r\nwebsite = 'example.com'\r\nlanguage = 'en'\r\ndescription = '${SERVER_DESC}'\r\nmodules = []\r\nresources = []\r\nEOF\r\nfi\r\n\r\nmkdir -p resources/\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "ld lib path",
+            "description": "Needed to load modules correctly. Best left at default.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Release Branch",
+            "description": "The supported versions are release, rc, dev (default: release).\r\nIf you don't know what you are doing leave it on release",
+            "env_variable": "BUILD",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:release,rc,dev",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:6",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description for the server.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "alt-v-83a66c065b98",
+        "name": "alt:V",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/alt-v-83a66c065b98.json",
+        "sha256": "ea3f36b3e2d7d4489e29aacd98bb38c2b2701388b7620964c9b2e97da0ff76d1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/altv/egg-pterodactyl-alt--v.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/83a66c065b98.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-08-25T10:29:40+02:00",
+        "name": "alt:V",
+        "author": "parker@parkervcp.com",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "features": null,
+        "docker_images": {
+          "ALT-V": "ghcr.io/parkervcp/games:altv"
+        },
+        "file_denylist": [],
+        "startup": "./altv-server",
+        "config": {
+          "files": "{\"server.toml\": {\"parser\": \"file\", \"find\": {\"host\": \"host = '0.0.0.0'\", \"port\": \"port = '{{server.build.default.port}}'\", \"password\": \"password = '{{server.build.env.PASSWORD}}'\", \"description\": \"description = '{{server.build.env.SERVER_DESC}}'\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n\r\napt update\r\napt install -y wget jq curl \r\n\r\ncd /mnt/server\r\nNEWVERSION=$(curl -sSL https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json | jq -r .version)\r\n\r\n\r\nif [ -f \"/mnt/server/altv-server\" ]; then\r\n    CURRENTVERSION=$(cat update.json | jq -r .version)\r\n    if [[ \"${CURRENTVERSION}\" == \"${NEWVERSION}\" ]]; then\r\n        echo \"No update found\"\r\n        exit 0\r\n    fi\r\n    echo \"Backing up version ${CURRENTVERSION}\"\r\n    mkdir -p /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv altv-server /mnt/server/backup/${CURRENTVERSION}/\r\n    cd /mnt/server/data\r\n    mv clothes.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmods.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv pedmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv weaponmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv rpfdata.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    rm /mnt/server/update.json\r\nfi\r\n\r\n\r\ncd /mnt/server\r\n\r\n\r\necho \"Installing version: ${NEWVERSION}\"\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/altv-server\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json\r\nchmod +x ./altv-server\r\n\r\n\r\nmkdir -p /mnt/server/data\r\ncd /mnt/server/data\r\n\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmods.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/clothes.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/pedmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/weaponmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/rpfdata.bin\r\n\r\n\r\n\r\n\r\ncd /mnt/server\r\nif [ ! -f \"/mnt/server/server.toml\" ]; then\r\ncat << EOF >> server.toml\r\nname = 'alt:V Server'\r\nhost = '0.0.0.0'\r\nport = ${SERVER_PORT}\r\nplayers = 128\r\npassword = '${PASSWORD}'\r\nannounce = false\r\ntoken = 'YOUR_TOKEN'\r\ngamemode = 'Freeroam'\r\nwebsite = 'example.com'\r\nlanguage = 'en'\r\ndescription = '${SERVER_DESC}'\r\nmodules = []\r\nresources = []\r\nEOF\r\nfi\r\n\r\nmkdir -p resources/\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "ld lib path",
+            "description": "Needed to load modules correctly. Best left at default.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Release Branch",
+            "description": "The supported versions are release, rc, dev (default: release).\r\nIf you don't know what you are doing leave it on release",
+            "env_variable": "BUILD",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:release,rc,dev",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:6",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description for the server.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "alt-v-85582621ccbc",
+        "name": "alt:V",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/alt-v-85582621ccbc.json",
+        "sha256": "dc9ea128722cc269559fe825345f1ea84edab3127be70cda9e2c4ba1ae49a278",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/altv/egg-alt--v.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/85582621ccbc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-06-18T11:34:24+02:00",
+        "name": "alt:V",
+        "author": "parker@parkervcp.com",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "features": null,
+        "docker_images": {
+          "ALT:V": "ghcr.io/ptero-eggs/games:altv"
+        },
+        "file_denylist": [],
+        "startup": "./altv-server",
+        "config": {
+          "files": "{\"server.toml\": {\"parser\": \"file\", \"find\": {\"host:\": \"host: 0.0.0.0\", \"port:\": \"port: {{server.build.default.port}}\", \"password:\": \"password: {{server.build.env.PASSWORD}}\", \"description:\": \"description: {{server.build.env.SERVER_DESC}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n\r\napt update\r\napt install -y wget jq curl \r\n\r\ncd /mnt/server\r\nNEWVERSION=$(curl -sSL https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json | jq -r .version)\r\n\r\n\r\nif [ -f \"/mnt/server/altv-server\" ]; then\r\n    CURRENTVERSION=$(cat update.json | jq -r .version)\r\n    if [[ \"${CURRENTVERSION}\" == \"${NEWVERSION}\" ]]; then\r\n        echo \"No update found\"\r\n        exit 0\r\n    fi\r\n    echo \"Backing up version ${CURRENTVERSION}\"\r\n    mkdir -p /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv altv-server /mnt/server/backup/${CURRENTVERSION}/\r\n    cd /mnt/server/data\r\n    mv clothes.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmods.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv pedmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv weaponmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv rpfdata.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    rm /mnt/server/update.json\r\nfi\r\n\r\n\r\ncd /mnt/server\r\n\r\n\r\necho \"Installing version: ${NEWVERSION}\"\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/altv-server\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json\r\nchmod +x ./altv-server\r\n\r\n\r\nmkdir -p /mnt/server/data\r\ncd /mnt/server/data\r\n\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmods.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/clothes.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/pedmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/weaponmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/rpfdata.bin\r\n\r\n\r\n\r\n\r\ncd /mnt/server\r\nif [ ! -f \"/mnt/server/server.toml\" ]; then\r\ncat << EOF >> server.toml\r\nname = 'alt:V Server'\r\nhost = '0.0.0.0'\r\nport = ${SERVER_PORT}\r\nplayers = 128\r\npassword = '${PASSWORD}'\r\nannounce = false\r\ntoken = 'YOUR_TOKEN'\r\ngamemode = 'Freeroam'\r\nwebsite = 'example.com'\r\nlanguage = 'en'\r\ndescription = '${SERVER_DESC}'\r\nmodules = []\r\nresources = []\r\nEOF\r\nfi\r\n\r\nmkdir -p resources/\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "ld lib path",
+            "description": "Needed to load modules correctly. Best left at default.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Release Branch",
+            "description": "The supported versions are release, rc, dev (default: release).\r\nIf you don't know what you are doing leave it on release",
+            "env_variable": "BUILD",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:release,rc,dev",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:6",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description for the server.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

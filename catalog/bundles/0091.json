@@ -1,0 +1,1119 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "fabric-9bd77c2db6ab",
+        "name": "Fabric",
+        "description": "Fabric is a modular modding toolchain targeting Minecraft 1.14 and above, including snapshots.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/fabric-9bd77c2db6ab.json",
+        "sha256": "3ecba523877388aba7ae1e1af3e96c9c55f519cf62ae168f273798769b580d0a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/fabric/egg-fabric.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/9bd77c2db6ab.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "Fabric",
+        "author": "accounts@bofanodes.io",
+        "description": "Fabric is a modular modding toolchain targeting Minecraft 1.14 and above, including snapshots.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25",
+          "java 24": "ghcr.io/ptero-eggs/yolks:java_24",
+          "java 23": "ghcr.io/ptero-eggs/yolks:java_23",
+          "java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Fabric MC Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y curl jq unzip dos2unix wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Enable snapshots\r\nif [ -z \"$MC_VERSION\" ] || [ \"$MC_VERSION\" == \"latest\" ]; then\r\n  MC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/game | jq -r '.[] | select(.stable== true )|.version' | head -n1)\r\nelif [ \"$MC_VERSION\" == \"snapshot\" ]; then\r\n  MC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/game | jq -r '.[] | select(.stable== false )|.version' | head -n1)\r\nfi\r\n\r\nif [ -z \"$FABRIC_VERSION\" ] || [ \"$FABRIC_VERSION\" == \"latest\" ]; then\r\n  FABRIC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/installer | jq -r '.[0].version')\r\nfi\r\n\r\nif [ -z \"$LOADER_VERSION\" ] || [ \"$LOADER_VERSION\" == \"latest\" ]; then\r\n  LOADER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/loader | jq -r '.[] | select(.stable== true )|.version' | head -n1)\r\nelif [ \"$LOADER_VERSION\" == \"snapshot\" ]; then\r\n  LOADER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/loader | jq -r '.[] | select(.stable== false )|.version' | head -n1)\r\nfi\r\n\r\nwget -O fabric-installer.jar https://maven.fabricmc.net/net/fabricmc/fabric-installer/$FABRIC_VERSION/fabric-installer-$FABRIC_VERSION.jar\r\njava -jar fabric-installer.jar server -mcversion $MC_VERSION -loader $LOADER_VERSION -downloadMinecraft\r\nmv server.jar minecraft-server.jar\r\nmv fabric-server-launch.jar server.jar\r\necho \"serverJar=minecraft-server.jar\" > fabric-server-launcher.properties\r\necho -e \"Install Complete\"",
+            "container": "eclipse-temurin:21-jdk-jammy",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to install. Use \"latest\" to install the latest version, or use \"snapshot\" to install the latest snapshot.",
+            "env_variable": "MC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Fabric Version",
+            "description": "The version of Fabric to install.",
+            "env_variable": "FABRIC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Fabric Loader Version",
+            "description": "The version of Fabric Loader to install.",
+            "env_variable": "LOADER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fabric-dfd04f8f6618",
+        "name": "Fabric",
+        "description": "Fabric is a modular modding toolchain targeting Minecraft 1.14 and above, including snapshots.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/fabric-dfd04f8f6618.json",
+        "sha256": "e7908c1bf836b33b8fdb2032785271751cccb75977e220e9f33995b3ac237719",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/fabric/egg-fabric.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/dfd04f8f6618.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-17T23:20:29+01:00",
+        "name": "Fabric",
+        "author": "accounts@bofanodes.io",
+        "description": "Fabric is a modular modding toolchain targeting Minecraft 1.14 and above, including snapshots.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Fabric MC Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y curl jq unzip dos2unix wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Enable snapshots\r\nif [ -z \"$MC_VERSION\" ] || [ \"$MC_VERSION\" == \"latest\" ]; then\r\n  MC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/game | jq -r '.[] | select(.stable== true )|.version' | head -n1)\r\nelif [ \"$MC_VERSION\" == \"snapshot\" ]; then\r\n  MC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/game | jq -r '.[] | select(.stable== false )|.version' | head -n1)\r\nfi\r\n\r\nif [ -z \"$FABRIC_VERSION\" ] || [ \"$FABRIC_VERSION\" == \"latest\" ]; then\r\n  FABRIC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/installer | jq -r '.[0].version')\r\nfi\r\n\r\nif [ -z \"$LOADER_VERSION\" ] || [ \"$LOADER_VERSION\" == \"latest\" ]; then\r\n  LOADER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/loader | jq -r '.[] | select(.stable== true )|.version' | head -n1)\r\nelif [ \"$LOADER_VERSION\" == \"snapshot\" ]; then\r\n  LOADER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/loader | jq -r '.[] | select(.stable== false )|.version' | head -n1)\r\nfi\r\n\r\nwget -O fabric-installer.jar https://maven.fabricmc.net/net/fabricmc/fabric-installer/$FABRIC_VERSION/fabric-installer-$FABRIC_VERSION.jar\r\njava -jar fabric-installer.jar server -mcversion $MC_VERSION -loader $LOADER_VERSION -downloadMinecraft\r\nmv server.jar minecraft-server.jar\r\nmv fabric-server-launch.jar server.jar\r\necho \"serverJar=minecraft-server.jar\" > fabric-server-launcher.properties\r\necho -e \"Install Complete\"",
+            "container": "openjdk:11-jdk-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to install. Use \"latest\" to install the latest version, or use \"snapshot\" to install the latest snapshot.",
+            "env_variable": "MC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Fabric Version",
+            "description": "The version of Fabric to install.",
+            "env_variable": "FABRIC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Fabric Loader Version",
+            "description": "The version of Fabric Loader to install.",
+            "env_variable": "LOADER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fabric-fffaf6f06295",
+        "name": "Fabric",
+        "description": "Fabric is a modular modding toolchain targeting Minecraft 1.14 and above, including snapshots.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/fabric-fffaf6f06295.json",
+        "sha256": "45323146f6a770a85fa81e4235842f17864ab9ea369b898fb24ccfdeed74399d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/fabric/egg-pterodactyl-fabric.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/fffaf6f06295.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-13T15:26:34+00:00",
+        "name": "Fabric",
+        "author": "accounts@bofanodes.io",
+        "description": "Fabric is a modular modding toolchain targeting Minecraft 1.14 and above, including snapshots.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Fabric MC Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y curl jq unzip dos2unix wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Enable snapshots\r\nif [ -z \"$MC_VERSION\" ] || [ \"$MC_VERSION\" == \"latest\" ]; then\r\n  MC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/game | jq -r '.[] | select(.stable== true )|.version' | head -n1)\r\nelif [ \"$MC_VERSION\" == \"snapshot\" ]; then\r\n  MC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/game | jq -r '.[] | select(.stable== false )|.version' | head -n1)\r\nfi\r\n\r\nif [ -z \"$FABRIC_VERSION\" ] || [ \"$FABRIC_VERSION\" == \"latest\" ]; then\r\n  FABRIC_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/installer | jq -r '.[0].version')\r\nfi\r\n\r\nif [ -z \"$LOADER_VERSION\" ] || [ \"$LOADER_VERSION\" == \"latest\" ]; then\r\n  LOADER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/loader | jq -r '.[] | select(.stable== true )|.version' | head -n1)\r\nelif [ \"$LOADER_VERSION\" == \"snapshot\" ]; then\r\n  LOADER_VERSION=$(curl -sSL https://meta.fabricmc.net/v2/versions/loader | jq -r '.[] | select(.stable== false )|.version' | head -n1)\r\nfi\r\n\r\nwget -O fabric-installer.jar https://maven.fabricmc.net/net/fabricmc/fabric-installer/$FABRIC_VERSION/fabric-installer-$FABRIC_VERSION.jar\r\njava -jar fabric-installer.jar server -mcversion $MC_VERSION -loader $LOADER_VERSION -downloadMinecraft\r\nmv server.jar minecraft-server.jar\r\nmv fabric-server-launch.jar server.jar\r\necho \"serverJar=minecraft-server.jar\" > fabric-server-launcher.properties\r\necho -e \"Install Complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:java_11",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to install. Use \"latest\" to install the latest version, or use \"snapshot\" to install the latest snapshot.",
+            "env_variable": "MC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Fabric Version",
+            "description": "The version of Fabric to install.",
+            "env_variable": "FABRIC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Fabric Loader Version",
+            "description": "The version of Fabric Loader to install.",
+            "env_variable": "LOADER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "feed-the-beast-003435ee7938",
+        "name": "Feed the Beast",
+        "description": "Egg to handle all official FTB Modpacks",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/feed-the-beast-003435ee7938.json",
+        "sha256": "c64a723c6fded3723fb6c375d8d3d87107a36ae02f109cb905cdea072e403230",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/outdated/egg-feed-the-beast.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/003435ee7938.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Feed the Beast",
+        "author": "aevum@decess.us",
+        "uuid": "389b8f68-2fc4-4e5b-92ea-b8a0eadee0c4",
+        "description": "Egg to handle all official FTB Modpacks",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar FTBserv*.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\", \"level-name\": \"{{server.build.env.LEVEL_NAME}}\", \"level-seed\": \"{{server.build.env.LEVEL_SEED}}\", \"max-players\": \"{{server.build.env.MAX_PLAYERS}}\", \"motd\": \"{{server.build.env.MOTD}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Generic FTB Server Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# MODPACK_VERSION = version of the modpack, set in variables\r\n# i.e MODPACK_VERSION=1.5.0\r\n# MODPACK_URL = url base of the pack, set in variables, hardcoded\r\n# i.e https://www.feed-the-beast.com/projects/ftb-revelation/files\r\n# MODPACK_URL=ftb-revelation\r\n\r\n## Correcting for bad variables\r\nGETPACK=$(echo ${MODPACK_URL} | cut -d \"/\" -f 5 )\r\necho -e \"\\n The pack being downloaded is $GETPACK \\n\"\r\n\r\n## Getting the Base URL\r\nBASEURL=https://www.feed-the-beast.com/projects/${GETPACK}/files\r\necho \"The base URL is ${BASEURL}\"\r\n\r\n## This is meant to get the pack ID that is unique and not exactly clear \r\n\r\n\r\nif [ -z \"${MODPACK_VERSION}\" ] || [ \"${MODPACK_VERSION}\" == \"latest\" ]; then\r\n    ID=`curl -sl ${BASEURL} | grep -i -A9 'title=\"release\"' | grep -i -o 'href=\".*\"' |  cut -d \"/\" -f5 | sed s/\\\"//g`\r\n    echo \"ID: ${ID}\"\r\nelse \r\n    ID=`curl -sl ${BASEURL} | grep -i -A9 \"${MODPACK_VERSION}\" | grep -m1 -oE 'href=\"[^\\\"]+\"' | cut -d \"/\" -f5 | grep -oE [0-9]+`\r\n    echo \"ID: ${ID}\"\r\nfi\r\n\r\nSECONDURL=${BASEURL}/${ID}\r\necho \"SECONDURL: ${SECONDURL}\"\r\n\r\nGOOD_ID=`curl -sl ${SECONDURL} | grep -i server | grep -Eo 'href=\"[^\\\"]+\"' | grep -o -E \"[0-9]+\" | tail -1`\r\necho \"GOOD_ID: ${GOOD_ID}\"\r\n\r\nDL_URL=${BASEURL}/${GOOD_ID}/download\r\necho \"Download_URL: ${DL_URL}\"\r\n\r\ncd /mnt/server\r\n\r\necho \"Executing curl -L ${DL_URL} -o $GETPACK.zip\"\r\ncurl -L ${DL_URL} -o $GETPACK.zip\r\n\r\nunzip ${GETPACK}.zip\r\n\r\nrm -rf ${GETPACK}.zip\r\n\r\necho \"Running FTBInstall.sh\"\r\nif [ -f ./FTBInstall.sh ]; then\r\n    sh ./FTBInstall.sh\r\nelse\r\n    echo -e \"No FTBInstall script found. Assumeing it's not needed.\"\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack URL Name",
+            "description": "Name of the modpack as referenced in URL's on feed-the-beast.com\r\ni.e\r\nhttps://www.feed-the-beast.com/projects/<MODPACK_URL>",
+            "env_variable": "MODPACK_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:([a-z-0-9]+$)",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use.",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Level Seed",
+            "description": "Optional specified level seed for map generation",
+            "env_variable": "LEVEL_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max # of players on the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Level Name",
+            "description": "Name of the world save",
+            "env_variable": "LEVEL_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Message to appear when viewing the server in browser and on login",
+            "env_variable": "MOTD",
+            "default_value": "A Minecraft Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "feed-the-beast-78c3d02eca73",
+        "name": "Feed the Beast",
+        "description": "Egg to handle all official FTB Modpacks",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/feed-the-beast-78c3d02eca73.json",
+        "sha256": "09bcd449caf81b83fa7bdd3bd3a089d7d049ad9dd203887fcb66168d1078fd2b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/ftb/outdated/egg-feed-the-beast.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/78c3d02eca73.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T11:41:53+02:00",
+        "name": "Feed the Beast",
+        "author": "aevum@decess.us",
+        "description": "Egg to handle all official FTB Modpacks",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar FTBserv*.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\", \"level-name\": \"{{server.build.env.LEVEL_NAME}}\", \"level-seed\": \"{{server.build.env.LEVEL_SEED}}\", \"max-players\": \"{{server.build.env.MAX_PLAYERS}}\", \"motd\": \"{{server.build.env.MOTD}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Generic FTB Server Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# MODPACK_VERSION = version of the modpack, set in variables\r\n# i.e MODPACK_VERSION=1.5.0\r\n# MODPACK_URL = url base of the pack, set in variables, hardcoded\r\n# i.e https://www.feed-the-beast.com/projects/ftb-revelation/files\r\n# MODPACK_URL=ftb-revelation\r\n\r\n## Correcting for bad variables\r\nGETPACK=$(echo ${MODPACK_URL} | cut -d \"/\" -f 5 )\r\necho -e \"\\n The pack being downloaded is $GETPACK \\n\"\r\n\r\n## Getting the Base URL\r\nBASEURL=https://www.feed-the-beast.com/projects/${GETPACK}/files\r\necho \"The base URL is ${BASEURL}\"\r\n\r\n## This is meant to get the pack ID that is unique and not exactly clear \r\n\r\n\r\nif [ -z \"${MODPACK_VERSION}\" ] || [ \"${MODPACK_VERSION}\" == \"latest\" ]; then\r\n    ID=`curl -sl ${BASEURL} | grep -i -A9 'title=\"release\"' | grep -i -o 'href=\".*\"' |  cut -d \"/\" -f5 | sed s/\\\"//g`\r\n    echo \"ID: ${ID}\"\r\nelse \r\n    ID=`curl -sl ${BASEURL} | grep -i -A9 \"${MODPACK_VERSION}\" | grep -m1 -oE 'href=\"[^\\\"]+\"' | cut -d \"/\" -f5 | grep -oE [0-9]+`\r\n    echo \"ID: ${ID}\"\r\nfi\r\n\r\nSECONDURL=${BASEURL}/${ID}\r\necho \"SECONDURL: ${SECONDURL}\"\r\n\r\nGOOD_ID=`curl -sl ${SECONDURL} | grep -i server | grep -Eo 'href=\"[^\\\"]+\"' | grep -o -E \"[0-9]+\" | tail -1`\r\necho \"GOOD_ID: ${GOOD_ID}\"\r\n\r\nDL_URL=${BASEURL}/${GOOD_ID}/download\r\necho \"Download_URL: ${DL_URL}\"\r\n\r\ncd /mnt/server\r\n\r\necho \"Executing curl -L ${DL_URL} -o $GETPACK.zip\"\r\ncurl -L ${DL_URL} -o $GETPACK.zip\r\n\r\nunzip ${GETPACK}.zip\r\n\r\nrm -rf ${GETPACK}.zip\r\n\r\necho \"Running FTBInstall.sh\"\r\nif [ -f ./FTBInstall.sh ]; then\r\n    sh ./FTBInstall.sh\r\nelse\r\n    echo -e \"No FTBInstall script found. Assumeing it's not needed.\"\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack URL Name",
+            "description": "Name of the modpack as referenced in URL's on feed-the-beast.com\r\ni.e\r\nhttps://www.feed-the-beast.com/projects/<MODPACK_URL>",
+            "env_variable": "MODPACK_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:([a-z-0-9]+$)",
+            "field_type": "text"
+          },
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use.",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Level Seed",
+            "description": "Optional specified level seed for map generation",
+            "env_variable": "LEVEL_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max # of players on the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Level Name",
+            "description": "Name of the world save",
+            "env_variable": "LEVEL_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Message to appear when viewing the server in browser and on login",
+            "env_variable": "MOTD",
+            "default_value": "A Minecraft Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "feed-the-beast-ac220b35b56e",
+        "name": "Feed the Beast",
+        "description": "Egg to handle all official FTB Modpacks",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/feed-the-beast-ac220b35b56e.json",
+        "sha256": "e0ddb46959c5014329964494ade636733a89eba8e7fbfb0553e4a313e75e0016",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/outdated/egg-pterodactyl-feed-the-beast.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/ac220b35b56e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:42+00:00",
+        "name": "Feed the Beast",
+        "author": "aevum@decess.us",
+        "description": "Egg to handle all official FTB Modpacks",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar FTBserv*.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\", \"level-name\": \"{{server.build.env.LEVEL_NAME}}\", \"level-seed\": \"{{server.build.env.LEVEL_SEED}}\", \"max-players\": \"{{server.build.env.MAX_PLAYERS}}\", \"motd\": \"{{server.build.env.MOTD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Generic FTB Server Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# MODPACK_VERSION = version of the modpack, set in variables\r\n# i.e MODPACK_VERSION=1.5.0\r\n# MODPACK_URL = url base of the pack, set in variables, hardcoded\r\n# i.e https://www.feed-the-beast.com/projects/ftb-revelation/files\r\n# MODPACK_URL=ftb-revelation\r\n\r\n## Correcting for bad variables\r\nGETPACK=$(echo ${MODPACK_URL} | cut -d \"/\" -f 5 )\r\necho -e \"\\n The pack being downloaded is $GETPACK \\n\"\r\n\r\n## Getting the Base URL\r\nBASEURL=https://www.feed-the-beast.com/projects/${GETPACK}/files\r\necho \"The base URL is ${BASEURL}\"\r\n\r\n## This is meant to get the pack ID that is unique and not exactly clear \r\n\r\n\r\nif [ -z \"${MODPACK_VERSION}\" ] || [ \"${MODPACK_VERSION}\" == \"latest\" ]; then\r\n    ID=`curl -sl ${BASEURL} | grep -i -A9 'title=\"release\"' | grep -i -o 'href=\".*\"' |  cut -d \"/\" -f5 | sed s/\\\"//g`\r\n    echo \"ID: ${ID}\"\r\nelse \r\n    ID=`curl -sl ${BASEURL} | grep -i -A9 \"${MODPACK_VERSION}\" | grep -m1 -oE 'href=\"[^\\\"]+\"' | cut -d \"/\" -f5 | grep -oE [0-9]+`\r\n    echo \"ID: ${ID}\"\r\nfi\r\n\r\nSECONDURL=${BASEURL}/${ID}\r\necho \"SECONDURL: ${SECONDURL}\"\r\n\r\nGOOD_ID=`curl -sl ${SECONDURL} | grep -i server | grep -Eo 'href=\"[^\\\"]+\"' | grep -o -E \"[0-9]+\" | tail -1`\r\necho \"GOOD_ID: ${GOOD_ID}\"\r\n\r\nDL_URL=${BASEURL}/${GOOD_ID}/download\r\necho \"Download_URL: ${DL_URL}\"\r\n\r\ncd /mnt/server\r\n\r\necho \"Executing curl -L ${DL_URL} -o $GETPACK.zip\"\r\ncurl -L ${DL_URL} -o $GETPACK.zip\r\n\r\nunzip ${GETPACK}.zip\r\n\r\nrm -rf ${GETPACK}.zip\r\n\r\necho \"Running FTBInstall.sh\"\r\nif [ -f ./FTBInstall.sh ]; then\r\n    sh ./FTBInstall.sh\r\nelse\r\n    echo -e \"No FTBInstall script found. Assumeing it's not needed.\"\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack URL Name",
+            "description": "Name of the modpack as referenced in URL's on feed-the-beast.com\r\ni.e\r\nhttps://www.feed-the-beast.com/projects/<MODPACK_URL>",
+            "env_variable": "MODPACK_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:([a-z-0-9]+$)",
+            "field_type": "text"
+          },
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use.",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Level Seed",
+            "description": "Optional specified level seed for map generation",
+            "env_variable": "LEVEL_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max # of players on the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Level Name",
+            "description": "Name of the world save",
+            "env_variable": "LEVEL_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Message to appear when viewing the server in browser and on login",
+            "env_variable": "MOTD",
+            "default_value": "A Minecraft Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "folia-10388fd9ccca",
+        "name": "Folia",
+        "description": "Fork of Paper which adds regionised multithreading to the dedicated server.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/folia-10388fd9ccca.json",
+        "sha256": "e30ac9f2999742ea28114539adf076283f563d181ac103581a526d01cb21b57f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/folia/egg-folia.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/10388fd9ccca.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-03-27T14:36:34+01:00",
+        "name": "Folia",
+        "author": "Hosting@NeverStopGaming.net",
+        "description": "Fork of Paper which adds regionised multithreading to the dedicated server.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25",
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Folia Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=folia\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep -m1 true`\r\n\tLATEST_VERSION=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\r\n\tBUILD_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\r\n\tLATEST_BUILD=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the folia release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "folia-32db416ad26a",
+        "name": "Folia",
+        "description": "Fork of Paper which adds regionised multithreading to the dedicated server.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/folia-32db416ad26a.json",
+        "sha256": "cfa87efc0d94d75fd565b6387471af0e87d4d34240a78216ac65bd2d7ef99513",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/folia/egg-folia.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/32db416ad26a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-13T17:26:13+0000",
+        "name": "Folia",
+        "author": "Hosting@NeverStopGaming.net",
+        "description": "Fork of Paper which adds regionised multithreading to the dedicated server.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 21": "ghcr.io/pterodactyl/yolks:java_21",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Folia Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=folia\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep -m1 true`\r\n\tLATEST_VERSION=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\r\n\tBUILD_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\r\n\tLATEST_BUILD=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the folia release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "folia-ab70af0396c6",
+        "name": "Folia",
+        "description": "Fork of Paper which adds regionised multithreading to the dedicated server.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/folia-ab70af0396c6.json",
+        "sha256": "86d5e855171e5a6697e1984f4552402d91d3f908b591bd93c190a614609f6ed5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/folia/egg-pterodactyl-folia.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/ab70af0396c6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:42+00:00",
+        "name": "Folia",
+        "author": "Hosting@NeverStopGaming.net",
+        "description": "Fork of Paper which adds regionised multithreading to the dedicated server.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Folia Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=folia\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep -m1 true`\r\n\tLATEST_VERSION=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\r\n\tBUILD_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\r\n\tLATEST_BUILD=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the folia release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "forge-enhanced-ee2d01a1267c",
+        "name": "Forge Enhanced",
+        "description": "Minecraft Forge Server. Minecraft Forge is a modding API (Application Programming Interface), which makes it easier to create mods, and also make sure mods are compatible with each other.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/forge-enhanced-ee2d01a1267c.json",
+        "sha256": "0abeacaca6b0cfca4b4f2b402ecbe483b9af951def2e7aa68e4978697940314b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/forge/forge/egg-forge-enhanced.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/ee2d01a1267c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-30T11:04:14-05:00",
+        "name": "Forge Enhanced",
+        "author": "parker@parkervcp.com",
+        "description": "Minecraft Forge Server. Minecraft Forge is a modding API (Application Programming Interface), which makes it easier to create mods, and also make sure mods are compatible with each other.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar {{SERVER_JARFILE}}\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y curl jq\r\n\r\nif [[ ! -d /mnt/server ]]; then\r\n  mkdir /mnt/server\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Remove spaces from the version number to avoid issues with curl\r\nFORGE_VERSION=\"$(echo \"$FORGE_VERSION\" | tr -d ' ')\"\r\nMC_VERSION=\"$(echo \"$MC_VERSION\" | tr -d ' ')\"\r\nif [ -z ${SERVER_JARFILE}]; then \r\n  SERVER_JARFILE=server.jar\r\nfi\r\n\r\nif [[ ! -z ${FORGE_VERSION} ]]; then\r\n  DOWNLOAD_LINK=https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_VERSION}/forge-${FORGE_VERSION}\r\n  FORGE_JAR=forge-${FORGE_VERSION}*.jar\r\nelse\r\n  JSON_DATA=$(curl -sSL https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json)\r\n\r\n  if [[ \"${MC_VERSION}\" == \"latest\" ]] || [[ \"${MC_VERSION}\" == \"\" ]]; then\r\n    echo -e \"getting latest version of forge.\"\r\n    MC_VERSION=$(echo -e ${JSON_DATA} | jq -r '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains(\"latest\")) | split(\"-\")[0]' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | tail -1)\r\n    BUILD_TYPE=latest\r\n  fi\r\n\r\n  if [[ \"${BUILD_TYPE}\" != \"recommended\" ]] && [[ \"${BUILD_TYPE}\" != \"latest\" ]]; then\r\n    BUILD_TYPE=recommended\r\n  fi\r\n\r\n  echo -e \"minecraft version: ${MC_VERSION}\"\r\n  echo -e \"build type: ${BUILD_TYPE}\"\r\n\r\n  ## some variables for getting versions and things\r\n  FILE_SITE=https://maven.minecraftforge.net/net/minecraftforge/forge/\r\n  VERSION_KEY=$(echo -e ${JSON_DATA} | jq -r --arg MC_VERSION \"${MC_VERSION}\" --arg BUILD_TYPE \"${BUILD_TYPE}\" '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains($MC_VERSION)) | select(contains($BUILD_TYPE))')\r\n\r\n  ## locating the forge version\r\n  if [[ \"${VERSION_KEY}\" == \"\" ]] && [[ \"${BUILD_TYPE}\" == \"recommended\" ]]; then\r\n    echo -e \"dropping back to latest from recommended due to there not being a recommended version of forge for the mc version requested.\"\r\n    VERSION_KEY=$(echo -e ${JSON_DATA} | jq -r --arg MC_VERSION \"${MC_VERSION}\" '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains($MC_VERSION)) | select(contains(\"latest\"))')\r\n  fi\r\n\r\n  ## Error if the mc version set wasn't valid.\r\n  if [ \"${VERSION_KEY}\" == \"\" ] || [ \"${VERSION_KEY}\" == \"null\" ]; then\r\n    echo -e \"The install failed because there is no valid version of forge for the version of minecraft selected.\"\r\n    exit 1\r\n  fi\r\n\r\n  FORGE_VERSION=$(echo -e ${JSON_DATA} | jq -r --arg VERSION_KEY \"$VERSION_KEY\" '.promos | .[$VERSION_KEY]')\r\n\r\n  if [[ \"${MC_VERSION}\" == \"1.7.10\" ]] || [[ \"${MC_VERSION}\" == \"1.8.9\" ]]; then\r\n    DOWNLOAD_LINK=${FILE_SITE}${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}/forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}\r\n    FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}.jar\r\n    if [[ \"${MC_VERSION}\" == \"1.7.10\" ]]; then\r\n      FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}-universal.jar\r\n    fi\r\n  else\r\n    DOWNLOAD_LINK=${FILE_SITE}${MC_VERSION}-${FORGE_VERSION}/forge-${MC_VERSION}-${FORGE_VERSION}\r\n    FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}*.jar\r\n  fi\r\nfi\r\n\r\n#Adding .jar when not eding by SERVER_JARFILE\r\nif [[ ! $SERVER_JARFILE = *\\.jar ]]; then\r\n  SERVER_JARFILE=\"$SERVER_JARFILE.jar\"\r\nfi\r\n\r\n#Downloading jars\r\necho -e \"Downloading forge version ${FORGE_VERSION}\"\r\necho -e \"Download link is ${DOWNLOAD_LINK}\"\r\n\r\nif [[ ! -z \"${DOWNLOAD_LINK}\" ]]; then\r\n  if curl -sSL --output /dev/null --head --fail ${DOWNLOAD_LINK}-installer.jar; then\r\n    echo -e \"installer jar download link is valid.\"\r\n  else\r\n    echo -e \"link is invalid. Exiting now\"\r\n    exit 2\r\n  fi\r\nelse\r\n  echo -e \"no download link provided. Exiting now\"\r\n  exit 3\r\nfi\r\n\r\ncurl -sSL -o installer.jar ${DOWNLOAD_LINK}-installer.jar\r\n\r\n#Checking if downloaded jars exist\r\nif [[ ! -f ./installer.jar ]]; then\r\n  echo \"!!! Error downloading forge version ${FORGE_VERSION} !!!\"\r\n  exit\r\nfi\r\n\r\nfunction  unix_args {\r\n  echo -e \"Detected Forge 1.17 or newer version. Setting up forge unix args.\"\r\n  ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n}\r\n\r\n# Delete args to support downgrading/upgrading\r\nrm -rf libraries/net/minecraftforge/forge\r\nrm unix_args.txt\r\n\r\n#Installing server\r\necho -e \"Installing forge server.\\n\"\r\njava -jar installer.jar --installServer || { echo -e \"install failed using Forge version ${FORGE_VERSION} and Minecraft version ${MINECRAFT_VERSION}\"; exit 4; }\r\n\r\nif [ -f ${FORGE_JAR} ]; then\r\n  # For versions below 1.17 that ship with jar\r\n  mv $FORGE_JAR $SERVER_JARFILE\r\nelse\r\n  # Check if we need a symlink for 1.17+ Forge JPMS args\r\n  if [[ $MC_VERSION =~ ^1\\.(17|18|19|20|21|22|23) || $FORGE_VERSION =~ ^1\\.(17|18|19|20|21|22|23) ]]; then\r\n    unix_args\r\n\r\n  # Check if someone has set MC to latest but overwrote it with older Forge version, otherwise we would have false positives\r\n  elif [[ $MC_VERSION == \"latest\" && $FORGE_VERSION =~ ^1\\.(17|18|19|20|21|22|23) ]]; then\r\n    unix_args\r\n  fi\r\nfi\r\n\r\necho -e \"Deleting installer.jar file.\\n\"\r\nrm -rf installer.jar\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "openjdk:8-jdk-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the Jarfile to use when running Forge version below 1.17.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft you want to install for.\r\n\r\nLeaving latest will install the latest recommended version.",
+            "env_variable": "MC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:9",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Type",
+            "description": "The type of server jar to download from forge.\r\n\r\nValid types are \"recommended\" and \"latest\".",
+            "env_variable": "BUILD_TYPE",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:recommended,latest",
+            "field_type": "text"
+          },
+          {
+            "name": "Forge Version",
+            "description": "Gets an exact version.\r\n\r\nEx. 1.15.2-31.2.4\r\n\r\nOverrides MC_VERSION and BUILD_TYPE. If it fails to download the server files it will fail to install.",
+            "env_variable": "FORGE_VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

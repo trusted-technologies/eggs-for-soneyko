@@ -1,0 +1,980 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "forge-enhanced-fbaa43dc9611",
+        "name": "Forge Enhanced",
+        "description": "Minecraft Forge Server. Minecraft Forge is a modding API (Application Programming Interface), which makes it easier to create mods, and also make sure mods are compatible with each other.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/forge-enhanced-fbaa43dc9611.json",
+        "sha256": "48144eeba37f012da6a8ecac7617bd2da9a2acc2fc75f704f6e62528027bc223",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/forge/egg-forge-enhanced.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/fbaa43dc9611.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "Forge Enhanced",
+        "author": "parker@parkervcp.com",
+        "description": "Minecraft Forge Server. Minecraft Forge is a modding API (Application Programming Interface), which makes it easier to create mods, and also make sure mods are compatible with each other.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar {{SERVER_JARFILE}}\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y curl jq\r\n\r\nif [[ ! -d /mnt/server ]]; then\r\n  mkdir /mnt/server\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Remove spaces from the version number to avoid issues with curl\r\nFORGE_VERSION=\"$(echo \"$FORGE_VERSION\" | tr -d ' ')\"\r\nMC_VERSION=\"$(echo \"$MC_VERSION\" | tr -d ' ')\"\r\nif [ -z ${SERVER_JARFILE}]; then \r\n  SERVER_JARFILE=server.jar\r\nfi\r\n\r\nif [[ ! -z ${FORGE_VERSION} ]]; then\r\n  DOWNLOAD_LINK=https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_VERSION}/forge-${FORGE_VERSION}\r\n  FORGE_JAR=forge-${FORGE_VERSION}*.jar\r\nelse\r\n  JSON_DATA=$(curl -sSL https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json)\r\n\r\n  if [[ \"${MC_VERSION}\" == \"latest\" ]] || [[ \"${MC_VERSION}\" == \"\" ]]; then\r\n    echo -e \"getting latest version of forge.\"\r\n    MC_VERSION=$(echo -e ${JSON_DATA} | jq -r '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains(\"latest\")) | split(\"-\")[0]' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | tail -1)\r\n    BUILD_TYPE=latest\r\n  fi\r\n\r\n  if [[ \"${BUILD_TYPE}\" != \"recommended\" ]] && [[ \"${BUILD_TYPE}\" != \"latest\" ]]; then\r\n    BUILD_TYPE=recommended\r\n  fi\r\n\r\n  echo -e \"minecraft version: ${MC_VERSION}\"\r\n  echo -e \"build type: ${BUILD_TYPE}\"\r\n\r\n  ## some variables for getting versions and things\r\n  FILE_SITE=https://maven.minecraftforge.net/net/minecraftforge/forge/\r\n  VERSION_KEY=$(echo -e ${JSON_DATA} | jq -r --arg MC_VERSION \"${MC_VERSION}\" --arg BUILD_TYPE \"${BUILD_TYPE}\" '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains($MC_VERSION)) | select(contains($BUILD_TYPE))')\r\n\r\n  ## locating the forge version\r\n  if [[ \"${VERSION_KEY}\" == \"\" ]] && [[ \"${BUILD_TYPE}\" == \"recommended\" ]]; then\r\n    echo -e \"dropping back to latest from recommended due to there not being a recommended version of forge for the mc version requested.\"\r\n    VERSION_KEY=$(echo -e ${JSON_DATA} | jq -r --arg MC_VERSION \"${MC_VERSION}\" '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains($MC_VERSION)) | select(contains(\"latest\"))')\r\n  fi\r\n\r\n  ## Error if the mc version set wasn't valid.\r\n  if [ \"${VERSION_KEY}\" == \"\" ] || [ \"${VERSION_KEY}\" == \"null\" ]; then\r\n    echo -e \"The install failed because there is no valid version of forge for the version of minecraft selected.\"\r\n    exit 1\r\n  fi\r\n\r\n  FORGE_VERSION=$(echo -e ${JSON_DATA} | jq -r --arg VERSION_KEY \"$VERSION_KEY\" '.promos | .[$VERSION_KEY]')\r\n\r\n  if [[ \"${MC_VERSION}\" == \"1.7.10\" ]] || [[ \"${MC_VERSION}\" == \"1.8.9\" ]]; then\r\n    DOWNLOAD_LINK=${FILE_SITE}${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}/forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}\r\n    FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}.jar\r\n    if [[ \"${MC_VERSION}\" == \"1.7.10\" ]]; then\r\n      FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}-universal.jar\r\n    fi\r\n  else\r\n    DOWNLOAD_LINK=${FILE_SITE}${MC_VERSION}-${FORGE_VERSION}/forge-${MC_VERSION}-${FORGE_VERSION}\r\n    FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}*.jar\r\n  fi\r\nfi\r\n\r\n#Adding .jar when not eding by SERVER_JARFILE\r\nif [[ ! $SERVER_JARFILE = *\\.jar ]]; then\r\n  SERVER_JARFILE=\"$SERVER_JARFILE.jar\"\r\nfi\r\n\r\n#Downloading jars\r\necho -e \"Downloading forge version ${FORGE_VERSION}\"\r\necho -e \"Download link is ${DOWNLOAD_LINK}\"\r\n\r\nif [[ ! -z \"${DOWNLOAD_LINK}\" ]]; then\r\n  if curl -sSL --output /dev/null --head --fail ${DOWNLOAD_LINK}-installer.jar; then\r\n    echo -e \"installer jar download link is valid.\"\r\n  else\r\n    echo -e \"link is invalid. Exiting now\"\r\n    exit 2\r\n  fi\r\nelse\r\n  echo -e \"no download link provided. Exiting now\"\r\n  exit 3\r\nfi\r\n\r\ncurl -sSL -o installer.jar ${DOWNLOAD_LINK}-installer.jar\r\n\r\n#Checking if downloaded jars exist\r\nif [[ ! -f ./installer.jar ]]; then\r\n  echo \"!!! Error downloading forge version ${FORGE_VERSION} !!!\"\r\n  exit\r\nfi\r\n\r\nfunction  unix_args {\r\n  echo -e \"Detected Forge 1.17 or newer version. Setting up forge unix args.\"\r\n  ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n}\r\n\r\n# Delete args to support downgrading/upgrading\r\nrm -rf libraries/net/minecraftforge/forge\r\nrm unix_args.txt\r\n\r\n#Installing server\r\necho -e \"Installing forge server.\\n\"\r\njava -jar installer.jar --installServer || { echo -e \"install failed using Forge version ${FORGE_VERSION} and Minecraft version ${MINECRAFT_VERSION}\"; exit 4; }\r\n\r\nif [ -f ${FORGE_JAR} ]; then\r\n  # For versions below 1.17 that ship with jar\r\n  mv $FORGE_JAR $SERVER_JARFILE\r\nelse\r\n  # Check if we need a symlink for 1.17+ Forge JPMS args\r\n  if [[ $MC_VERSION =~ ^1\\.(17|18|19|20|21|22|23) || $FORGE_VERSION =~ ^1\\.(17|18|19|20|21|22|23) ]]; then\r\n    unix_args\r\n\r\n  # Check if someone has set MC to latest but overwrote it with older Forge version, otherwise we would have false positives\r\n  elif [[ $MC_VERSION == \"latest\" && $FORGE_VERSION =~ ^1\\.(17|18|19|20|21|22|23) ]]; then\r\n    unix_args\r\n  fi\r\nfi\r\n\r\necho -e \"Deleting installer.jar file.\\n\"\r\nrm -rf installer.jar\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "eclipse-temurin:8-jdk-jammy",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the Jarfile to use when running Forge version below 1.17.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft you want to install for.\r\n\r\nLeaving latest will install the latest recommended version.",
+            "env_variable": "MC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:9",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Type",
+            "description": "The type of server jar to download from forge.\r\n\r\nValid types are \"recommended\" and \"latest\".",
+            "env_variable": "BUILD_TYPE",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:recommended,latest",
+            "field_type": "text"
+          },
+          {
+            "name": "Forge Version",
+            "description": "Gets an exact version.\r\n\r\nEx. 1.15.2-31.2.4\r\n\r\nOverrides MC_VERSION and BUILD_TYPE. If it fails to download the server files it will fail to install.",
+            "env_variable": "FORGE_VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "forge-minecraft-0b1f7bd52269",
+        "name": "Forge Minecraft",
+        "description": "Minecraft Forge Server. Minecraft Forge is a modding API (Application Programming Interface), which\nmakes it easier to create mods, and also make sure mods are compatible with each other.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/forge-minecraft-0b1f7bd52269.json",
+        "sha256": "b9c617768f93ef9d9ef6fb21555921cafbcb42a679f12ecde257b255d38daf45",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/forge/pterodactyl-egg-forge-minecraft.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/0b1f7bd52269.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-31T13:05:02+00:00",
+        "name": "Forge Minecraft",
+        "author": "panel@example.com",
+        "description": "Minecraft Forge Server. Minecraft Forge is a modding API (Application Programming Interface), which\nmakes it easier to create mods, and also make sure mods are compatible with each other.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar {{SERVER_JARFILE}}\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "[]",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# Forge Installation Script\n#\n# Server Files: /mnt/server\napt update\napt install -y curl jq\n\nif [[ ! -d /mnt/server ]]; then\n  mkdir /mnt/server\nfi\n\ncd /mnt/server\n\n# Remove spaces from the version number to avoid issues with curl\nFORGE_VERSION=\"$(echo \"$FORGE_VERSION\" | tr -d ' ')\"\nMC_VERSION=\"$(echo \"$MC_VERSION\" | tr -d ' ')\"\n\nif [[ ! -z ${FORGE_VERSION} ]]; then\n  DOWNLOAD_LINK=https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_VERSION}/forge-${FORGE_VERSION}\n  FORGE_JAR=forge-${FORGE_VERSION}*.jar\nelse\n  JSON_DATA=$(curl -sSL https://files.minecraftforge.net/maven/net/minecraftforge/forge/promotions_slim.json)\n\n  if [[ \"${MC_VERSION}\" == \"latest\" ]] || [[ \"${MC_VERSION}\" == \"\" ]]; then\n    echo -e \"getting latest version of forge.\"\n    MC_VERSION=$(echo -e ${JSON_DATA} | jq -r '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains(\"latest\")) | split(\"-\")[0]' | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | tail -1)\n    BUILD_TYPE=latest\n  fi\n\n  if [[ \"${BUILD_TYPE}\" != \"recommended\" ]] && [[ \"${BUILD_TYPE}\" != \"latest\" ]]; then\n    BUILD_TYPE=recommended\n  fi\n\n  echo -e \"minecraft version: ${MC_VERSION}\"\n  echo -e \"build type: ${BUILD_TYPE}\"\n\n  ## some variables for getting versions and things\n  FILE_SITE=https://maven.minecraftforge.net/net/minecraftforge/forge/\n  VERSION_KEY=$(echo -e ${JSON_DATA} | jq -r --arg MC_VERSION \"${MC_VERSION}\" --arg BUILD_TYPE \"${BUILD_TYPE}\" '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains($MC_VERSION)) | select(contains($BUILD_TYPE))')\n\n  ## locating the forge version\n  if [[ \"${VERSION_KEY}\" == \"\" ]] && [[ \"${BUILD_TYPE}\" == \"recommended\" ]]; then\n    echo -e \"dropping back to latest from recommended due to there not being a recommended version of forge for the mc version requested.\"\n    VERSION_KEY=$(echo -e ${JSON_DATA} | jq -r --arg MC_VERSION \"${MC_VERSION}\" '.promos | del(.\"latest-1.7.10\") | del(.\"1.7.10-latest-1.7.10\") | to_entries[] | .key | select(contains($MC_VERSION)) | select(contains(\"latest\"))')\n  fi\n\n  ## Error if the mc version set wasn't valid.\n  if [ \"${VERSION_KEY}\" == \"\" ] || [ \"${VERSION_KEY}\" == \"null\" ]; then\n    echo -e \"The install failed because there is no valid version of forge for the version of minecraft selected.\"\n    exit 1\n  fi\n\n  FORGE_VERSION=$(echo -e ${JSON_DATA} | jq -r --arg VERSION_KEY \"$VERSION_KEY\" '.promos | .[$VERSION_KEY]')\n\n  if [[ \"${MC_VERSION}\" == \"1.7.10\" ]] || [[ \"${MC_VERSION}\" == \"1.8.9\" ]]; then\n    DOWNLOAD_LINK=${FILE_SITE}${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}/forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}\n    FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}.jar\n    if [[ \"${MC_VERSION}\" == \"1.7.10\" ]]; then\n      FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}-${MC_VERSION}-universal.jar\n    fi\n  else\n    DOWNLOAD_LINK=${FILE_SITE}${MC_VERSION}-${FORGE_VERSION}/forge-${MC_VERSION}-${FORGE_VERSION}\n    FORGE_JAR=forge-${MC_VERSION}-${FORGE_VERSION}.jar\n  fi\nfi\n\n#Adding .jar when not eding by SERVER_JARFILE\nif [[ ! $SERVER_JARFILE = *\\.jar ]]; then\n  SERVER_JARFILE=\"$SERVER_JARFILE.jar\"\nfi\n\n#Downloading jars\necho -e \"Downloading forge version ${FORGE_VERSION}\"\necho -e \"Download link is ${DOWNLOAD_LINK}\"\n\nif [[ ! -z \"${DOWNLOAD_LINK}\" ]]; then\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}-installer.jar; then\n    echo -e \"installer jar download link is valid.\"\n  else\n    echo -e \"link is invalid. Exiting now\"\n    exit 2\n  fi\nelse\n  echo -e \"no download link provided. Exiting now\"\n  exit 3\nfi\n\ncurl -s -o installer.jar -sS ${DOWNLOAD_LINK}-installer.jar\n\n#Checking if downloaded jars exist\nif [[ ! -f ./installer.jar ]]; then\n  echo \"!!! Error downloading forge version ${FORGE_VERSION} !!!\"\n  exit\nfi\n\nfunction  unix_args {\n  echo -e \"Detected Forge 1.17 or newer version. Setting up forge unix args.\"\n  ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\n}\n\n# Delete args to support downgrading/upgrading\nrm -rf libraries/net/minecraftforge/forge\nrm unix_args.txt\n\n#Installing server\necho -e \"Installing forge server.\n\"\njava -jar installer.jar --installServer || { echo -e \"\nInstall failed using Forge version ${FORGE_VERSION} and Minecraft version ${MINECRAFT_VERSION}.\nShould you be using unlimited memory value of 0, make sure to increase the default install resource limits in the Daemon config or specify exact allocated memory in the server Build Configuration instead of 0! \nOtherwise, the Forge installer will not have enough memory.\"; exit 4; }\n\n# Check if we need a symlink for 1.17+ Forge JPMS args\nif [[ $MC_VERSION =~ ^1\\.(17|18|19|20|21|22|23) || $FORGE_VERSION =~ ^1\\.(17|18|19|20|21|22|23) ]]; then\n  unix_args\n\n# Check if someone has set MC to latest but overwrote it with older Forge version, otherwise we would have false positives\nelif [[ $MC_VERSION == \"latest\" && $FORGE_VERSION =~ ^1\\.(17|18|19|20|21|22|23) ]]; then\n  unix_args\nelse\n  # For versions below 1.17 that ship with jar\n  mv $FORGE_JAR $SERVER_JARFILE\nfi\n\necho -e \"Deleting installer.jar file.\n\"\nrm -rf installer.jar\necho -e \"Installation process is completed\"",
+            "container": "ghcr.io/pelican-eggs/installers:java_8",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Build Type",
+            "description": "The type of server jar to download from forge.\r\n\r\nValid types are \"recommended\" and \"latest\".",
+            "env_variable": "BUILD_TYPE",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:recommended,latest",
+            "field_type": "text"
+          },
+          {
+            "name": "Forge Version",
+            "description": "The full exact version.\r\n\r\nEx. 1.15.2-31.2.4\r\n\r\nOverrides MC_VERSION and BUILD_TYPE. If it fails to download the server files it will fail to\ninstall.",
+            "env_variable": "FORGE_VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^[0-9\\.\\-]+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft you want to install for.\r\n\r\nLeaving latest will install the latest recommended version.",
+            "env_variable": "MC_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:9",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the Jarfile to use when running Forge version below 1.17.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-revelation-4121b7e8ab96",
+        "name": "FTB Revelation",
+        "description": "Revelation is a general all-purpose pack that is designed for solo play as well as small and medium population servers. This pack contains a mix of magic, tech and exploration mods, and is the largest pack ever built and released by the Feed The Beast Team.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-revelation-4121b7e8ab96.json",
+        "sha256": "1ab866b9dcd16685789e07654876fb977acbfbe613bac925c6e5055ae54639b2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/outdated/egg-f-t-b-revelation.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/4121b7e8ab96.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "FTB Revelation",
+        "author": "aevum@decess.us",
+        "uuid": "2b6a3998-25d3-4c93-8f68-7a293fb39998",
+        "description": "Revelation is a general all-purpose pack that is designed for solo play as well as small and medium population servers. This pack contains a mix of magic, tech and exploration mods, and is the largest pack ever built and released by the Feed The Beast Team.",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar FTBserver-*.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nBASEURL=https://www.feed-the-beast.com/projects/ftb-revelation/files\r\nPATTERN=\"(projects\\/ftb-revelation\\/files\\/\\d{7,})\"\r\nID=`curl -sl ${BASEURL}| grep -A2 ${MODPACK_VERSION} | grep -oE \"${PATTERN}\"`\r\nSECONDURL=https://www.feed-the-beast.com/${ID}\r\nGOOD_ID=`curl -sl ${SECONDURL} | grep -B2 Server_${MODPACK_VERSION}.zip | grep -oE \"${PATTERN}\"`\r\n\r\nDL_URL=https://www.feed-the-beast.com/${GOOD_ID}/download\r\n\r\ncd /mnt/server\r\n\r\ncurl -L ${DL_URL} -o ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nunzip ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nrm -rf ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nsh ./FTBInstall.sh\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "2.4.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-revelation-cbc930b67f4b",
+        "name": "FTB Revelation",
+        "description": "Revelation is a general all-purpose pack that is designed for solo play as well as small and medium population servers. This pack contains a mix of magic, tech and exploration mods, and is the largest pack ever built and released by the Feed The Beast Team.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-revelation-cbc930b67f4b.json",
+        "sha256": "3c8f92eff1bf59daa0bb6ca17f6971173dbd5011a40f9e837572a58a180a24e3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/ftb/outdated/egg-f-t-b-revelation.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/cbc930b67f4b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T11:40:33+02:00",
+        "name": "FTB Revelation",
+        "author": "aevum@decess.us",
+        "description": "Revelation is a general all-purpose pack that is designed for solo play as well as small and medium population servers. This pack contains a mix of magic, tech and exploration mods, and is the largest pack ever built and released by the Feed The Beast Team.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar FTBserver-*.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nBASEURL=https://www.feed-the-beast.com/projects/ftb-revelation/files\r\nPATTERN=\"(projects\\/ftb-revelation\\/files\\/\\d{7,})\"\r\nID=`curl -sl ${BASEURL}| grep -A2 ${MODPACK_VERSION} | grep -oE \"${PATTERN}\"`\r\nSECONDURL=https://www.feed-the-beast.com/${ID}\r\nGOOD_ID=`curl -sl ${SECONDURL} | grep -B2 Server_${MODPACK_VERSION}.zip | grep -oE \"${PATTERN}\"`\r\n\r\nDL_URL=https://www.feed-the-beast.com/${GOOD_ID}/download\r\n\r\ncd /mnt/server\r\n\r\ncurl -L ${DL_URL} -o ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nunzip ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nrm -rf ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nsh ./FTBInstall.sh\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "2.4.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-revelation-f0e365658f41",
+        "name": "FTB Revelation",
+        "description": "Revelation is a general all-purpose pack that is designed for solo play as well as small and medium population servers. This pack contains a mix of magic, tech and exploration mods, and is the largest pack ever built and released by the Feed The Beast Team.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-revelation-f0e365658f41.json",
+        "sha256": "c39ceb062b1b9da630a0120aba9672bd3e28bbba9168d259233fb5986c3ff0ab",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/outdated/egg-pterodactyl-f-t-b-revelation.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/f0e365658f41.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:44+00:00",
+        "name": "FTB Revelation",
+        "author": "aevum@decess.us",
+        "description": "Revelation is a general all-purpose pack that is designed for solo play as well as small and medium population servers. This pack contains a mix of magic, tech and exploration mods, and is the largest pack ever built and released by the Feed The Beast Team.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar FTBserver-*.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nBASEURL=https://www.feed-the-beast.com/projects/ftb-revelation/files\r\nPATTERN=\"(projects\\/ftb-revelation\\/files\\/\\d{7,})\"\r\nID=`curl -sl ${BASEURL}| grep -A2 ${MODPACK_VERSION} | grep -oE \"${PATTERN}\"`\r\nSECONDURL=https://www.feed-the-beast.com/${ID}\r\nGOOD_ID=`curl -sl ${SECONDURL} | grep -B2 Server_${MODPACK_VERSION}.zip | grep -oE \"${PATTERN}\"`\r\n\r\nDL_URL=https://www.feed-the-beast.com/${GOOD_ID}/download\r\n\r\ncd /mnt/server\r\n\r\ncurl -L ${DL_URL} -o ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nunzip ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nrm -rf ftbrevelations-${MODPACK_VERSION}.zip\r\n\r\nsh ./FTBInstall.sh\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "2.4.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-server-3e2cb6e98d21",
+        "name": "FTB Server",
+        "description": "This egg was developed to easily set up a server from FTB.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-server-3e2cb6e98d21.json",
+        "sha256": "f72a8e9532e4a8ed77ff559c4488087673befe22d3d0a3c8c833db5d47dba48c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/egg-f-t-b-server.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/3e2cb6e98d21.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "FTB Server",
+        "author": "runemaster580@gmail.com",
+        "uuid": "e60a9de8-a0b1-4d97-b4e2-6568f048668d",
+        "description": "This egg was developed to easily set up a server from FTB.",
+        "image": null,
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.allocations.default.port}}\", \"query.port\": \"{{server.allocations.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FTB Pack Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server\r\nfi\r\ncd /mnt/server\r\n\r\n\r\n# Download needed software.\r\nfunction install_required {\r\n    apt update\r\n    apt install -y curl jq\r\n}\r\n\r\nfunction get_modpack_id {\r\n    urlencode() {\r\n        local string=\"${1// /%20}\"\r\n        echo \"$string\"\r\n    }\r\n    \r\n    # if no modpack id is set and modpack search term is set.\r\n    if [ -z ${FTB_MODPACK_ID} ] && [ ! -z \"${FTB_SEARCH_TERM}\" ]; then\r\n        encoded_search_term=$(urlencode \"$FTB_SEARCH_TERM\")\r\n        JSON_DATA=$(curl -sSL https://api.feed-the-beast.com/v1/modpacks/public/modpack/search/8?term=\"${encoded_search_term}\")\r\n    \r\n        # grabs the first modpack in array.\r\n        FTB_MODPACK_ID=$(echo -e ${JSON_DATA} | jq -r \".packs[0]\")\r\n    fi\r\n\r\n    if [ -z ${FTB_MODPACK_VERSION_ID} ] && [ ! -z ${FTB_VERSION_STRING} ]; then\r\n        # grabs the correct version id matching the string.\r\n        FTB_MODPACK_VERSION_ID=$(curl -sSL https://api.feed-the-beast.com/v1/modpacks/public/modpack/${FTB_MODPACK_ID} | jq -r --arg VSTRING ${FTB_VERSION_STRING} '.versions[] | select(.name == $VSTRING) | .id')\r\n    fi\r\n}\r\n\r\nfunction run_installer {\r\n    # get architecture for installer\r\n    INSTALLER_TYPE=$([ \"$(uname -m)\" == \"x86_64\" ] && echo \"linux\" || echo \"arm/linux\")\r\n    echo \"ModpackID: ${FTB_MODPACK_ID} VersionID: ${FTB_MODPACK_VERSION_ID} InstallerType: ${INSTALLER_TYPE}\"\r\n\r\n    # download installer\r\n    curl -L https://api.feed-the-beast.com/v1/modpacks/public/modpack/0/0/server/${INSTALLER_TYPE} --output serversetup\r\n    chmod +x ./serversetup\r\n    \r\n    # remove old forge files (to allow updating)\r\n    rm -rf libraries/net/minecraftforge/forge\r\n    rm -rf libraries/net/neoforged/forge\r\n    rm -f unix_args.txt\r\n    \r\n    # run installer\r\n    ./serversetup --pack ${FTB_MODPACK_ID} --version ${FTB_MODPACK_VERSION_ID} --auto --no-java\r\n}\r\n\r\n# allows startup command to work\r\nfunction move_startup_files {\r\n    # create symlink for forge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/minecraftforge/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # create symlink for neoforge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/neoforged/neoforge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/neoforged/neoforge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # move forge/neoforge/fabric jar file to start-server.jar if exists\r\n    if compgen -G \"forge-*.jar\"; then\r\n        mv -f forge-*.jar start-server.jar\r\n    elif compgen -G \"fabric-*.jar\"; then\r\n        mv -f fabric-*.jar start-server.jar\r\n    fi\r\n}\r\n\r\n# installer cleanup\r\nfunction installer_cleanup {\r\n    rm serversetup\r\n    rm -f run.bat\r\n    rm -f run.sh\r\n}\r\n\r\n# run installation steps\r\ninstall_required\r\nget_modpack_id\r\nrun_installer\r\nmove_startup_files\r\ninstaller_cleanup\r\n\r\necho \"Finished installing FTB modpack\"",
+            "container": "ghcr.io/pelican-eggs/installers:java_21",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FTB Pack Version",
+            "description": "what version of the modpack to install. leave empty if using the modpack version id variable.",
+            "env_variable": "FTB_VERSION_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": 1
+          },
+          {
+            "name": "FTB Pack Version ID",
+            "description": "The modpack api version ID.\r\nneeded if not using the string for the version.\r\n\r\nExample FTB Revelations version id for version \"2.0.2\" is 86.\r\nwhich would come out as: https://api.feed-the-beast.com/v1/modpacks/public/modpack/5/86",
+            "env_variable": "FTB_MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "sort": 2
+          },
+          {
+            "name": "FTB Pack search term",
+            "description": "the search term for finding the modpack. needs to be at least 4 characters long.\r\nFind out what term is needed by using the ftb app and searching with the term. make sure it only returns 1 result.\r\ncan also be searched for via: https://api.feed-the-beast.com/v1/modpacks/public/modpack/search/8?term={SEARCHTERM}\r\n\r\nonly needed if the modpack id and modpack version id is unknown.",
+            "env_variable": "FTB_SEARCH_TERM",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": 3
+          },
+          {
+            "name": "FTB modpack ID",
+            "description": "The FTB Api modpack ID.\r\nNeeded if not using the search variable\r\n\r\nExample: FTB Interactions ID is 5.\r\nhttps://api.feed-the-beast.com/v1/modpacks/public/modpack/5",
+            "env_variable": "FTB_MODPACK_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "sort": 4
+          }
+        ],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )"
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-server-86c1dcb7197d",
+        "name": "FTB Server",
+        "description": "This egg was developed to easily set up a server from FTB.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-server-86c1dcb7197d.json",
+        "sha256": "c5716b959e950abf0a91f2fffb99f788999dec111aed680bfefa9c8d27c045da",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/egg-pterodactyl-f-t-b-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/86c1dcb7197d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-18T18:11:44+00:00",
+        "name": "FTB Server",
+        "author": "runemaster580@gmail.com",
+        "description": "This egg was developed to easily set up a server from FTB.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25",
+          "Java 19": "ghcr.io/pelican-eggs/yolks:java_19",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FTB Pack Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server\r\nfi\r\ncd /mnt/server\r\n\r\n\r\n# Download needed software.\r\nfunction install_required {\r\n    apt update\r\n    apt install -y curl jq\r\n}\r\n\r\nfunction get_modpack_id {\r\n    urlencode() {\r\n        local string=\"${1// /%20}\"\r\n        echo \"$string\"\r\n    }\r\n    \r\n    # if no modpack id is set and modpack search term is set.\r\n    if [ -z ${FTB_MODPACK_ID} ] && [ ! -z \"${FTB_SEARCH_TERM}\" ]; then\r\n        encoded_search_term=$(urlencode \"$FTB_SEARCH_TERM\")\r\n        JSON_DATA=$(curl -sSL https://api.feed-the-beast.com/v1/modpacks/public/modpack/search/8?term=\"${encoded_search_term}\")\r\n    \r\n        # grabs the first modpack in array.\r\n        FTB_MODPACK_ID=$(echo -e ${JSON_DATA} | jq -r \".packs[0]\")\r\n    fi\r\n\r\n    if [ -z ${FTB_MODPACK_VERSION_ID} ] && [ ! -z ${FTB_VERSION_STRING} ]; then\r\n        # grabs the correct version id matching the string.\r\n        FTB_MODPACK_VERSION_ID=$(curl -sSL https://api.feed-the-beast.com/v1/modpacks/public/modpack/${FTB_MODPACK_ID} | jq -r --arg VSTRING ${FTB_VERSION_STRING} '.versions[] | select(.name == $VSTRING) | .id')\r\n    fi\r\n}\r\n\r\nfunction run_installer {\r\n    # get architecture for installer\r\n    INSTALLER_TYPE=$([ \"$(uname -m)\" == \"x86_64\" ] && echo \"linux\" || echo \"arm/linux\")\r\n    echo \"ModpackID: ${FTB_MODPACK_ID} VersionID: ${FTB_MODPACK_VERSION_ID} InstallerType: ${INSTALLER_TYPE}\"\r\n\r\n    # download installer\r\n    curl -L https://api.feed-the-beast.com/v1/modpacks/public/modpack/0/0/server/${INSTALLER_TYPE} --output serversetup\r\n    chmod +x ./serversetup\r\n    \r\n    # remove old forge files (to allow updating)\r\n    rm -rf libraries/net/minecraftforge/forge\r\n    rm -rf libraries/net/neoforged/forge\r\n    rm -f unix_args.txt\r\n    \r\n    # run installer\r\n    ./serversetup --pack ${FTB_MODPACK_ID} --version ${FTB_MODPACK_VERSION_ID} --auto --no-java\r\n}\r\n\r\n# allows startup command to work\r\nfunction move_startup_files {\r\n    # create symlink for forge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/minecraftforge/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # create symlink for neoforge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/neoforged/neoforge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/neoforged/neoforge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # move forge/neoforge/fabric jar file to start-server.jar if exists\r\n    if compgen -G \"forge-*.jar\"; then\r\n        mv -f forge-*.jar start-server.jar\r\n    elif compgen -G \"fabric-*.jar\"; then\r\n        mv -f fabric-*.jar start-server.jar\r\n    fi\r\n}\r\n\r\n# installer cleanup\r\nfunction installer_cleanup {\r\n    rm serversetup\r\n    rm -f run.bat\r\n    rm -f run.sh\r\n}\r\n\r\n# run installation steps\r\ninstall_required\r\nget_modpack_id\r\nrun_installer\r\nmove_startup_files\r\ninstaller_cleanup\r\n\r\necho \"Finished installing FTB modpack\"",
+            "container": "ghcr.io/pelican-eggs/yolks:java_21",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FTB Pack search term",
+            "description": "the search term for finding the modpack. needs to be at least 4 characters long.\r\nFind out what term is needed by using the ftb app and searching with the term. make sure it only returns 1 result.\r\ncan also be searched for via: https://api.feed-the-beast.com/v1/modpacks/public/modpack/search/8?term={SEARCHTERM}\r\n\r\nonly needed if the modpack id and modpack version id is unknown.",
+            "env_variable": "FTB_SEARCH_TERM",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB modpack ID",
+            "description": "The FTB Api modpack ID.\r\nNeeded if not using the search variable\r\n\r\nExample: FTB Interactions ID is 5.\r\nhttps://api.feed-the-beast.com/v1/modpacks/public/modpack/5",
+            "env_variable": "FTB_MODPACK_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version",
+            "description": "what version of the modpack to install. leave empty if using the modpack version id variable.",
+            "env_variable": "FTB_VERSION_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version ID",
+            "description": "The modpack api version ID.\r\nneeded if not using the string for the version.\r\n\r\nExample FTB Revelations version id for version \"2.0.2\" is 86.\r\nwhich would come out as: https://api.feed-the-beast.com/v1/modpacks/public/modpack/5/86",
+            "env_variable": "FTB_MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-server-a38c1f3c901c",
+        "name": "FTB Server",
+        "description": "FTB modpacks are now distributed through their own API. This egg was developed for support for modpacks that are distributed through this.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-server-a38c1f3c901c.json",
+        "sha256": "9be37a11fb81893a60842ef5a663347841162feb147fbcdcf894cd0c7d46ff7c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/ftb/egg-ftb-installer.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/a38c1f3c901c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "FTB Server",
+        "author": "runemaster580@gmail.com",
+        "description": "FTB modpacks are now distributed through their own API. This egg was developed for support for modpacks that are distributed through this.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 23": "ghcr.io/ptero-eggs/yolks:java_23",
+          "Java 24": "ghcr.io/ptero-eggs/yolks:java_24",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java $( [[ -f log4jfix/Log4jPatcher.jar ]] && printf %s \"-javaagent:log4jfix/Log4jPatcher.jar \" ) -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[ ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FTB Pack Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server\r\nfi\r\ncd /mnt/server || { echo \"Failed to change into server directory\"; exit 1; }\r\n\r\n\r\n# Download needed software.\r\nfunction install_required {\r\n    apt update\r\n    apt install -y curl jq\r\n}\r\n\r\nfunction get_modpack_id {\r\n    urlencode() {\r\n        local string=\"${1// /%20}\"\r\n        echo \"$string\"\r\n    }\r\n    \r\n    # if no modpack id is set and modpack search term is set.\r\n    if [ -z \"${FTB_MODPACK_ID}\" ] && [ -n \"${FTB_SEARCH_TERM}\" ]; then\r\n        encoded_search_term=$(urlencode \"$FTB_SEARCH_TERM\")\r\n        JSON_DATA=$(curl -sSL https://api.feed-the-beast.com/v1/modpacks/public/modpack/search/8?term=\"${encoded_search_term}\")\r\n    \r\n        # grabs the first modpack in array.\r\n        FTB_MODPACK_ID=$(echo -e \"${JSON_DATA}\" | jq -r \".packs[0]\")\r\n    fi\r\n    \r\n    if [ -z \"${FTB_MODPACK_VERSION_ID}\" ] && [ -n \"${FTB_VERSION_STRING}\" ]; then\r\n        # grabs the correct version id matching the string.\r\n        FTB_MODPACK_VERSION_ID=$(curl -sSL https://api.feed-the-beast.com/v1/modpacks/public/modpack/\"${FTB_MODPACK_ID}\" | jq -r --arg VSTRING \"${FTB_VERSION_STRING}\" '.versions[] | select(.name == $VSTRING) | .id')\r\n    fi\r\n}\r\n\r\nfunction run_installer {\r\n    # get architecture for installer\r\n    INSTALLER_TYPE=$([ \"$(uname -m)\" == \"x86_64\" ] && echo \"linux\" || echo \"arm/linux\")\r\n    echo \"ModpackID: ${FTB_MODPACK_ID} VersionID: ${FTB_MODPACK_VERSION_ID:-latest} InstallerType: ${INSTALLER_TYPE}\"\r\n\r\n    # download installer\r\n    curl -Ls https://api.feed-the-beast.com/v1/modpacks/public/modpack/0/0/server/${INSTALLER_TYPE} --output serversetup\r\n    chmod +x ./serversetup\r\n    \r\n    # remove old forge files (to allow updating)\r\n    rm -rf libraries/net/minecraftforge/forge\r\n    rm -rf libraries/net/neoforged/forge\r\n    rm -rf libraries/net/neoforged/neoforge\r\n    rm -f unix_args.txt\r\n    \r\n    # Remove old log4jpatcher\r\n    rm -rf log4jfix/\r\n    \r\n    # run installer\r\n    # shellcheck disable=SC2046\r\n    ./serversetup -pack \"${FTB_MODPACK_ID}\" $([ -n \"$FTB_MODPACK_VERSION_ID\" ] && echo \"-version $FTB_MODPACK_VERSION_ID\") -no-colours -no-java -auto -force || { echo \"Failed to run FTB Installer\"; exit 1; }\r\n}\r\n\r\n# allows startup command to work\r\nfunction move_startup_files {\r\n    # create symlink for forge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/minecraftforge/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # create symlink for neoforge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/neoforged/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/neoforged/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    if compgen -G \"libraries/net/neoforged/neoforge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/neoforged/neoforge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # Create symlink for log4jpatcher that is sometimes included\r\n    if compgen -G \"log4jfix/Log4jPatcher-*.jar\"; then\r\n        ln -sf log4jfix/Log4jPatcher-*.jar log4jfix/Log4jPatcher.jar\r\n    fi\r\n    \r\n    # move forge/neoforge/fabric jar file to start-server.jar if exists\r\n    if compgen -G \"forge-*.jar\"; then\r\n        mv -f forge-*.jar start-server.jar\r\n    elif compgen -G \"fabric-*.jar\"; then\r\n        mv -f fabric-*.jar start-server.jar\r\n    fi\r\n}\r\n\r\n# installer cleanup\r\nfunction installer_cleanup {\r\n    rm serversetup\r\n    rm -f run.bat\r\n    rm -f run.sh\r\n}\r\n\r\n# run installation steps\r\ninstall_required\r\nget_modpack_id\r\nrun_installer\r\nmove_startup_files\r\ninstaller_cleanup\r\n\r\necho \"Finished installing FTB modpack\"",
+            "container": "eclipse-temurin:8-jdk-jammy",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FTB Pack search term",
+            "description": "the search term for finding the modpack. needs to be at least 4 characters long.\r\nFind out what term is needed by using the ftb app and searching with the term. make sure it only returns 1 result.\r\ncan also be searched for via: https://api.feed-the-beast.com/v1/modpacks/public/modpack/search/8?term={SEARCHTERM}\r\n\r\nonly needed if the modpack id and modpack version id is unknown.",
+            "env_variable": "FTB_SEARCH_TERM",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB modpack ID",
+            "description": "The FTB Api modpack ID.\r\nNeeded if not using the search variable\r\n\r\nExample: FTB Interactions ID is 5.\r\nhttps://api.feed-the-beast.com/v1/modpacks/public/modpack/5",
+            "env_variable": "FTB_MODPACK_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version",
+            "description": "what version of the modpack to install. leave empty if using the modpack version id variable.",
+            "env_variable": "FTB_VERSION_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version ID",
+            "description": "The modpack api version ID.\r\nLeave this and FTB Pack Version empty to install latest.\r\n\r\nExample FTB Revelations version id for version \"2.0.2\" is 86.\r\nwhich would come out as: https://api.feed-the-beast.com/v1/modpacks/public/modpack/5/86",
+            "env_variable": "FTB_MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-modpacks-ch-server-27ec90c5727d",
+        "name": "FTB-modpacks.ch Server",
+        "description": "Since the release of the FTB APP, FTB modpacks are now distributed through modpacks.ch. This egg was developed for support for modpacks that are distributed through this.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-modpacks-ch-server-27ec90c5727d.json",
+        "sha256": "e96306445aa0c82c2d1c826e37b408ce27a3df9dc1c09a7dd67608bddba7003f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/outdated/egg-f-t-b-modpacks-ch-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/27ec90c5727d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "FTB-modpacks.ch Server",
+        "author": "runemaster580@gmail.com",
+        "uuid": "e60a9de8-a0b1-4d97-b4e2-6568f048668d",
+        "description": "Since the release of the FTB APP, FTB modpacks are now distributed through modpacks.ch. This egg was developed for support for modpacks that are distributed through this.",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 18": "ghcr.io/pelican-eggs/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -javaagent:log4jfix/Log4jPatcher-1.0.0.jar -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FTB Pack Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server\r\nfi\r\ncd /mnt/server\r\n\r\n\r\n# Download needed software.\r\nfunction install_required {\r\n    apt update\r\n    apt install -y curl jq\r\n}\r\n\r\nfunction get_modpack_id {\r\n    urlencode() {\r\n        local string=\"${1// /%20}\"\r\n        echo \"$string\"\r\n    }\r\n    \r\n    # if no modpack id is set and modpack search term is set.\r\n    if [ -z ${FTB_MODPACK_ID} ] && [ ! -z \"${FTB_SEARCH_TERM}\" ]; then\r\n        encoded_search_term=$(urlencode \"$FTB_SEARCH_TERM\")\r\n        JSON_DATA=$(curl -sSL https://api.modpacks.ch/public/modpack/search/8?term=\"${encoded_search_term}\")\r\n    \r\n        # grabs the first modpack in array.\r\n        FTB_MODPACK_ID=$(echo -e ${JSON_DATA} | jq -r \".packs[0]\")\r\n    fi\r\n    \r\n    if [ -z ${FTB_MODPACK_VERSION_ID} ] && [ ! -z ${FTB_VERSION_STRING} ]; then\r\n        # grabs the correct version id matching the string.\r\n        FTB_MODPACK_VERSION_ID=$(curl -sSL https://api.modpacks.ch/public/modpack/${FTB_MODPACK_ID} | jq -r --arg VSTRING ${FTB_VERSION_STRING} '.versions[] | select(.name == $VSTRING) | .id')\r\n    fi\r\n}\r\n\r\nfunction run_installer {\r\n    # get architecture for installer\r\n    INSTALLER_TYPE=$([ \"$(uname -m)\" == \"x86_64\" ] && echo \"linux\" || echo \"arm/linux\")\r\n    echo \"ModpackID: ${FTB_MODPACK_ID} VersionID: ${FTB_MODPACK_VERSION_ID} InstallerType: ${INSTALLER_TYPE}\"\r\n\r\n    # download installer\r\n    curl -L https://api.modpacks.ch/public/modpack/0/0/server/${INSTALLER_TYPE} --output serversetup\r\n    chmod +x ./serversetup\r\n    \r\n    # remove old forge files (to allow updating)\r\n    rm -rf libraries/net/minecraftforge/forge\r\n    rm -rf libraries/net/neoforged/forge\r\n    rm -f unix_args.txt\r\n    \r\n    # run installer\r\n    ./serversetup ${FTB_MODPACK_ID} ${FTB_MODPACK_VERSION_ID} --auto --noscript --nojava\r\n}\r\n\r\n# allows startup command to work\r\nfunction move_startup_files {\r\n    # create symlink for forge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/minecraftforge/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # create symlink for neoforge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/neoforged/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/neoforged/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # move forge/neoforge/fabric jar file to start-server.jar if exists\r\n    if compgen -G \"forge-*.jar\"; then\r\n        mv -f forge-*.jar start-server.jar\r\n    elif compgen -G \"fabric-*.jar\"; then\r\n        mv -f fabric-*.jar start-server.jar\r\n    fi\r\n}\r\n\r\n# installer cleanup\r\nfunction installer_cleanup {\r\n    rm serversetup\r\n    rm -f run.bat\r\n    rm -f run.sh\r\n}\r\n\r\n# run installation steps\r\ninstall_required\r\nget_modpack_id\r\nrun_installer\r\nmove_startup_files\r\ninstaller_cleanup\r\n\r\necho \"Finished installing FTB modpack\"",
+            "container": "ghcr.io/pelican-eggs/installers:java_8",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FTB Pack search term",
+            "description": "the search term for finding the modpack. needs to be at least 4 characters long.\r\nFind out what term is needed by using the ftb app and searching with the term. make sure it only returns 1 result.\r\ncan also be searched for via: https://api.modpacks.ch/public/modpack/search/8?term={SEARCHTERM}\r\n\r\nonly needed if the modpack id and modpack version id is unknown.",
+            "env_variable": "FTB_SEARCH_TERM",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "FTB modpack ID",
+            "description": "The FTB Api modpack ID.\r\nNeeded if not using the search variable\r\n\r\nExample: FTB Interactions ID is 5.\r\nhttps://api.modpacks.ch/public/modpack/5",
+            "env_variable": "FTB_MODPACK_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version",
+            "description": "what version of the modpack to install. leave empty if using the modpack version id variable.",
+            "env_variable": "FTB_VERSION_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version ID",
+            "description": "The modpack api version ID.\r\nneeded if not using the string for the version.\r\n\r\nExample FTB Revelations version id for version \"2.0.2\" is 86.\r\nwhich would come out as: https://api.modpacks.ch/public/modpack/5/86",
+            "env_variable": "FTB_MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ftb-modpacks-ch-server-72c877d24b40",
+        "name": "FTB-modpacks.ch Server",
+        "description": "Since the release of the FTB APP, FTB modpacks are now distributed through modpacks.ch. This egg was developed for support for modpacks that are distributed through this.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-modpacks-ch-server-72c877d24b40.json",
+        "sha256": "4bf0e4b7213d5dddec4220d0bb4de348b8c9ecbdc255b7d0771b60c73487464e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/ftb/egg-ftb-modpacksch-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/72c877d24b40.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-10-27T00:29:03+02:00",
+        "name": "FTB-modpacks.ch Server",
+        "author": "runemaster580@gmail.com",
+        "description": "Since the release of the FTB APP, FTB modpacks are now distributed through modpacks.ch. This egg was developed for support for modpacks that are distributed through this.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -javaagent:log4jfix/Log4jPatcher-1.0.0.jar -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FTB Pack Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server\r\nfi\r\ncd /mnt/server\r\n\r\n\r\n# Download needed software.\r\nfunction install_required {\r\n    apt update\r\n    apt install -y curl jq\r\n}\r\n\r\nfunction get_modpack_id {\r\n    urlencode() {\r\n        local string=\"${1// /%20}\"\r\n        echo \"$string\"\r\n    }\r\n    \r\n    # if no modpack id is set and modpack search term is set.\r\n    if [ -z ${FTB_MODPACK_ID} ] && [ ! -z \"${FTB_SEARCH_TERM}\" ]; then\r\n        encoded_search_term=$(urlencode \"$FTB_SEARCH_TERM\")\r\n        JSON_DATA=$(curl -sSL https://api.modpacks.ch/public/modpack/search/8?term=\"${encoded_search_term}\")\r\n    \r\n        # grabs the first modpack in array.\r\n        FTB_MODPACK_ID=$(echo -e ${JSON_DATA} | jq -r \".packs[0]\")\r\n    fi\r\n    \r\n    if [ -z ${FTB_MODPACK_VERSION_ID} ] && [ ! -z ${FTB_VERSION_STRING} ]; then\r\n        # grabs the correct version id matching the string.\r\n        FTB_MODPACK_VERSION_ID=$(curl -sSL https://api.modpacks.ch/public/modpack/${FTB_MODPACK_ID} | jq -r --arg VSTRING ${FTB_VERSION_STRING} '.versions[] | select(.name == $VSTRING) | .id')\r\n    fi\r\n}\r\n\r\nfunction run_installer {\r\n    # get architecture for installer\r\n    INSTALLER_TYPE=$([ \"$(uname -m)\" == \"x86_64\" ] && echo \"linux\" || echo \"arm/linux\")\r\n    echo \"ModpackID: ${FTB_MODPACK_ID} VersionID: ${FTB_MODPACK_VERSION_ID} InstallerType: ${INSTALLER_TYPE}\"\r\n\r\n    # download installer\r\n    curl -L https://api.modpacks.ch/public/modpack/0/0/server/${INSTALLER_TYPE} --output serversetup\r\n    chmod +x ./serversetup\r\n    \r\n    # remove old forge files (to allow updating)\r\n    rm -rf libraries/net/minecraftforge/forge\r\n    rm -rf libraries/net/neoforged/forge\r\n    rm -f unix_args.txt\r\n    \r\n    # run installer\r\n    ./serversetup ${FTB_MODPACK_ID} ${FTB_MODPACK_VERSION_ID} --auto --noscript --nojava\r\n}\r\n\r\n# allows startup command to work\r\nfunction move_startup_files {\r\n    # create symlink for forge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/minecraftforge/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # create symlink for neoforge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/neoforged/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/neoforged/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # move forge/neoforge/fabric jar file to start-server.jar if exists\r\n    if compgen -G \"forge-*.jar\"; then\r\n        mv -f forge-*.jar start-server.jar\r\n    elif compgen -G \"fabric-*.jar\"; then\r\n        mv -f fabric-*.jar start-server.jar\r\n    fi\r\n}\r\n\r\n# installer cleanup\r\nfunction installer_cleanup {\r\n    rm serversetup\r\n    rm -f run.bat\r\n    rm -f run.sh\r\n}\r\n\r\n# run installation steps\r\ninstall_required\r\nget_modpack_id\r\nrun_installer\r\nmove_startup_files\r\ninstaller_cleanup\r\n\r\necho \"Finished installing FTB modpack\"",
+            "container": "openjdk:8-jdk-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FTB Pack search term",
+            "description": "the search term for finding the modpack. needs to be at least 4 characters long.\r\nFind out what term is needed by using the ftb app and searching with the term. make sure it only returns 1 result.\r\ncan also be searched for via: https://api.modpacks.ch/public/modpack/search/8?term={SEARCHTERM}\r\n\r\nonly needed if the modpack id and modpack version id is unknown.",
+            "env_variable": "FTB_SEARCH_TERM",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB modpack ID",
+            "description": "The FTB Api modpack ID.\r\nNeeded if not using the search variable\r\n\r\nExample: FTB Interactions ID is 5.\r\nhttps://api.modpacks.ch/public/modpack/5",
+            "env_variable": "FTB_MODPACK_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version",
+            "description": "what version of the modpack to install. leave empty if using the modpack version id variable.",
+            "env_variable": "FTB_VERSION_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version ID",
+            "description": "The modpack api version ID.\r\nneeded if not using the string for the version.\r\n\r\nExample FTB Revelations version id for version \"2.0.2\" is 86.\r\nwhich would come out as: https://api.modpacks.ch/public/modpack/5/86",
+            "env_variable": "FTB_MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

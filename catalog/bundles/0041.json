@@ -1,0 +1,1595 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "fivem-7d4c81cd6808",
+        "name": "FiveM",
+        "description": "A new FiveM / RedM egg for the latest builds due to recent changes in FiveM",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fivem-7d4c81cd6808.json",
+        "sha256": "4edfcdaaca61ffcf4a7ebad92e05ccd3d1207ccb27f8d89f351ffead8f996a0a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/fivem/egg-pterodactyl-five-m.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/7d4c81cd6808.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-20T19:43:26+02:00",
+        "name": "FiveM",
+        "author": "parker@parkervcp.com",
+        "description": "A new FiveM / RedM egg for the latest builds due to recent changes in FiveM",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "$(pwd)/alpine/opt/cfx-server/ld-musl-x86_64.so.1 --library-path \"$(pwd)/alpine/usr/lib/v8/:$(pwd)/alpine/lib/:$(pwd)/alpine/usr/lib/\" -- $(pwd)/alpine/opt/cfx-server/FXServer +set citizen_dir $(pwd)/alpine/opt/cfx-server/citizen/ +set sv_licenseKey {{FIVEM_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} $( [ \"$TXADMIN_ENABLE\" == \"1\" ] || printf %s '+exec server.cfg' )",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\", \"set sv_licenseKey\": \"set sv_licenseKey {{server.build.env.FIVEM_LICENSE}}\", \"set steam_webApiKey\": \"set steam_webApiKey {{server.build.env.STEAM_WEBAPIKEY}}\", \"sv_maxclients\": \"sv_maxclients {{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"succeeded. Welcome!\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FiveM Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p /mnt/server/resources\r\n\r\ncd /mnt/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https://github.com/citizenfx/cfx-server-data.git /tmp\r\ncp -Rf /tmp/resources/* resources/\r\n\r\nRELEASE_PAGE=$(curl -sSL https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)\r\nCHANGELOGS_PAGE=$(curl -sSL https://changelogs-live.fivem.net/api/changelog/versions/linux/server)\r\n\r\nif [[ \"${FIVEM_VERSION}\" == \"recommended\" ]] || [[ -z ${FIVEM_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${FIVEM_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*/*.tar.xz\"' | grep -Eo '\".*/*.tar.xz\"' | sed 's/\\\"//g'  | sed 's/\\.\\///1' | grep -i \"${FIVEM_VERSION}\" | grep -o =.* |  tr -d '=')\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"Skipping downloading default server config file as one already exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/fivem/server.cfg >>server.cfg\r\nfi\r\n\r\n# Map GAME_NAME to GAME_TYPE before writing to server.cfg\r\nif [ \"${TXHOST_GAME_NAME}\" == \"fivem\" ]; then\r\n    GAME_TYPE=\"gta5\"\r\nelif [ \"${TXHOST_GAME_NAME}\" == \"redm\" ]; then\r\n    GAME_TYPE=\"rdr3\"\r\nelse\r\n    echo \"Invalid GAME_NAME specified: ${TXHOST_GAME_NAME}\"\r\n    exit 1\r\nfi    \r\n\r\nCFG_FILE=\"server.cfg\"\r\n\r\n# Only proceed if server.cfg exists\r\nif [ -f \"$CFG_FILE\" ]; then\r\n    # Remove old gamename block: comment and actual line\r\n    sed -i '/^# set gamename/,+1d' \"$CFG_FILE\"\r\n\r\n    # Append clean new block\r\n    {\r\n        echo \"# set gamename\"\r\n        echo \"set gamename \\\"${GAME_TYPE}\\\"\"\r\n    } >> \"$CFG_FILE\"\r\nelse\r\n    echo \"Warning: $CFG_FILE not found. Skipping gamename insertion.\"\r\nfi\r\n\r\nmkdir -p logs/\r\n\r\necho \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "fivem license",
+            "description": "Required to start the service. Get your keys at https://portal.cfx.re/",
+            "env_variable": "FIVEM_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:33",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the fivem max play count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,48",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name that shows up in the server browser",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "My new FXServer!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "fivem version",
+            "description": "The fivem version that is to be installed. Invalid versions will default to recommended.\r\n\r\nAn example is `6013-d8ae399d15680da569022f57ab7f2474d307c821`\r\n\r\nYou can get the latest version from here - https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/",
+            "env_variable": "FIVEM_VERSION",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "This is the link to download fivem from. This is only used in the install script.\r\n\r\nThe file you link to needs to be an fx.tar.zx file.\r\n\r\nExample:\r\nhttps://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/6013-d8ae399d15680da569022f57ab7f2474d307c821/fx.tar.xz",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Web Api Key",
+            "description": "Use your Steam WebApiKey or set to 'none'. Get your key at https://steamcommunity.com/dev/apikey/",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "txAdmin Port",
+            "description": "The port for the txAdmin panel",
+            "env_variable": "TXHOST_TXA_PORT",
+            "default_value": "40120",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable txadmin",
+            "description": "Enables txadmin.\r\n\r\nset to 1 to enable. (default is 0 for false)",
+            "env_variable": "TXADMIN_ENABLE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "Restricts to only running either FiveM or RedM servers.\r\nThe setup page will only show recipes for the game specified below !\r\nOptions are : fivem or redm",
+            "env_variable": "TXHOST_GAME_NAME",
+            "default_value": "fivem",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:fivem,redm",
+            "field_type": "text"
+          },
+          {
+            "name": "Game type",
+            "description": "Value to be used : gta5 for FiveM and rdr3 for RedM\r\n! Dont fill in any value it reads the game name variable and set the correct value for it !",
+            "env_variable": "GAME_TYPE",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "TXHOST DATA PATH",
+            "description": "Location for TX Admin",
+            "env_variable": "TXHOST_DATA_PATH",
+            "default_value": "/home/container/txData",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fivem-b5d84400b614",
+        "name": "FiveM",
+        "description": "A new FiveM /RedM egg for the latest builds due to recent changes in FiveM",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fivem-b5d84400b614.json",
+        "sha256": "37a252b4a74b6bacbcaa5a43b29a9ca8624e5c1c86d65cad3ff3ba3d3eac84fd",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/fivem/egg-five-m.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/b5d84400b614.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-20T20:14:27+02:00",
+        "name": "FiveM",
+        "author": "parker@parkervcp.com",
+        "description": "A new FiveM /RedM egg for the latest builds due to recent changes in FiveM",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "$(pwd)/alpine/opt/cfx-server/ld-musl-x86_64.so.1 --library-path \"$(pwd)/alpine/usr/lib/v8/:$(pwd)/alpine/lib/:$(pwd)/alpine/usr/lib/\" -- $(pwd)/alpine/opt/cfx-server/FXServer +set citizen_dir $(pwd)/alpine/opt/cfx-server/citizen/ +set sv_licenseKey {{FIVEM_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} $( [ \"$TXADMIN_ENABLE\" == \"1\" ] || printf %s '+exec server.cfg' )",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\", \"set sv_licenseKey\": \"set sv_licenseKey {{server.build.env.FIVEM_LICENSE}}\", \"set steam_webApiKey\": \"set steam_webApiKey {{server.build.env.STEAM_WEBAPIKEY}}\", \"sv_maxclients\": \"sv_maxclients {{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"succeeded. Welcome!\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FiveM Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p /mnt/server/resources\r\n\r\ncd /mnt/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https://github.com/citizenfx/cfx-server-data.git /tmp\r\ncp -Rf /tmp/resources/* resources/\r\n\r\nRELEASE_PAGE=$(curl -sSL https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)\r\nCHANGELOGS_PAGE=$(curl -sSL https://changelogs-live.fivem.net/api/changelog/versions/linux/server)\r\n\r\nif [[ \"${FIVEM_VERSION}\" == \"recommended\" ]] || [[ -z ${FIVEM_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${FIVEM_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*/*.tar.xz\"' | grep -Eo '\".*/*.tar.xz\"' | sed 's/\\\"//g'  | sed 's/\\.\\///1' | grep -i \"${FIVEM_VERSION}\" | grep -o =.* |  tr -d '=')\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"Skipping downloading default server config file as one already exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/gta/fivem/server.cfg >>server.cfg\r\nfi\r\n\r\n# Map GAME_NAME to GAME_TYPE before writing to server.cfg\r\nif [ \"${TXHOST_GAME_NAME}\" == \"fivem\" ]; then\r\n    GAME_TYPE=\"gta5\"\r\nelif [ \"${TXHOST_GAME_NAME}\" == \"redm\" ]; then\r\n    GAME_TYPE=\"rdr3\"\r\nelse\r\n    echo \"Invalid GAME_NAME specified: ${TXHOST_GAME_NAME}\"\r\n    exit 1\r\nfi    \r\n\r\nCFG_FILE=\"server.cfg\"\r\n\r\n# Only proceed if server.cfg exists\r\nif [ -f \"$CFG_FILE\" ]; then\r\n    # Remove old gamename block: comment and actual line\r\n    sed -i '/^# set gamename/,+1d' \"$CFG_FILE\"\r\n\r\n    # Append clean new block\r\n    {\r\n        echo \"# set gamename\"\r\n        echo \"set gamename \\\"${GAME_TYPE}\\\"\"\r\n    } >> \"$CFG_FILE\"\r\nelse\r\n    echo \"Warning: $CFG_FILE not found. Skipping gamename insertion.\"\r\nfi\r\n\r\nmkdir -p logs/\r\n\r\necho \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "fivem license",
+            "description": "Required to start the service. Get your keys at https://portal.cfx.re/",
+            "env_variable": "FIVEM_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:33",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the fivem max play count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,48",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name that shows up in the server browser",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "My new FXServer!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "fivem version",
+            "description": "The fivem version that is to be installed. Invalid versions will default to recommended.\r\n\r\nAn example is `6013-d8ae399d15680da569022f57ab7f2474d307c821`\r\n\r\nYou can get the latest version from here - https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/",
+            "env_variable": "FIVEM_VERSION",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "This is the link to download fivem from. This is only used in the install script.\r\n\r\nThe file you link to needs to be an fx.tar.zx file.\r\n\r\nExample:\r\nhttps://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/6013-d8ae399d15680da569022f57ab7f2474d307c821/fx.tar.xz",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Web Api Key",
+            "description": "Use your Steam WebApiKey or set to 'none'. Get your key at https://steamcommunity.com/dev/apikey/",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "txAdmin Port",
+            "description": "The port for the txAdmin panel",
+            "env_variable": "TXHOST_TXA_PORT",
+            "default_value": "40120",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable txadmin",
+            "description": "Enables txadmin.\r\n\r\nset to 1 to enable. (default is 0 for false)",
+            "env_variable": "TXADMIN_ENABLE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "Restricts to only running either FiveM or RedM servers.\r\nThe setup page will only show recipes for the game specified below !\r\nOptions are : fivem or redm",
+            "env_variable": "TXHOST_GAME_NAME",
+            "default_value": "fivem",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:fivem,redm",
+            "field_type": "text"
+          },
+          {
+            "name": "Game type",
+            "description": "Value to be used : gta5 for FiveM and rdr3 for RedM\r\n! Dont fill in any value it reads the game name variable and set the correct value for it !",
+            "env_variable": "GAME_TYPE",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "TXHOST DATA PATH",
+            "description": "Location for TX Admin",
+            "env_variable": "TXHOST_DATA_PATH",
+            "default_value": "/home/container/txData",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fivem-dedb90348805",
+        "name": "FiveM",
+        "description": "A new FiveM egg for the latest builds due to recent changes in FiveM",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fivem-dedb90348805.json",
+        "sha256": "23bfcde32d33814b2f03249d649b34c3eb04ef43eeb8ef7b641ba4be354352e3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/gta/fivem/egg-five-m.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/dedb90348805.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-02-19T12:54:36+01:00",
+        "name": "FiveM",
+        "author": "parker@parkervcp.com",
+        "description": "A new FiveM egg for the latest builds due to recent changes in FiveM",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "$(pwd)/alpine/opt/cfx-server/ld-musl-x86_64.so.1 --library-path \"$(pwd)/alpine/usr/lib/v8/:$(pwd)/alpine/lib/:$(pwd)/alpine/usr/lib/\" -- $(pwd)/alpine/opt/cfx-server/FXServer +set citizen_dir $(pwd)/alpine/opt/cfx-server/citizen/ +set sv_licenseKey {{FIVEM_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} +set serverProfile default +set txAdminPort {{TXADMIN_PORT}} $( [ \"$TXADMIN_ENABLE\" == \"1\" ] || printf %s '+exec server.cfg' )",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\", \"set sv_licenseKey\": \"set sv_licenseKey {{server.build.env.FIVEM_LICENSE}}\", \"set steam_webApiKey\": \"set steam_webApiKey {{server.build.env.STEAM_WEBAPIKEY}}\", \"sv_maxclients\": \"sv_maxclients {{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"succeeded. Welcome!\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FiveM Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p /mnt/server/resources\r\n\r\ncd /mnt/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https://github.com/citizenfx/cfx-server-data.git /tmp\r\ncp -Rf /tmp/resources/* resources/\r\n\r\nRELEASE_PAGE=$(curl -sSL https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)\r\nCHANGELOGS_PAGE=$(curl -sSL https://changelogs-live.fivem.net/api/changelog/versions/linux/server)\r\n\r\nif [[ \"${FIVEM_VERSION}\" == \"recommended\" ]] || [[ -z ${FIVEM_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${FIVEM_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*/*.tar.xz\"' | grep -Eo '\".*/*.tar.xz\"' | sed 's/\\\"//g'  | sed 's/\\.\\///1' | grep -i \"${FIVEM_VERSION}\" | grep -o =.* |  tr -d '=')\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"Skipping downloading default server config file as one already exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/fivem/server.cfg >>server.cfg\r\nfi\r\n\r\nmkdir -p logs/\r\n\r\necho \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "fivem license",
+            "description": "Required to start the service. Get your keys at https://keymaster.fivem.net/",
+            "env_variable": "FIVEM_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:33",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the fivem max play count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,48",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name that shows up in the server browser",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "My new FXServer!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "fivem version",
+            "description": "The fivem version that is to be installed. Invalid versions will default to recommended.\r\n\r\nAn example is `6013-d8ae399d15680da569022f57ab7f2474d307c821`\r\n\r\nYou can get the latest version from here - https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/",
+            "env_variable": "FIVEM_VERSION",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "This is the link to download fivem from. This is only used in the install script.\r\n\r\nThe file you link to needs to be an fx.tar.zx file.\r\n\r\nExample:\r\nhttps://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/6013-d8ae399d15680da569022f57ab7f2474d307c821/fx.tar.xz",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Web Api Key",
+            "description": "Use your Steam WebApiKey or set to 'none'. Get your key at https://steamcommunity.com/dev/apikey/",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "txAdmin Port",
+            "description": "The port for the txAdmin panel",
+            "env_variable": "TXADMIN_PORT",
+            "default_value": "40120",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable txadmin",
+            "description": "Enables txadmin.\r\n\r\nset to 1 to enable. (default is 0 for false)",
+            "env_variable": "TXADMIN_ENABLE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fof-65754c6e86a9",
+        "name": "Fof",
+        "description": "Fistful of Frags",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fof-65754c6e86a9.json",
+        "sha256": "9101cf8008d1939e75c4df7d8bbcce9f9ad28b3f427dd0fb923a9410b6a0d6b1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "fof/egg-fof.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/65754c6e86a9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Fof",
+        "author": "avalongamecs@gmail.com",
+        "uuid": "bf18486b-8770-49f2-8944-f85e708a31ee",
+        "description": "Fistful of Frags",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "fof ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "295230",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:295230",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "fof game",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "fof",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(fof)$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default Map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "fof_revenge",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fof-980c1505699f",
+        "name": "Fof",
+        "description": "Fistful of Frags",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fof-980c1505699f.json",
+        "sha256": "8ba4d82c6348f3aaea8fe7c6ed05875a4ec1b6d86c01503feff35b391fc12774",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "fof/egg-fof.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/980c1505699f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:23:21+02:00",
+        "name": "Fof",
+        "author": "avalongamecs@gmail.com",
+        "description": "Fistful of Frags",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "fof ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "295230",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:295230",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "fof game",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "fof",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(fof)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default Map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "fof_revenge",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fof-a6f6dd4db513",
+        "name": "Fof",
+        "description": "Fistful of Frags",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fof-a6f6dd4db513.json",
+        "sha256": "64ab833ca29b5951703b225c378c6478e3664d7a9a088c9cffc2e27f76180bbf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/fof/egg-fof.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/a6f6dd4db513.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:23:21+02:00",
+        "name": "Fof",
+        "author": "avalongamecs@gmail.com",
+        "description": "Fistful of Frags",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "fof ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "295230",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:295230",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "fof game",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "fof",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(fof)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default Map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "fof_revenge",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fof-fe74bc8879a9",
+        "name": "Fof",
+        "description": "Fistful of Frags",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fof-fe74bc8879a9.json",
+        "sha256": "8d2f64360027f58bf12af69b4b77da0623d8f485088121974c4d0884bf83924d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "fof/egg-pterodactyl-fof.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/fe74bc8879a9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:13+00:00",
+        "name": "Fof",
+        "author": "avalongamecs@gmail.com",
+        "description": "Fistful of Frags",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "fof ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "295230",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:295230",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "fof game",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "fof",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(fof)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default Map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "fof_revenge",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fortresscraft-evolved-164c79d03f31",
+        "name": "Fortresscraft Evolved",
+        "description": "FortressCraft Evolved is a unique blend of Voxel Landscapes, Tower Defense, Crafting, Logistics, Exploration, Combat and Assembly lines. Players begin by crash-landing on a strange alien world, left with only a small handful of starting machines..",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fortresscraft-evolved-164c79d03f31.json",
+        "sha256": "68d013d4a0da0ec759f0078b1331076125ea4a05fc2baac6346c14bb0bd8cbbc",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "fortresscraft_evolved/egg-fortresscraft-evolved.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/164c79d03f31.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-18T02:47:27+01:00",
+        "name": "Fortresscraft Evolved",
+        "author": "brainshead@gmail.com",
+        "description": "FortressCraft Evolved is a unique blend of Voxel Landscapes, Tower Defense, Crafting, Logistics, Exploration, Combat and Assembly lines. Players begin by crash-landing on a strange alien world, left with only a small handful of starting machines..",
+        "features": null,
+        "docker_images": {
+          "Debian STEAMCMD": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "rm ./unity.log; ./FC_Linux_Universal.x86_64 -batchmode -nographics -logFile ./unity.log & ENS_PID=$! ; tail -c0 -F ./unity.log --pid=$ENS_PID | grep -Ev \"Filename:|DebugBindings|buildslave|Line:\"",
+        "config": {
+          "files": "{\"Default/firstrun.ini\": {\"parser\": \"ini\", \"find\": {\"[config].Name\": \"{{server.build.env.SERVER_NAME}}\", \"[config].Resources\": \"{{server.build.env.G_RESOURCE}}\", \"[config].Conveyors\": \"{{server.build.env.G_CONVEYOR}}\", \"[config].Power\": \"{{server.build.env.G_POWER}}\", \"[config].Day\": \"{{server.build.env.G_DAY}}\", \"[config].CarePackage\": \"{{server.build.env.G_CAREPACKAGE}}\", \"[config].FlatLand\": \"{{server.build.env.G_FLATLAND}}\", \"[config].RushMode\": \"{{server.build.env.G_RushMode}}\"}}, \"Default/serveroverrides.ini\": {\"parser\": \"ini\", \"find\": {\"[config].RCONPort\": \"{{server.build.env.RCON_PORT}}\", \"[config].RCONPassword\": \"{{server.build.env.RCON_PASSWORD}}\", \"[config].ServerPort\": \"{{server.build.default.port}}\", \"[config].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"[config].WorldName\": \"{{server.build.env.WORLDNAME}}\", \"[config].IsPublic\": \"{{server.build.env.PUBLIC}}\", \"[config].AutoPause\": \"{{server.build.env.AUTO_PAUSE}}\"}}}",
+          "startup": "{\"done\": \"Headless server active\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n#Custom Commands\r\nSOURCE_DIR=\"/mnt/server/Default/Example Server Ini files\"\r\nTARGET_DIR=\"/mnt/server/Default\"\r\n\r\necho \"Copying default server ini files...\"\r\n\r\nif [ -d \"${SOURCE_DIR}\" ]; then\r\n    cp -v \"${SOURCE_DIR}/firstrun.ini\" \"${TARGET_DIR}/\" 2>/dev/null || echo \"firstrun.ini not found\"\r\n    cp -v \"${SOURCE_DIR}/serveroverrides.ini\" \"${TARGET_DIR}/\" 2>/dev/null || echo \"serveroverrides.ini not found\"\r\nelse\r\n    echo \"Warning: ${SOURCE_DIR} does not exist, skipping ini copy\"\r\nfi\r\n# Remove comment lines starting with --\r\nsed -i '/^[[:space:]]*--/d' /mnt/server/Default/firstrun.ini\r\n\r\n# Remove inline comments after values (e.g. \"greg  --comment\")\r\nsed -i 's/\\s*--.*$//' /mnt/server/Default/firstrun.ini\r\n    echo \" Cleanup INI file layout \"\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[STEAM] Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443600",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM]  Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Beta Branch",
+            "description": "Installs beta branch if specified.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "linux_server_headless",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Server name",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Dedicated Server World",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] RCON port",
+            "description": "RCON Port",
+            "env_variable": "RCON_PORT",
+            "default_value": "27001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] RCON Password",
+            "description": "RCON Password",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Max Players",
+            "description": "Max Players (default is 64)",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "64",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] World Name",
+            "description": "Specific World to load by the server at startup",
+            "env_variable": "WORLDNAME",
+            "default_value": "WorldName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Public",
+            "description": "Should the Server list itself on the Publicserverlist? If you set this to true everybody might join. Griefers might/will do what they want on the server, be sure to take measures.",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Auto Pause",
+            "description": "Should the server go to sleep when nobody is on it?",
+            "env_variable": "AUTO_PAUSE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[GAME WORLD] Resources",
+            "description": "Choices are : Rapid, Plentiful, Scarce, Greg",
+            "env_variable": "G_RESOURCE",
+            "default_value": "scarce",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:rapid,plentiful,scarce,greg",
+            "field_type": "text"
+          },
+          {
+            "name": "[GAME WORLD] Conveyors",
+            "description": "Speed of conveyors : Slow, Fast",
+            "env_variable": "G_CONVEYOR",
+            "default_value": "slow",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:slow,fast",
+            "field_type": "text"
+          },
+          {
+            "name": "[GAME WORLD] Power",
+            "description": "Power Choices : Scarce, Plentiful",
+            "env_variable": "G_POWER",
+            "default_value": "scarce",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:scarce,plentiful",
+            "field_type": "text"
+          },
+          {
+            "name": "[GAME WORLD] Day",
+            "description": "Day Choices : Eternal, Normal, Night",
+            "env_variable": "G_DAY",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:eternal,normal,night",
+            "field_type": "text"
+          },
+          {
+            "name": "[GAME WORLD] CarePackage",
+            "description": "",
+            "env_variable": "G_CAREPACKAGE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[GAME WORLD] Flat land",
+            "description": "",
+            "env_variable": "G_FLATLAND",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[GAME WORLD] RushMode",
+            "description": "",
+            "env_variable": "G_RushMode",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "foundry-005863fa7f18",
+        "name": "Foundry",
+        "description": "Build a factory optimized to perfection or an artistic masterpiece in an infinite voxel world. Mine and harvest resources, automate your ever-growing production lines and manage complex systems while researching your way to mechanical mastery in FOUNDRY.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/foundry-005863fa7f18.json",
+        "sha256": "0e7668cf8c404cc7ba6d3a02afa36c5987c2f47abc88dbade5a30db1d2c9c7a1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "foundry/egg-foundry.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/005863fa7f18.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Foundry",
+        "author": "eggs@goover.dev",
+        "uuid": "91705781-6ef4-49a7-8655-8da3b89aa99f",
+        "description": "Build a factory optimized to perfection or an artistic masterpiece in an infinite voxel world. Mine and harvest resources, automate your ever-growing production lines and manage complex systems while researching your way to mechanical mastery in FOUNDRY.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "xvfb :0 -screen 0 1024x768x16; DISPLAY=:0.0 xvfb-run wine /home/container/FoundryDedicatedServer.exe -log",
+        "config": {
+          "files": "{\"App.cfg\": {\"parser\": \"properties\", \"find\": {\"server_name\": \"{{server.environment.SERVER_NAME}}\", \"server_password\": \"{{server.environment.SRV_PW}}\", \"server_world_name\": \"{{server.environment.WORLD_NAME}}\", \"server_max_players\": \"{{server.environment.MAX_PLAYERS}}\", \"server_port\": \"{{server.allocations.default.port}}\", \"server_query_port\": \"{{server.environment.QUERY_PORT}}\", \"pause_server_when_empty\": \"{{server.environment.PAUSE_SERVER}}\", \"autosave_interval\": \"{{server.environment.AUTOSAVE_INTERVAL}}\", \"server_is_public\": \"{{server.environment.PUBLIC_SERVER}}\", \"server_persistent_data_override_folder\": \"{{server.environment.SAVE_PATH}}\", \"map_seed\": \"{{server.environment.MAP_SEED}}\"}}}",
+          "startup": "{\"done\": \"Dedicated server is now running!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Foundry Installscript${NC}\"\r\necho -e \"${YELLOW}Egg by gOOvER | 2024 MIT Licence${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\nmkdir -p $HOME/Mods\r\nmkdir -p $HOME/serverfiles\r\n\r\n#ccheck for config\r\nFILE=$HOME/App.cfg\r\n\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}App.cfg found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No App.cfg found. downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME\r\n  curl -sSL -o App.cfg https://dedicated.foundry-game.com/App.cfg\r\n  echo -e \"${GREEN}..done..${NC}\"\r\nfi\r\n\r\n## cleanup to prevent errors\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${RED}deleting old wine dirs... please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\nif [ ! -d \"/mnt/server/.wine\" ]; then\r\n    rm -fR /mnt/server/.wine\r\n    rm -fR /mnt/server/.config\r\n    rm -fR /mnt/server/.cache\r\n    rm -fR /mnt/server/.local\r\n    rm -fR /mnt/server/appcache\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": null,
+            "name": "[SERVER] Steam Query Port",
+            "description": "Sets the network port used by the Steam server browser to query information about the game. This is only used if the server is set to public.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server Name",
+            "description": "This is the name of the server listed in the Steam server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server World Name",
+            "description": "Sets the server world name. This is the folder where the save files will be stored.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "MyFoundry",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server Password",
+            "description": "Sets the server password.",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Pause Server When Empty",
+            "description": "Will the server pause when nobody is connected.",
+            "env_variable": "PAUSE_SERVER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Autosave Interval",
+            "description": "Sets the autosave frequency in seconds.",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server Public",
+            "description": "Sets whether the server is listed on the Steam server browser.",
+            "env_variable": "PUBLIC_SERVER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Map Seed",
+            "description": "Sets the map seed used to generate the world.",
+            "env_variable": "MAP_SEED",
+            "default_value": "42938743982",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server Max Players",
+            "description": "This sets the max amount of players on a server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Savepath",
+            "description": "",
+            "env_variable": "SAVE_PATH",
+            "default_value": "/home/container/serverfiles",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Auto update the server",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2915550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2915550",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[WINE] WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[WINE] WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[WINE] XVFB",
+            "description": "",
+            "env_variable": "XVFB",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "foundry-3cb7058c4e0c",
+        "name": "Foundry",
+        "description": "Build a factory optimized to perfection or an artistic masterpiece in an infinite voxel world. Mine and harvest resources, automate your ever-growing production lines and manage complex systems while researching your way to mechanical mastery in FOUNDRY.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/foundry-3cb7058c4e0c.json",
+        "sha256": "f07b9746724999638eda89a297370fd40a2978f0035b6b8b6f16d6c68204d469",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "foundry/egg-foundry.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/3cb7058c4e0c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-08-25T11:31:45+02:00",
+        "name": "Foundry",
+        "author": "eggs@goover.dev",
+        "description": "Build a factory optimized to perfection or an artistic masterpiece in an infinite voxel world. Mine and harvest resources, automate your ever-growing production lines and manage complex systems while researching your way to mechanical mastery in FOUNDRY.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "xvfb :0 -screen 0 1024x768x16; DISPLAY=:0.0 xvfb-run wine /home/container/FoundryDedicatedServer.exe -log",
+        "config": {
+          "files": "{\"App.cfg\": {\"parser\": \"properties\", \"find\": {\"server_name\": \"{{server.build.env.SERVER_NAME}}\", \"server_password\": \"{{server.build.env.SRV_PW}}\", \"server_world_name\": \"{{server.build.env.WORLD_NAME}}\", \"server_max_players\": \"{{server.build.env.MAX_PLAYERS}}\", \"server_port\": \"{{server.build.default.port}}\", \"server_query_port\": \"{{server.build.env.QUERY_PORT}}\", \"pause_server_when_empty\": \"{{server.build.env.PAUSE_SERVER}}\", \"autosave_interval\": \"{{server.build.env.AUTOSAVE_INTERVAL}}\", \"server_is_public\": \"{{server.build.env.PUBLIC_SERVER}}\", \"server_persistent_data_override_folder\": \"{{server.build.env.SAVE_PATH}}\", \"map_seed\": \"{{server.build.env.MAP_SEED}}\"}}}",
+          "startup": "{\"done\": \"Dedicated server is now running!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Foundry Installscript${NC}\"\r\necho -e \"${YELLOW}Egg by gOOvER | 2024 MIT Licence${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\nmkdir -p $HOME/Mods\r\nmkdir -p $HOME/serverfiles\r\n\r\n#ccheck for config\r\nFILE=$HOME/App.cfg\r\n\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}App.cfg found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No App.cfg found. downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME\r\n  curl -sSL -o App.cfg https://dedicated.foundry-game.com/App.cfg\r\n  echo -e \"${GREEN}..done..${NC}\"\r\nfi\r\n\r\n## cleanup to prevent errors\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${RED}deleting old wine dirs... please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\nif [ ! -d \"/mnt/server/.wine\" ]; then\r\n    rm -fR /mnt/server/.wine\r\n    rm -fR /mnt/server/.config\r\n    rm -fR /mnt/server/.cache\r\n    rm -fR /mnt/server/.local\r\n    rm -fR /mnt/server/appcache\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[SERVER] Steam Query Port",
+            "description": "Sets the network port used by the Steam server browser to query information about the game. This is only used if the server is set to public.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "This is the name of the server listed in the Steam server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server World Name",
+            "description": "Sets the server world name. This is the folder where the save files will be stored.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "MyFoundry",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Sets the server password.",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Pause Server When Empty",
+            "description": "Will the server pause when nobody is connected.",
+            "env_variable": "PAUSE_SERVER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Autosave Interval",
+            "description": "Sets the autosave frequency in seconds.",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Public",
+            "description": "Sets whether the server is listed on the Steam server browser.",
+            "env_variable": "PUBLIC_SERVER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Map Seed",
+            "description": "Sets the map seed used to generate the world.",
+            "env_variable": "MAP_SEED",
+            "default_value": "42938743982",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Max Players",
+            "description": "This sets the max amount of players on a server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Savepath",
+            "description": "",
+            "env_variable": "SAVE_PATH",
+            "default_value": "/home/container/serverfiles",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Auto update the server",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2915550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2915550",
+            "field_type": "text"
+          },
+          {
+            "name": "[WINE] WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[WINE] WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[WINE] XVFB",
+            "description": "",
+            "env_variable": "XVFB",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

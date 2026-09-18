@@ -1,0 +1,1907 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "factorio-de781b511e4c",
+        "name": "Factorio",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-de781b511e4c.json",
+        "sha256": "513d696e60827d548ef2a75a6fbd3b282b87c086dbfd8ae84958ff078096b52e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "factorio/factorio/egg-pterodactyl-factorio.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/de781b511e4c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-01-11T12:43:05+00:00",
+        "name": "Factorio",
+        "author": "parker@parkervcp.com",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "[ ! -f \"./saves/{{SAVE_NAME}}.zip\" ] && ./bin/x64/factorio --create ./saves/{{SAVE_NAME}}.zip --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json; ./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server saves/{{SAVE_NAME}}.zip $( [ \"$RCON_ENABLED\" = \"1\" ] && echo \"--rcon-port {{RCON_PORT}} --rcon-password {{RCON_PASSWORD}}\" )",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\", \"game_password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils jq\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\nif [ -e ./saves/${SAVE_NAME}.zip ]; then\r\n    echo \"save file exists\"\r\nelse\r\n    ./bin/x64/factorio --create ./saves/${SAVE_NAME} --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json\r\n    chmod o+w ./saves/${SAVE_NAME}.zip\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Enabled?",
+            "description": "",
+            "env_variable": "RCON_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "The password for the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-f56bbb38bea9",
+        "name": "Factorio",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-f56bbb38bea9.json",
+        "sha256": "077726cd274301ffea4e4912f7b0789109b27027f1773756f691854919d9d243",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "factorio/factorio/egg-factorio.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/f56bbb38bea9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:03:08+02:00",
+        "name": "Factorio",
+        "author": "parker@parkervcp.com",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "if [ ! -f \"./saves/{{SAVE_NAME}}.zip\" ]; then ./bin/x64/factorio --create ./saves/{{SAVE_NAME}}.zip --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json; fi; ./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server saves/{{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils jq\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\nif [ -e ./saves/${SAVE_NAME}.zip ]; then\r\n    echo \"save file exists\"\r\nelse\r\n    ./bin/x64/factorio --create ./saves/${SAVE_NAME} --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json\r\n    chmod o+w ./saves/${SAVE_NAME}.zip\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-arm64-46422b4ea24f",
+        "name": "Factorio ARM64",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-arm64-46422b4ea24f.json",
+        "sha256": "d3a262b11e6141099e515695e3aa28a04c757ca6648d3a551e2b4067585936f1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/factorio/factorio/egg-factorio-a-r-m64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/46422b4ea24f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-18T10:08:36+01:00",
+        "name": "Factorio ARM64",
+        "author": "parker@parkervcp.com",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "features": null,
+        "docker_images": {
+          "Box64": "ghcr.io/parkervcp/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "if [ ! -f \"./saves/{{SAVE_NAME}}.zip\" ]; then box64 ./bin/x64/factorio --create ./saves/{{SAVE_NAME}}.zip --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json; fi;\r\nbox64 ./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server saves/{{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils jq\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_SAFEFLAGS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_SAFEFLAGS",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_BIGBLOCK",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_BIGBLOCK",
+            "default_value": "2",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:2",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_FORWARD",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FORWARD",
+            "default_value": "1024",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_CALLRET",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_CALLRET",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_FASTROUND",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FASTROUND",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-arm64-499694e3c16d",
+        "name": "Factorio ARM64",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-arm64-499694e3c16d.json",
+        "sha256": "3e94baacdc92cea6bdcb2a9ada207e7057735e19751cf4a9ea84ff7877571a13",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "factorio/factorio/egg-factorio-a-r-m64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/499694e3c16d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-18T10:08:36+01:00",
+        "name": "Factorio ARM64",
+        "author": "parker@parkervcp.com",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "features": null,
+        "docker_images": {
+          "Box64": "ghcr.io/ptero-eggs/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "if [ ! -f \"./saves/{{SAVE_NAME}}.zip\" ]; then box64 ./bin/x64/factorio --create ./saves/{{SAVE_NAME}}.zip --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json; fi;\r\nbox64 ./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server saves/{{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils jq\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_SAFEFLAGS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_SAFEFLAGS",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_BIGBLOCK",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_BIGBLOCK",
+            "default_value": "2",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:2",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_FORWARD",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FORWARD",
+            "default_value": "1024",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_CALLRET",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_CALLRET",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_FASTROUND",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FASTROUND",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-arm64-7388f83b3b40",
+        "name": "Factorio ARM64",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-arm64-7388f83b3b40.json",
+        "sha256": "a1086ce4c31210db4e9c15246c34c45e5a81bbc7ebec47fcfbce0c2d01254403",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "factorio/factorio/egg-pterodactyl-factorio-a-r-m64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/7388f83b3b40.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-21T19:35:14+00:00",
+        "name": "Factorio ARM64",
+        "author": "parker@parkervcp.com",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "tags": [],
+        "features": [],
+        "docker_images": {
+          "Box64": "ghcr.io/parkervcp/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "if [ ! -f \"./saves/{{SAVE_NAME}}.zip\" ]; then box64 ./bin/x64/factorio --create ./saves/{{SAVE_NAME}}.zip --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json; fi; box64 ./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server saves/{{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\", \"game_password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils jq\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "The password for the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_SAFEFLAGS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_SAFEFLAGS",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_BIGBLOCK",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_BIGBLOCK",
+            "default_value": "2",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:2",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_FORWARD",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FORWARD",
+            "default_value": "1024",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_CALLRET",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_CALLRET",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_FASTROUND",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FASTROUND",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0",
+            "field_type": "text"
+          },
+          {
+            "name": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-arm64-c47a08ee2914",
+        "name": "Factorio ARM64",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-arm64-c47a08ee2914.json",
+        "sha256": "e1f8604bf500531697f0783e8065ed112bcebea63f52123838c08be3ae432182",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "factorio/factorio/egg-factorio-a-r-m64.json",
+          "format": "PLCN_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/c47a08ee2914.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-21T19:35:14+00:00",
+        "name": "Factorio ARM64",
+        "author": "parker@parkervcp.com",
+        "uuid": "a96b46b4-9f42-4a0a-8881-0bd9c4cbf079",
+        "description": "The vanilla Factorio server.\r\n\r\nhttps://www.factorio.com/",
+        "tags": [],
+        "features": [],
+        "docker_images": {
+          "Box64": "ghcr.io/parkervcp/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "if [ ! -f \"./saves/{{SAVE_NAME}}.zip\" ]; then box64 ./bin/x64/factorio --create ./saves/{{SAVE_NAME}}.zip --map-gen-settings data/map-gen-settings.json --map-settings data/map-settings.json; fi; box64 ./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server saves/{{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.environment.SERVER_NAME}}\", \"description\": \"{{server.environment.SERVER_DESC}}\", \"max_players\": \"{{server.environment.MAX_SLOTS}}\", \"username\": \"{{server.environment.SERVER_USERNAME}}\", \"token\": \"{{server.environment.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.environment.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.environment.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.environment.AFK_KICK}}\", \"game_password\": \"{{server.environment.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils jq\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12"
+          },
+          {
+            "sort": 2,
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3"
+          },
+          {
+            "sort": 3,
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100"
+          },
+          {
+            "sort": 4,
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100"
+          },
+          {
+            "sort": 5,
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100"
+          },
+          {
+            "sort": 6,
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200"
+          },
+          {
+            "sort": 7,
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40"
+          },
+          {
+            "sort": 8,
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3"
+          },
+          {
+            "sort": 9,
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3"
+          },
+          {
+            "sort": 10,
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3"
+          },
+          {
+            "sort": 11,
+            "name": "Server password",
+            "description": "The password for the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "max:40"
+          },
+          {
+            "sort": 12,
+            "name": "BOX64_DYNAREC_SAFEFLAGS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_SAFEFLAGS",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0"
+          },
+          {
+            "sort": 13,
+            "name": "BOX64_DYNAREC_BIGBLOCK",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_BIGBLOCK",
+            "default_value": "2",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:2"
+          },
+          {
+            "sort": 14,
+            "name": "BOX64_DYNAREC_FORWARD",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FORWARD",
+            "default_value": "1024",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1024"
+          },
+          {
+            "sort": 15,
+            "name": "BOX64_DYNAREC_CALLRET",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_CALLRET",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1"
+          },
+          {
+            "sort": 16,
+            "name": "BOX64_DYNAREC_FASTROUND",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_FASTROUND",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:0"
+          },
+          {
+            "sort": 17,
+            "name": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "description": "",
+            "env_variable": "BOX64_DYNAREC_ALIGNED_ATOMICS",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:1"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-modupdate-00a696dee695",
+        "name": "Factorio-ModUpdate",
+        "description": "The vanilla Factorio server. With automatic Mod Updates after ReInstall.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-modupdate-00a696dee695.json",
+        "sha256": "6578f230179e12279cbfcca2aa30938d3da81195fe13333d1d7aeeb7e18d0993",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "factorio/factorio-modupdate/egg-factorio-modupdate.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/00a696dee695.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:04:03+02:00",
+        "name": "Factorio-ModUpdate",
+        "author": "tueye@tuworld.de",
+        "description": "The vanilla Factorio server. With automatic Mod Updates after ReInstall.\r\n\r\nhttps://www.factorio.com/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server {{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils python3 python3-requests jq\r\n\r\nlatest_ModUpdate=$(curl --silent \"https://api.github.com/repos/pdemonaco/factorio-mod-updater/tags\" | jq -r '.[0].name')\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\nif [ -e ${SAVE_NAME}.zip ]; then\r\n    echo \"save file exists\"\r\nelse\r\n    ./bin/x64/factorio --create ${SAVE_NAME}\r\n    chmod o+w ${SAVE_NAME}.zip\r\nfi\r\n\r\n# Download Mod Updater\r\necho -e \"\\n running 'curl -sL https://github.com/pdemonaco/factorio-mod-updater/archive/${latest_ModUpdate}.tar.gz -o factorio-MU-${latest_ModUpdate}' \\n\"\r\n\r\ncurl -sL https://github.com/pdemonaco/factorio-mod-updater/archive/${latest_ModUpdate}.tar.gz -o factorio-MU-${latest_ModUpdate}\r\n\r\ntar -xf factorio-MU-${latest_ModUpdate} -C /mnt/server\r\n\r\nrm factorio-MU-${latest_ModUpdate}\r\n\r\n# Run Mod Updater\r\n./factorio-mod-updater-${latest_ModUpdate}/mod_updater.py -s /mnt/server/data/server-settings.json -m /mnt/server/mods --fact-path /mnt/server/bin/x64/factorio --update\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-modupdate-45627d7e68fb",
+        "name": "Factorio-ModUpdate",
+        "description": "The vanilla Factorio server. With automatic Mod Updates after ReInstall.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-modupdate-45627d7e68fb.json",
+        "sha256": "93c7f09d39a078122d4e39d0fa8b6e8c261aa583bbb20147f5357df542ca730e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "factorio/factorio-modupdate/egg-factorio--mod-update.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/45627d7e68fb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:38+00:00",
+        "name": "Factorio-ModUpdate",
+        "author": "tueye@tuworld.de",
+        "uuid": "3834ae35-c0c5-46f1-8b13-b35c3d2fd5fa",
+        "description": "The vanilla Factorio server. With automatic Mod Updates after ReInstall.\r\n\r\nhttps://www.factorio.com/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server {{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\"}}}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "logs": "{}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils python3 python3-requests jq\r\n\r\nlatest_ModUpdate=$(curl --silent \"https://api.github.com/repos/pdemonaco/factorio-mod-updater/tags\" | jq -r '.[0].name')\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\nif [ -e ${SAVE_NAME}.zip ]; then\r\n    echo \"save file exists\"\r\nelse\r\n    ./bin/x64/factorio --create ${SAVE_NAME}\r\n    chmod o+w ${SAVE_NAME}.zip\r\nfi\r\n\r\n# Download Mod Updater\r\necho -e \"\\n running 'curl -sL https://github.com/pdemonaco/factorio-mod-updater/archive/${latest_ModUpdate}.tar.gz -o factorio-MU-${latest_ModUpdate}' \\n\"\r\n\r\ncurl -sL https://github.com/pdemonaco/factorio-mod-updater/archive/${latest_ModUpdate}.tar.gz -o factorio-MU-${latest_ModUpdate}\r\n\r\ntar -xf factorio-MU-${latest_ModUpdate} -C /mnt/server\r\n\r\nrm factorio-MU-${latest_ModUpdate}\r\n\r\n# Run Mod Updater\r\n./factorio-mod-updater-${latest_ModUpdate}/mod_updater.py -s /mnt/server/data/server-settings.json -m /mnt/server/mods --fact-path /mnt/server/bin/x64/factorio --update\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "factorio-modupdate-d66125f7dcfc",
+        "name": "Factorio-ModUpdate",
+        "description": "The vanilla Factorio server. With automatic Mod Updates after ReInstall.\r\n\r\nhttps://www.factorio.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/factorio-modupdate-d66125f7dcfc.json",
+        "sha256": "4e29f7eb69745c78f2ccfe731c5be1ae12491ea27d7b5bf8e5e665304ab1a170",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "factorio/factorio-modupdate/egg-pterodactyl-factorio--mod-update.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/factorio/factorio-modupdate/egg-factorio-modupdate.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/d66125f7dcfc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:38+00:00",
+        "name": "Factorio-ModUpdate",
+        "author": "tueye@tuworld.de",
+        "description": "The vanilla Factorio server. With automatic Mod Updates after ReInstall.\r\n\r\nhttps://www.factorio.com/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/x64/factorio --port {{SERVER_PORT}} --server-settings data/server-settings.json --start-server {{SAVE_NAME}}.zip",
+        "config": {
+          "files": "{\"data/server-settings.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SERVER_NAME}}\", \"description\": \"{{server.build.env.SERVER_DESC}}\", \"max_players\": \"{{server.build.env.MAX_SLOTS}}\", \"username\": \"{{server.build.env.SERVER_USERNAME}}\", \"token\": \"{{server.build.env.SERVER_TOKEN}}\", \"autosave_interval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"autosave_slots\": \"{{server.build.env.SAVE_SLOTS}}\", \"afk_autokick_interval\": \"{{server.build.env.AFK_KICK}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Hosting game at\"}",
+          "stop": "/quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Factorio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update \r\napt install -y curl tar xz-utils python3 python3-requests jq\r\n\r\nlatest_ModUpdate=$(curl --silent \"https://api.github.com/repos/pdemonaco/factorio-mod-updater/tags\" | jq -r '.[0].name')\r\n\r\nVERSION_JSON=$(curl -sSL https://factorio.com/api/latest-releases)\r\n\r\nlatest_stable=$(echo $VERSION_JSON | jq -r '.stable.headless')\r\nlatest_experimental=$(echo $VERSION_JSON | jq -r '.experimental.headless')\r\n\r\nif [ -z \"${FACTORIO_VERSION}\" ] || [ \"${FACTORIO_VERSION}\" == \"latest\" ]; then\r\n  DL_VERSION=$latest_stable\r\nelif [ \"${FACTORIO_VERSION}\" == \"experimental\" ]; then\r\n  DL_VERSION=$latest_experimental\r\nelse\r\n  DL_VERSION=${FACTORIO_VERSION}\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\n running 'curl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}' \\n\"\r\n\r\ncurl -sL https://www.factorio.com/get-download/${DL_VERSION}/headless/linux64 -o factorio-${DL_VERSION}\r\n\r\ntar -xf factorio-${DL_VERSION} --strip-components=1 -C /mnt/server\r\n\r\nrm factorio-${DL_VERSION}\r\n\r\nif [ -e data/map-gen-settings.json ]; then\r\n    echo \"map-gen exists\"\r\nelse\r\n    echo \"copying map-gen default settings\"\r\n    mv data/map-gen-settings.example.json data/map-gen-settings.json\r\nfi\r\n\r\nif [ -e data/server-settings.json ]; then\r\n    echo \"server settings exists\"\r\nelse\r\n    echo \"copying server default settings\"\r\n    mv data/server-settings.example.json data/server-settings.json\r\nfi\r\n\r\nif [ -e map-settings.json ]; then\r\n    echo \"map settings exists\"\r\nelse\r\n    echo \"copying map default settings\"\r\n    mv data/map-settings.example.json data/map-settings.json\r\nfi\r\n\r\nif [ -e ${SAVE_NAME}.zip ]; then\r\n    echo \"save file exists\"\r\nelse\r\n    ./bin/x64/factorio --create ${SAVE_NAME}\r\n    chmod o+w ${SAVE_NAME}.zip\r\nfi\r\n\r\n# Download Mod Updater\r\necho -e \"\\n running 'curl -sL https://github.com/pdemonaco/factorio-mod-updater/archive/${latest_ModUpdate}.tar.gz -o factorio-MU-${latest_ModUpdate}' \\n\"\r\n\r\ncurl -sL https://github.com/pdemonaco/factorio-mod-updater/archive/${latest_ModUpdate}.tar.gz -o factorio-MU-${latest_ModUpdate}\r\n\r\ntar -xf factorio-MU-${latest_ModUpdate} -C /mnt/server\r\n\r\nrm factorio-MU-${latest_ModUpdate}\r\n\r\n# Run Mod Updater\r\n./factorio-mod-updater-${latest_ModUpdate}/mod_updater.py -s /mnt/server/data/server-settings.json -m /mnt/server/mods --fact-path /mnt/server/bin/x64/factorio --update\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Factorio Version",
+            "description": "Which version of Factorio to install and use.",
+            "env_variable": "FACTORIO_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,12",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Slots",
+            "description": "Total number of slots to allow on the server.",
+            "env_variable": "MAX_SLOTS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The save name for the server.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "gamesave",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Token",
+            "description": "Your factorio.com token, it is required for your server to be visible in the public server list.",
+            "env_variable": "SERVER_TOKEN",
+            "default_value": "undefined",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "alpha_num|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the game as it will appear in the game listing",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Factorio Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the game that will appear in the listing.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Username",
+            "description": "Username used for the server",
+            "env_variable": "SERVER_USERNAME",
+            "default_value": "unnamed",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Time between auto saves specified in minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Slots",
+            "description": "The number of auto saves to keep.",
+            "env_variable": "SAVE_SLOTS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "AFK Kick",
+            "description": "Time specified in minutes to kick AFK players.\r\n0 is off",
+            "env_variable": "AFK_KICK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "fivem-1b66c78d157b",
+        "name": "FiveM",
+        "description": "A new FiveM / RedM egg for the latest builds due to recent changes in FiveM",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/fivem-1b66c78d157b.json",
+        "sha256": "9938847016e87c72ed8d97e1b1b540ad27b48d4f346655ab8ff2d77edfcc9da0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/fivem/egg-five-m.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/1b66c78d157b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-20T19:43:26+02:00",
+        "name": "FiveM",
+        "author": "parker@parkervcp.com",
+        "uuid": "238b3cb3-6796-4ba2-8403-5eb30faf1c86",
+        "description": "A new FiveM / RedM egg for the latest builds due to recent changes in FiveM",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "$(pwd)/alpine/opt/cfx-server/ld-musl-x86_64.so.1 --library-path \"$(pwd)/alpine/usr/lib/v8/:$(pwd)/alpine/lib/:$(pwd)/alpine/usr/lib/\" -- $(pwd)/alpine/opt/cfx-server/FXServer +set citizen_dir $(pwd)/alpine/opt/cfx-server/citizen/ +set sv_licenseKey {{FIVEM_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} $( [ \"$TXADMIN_ENABLE\" == \"1\" ] || printf %s '+exec server.cfg' )",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.allocations.default.port}}\\\"\", \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.allocations.default.port}}\\\"\", \"sv_hostname\": \"sv_hostname \\\"{{server.environment.SERVER_HOSTNAME}}\\\"\", \"set sv_licenseKey\": \"set sv_licenseKey {{server.environment.FIVEM_LICENSE}}\", \"set steam_webApiKey\": \"set steam_webApiKey {{server.environment.STEAM_WEBAPIKEY}}\", \"sv_maxclients\": \"sv_maxclients {{server.environment.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"succeeded. Welcome!\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FiveM Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p /mnt/server/resources\r\n\r\ncd /mnt/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https://github.com/citizenfx/cfx-server-data.git /tmp\r\ncp -Rf /tmp/resources/* resources/\r\n\r\nRELEASE_PAGE=$(curl -sSL https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)\r\nCHANGELOGS_PAGE=$(curl -sSL https://changelogs-live.fivem.net/api/changelog/versions/linux/server)\r\n\r\nif [[ \"${FIVEM_VERSION}\" == \"recommended\" ]] || [[ -z ${FIVEM_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${FIVEM_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*/*.tar.xz\"' | grep -Eo '\".*/*.tar.xz\"' | sed 's/\\\"//g'  | sed 's/\\.\\///1' | grep -i \"${FIVEM_VERSION}\" | grep -o =.* |  tr -d '=')\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"Skipping downloading default server config file as one already exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/fivem/server.cfg >>server.cfg\r\nfi\r\n\r\n# Map GAME_NAME to GAME_TYPE before writing to server.cfg\r\nif [ \"${TXHOST_GAME_NAME}\" == \"fivem\" ]; then\r\n    GAME_TYPE=\"gta5\"\r\nelif [ \"${TXHOST_GAME_NAME}\" == \"redm\" ]; then\r\n    GAME_TYPE=\"rdr3\"\r\nelse\r\n    echo \"Invalid GAME_NAME specified: ${TXHOST_GAME_NAME}\"\r\n    exit 1\r\nfi    \r\n\r\nCFG_FILE=\"server.cfg\"\r\n\r\n# Only proceed if server.cfg exists\r\nif [ -f \"$CFG_FILE\" ]; then\r\n    # Remove old gamename block: comment and actual line\r\n    sed -i '/^# set gamename/,+1d' \"$CFG_FILE\"\r\n\r\n    # Append clean new block\r\n    {\r\n        echo \"# set gamename\"\r\n        echo \"set gamename \\\"${GAME_TYPE}\\\"\"\r\n    } >> \"$CFG_FILE\"\r\nelse\r\n    echo \"Warning: $CFG_FILE not found. Skipping gamename insertion.\"\r\nfi\r\n\r\nmkdir -p logs/\r\n\r\necho \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "fivem license",
+            "description": "Required to start the service. Get your keys at https://portal.cfx.re/",
+            "env_variable": "FIVEM_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:33",
+            "sort": 1
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the fivem max play count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,48",
+            "sort": 2
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name that shows up in the server browser",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "My new FXServer!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 3
+          },
+          {
+            "name": "fivem version",
+            "description": "The fivem version that is to be installed. Invalid versions will default to recommended.\r\n\r\nAn example is `6013-d8ae399d15680da569022f57ab7f2474d307c821`\r\n\r\nYou can get the latest version from here - https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/",
+            "env_variable": "FIVEM_VERSION",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": 4
+          },
+          {
+            "name": "Download Link",
+            "description": "This is the link to download fivem from. This is only used in the install script.\r\n\r\nThe file you link to needs to be an fx.tar.zx file.\r\n\r\nExample:\r\nhttps://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/6013-d8ae399d15680da569022f57ab7f2474d307c821/fx.tar.xz",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": 5
+          },
+          {
+            "name": "Steam Web Api Key",
+            "description": "Use your Steam WebApiKey or set to 'none'. Get your key at https://steamcommunity.com/dev/apikey/",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 6
+          },
+          {
+            "name": "txAdmin Port",
+            "description": "The port for the txAdmin panel",
+            "env_variable": "TXHOST_TXA_PORT",
+            "default_value": "40120",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 7
+          },
+          {
+            "name": "Enable txadmin",
+            "description": "Enables txadmin.\r\n\r\nset to 1 to enable. (default is 0 for false)",
+            "env_variable": "TXADMIN_ENABLE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": 8
+          },
+          {
+            "name": "Game Name",
+            "description": "Restricts to only running either FiveM or RedM servers.\r\nThe setup page will only show recipes for the game specified below !\r\nOptions are : fivem or redm",
+            "env_variable": "TXHOST_GAME_NAME",
+            "default_value": "fivem",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:fivem,redm",
+            "sort": 9
+          },
+          {
+            "name": "Game type",
+            "description": "Value to be used : gta5 for FiveM and rdr3 for RedM\r\n! Dont fill in any value it reads the game name variable and set the correct value for it !",
+            "env_variable": "GAME_TYPE",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": 10
+          },
+          {
+            "name": "TXHOST DATA PATH",
+            "description": "Location for TX Admin",
+            "env_variable": "TXHOST_DATA_PATH",
+            "default_value": "/home/container/txData",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": 11
+          }
+        ]
+      }
+    }
+  ]
+}

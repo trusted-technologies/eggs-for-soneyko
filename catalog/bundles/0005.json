@@ -1,0 +1,876 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "gryt-server-ad840b96e9ed",
+        "name": "Gryt Server",
+        "description": "Gryt is an open source voice, video and text chat platform. Connect with the Gryt desktop app or the hosted web client at https://app.gryt.chat. The first user to join becomes the owner; afterwards the server is invite-only. Requirements: - amd64 only (the Gryt Linux bundle is x64 only) - needs two extra allocations: one for the SFU websocket (set SFU_PORT to its port), one for voice media (set ICE_UDP_MUX_PORT to its port) - set SFU_PUBLIC_HOST to <public-ip>:<SFU_PORT> so voice works over the internet",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/gryt-server-ad840b96e9ed.json",
+        "sha256": "2d73b1842efa44085c2784065ec5b642b93363bc95fc16510ce65243c982a47d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/voice",
+          "commit": "33858e0558d92e82cda04ba0550f9a733ced9d4c",
+          "path": "gryt/pterodactyl-egg-gryt-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--voice/ad840b96e9ed.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-09-06T16:00:35+00:00",
+        "name": "Gryt Server",
+        "author": "138704619+wan0v@users.noreply.github.com",
+        "description": "Gryt is an open source voice, video and text chat platform. Connect with the Gryt desktop app or the hosted web client at https://app.gryt.chat. The first user to join becomes the owner; afterwards the server is invite-only. Requirements: - amd64 only (the Gryt Linux bundle is x64 only) - needs two extra allocations: one for the SFU websocket (set SFU_PORT to its port), one for voice media (set ICE_UDP_MUX_PORT to its port) - set SFU_PUBLIC_HOST to <public-ip>:<SFU_PORT> so voice works over the internet",
+        "features": [],
+        "docker_images": {
+          "Node.js 24": "ghcr.io/pelican-eggs/yolks:nodejs_24"
+        },
+        "file_denylist": [],
+        "startup": "if [ -z \"$JWT_SECRET\" ]; then [ -f .jwt_secret ] || head -c 48 /dev/urandom | base64 > .jwt_secret; export JWT_SECRET=\"$(cat .jwt_secret)\"; fi; ./gryt_sfu & if [ \"$IMAGE_WORKER_ENABLED\" != \"false\" ]; then node --env-file=config.env image-worker/dist/index.js & fi; exec node --env-file=config.env server/dist/index.js",
+        "config": {
+          "files": "{\"config.env\": {\"parser\": \"properties\", \"find\": {\"SERVER_NAME\": \"{{server.build.env.SERVER_NAME}}\", \"SERVER_DESCRIPTION\": \"{{server.build.env.SERVER_DESCRIPTION}}\", \"HOST\": \"0.0.0.0\", \"PORT\": \"{{server.build.default.port}}\", \"DATA_DIR\": \"./data\", \"STORAGE_BACKEND\": \"filesystem\", \"S3_BUCKET\": \"uploads\", \"JWT_SECRET\": \"{{server.build.env.JWT_SECRET}}\", \"GRYT_IDENTITY_TIERS\": \"{{server.build.env.GRYT_IDENTITY_TIERS}}\", \"EXTERNAL_HOST\": \"{{server.build.env.EXTERNAL_HOST}}\", \"SFU_PORT\": \"{{server.build.env.SFU_PORT}}\", \"SFU_WS_HOST\": \"ws://127.0.0.1:{{server.build.env.SFU_PORT}}\", \"SFU_PUBLIC_HOST\": \"{{server.build.env.SFU_PUBLIC_HOST}}\", \"STUN_SERVERS\": \"{{server.build.env.STUN_SERVERS}}\", \"CORS_ORIGIN\": \"{{server.build.env.CORS_ORIGIN}}\"}}}",
+          "startup": "{\"done\": \"Signaling server started at\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# Gryt Server (self-hosted Linux bundle) installation script\n\nset -e\n\ncd /mnt/server\n\n## The Gryt Linux bundle is x86_64 only\nif [ \"$(uname -m)\" != \"x86_64\" ]; then\n    echo \"ERROR: This egg requires an x86_64 (amd64) node, this one is $(uname -m).\"\n    echo \"Gryt only publishes x64 self-hosted bundles (the gryt_sfu binary cannot run here).\"\n    exit 1\nfi\n\n## Resolve the release to install\nif [ -z \"${GRYT_VERSION}\" ] || [ \"${GRYT_VERSION}\" = \"latest\" ]; then\n    echo \"Resolving latest Gryt release...\"\n    RELEASE_JSON=$(curl -sSL https://api.github.com/repos/Gryt-chat/server/releases/latest)\n    RESOLVED_VERSION=$(echo \"${RELEASE_JSON}\" | jq -r '.tag_name | ltrimstr(\"v\")')\n    DOWNLOAD_URL=$(echo \"${RELEASE_JSON}\" | jq -r '.assets[] | select(.name | test(\"^gryt-server-linux-x64-v[0-9].*\\\\.zip$\")) | .browser_download_url')\nelse\n    RESOLVED_VERSION=\"${GRYT_VERSION#v}\"\n    DOWNLOAD_URL=\"https://github.com/Gryt-chat/server/releases/download/v${RESOLVED_VERSION}/gryt-server-linux-x64-v${RESOLVED_VERSION}.zip\"\nfi\n\nif [ -z \"${RESOLVED_VERSION}\" ] || [ \"${RESOLVED_VERSION}\" = \"null\" ] || [ -z \"${DOWNLOAD_URL}\" ] || [ \"${DOWNLOAD_URL}\" = \"null\" ]; then\n    echo \"ERROR: Could not resolve a Gryt release for version '${GRYT_VERSION}'.\"\n    exit 1\nfi\n\necho \"Installing Gryt Server v${RESOLVED_VERSION} (linux-x64 bundle)\"\n\n## Download and extract the bundle\necho \"Downloading ${DOWNLOAD_URL} ...\"\ncurl -sSL --fail -o /mnt/server/gryt.zip \"${DOWNLOAD_URL}\"\n\nunzip -q -o /mnt/server/gryt.zip -d /mnt/server\ncp -a /mnt/server/gryt-server-linux-x64/. /mnt/server/\nrm -rf /mnt/server/gryt-server-linux-x64 /mnt/server/gryt.zip\n\n## Unused bundle wrappers (the egg starts node/gryt_sfu directly)\nrm -f /mnt/server/start.bat /mnt/server/gryt_server.bat /mnt/server/gryt_image_worker.bat \\\n      /mnt/server/gryt_server.sh /mnt/server/gryt_image_worker.sh\n\nif [ ! -f /mnt/server/server/dist/index.js ] || [ ! -f /mnt/server/gryt_sfu ]; then\n    echo \"ERROR: Bundle seems incomplete (server/dist/index.js or gryt_sfu missing).\"\n    exit 1\nfi\n\nchmod +x /mnt/server/gryt_sfu\nmkdir -p /mnt/server/data\n\necho \"Installation of Gryt Server v${RESOLVED_VERSION} complete.\"\nexit 0",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Gryt Version",
+            "description": "The Gryt Server version to install (e.g. 1.6.5 or latest). Reinstall the server to apply a change.",
+            "env_variable": "GRYT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Display name shown to users.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "My Gryt Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the server.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "A Gryt voice chat server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "JWT Secret",
+            "description": "Secret for session tokens. Leave empty to auto-generate a persistent one on first start.",
+            "env_variable": "JWT_SECRET",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|min:32|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "SFU Port",
+            "description": "TCP port of the voice SFU websocket. Must match an extra port allocation.",
+            "env_variable": "SFU_PORT",
+            "default_value": "5005",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "SFU Public Host",
+            "description": "Public address of the SFU given to clients, e.g. 203.0.113.10:5005 or sfu.example.com:5005 (wss://... behind a TLS proxy only!). Required for voice over the internet.",
+            "env_variable": "SFU_PUBLIC_HOST",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "Voice Media Port (UDP)",
+            "description": "The one UDP port all WebRTC media flows over (ICE_UDP_MUX_PORT). Must match an extra UDP port allocation.",
+            "env_variable": "ICE_UDP_MUX_PORT",
+            "default_value": "3478",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "ICE Advertise IP",
+            "description": "Public IP(s) advertised in ICE candidates, comma-separated (e.g. 203.0.113.10, 203.0.113.11). Leave empty if STUN auto-discovery works. Set your public IP if the server runs behind NAT or voice does not work.",
+            "env_variable": "ICE_ADVERTISE_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Voice Peers",
+            "description": "How many peers may be connected to the SFU at once.",
+            "env_variable": "MAX_PEERS",
+            "default_value": "200",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:10000",
+            "field_type": "text"
+          },
+          {
+            "name": "STUN Servers",
+            "description": "Comma-separated STUN URIs for NAT traversal.",
+            "env_variable": "STUN_SERVERS",
+            "default_value": "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "CORS Origins",
+            "description": "Allowed origins, comma-separated. Keep http://127.0.0.1:15738 (desktop app) and https://app.gryt.chat (hosted web client).",
+            "env_variable": "CORS_ORIGIN",
+            "default_value": "http://127.0.0.1:15738,https://app.gryt.chat",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Identity Tiers",
+            "description": "Comma-separated identity types the server accepts: account (Gryt account) and/or local (no account).",
+            "env_variable": "GRYT_IDENTITY_TIERS",
+            "default_value": "account",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "External Host",
+            "description": "URL clients use to reach this server, e.g. http://203.0.113.10:5000",
+            "env_variable": "EXTERNAL_HOST",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "Image Worker",
+            "description": "Run the image worker (thumbnails, recompression, voice tile colors). true or false.",
+            "env_variable": "IMAGE_WORKER_ENABLED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable STUN",
+            "description": "Stop the SFU from discovering its public IP via STUN. Only use with a direct, port-preserving path to the internet and set ICE_ADVERTISE_IP instead. true or false.",
+            "env_variable": "DISABLE_STUN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "haste-server-2a309726ce88",
+        "name": "haste-server",
+        "description": "Haste is an open-source pastebin software written in node.js, which is easily installable in any network. It can be backed by either redis or filesystem, and has a very easy adapter interface for other stores. A publicly available version can be found at hastebin.com",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/haste-server-2a309726ce88.json",
+        "sha256": "34b2415480ee3b52c3ada28002d9911889a72245dc62b8b66f5d057f994b8786",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "haste-server/egg-haste-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/software",
+            "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+            "path": "haste-server/egg-pterodactyl-haste-server.json",
+            "format": "PTDL_v2"
+          },
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/haste-server/egg-haste-server.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/2a309726ce88.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:01+00:00",
+        "name": "haste-server",
+        "author": "eggs@harryw.link",
+        "uuid": "c03613a3-4c8c-4bff-b138-e912b088d681",
+        "description": "Haste is an open-source pastebin software written in node.js, which is easily installable in any network. It can be backed by either redis or filesystem, and has a very easy adapter interface for other stores. A publicly available version can be found at hastebin.com",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "npm start",
+        "config": {
+          "files": "{\"config.js\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"listening on\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y git curl\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ngit clone https://github.com/toptal/haste-server\r\ncd haste-server\r\nmv * /mnt/server\r\ncd ..\r\nrm -rf haste-server\r\nnpm install\r\n\r\nexit 0",
+            "container": "node:18-bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "haste-server-aa308d8c2ecf",
+        "name": "haste-server",
+        "description": "Haste is an open-source pastebin software written in node.js, which is easily installable in any network. It can be backed by either redis or filesystem, and has a very easy adapter interface for other stores. A publicly available version can be found at hastebin.com",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/haste-server-aa308d8c2ecf.json",
+        "sha256": "74491d975bb23ad48f94eba68992da3d16e4427f7623e5fdd12b41d9d81cd407",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "haste-server/egg-haste-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/aa308d8c2ecf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:01+00:00",
+        "name": "haste-server",
+        "author": "eggs@harryw.link",
+        "description": "Haste is an open-source pastebin software written in node.js, which is easily installable in any network. It can be backed by either redis or filesystem, and has a very easy adapter interface for other stores. A publicly available version can be found at hastebin.com",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:nodejs_18": "ghcr.io/ptero-eggs/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "npm start",
+        "config": {
+          "files": "{\"config.js\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"listening on\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "node:18-bookworm-slim",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y git curl\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ngit clone https://github.com/toptal/haste-server\r\ncd haste-server\r\nmv * /mnt/server\r\ncd ..\r\nrm -rf haste-server\r\nnpm install\r\n\r\nexit 0"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "jts3servermod-191d3138b987",
+        "name": "JTS3ServerMod",
+        "description": "Setup:\r\n- Install the latest version\r\n- Go into config/server1 and edit JTS3ServerMod_server.cfg\r\n- Save and start the server\r\n\r\nAuthor: https://www.stefan1200.de/forum/index.php?topic=2.0",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/jts3servermod-191d3138b987.json",
+        "sha256": "c0192e5babf749734642024746424aadbf544caac7e7bd05eb9b271f2750e6a7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "bots/teamspeak3/jts3servermod/egg-j-t-s3-server-mod.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/191d3138b987.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:16+00:00",
+        "name": "JTS3ServerMod",
+        "author": "teamwuffy@gmail.com",
+        "description": "Setup:\r\n- Install the latest version\r\n- Go into config/server1 and edit JTS3ServerMod_server.cfg\r\n- Save and start the server\r\n\r\nAuthor: https://www.stefan1200.de/forum/index.php?topic=2.0",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar JTS3ServerMod.jar",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Successful connected to \"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# JTS3ServerMod\r\n#\r\n# Server Files: /mnt/server\r\n# All required packages are installed in the used install image ghcr.io/ptero-eggs/installers:debian\r\n\r\nexport HOME=/mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ -z \"$SERVER_VERSION\" ] || [ \"$SERVER_VERSION\" == \"latest\" ]; then\r\n  echo -e \"Downloading latest version with curl -L \"https://www.stefan1200.de/dlrequest.php?file=jts3servermod &\r\n  type=.zip\" -o JTS3ServerMod.zip\"\r\n  curl -L \"https://www.stefan1200.de/dlrequest.php?file=jts3servermod&type=.zip\" -o JTS3ServerMod.zip\r\nelse\r\n  echo -e \"running curl -L \"https://www.stefan1200.de/downloads/JTS3ServerMod_$SERVER_VERSION.zip\" -o JTS3ServerMod.zip\"\r\n  curl -L \"https://www.stefan1200.de/downloads/JTS3ServerMod_$SERVER_VERSION.zip\" -o JTS3ServerMod.zip\r\nfi\r\n\r\n# no need to continue if we don't have an archive\r\nif [ ! -f JTS3ServerMod.zip ]; then\r\n  echo \"JTS3ServerMod.zip not found. Something went wrong. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nunzip JTS3ServerMod.zip\r\nrm JTS3ServerMod.zip JTS3ServerMod-Windows.exe JTS3ServerMod-Windows_NoWindow.exe jts3servermod_startscript.sh\r\necho -e \"Installation completed.\\nConfiguration of the server must be done in the config folder to proceed.\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Version to download. Use latest to install latest version",
+            "env_variable": "SERVER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "languagetool-3246f6862ada",
+        "name": "LanguageTool",
+        "description": "This egg installs a LanguageTool server\r\n\r\nLanguageTool is an Open Source proofreading software for English, French, German, Polish, Russian, and more than 20 other languages. It finds many errors that a simple spell checker cannot find.\r\n\r\nView https://languagetool.org for more information.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/languagetool-3246f6862ada.json",
+        "sha256": "5cd5bb09c78b7632fd401b747adefd7fc0a36f926fd48688168a31bc9d7c13b5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "languagetool/egg-language-tool.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/3246f6862ada.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:01+00:00",
+        "name": "LanguageTool",
+        "author": "thomasruhl@live.de",
+        "uuid": "4474d20a-6f03-4747-977a-d0423377d91f",
+        "description": "This egg installs a LanguageTool server\r\n\r\nLanguageTool is an Open Source proofreading software for English, French, German, Polish, Russian, and more than 20 other languages. It finds many errors that a simple spell checker cannot find.\r\n\r\nView https://languagetool.org for more information.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -cp languagetool-server.jar org.languagetool.server.HTTPServer --port {{SERVER_PORT}} --allow-origin --public --config config.properties",
+        "config": {
+          "files": "{\"config.properties\": {\"parser\": \"properties\", \"find\": {\"languageModel\": \"models/\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\napk add --no-cache unzip # to make shure the unzipper is working properly\r\nmkdir -p /mnt/server\r\nmkdir -p /mnt/server/models\r\ntouch config.properties\r\n\r\n# if TRAIN_MODELS has content install them\r\nif [ -n TRAIN_MODELS ]; then\r\n\r\n    content=$(curl -L https://languagetool.org/download/ngram-data/)\r\n\r\n    links=$(echo \"$content\" | grep -o '<a href=\"[^\"]*\\.zip\">' | sed 's/<a href=\"//' | sed 's/\">//')\r\n    echo $links\r\n\r\n    cd /mnt/server/models\r\n    for model in $TRAIN_MODELS; do\r\n        echo \"$model\"\r\n        for link in $links; do\r\n            # echo \"    $link\"\r\n            if [[ $link == *\"-$model-\"* ]]; then\r\n                fullLink=\"https://languagetool.org/download/ngram-data/$link\"\r\n                echo \"Downloading $fullLink\"\r\n                echo \"this could take some while\"\r\n                curl $fullLink --output $model.zip\r\n                echo \"unziping $model.zip\"\r\n                unzip $model.zip\r\n                rm $model.zip\r\n            fi\r\n        done\r\n    done\r\nfi\r\n\r\n# main languagetool install\r\ncd /mnt/server\r\n\r\necho \"downloading languagetool\"\r\ncurl https://languagetool.org/download/LanguageTool-stable.zip --output download.zip\r\necho unziping\r\nunzip download.zip\r\necho moving files\r\n\r\ncp -r LanguageTool-*/* .\r\n\r\nrm -rf LanguageTool-*\r\nrm download.zip -rf\r\n\r\necho Finished install",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Include traindata",
+            "description": "This uses many gigabytes of disk space. \r\n\r\nSeparate each value with spaces. For example, \"de en\". \r\n\r\nView all available models at https://languagetool.org/download/ngram-data/",
+            "env_variable": "TRAIN_MODELS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "languagetool-3e442d86fe02",
+        "name": "LanguageTool",
+        "description": "This egg installs a LanguageTool server\r\n\r\nLanguageTool is an Open Source proofreading software for English, French, German, Polish, Russian, and more than 20 other languages. It finds many errors that a simple spell checker cannot find.\r\n\r\nView https://languagetool.org for more information.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/languagetool-3e442d86fe02.json",
+        "sha256": "67fc398d117f4054e3e1d2d0892c435cf50259d97db053597694ec59c3fe7015",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "languagetool/egg-language-tool.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/3e442d86fe02.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:01+00:00",
+        "name": "LanguageTool",
+        "author": "thomasruhl@live.de",
+        "description": "This egg installs a LanguageTool server\r\n\r\nLanguageTool is an Open Source proofreading software for English, French, German, Polish, Russian, and more than 20 other languages. It finds many errors that a simple spell checker cannot find.\r\n\r\nView https://languagetool.org for more information.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:java_17": "ghcr.io/ptero-eggs/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -cp languagetool-server.jar org.languagetool.server.HTTPServer --port {{SERVER_PORT}} --allow-origin --public --config config.properties",
+        "config": {
+          "files": "{\"config.properties\": {\"parser\": \"properties\", \"find\": {\"languageModel\": \"models/\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server started\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\napk add --no-cache unzip # to make shure the unzipper is working properly\r\nmkdir -p /mnt/server\r\nmkdir -p /mnt/server/models\r\ntouch config.properties\r\n\r\n# if TRAIN_MODELS has content install them\r\nif [ -n TRAIN_MODELS ]; then\r\n\r\n    content=$(curl -L https://languagetool.org/download/ngram-data/)\r\n\r\n    links=$(echo \"$content\" | grep -o '<a href=\"[^\"]*\\.zip\">' | sed 's/<a href=\"//' | sed 's/\">//')\r\n    echo $links\r\n\r\n    cd /mnt/server/models\r\n    for model in $TRAIN_MODELS; do\r\n        echo \"$model\"\r\n        for link in $links; do\r\n            # echo \"    $link\"\r\n            if [[ $link == *\"-$model-\"* ]]; then\r\n                fullLink=\"https://languagetool.org/download/ngram-data/$link\"\r\n                echo \"Downloading $fullLink\"\r\n                echo \"this could take some while\"\r\n                curl $fullLink --output $model.zip\r\n                echo \"unziping $model.zip\"\r\n                unzip $model.zip\r\n                rm $model.zip\r\n            fi\r\n        done\r\n    done\r\nfi\r\n\r\n# main languagetool install\r\ncd /mnt/server\r\n\r\necho \"downloading languagetool\"\r\ncurl https://languagetool.org/download/LanguageTool-stable.zip --output download.zip\r\necho unziping\r\nunzip download.zip\r\necho moving files\r\n\r\ncp -r LanguageTool-*/* .\r\n\r\nrm -rf LanguageTool-*\r\nrm download.zip -rf\r\n\r\necho Finished install"
+          }
+        },
+        "variables": [
+          {
+            "name": "Include traindata",
+            "description": "This uses many gigabytes of disk space. \r\n\r\nSeparate each value with spaces. For example, \"de en\". \r\n\r\nView all available models at https://languagetool.org/download/ngram-data/",
+            "env_variable": "TRAIN_MODELS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "languagetool-7b227bb88e23",
+        "name": "LanguageTool",
+        "description": "This egg installs a LanguageTool server\r\n\r\nLanguageTool is an Open Source proofreading software for English, French, German, Polish, Russian, and more than 20 other languages. It finds many errors that a simple spell checker cannot find.\r\n\r\nView https://languagetool.org for more information.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/languagetool-7b227bb88e23.json",
+        "sha256": "1ba82b7e83d06c7233768385ac9d59e73fd07bbb35ca43e8bd189ee8469904f0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "languagetool/egg-pterodactyl-language-tool.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/languagetool/egg-languagetool.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/7b227bb88e23.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:01+00:00",
+        "name": "LanguageTool",
+        "author": "thomasruhl@live.de",
+        "description": "This egg installs a LanguageTool server\r\n\r\nLanguageTool is an Open Source proofreading software for English, French, German, Polish, Russian, and more than 20 other languages. It finds many errors that a simple spell checker cannot find.\r\n\r\nView https://languagetool.org for more information.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -cp languagetool-server.jar org.languagetool.server.HTTPServer --port {{SERVER_PORT}} --allow-origin --public --config config.properties",
+        "config": {
+          "files": "{\"config.properties\": {\"parser\": \"properties\", \"find\": {\"languageModel\": \"models/\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server started\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\napk add --no-cache unzip # to make shure the unzipper is working properly\r\nmkdir -p /mnt/server\r\nmkdir -p /mnt/server/models\r\ntouch config.properties\r\n\r\n# if TRAIN_MODELS has content install them\r\nif [ -n TRAIN_MODELS ]; then\r\n\r\n    content=$(curl -L https://languagetool.org/download/ngram-data/)\r\n\r\n    links=$(echo \"$content\" | grep -o '<a href=\"[^\"]*\\.zip\">' | sed 's/<a href=\"//' | sed 's/\">//')\r\n    echo $links\r\n\r\n    cd /mnt/server/models\r\n    for model in $TRAIN_MODELS; do\r\n        echo \"$model\"\r\n        for link in $links; do\r\n            # echo \"    $link\"\r\n            if [[ $link == *\"-$model-\"* ]]; then\r\n                fullLink=\"https://languagetool.org/download/ngram-data/$link\"\r\n                echo \"Downloading $fullLink\"\r\n                echo \"this could take some while\"\r\n                curl $fullLink --output $model.zip\r\n                echo \"unziping $model.zip\"\r\n                unzip $model.zip\r\n                rm $model.zip\r\n            fi\r\n        done\r\n    done\r\nfi\r\n\r\n# main languagetool install\r\ncd /mnt/server\r\n\r\necho \"downloading languagetool\"\r\ncurl https://languagetool.org/download/LanguageTool-stable.zip --output download.zip\r\necho unziping\r\nunzip download.zip\r\necho moving files\r\n\r\ncp -r LanguageTool-*/* .\r\n\r\nrm -rf LanguageTool-*\r\nrm download.zip -rf\r\n\r\necho Finished install"
+          }
+        },
+        "variables": [
+          {
+            "name": "Include traindata",
+            "description": "This uses many gigabytes of disk space. \r\n\r\nSeparate each value with spaces. For example, \"de en\". \r\n\r\nView all available models at https://languagetool.org/download/ngram-data/",
+            "env_variable": "TRAIN_MODELS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "lavalink-689e90bdd765",
+        "name": "Lavalink",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\r\nDescription taken from https://github.com/lavalink-devs/Lavalink",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/lavalink-689e90bdd765.json",
+        "sha256": "d85476e5719439019f0e1d0bc2d67978437841e4bb5f0c5514afc54aac23578b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "lavalink/egg-pterodactyl-lavalink.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/689e90bdd765.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-10-26T08:33:32+02:00",
+        "name": "Lavalink",
+        "author": "damuffin36@gmail.com",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\r\nDescription taken from https://github.com/lavalink-devs/Lavalink",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_21": "ghcr.io/parkervcp/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -jar Lavalink.jar",
+        "config": {
+          "files": "{\"application.yml\": {\"parser\": \"yml\", \"find\": {\"server.address\": \"0.0.0.0\", \"server.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Started Launcher in \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (match is to match the filename in some way)\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y curl jq git\r\n\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -L -o Lavalink.jar ${DOWNLOAD_URL}\r\ncurl -L -o application.yml https://raw.githubusercontent.com/freyacodes/Lavalink/master/LavalinkServer/application.yml.example\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installation completed\"\r\necho \"-------------------------------------------------------\"",
+            "container": "debian:bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GITHUB_PACKAGE",
+            "description": "",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "lavalink-devs/Lavalink",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "Lavalink.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "lavalink-8e446054d2a3",
+        "name": "Lavalink",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\r\nDescription taken from https://github.com/freyacodes/Lavalink",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/lavalink-8e446054d2a3.json",
+        "sha256": "bbaa440b6e38ba8467232e9a0822b48a025c4fe3c1e32631b122a7d81a8d1497",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "voice_servers/lavalink/egg-lavalink.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/8e446054d2a3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-08-04T08:40:49+02:00",
+        "name": "Lavalink",
+        "author": "damuffin36@gmail.com",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\r\nDescription taken from https://github.com/freyacodes/Lavalink",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -jar Lavalink.jar",
+        "config": {
+          "files": "{\"application.yml\": {\"parser\": \"yml\", \"find\": {\"server.address\": \"0.0.0.0\", \"server.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Started Launcher in \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (match is to match the filename in some way)\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y curl jq git\r\n\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -L -o Lavalink.jar ${DOWNLOAD_URL}\r\ncurl -L -o application.yml https://raw.githubusercontent.com/freyacodes/Lavalink/master/LavalinkServer/application.yml.example\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installation completed\"\r\necho \"-------------------------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GITHUB_PACKAGE",
+            "description": "",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "lavalink-devs/Lavalink",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "Lavalink.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "lavalink-bda0a38be1bc",
+        "name": "Lavalink",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\r\nDescription taken from https://github.com/lavalink-devs/Lavalink",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/lavalink-bda0a38be1bc.json",
+        "sha256": "f9e07cd461ac489515f677d0880867304c5fc5a71f33edb24acf0e0aca9bdaa7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "lavalink/egg-lavalink.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/bda0a38be1bc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-11T19:05:06+00:00",
+        "name": "Lavalink",
+        "author": "damuffin36@gmail.com",
+        "description": "A standalone audio sending node based on Lavaplayer and Koe. Allows for sending audio without it ever reaching any of your shards.\r\nDescription taken from https://github.com/lavalink-devs/Lavalink",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:java_21": "ghcr.io/ptero-eggs/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -jar Lavalink.jar",
+        "config": {
+          "files": "{\"application.yml\": {\"parser\": \"yml\", \"find\": {\"server.address\": \"0.0.0.0\", \"server.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Started Launcher in \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (match is to match the filename in some way)\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y curl jq git\r\n\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -L -o Lavalink.jar ${DOWNLOAD_URL}\r\ncurl -L -o application.yml https://raw.githubusercontent.com/freyacodes/Lavalink/master/LavalinkServer/application.yml.example\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installation completed\"\r\necho \"-------------------------------------------------------\"",
+            "container": "debian:bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GITHUB_PACKAGE",
+            "description": "",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "lavalink-devs/Lavalink",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "Lavalink.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

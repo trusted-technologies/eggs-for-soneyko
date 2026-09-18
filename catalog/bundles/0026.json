@@ -1,0 +1,1733 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "assetto-corsa-freeroam-ai-cff4df44f749",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-freeroam-ai-cff4df44f749.json",
+        "sha256": "4849e382ef618aa1e60d3220a5bc95a6706e12c7dc3655f4000f26088456e19a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/assetto_corsa/egg-assetto-corsa--freeroam--a-i.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/cff4df44f749.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-27T17:12:44+01:00",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "author": "josdekurk@gmail.com",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/parkervcp/yolks:dotnet_8"
+        },
+        "file_denylist": [],
+        "startup": "./AssettoServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"ini\", \"find\": {\"SERVER.NAME\": \"{{server.build.env.SERVER_NAME}}\", \"SERVER.PASSWORD\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SERVER.ADMIN_PASSWORD\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"SERVER.HTTP_PORT\": \"{{server.build.env.HTTP_PORT}}\", \"SERVER.MAX_CLIENTS\": \"{{server.build.env.MAX_CLIENTS}}\", \"SERVER.UDP_PORT\": \"{{server.build.default.port}}\", \"SERVER.TCP_PORT\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Starting update loop with an update rate of\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl git jq tar\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\nVERSION=latest\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i linux | head -1)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o assetto-server-linux.tar.gz ${DOWNLOAD_URL}\r\n\r\ntar xvf assetto-server-linux.tar.gz\r\nrm assetto-server-linux.tar.gz\r\nchmod +x AssettoServer\r\n\r\nmkdir cfg/\r\ncd cfg/\r\n[ -f \"server_cfg.ini\" ] || curl -sSL -o \"server_cfg.ini\" \"https://pteropaste.com/plk8mjfcqt4m\"\r\n[ -f \"extra_cfg.yml\" ] || curl -sSL -o \"extra_cfg.yml\" \"https://pteropaste.com/ocd58cq39z0z\"\r\n[ -f \"entry_list.ini\" ] || touch entry_list.ini\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name off the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "AC_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Http port",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric|",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "18",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,25",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assetto-corsa-freeroam-ai-f795b2ed344b",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-freeroam-ai-f795b2ed344b.json",
+        "sha256": "ca995c33f14f834f1f7342a0d1b01ebd7ed37ee4e517c40c861125b43aea1a56",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "assetto_corsa/egg-assetto-corsa--freeroam--a-i.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/f795b2ed344b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "author": "josdekurk@gmail.com",
+        "uuid": "8920a965-8d17-44e1-8e82-b5a5abc083d2",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/parkervcp/yolks:dotnet_8"
+        },
+        "file_denylist": [],
+        "startup": "./AssettoServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"ini\", \"find\": {\"SERVER.NAME\": \"{{server.build.env.SERVER_NAME}}\", \"SERVER.PASSWORD\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SERVER.ADMIN_PASSWORD\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"SERVER.HTTP_PORT\": \"{{server.build.env.HTTP_PORT}}\", \"SERVER.MAX_CLIENTS\": \"{{server.build.env.MAX_CLIENTS}}\", \"SERVER.UDP_PORT\": \"{{server.build.default.port}}\", \"SERVER.TCP_PORT\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Starting update loop with an update rate of\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl git jq tar\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\nVERSION=latest\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i linux | head -1)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o assetto-server-linux.tar.gz ${DOWNLOAD_URL}\r\n\r\ntar xvf assetto-server-linux.tar.gz\r\nrm assetto-server-linux.tar.gz\r\nchmod +x AssettoServer\r\n\r\nmkdir cfg/\r\ncd cfg/\r\n\r\n[ -f \"server_cfg.ini\" ] || curl -sSL -o \"server_cfg.ini\" \"https://raw.githubusercontent.com/pelican-eggs/steamcmd/main/assetto_corsa/cfg/server_cfg.ini\"\r\n[ -f \"extra_cfg.yml\" ] || curl -sSL -o \"extra_cfg.yml\" \"https://raw.githubusercontent.com/pelican-eggs/steamcmd/main/assetto_corsa/cfg/extra_cfg.yml\"\r\n[ -f \"entry_list.ini\" ] || touch entry_list.ini\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name off the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "AC_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Http port",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric|",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "18",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,25",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astro-colony-3eda7dc27679",
+        "name": "Astro Colony",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astro-colony-3eda7dc27679.json",
+        "sha256": "23b5081d2c7de4392d67da5b647b670f4c37e77fad51312235730fbf4333b2a5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "astro_colony/egg-astro-colony.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3eda7dc27679.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Astro Colony",
+        "author": "limmek@swedon.se",
+        "uuid": "4d507bc2-78ab-4669-b6c4-df631463e623",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./AstroColony/Binaries/Linux/AstroColonyServer -log -QueryPort={{SERVER_QUERY_PORT}} -SteamServerName=\\\"{{SERVER_NAME}}\\\"",
+        "config": {
+          "files": "{\"AstroColony/Saved/Config/LinuxServer/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/ACFeature.EHServerSubsystem].ServerPassword\": \"{{env.SERVER_PASSWORD}}\", \"[/Script/ACFeature.EHServerSubsystem].Seed\": \"{{env.SERVER_MAPSEED}}\", \"[/Script/ACFeature.EHServerSubsystem].MapName\": \"{{env.SERVER_MAPNAME}}\", \"[/Script/ACFeature.EHServerSubsystem].MaxPlayers\": \"{{env.SERVER_MAXPLAYERS}}\", \"[/Script/ACFeature.EHServerSubsystem].ShouldLoadLatestSavegame\": \"{{env.SERVER_LOADLATESTSAVEGAME}}\", \"[/Script/ACFeature.EHServerSubsystem].AdminList\": \"{{env.SERVER_ADMINS}}\", \"[/Script/ACFeature.EHServerSubsystem].SharedTechnologies\": \"{{env.SERVER_SHAREDTECHNOLOGIES}}\", \"[/Script/ACFeature.EHServerSubsystem].OxygenConsumption\": \"{{env.SERVER_OXYGENCONSUMPTION}}\", \"[/Script/ACFeature.EHServerSubsystem].FreeConstruction\": \"{{env.SERVER_FREECONSTRUCTION}}\", \"[/Script/ACFeature.EHServerSubsystem].AutosaveInterval\": \"{{env.SERVER_AUTOSAVEINTERVAL}}\", \"[/Script/ACFeature.EHServerSubsystem].AutosavesCount\": \"{{env.SERVER_AUTOSAVESCOUNT}}\"}}}",
+          "startup": "{\"done\": \"server create success\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates tar unzip lib32gcc-s1 wget\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2934900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2934900",
+            "sort": 1
+          },
+          {
+            "name": "Server Name",
+            "description": "Change the server name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Astro Colony Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "sort": 2
+          },
+          {
+            "name": "Server Password",
+            "description": "Set the game password. Leave empty to make server public.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": 3
+          },
+          {
+            "name": "Max Players",
+            "description": "Amount of max allowed players.",
+            "env_variable": "SERVER_MAXPLAYERS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,10",
+            "sort": 4
+          },
+          {
+            "name": "Map Seed",
+            "description": "Set the map seed.",
+            "env_variable": "SERVER_MAPSEED",
+            "default_value": "7300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|digits_between:1,10",
+            "sort": 5
+          },
+          {
+            "name": "Map Name",
+            "description": "Map name displayed in serverlist",
+            "env_variable": "SERVER_MAPNAME",
+            "default_value": "YourMapName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "sort": 6
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "Minutes between auto save (5.0 = 5 minutes)",
+            "env_variable": "SERVER_AUTOSAVEINTERVAL",
+            "default_value": "5.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": 7
+          },
+          {
+            "name": "Autosaves Count",
+            "description": "How many auto save files to keep.",
+            "env_variable": "SERVER_AUTOSAVESCOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 8
+          },
+          {
+            "name": "Admin List",
+            "description": "List of server administrators only (steamID64s) allowed, separatet by comma.",
+            "env_variable": "SERVER_ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": 9
+          },
+          {
+            "name": "Should Load Latest Savegame",
+            "description": "",
+            "env_variable": "SERVER_LOADLATESTSAVEGAME",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 10
+          },
+          {
+            "name": "Shared Technologies",
+            "description": "",
+            "env_variable": "SERVER_SHAREDTECHNOLOGIES",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 11
+          },
+          {
+            "name": "Oxygen Consumption",
+            "description": "",
+            "env_variable": "SERVER_OXYGENCONSUMPTION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 12
+          },
+          {
+            "name": "Free Construction",
+            "description": "",
+            "env_variable": "SERVER_FREECONSTRUCTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 13
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 14
+          },
+          {
+            "name": "Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "SERVER_QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": 15
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astro-colony-4b3b825bd79c",
+        "name": "Astro Colony",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astro-colony-4b3b825bd79c.json",
+        "sha256": "ee0fe1eb019536bc32f8c31ad2d780033c53b1f67f527252dfad609ed2fd3d46",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "astro_colony/egg-pterodactyl-astro-colony.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4b3b825bd79c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-25T11:05:05+00:00",
+        "name": "Astro Colony",
+        "author": "limmek@swedon.se",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./AstroColony/Binaries/Linux/AstroColonyServer -log -QueryPort={{SERVER_QUERY_PORT}} -SteamServerName=\\\"{{SERVER_NAME}}\\\"",
+        "config": {
+          "files": "{\"AstroColony/Saved/Config/LinuxServer/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/ACFeature.EHServerSubsystem].ServerPassword\": \"{{env.SERVER_PASSWORD}}\", \"[/Script/ACFeature.EHServerSubsystem].Seed\": \"{{env.SERVER_MAPSEED}}\", \"[/Script/ACFeature.EHServerSubsystem].MapName\": \"{{env.SERVER_MAPNAME}}\", \"[/Script/ACFeature.EHServerSubsystem].MaxPlayers\": \"{{env.SERVER_MAXPLAYERS}}\", \"[/Script/ACFeature.EHServerSubsystem].ShouldLoadLatestSavegame\": \"{{env.SERVER_LOADLATESTSAVEGAME}}\", \"[/Script/ACFeature.EHServerSubsystem].AdminList\": \"{{env.SERVER_ADMINS}}\", \"[/Script/ACFeature.EHServerSubsystem].SharedTechnologies\": \"{{env.SERVER_SHAREDTECHNOLOGIES}}\", \"[/Script/ACFeature.EHServerSubsystem].OxygenConsumption\": \"{{env.SERVER_OXYGENCONSUMPTION}}\", \"[/Script/ACFeature.EHServerSubsystem].FreeConstruction\": \"{{env.SERVER_FREECONSTRUCTION}}\", \"[/Script/ACFeature.EHServerSubsystem].AutosaveInterval\": \"{{env.SERVER_AUTOSAVEINTERVAL}}\", \"[/Script/ACFeature.EHServerSubsystem].AutosavesCount\": \"{{env.SERVER_AUTOSAVESCOUNT}}\"}}}",
+          "startup": "{\"done\": \"server create success\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates tar unzip lib32gcc-s1 wget\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2934900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2934900",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Change the server name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Astro Colony Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set the game password. Leave empty to make server public.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Amount of max allowed players.",
+            "env_variable": "SERVER_MAXPLAYERS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Seed",
+            "description": "Set the map seed.",
+            "env_variable": "SERVER_MAPSEED",
+            "default_value": "7300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|digits_between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "Map name displayed in serverlist",
+            "env_variable": "SERVER_MAPNAME",
+            "default_value": "YourMapName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "Minutes between auto save (5.0 = 5 minutes)",
+            "env_variable": "SERVER_AUTOSAVEINTERVAL",
+            "default_value": "5.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosaves Count",
+            "description": "How many auto save files to keep.",
+            "env_variable": "SERVER_AUTOSAVESCOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin List",
+            "description": "List of server administrators only (steamID64s) allowed, separatet by comma.",
+            "env_variable": "SERVER_ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Should Load Latest Savegame",
+            "description": "",
+            "env_variable": "SERVER_LOADLATESTSAVEGAME",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Shared Technologies",
+            "description": "",
+            "env_variable": "SERVER_SHAREDTECHNOLOGIES",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Oxygen Consumption",
+            "description": "",
+            "env_variable": "SERVER_OXYGENCONSUMPTION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Free Construction",
+            "description": "",
+            "env_variable": "SERVER_FREECONSTRUCTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "SERVER_QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astro-colony-61cb6e5c3de6",
+        "name": "Astro Colony",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astro-colony-61cb6e5c3de6.json",
+        "sha256": "b9ffaa0c8815e2270dd8eb3eb7a141ee4085d18d6705998dd30840ca2647e1ea",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/astro_colony/egg-astro-colony.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/61cb6e5c3de6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-12T14:04:24+02:00",
+        "name": "Astro Colony",
+        "author": "limmek@swedon.se",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./AstroColony/Binaries/Linux/AstroColonyServer -log -QueryPort={{SERVER_QUERY_PORT}} -SteamServerName=\\\"{{SERVER_NAME}}\\\"",
+        "config": {
+          "files": "{\"AstroColony/Saved/Config/LinuxServer/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/AstroColony.EHServerSubsystem].ServerPassword\": \"{{env.SERVER_PASSWORD}}\", \"[/Script/AstroColony.EHServerSubsystem].Seed\": \"{{env.SERVER_MAPSEED}}\", \"[/Script/AstroColony.EHServerSubsystem].MapName\": \"{{env.SERVER_MAPNAME}}\", \"[/Script/AstroColony.EHServerSubsystem].MaxPlayers\": \"{{env.SERVER_MAXPLAYERS}}\", \"[/Script/AstroColony.EHServerSubsystem].ShouldLoadLatestSavegame\": \"{{env.SERVER_LOADLATESTSAVEGAME}}\", \"[/Script/AstroColony.EHServerSubsystem].AdminList\": \"{{env.SERVER_ADMINS}}\", \"[/Script/AstroColony.EHServerSubsystem].SharedTechnologies\": \"{{env.SERVER_SHAREDTECHNOLOGIES}}\", \"[/Script/AstroColony.EHServerSubsystem].OxygenConsumption\": \"{{env.SERVER_OXYGENCONSUMPTION}}\", \"[/Script/AstroColony.EHServerSubsystem].FreeConstruction\": \"{{env.SERVER_FREECONSTRUCTION}}\", \"[/Script/AstroColony.EHServerSubsystem].AutosaveInterval\": \"{{env.SERVER_AUTOSAVEINTERVAL}}\", \"[/Script/AstroColony.EHServerSubsystem].AutosavesCount\": \"{{env.SERVER_AUTOSAVESCOUNT}}\"}}}",
+          "startup": "{\"done\": \"server create success\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates tar unzip lib32gcc-s1 wget\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# set up settings\r\ncreate_server_settings_ini() {\r\n    cat > ServerSettings.ini <<EOF\r\n[/Script/AstroColony.EHServerSubsystem]\r\nServerPassword=${SERVER_PASSWORD}\r\nSeed=${SERVER_MAPSEED}\r\nMapName=${SERVER_MAPNAME}\r\nMaxPlayers=${SERVER_MAXPLAYERS}\r\nShouldLoadLatestSavegame=${SERVER_LOADLATESTSAVEGAME}\r\nAdminList=${SERVER_ADMINS} \r\nSharedTechnologies=${SERVER_SHAREDTECHNOLOGIES}\r\nOxygenConsumption=${SERVER_OXYGENCONSUMPTION}\r\nFreeConstruction=${SERVER_FREECONSTRUCTION}\r\nAutosaveInterval=${SERVER_AUTOSAVEINTERVAL}\r\nAutosavesCount=${SERVER_AUTOSAVESCOUNT}\r\nEOF\r\n}\r\n\r\nFILE=/mnt/server/AstroColony/Saved/Config/LinuxServer/ServerSettings.ini\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config already exists, skipping\"\r\nelse \r\n    echo \"Config does not yet exist, making one\"\r\n    mkdir -p /mnt/server/AstroColony/Saved/Config/LinuxServer/\r\n    cd /mnt/server/AstroColony/Saved/Config/LinuxServer/\r\n    create_server_settings_ini\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2934900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2934900",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "SERVER_QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Change the server name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Astro Colony Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set the game password. Leave empty to make server public.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Amount of max allowed players.",
+            "env_variable": "SERVER_MAXPLAYERS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Seed",
+            "description": "Set the map seed.",
+            "env_variable": "SERVER_MAPSEED",
+            "default_value": "7300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|digits_between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "Map name displayed in serverlist",
+            "env_variable": "SERVER_MAPNAME",
+            "default_value": "YourMapName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "Minutes between auto save (5.0 = 5 minutes)",
+            "env_variable": "SERVER_AUTOSAVEINTERVAL",
+            "default_value": "5.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosaves Count",
+            "description": "How many auto save files to keep.",
+            "env_variable": "SERVER_AUTOSAVESCOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin List",
+            "description": "List of server administrators only (steamID64s) allowed, separatet by comma.",
+            "env_variable": "SERVER_ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Should Load Latest Savegame",
+            "description": "",
+            "env_variable": "SERVER_LOADLATESTSAVEGAME",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Shared Technologies",
+            "description": "",
+            "env_variable": "SERVER_SHAREDTECHNOLOGIES",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Oxygen Consumption",
+            "description": "",
+            "env_variable": "SERVER_OXYGENCONSUMPTION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Free Construction",
+            "description": "",
+            "env_variable": "SERVER_FREECONSTRUCTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astro-colony-b37efb6e788d",
+        "name": "Astro Colony",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astro-colony-b37efb6e788d.json",
+        "sha256": "71098998f0ebc2a584805708b65e4eb5e1e92f8707dac5aa5f9b1d0f4c27bcd2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "astro_colony/egg-astro-colony.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/b37efb6e788d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-18T13:37:17+00:00",
+        "name": "Astro Colony",
+        "author": "limmek@swedon.se",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./AstroColony/Binaries/Linux/AstroColonyServer -log -QueryPort={{SERVER_QUERY_PORT}} -SteamServerName=\\\"{{SERVER_NAME}}\\\"",
+        "config": {
+          "files": "{\"AstroColony/Saved/Config/LinuxServer/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/ACFeature.EHServerSubsystem].ServerPassword\": \"{{env.SERVER_PASSWORD}}\", \"[/Script/ACFeature.EHServerSubsystem].Seed\": \"{{env.SERVER_MAPSEED}}\", \"[/Script/ACFeature.EHServerSubsystem].MapName\": \"{{env.SERVER_MAPNAME}}\", \"[/Script/ACFeature.EHServerSubsystem].MaxPlayers\": \"{{env.SERVER_MAXPLAYERS}}\", \"[/Script/ACFeature.EHServerSubsystem].ShouldLoadLatestSavegame\": \"{{env.SERVER_LOADLATESTSAVEGAME}}\", \"[/Script/ACFeature.EHServerSubsystem].AdminList\": \"{{env.SERVER_ADMINS}}\", \"[/Script/ACFeature.EHServerSubsystem].SharedTechnologies\": \"{{env.SERVER_SHAREDTECHNOLOGIES}}\", \"[/Script/ACFeature.EHServerSubsystem].OxygenConsumption\": \"{{env.SERVER_OXYGENCONSUMPTION}}\", \"[/Script/ACFeature.EHServerSubsystem].FreeConstruction\": \"{{env.SERVER_FREECONSTRUCTION}}\", \"[/Script/ACFeature.EHServerSubsystem].AutosaveInterval\": \"{{env.SERVER_AUTOSAVEINTERVAL}}\", \"[/Script/ACFeature.EHServerSubsystem].AutosavesCount\": \"{{env.SERVER_AUTOSAVESCOUNT}}\"}}}",
+          "startup": "{\"done\": \"server create success\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates tar unzip lib32gcc-s1 wget\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# Configuration files are managed by Pterodactyl's ini parser.\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2934900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2934900",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Change the server name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Astro Colony Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set the game password. Leave empty to make server public.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Amount of max allowed players.",
+            "env_variable": "SERVER_MAXPLAYERS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Seed",
+            "description": "Set the map seed.",
+            "env_variable": "SERVER_MAPSEED",
+            "default_value": "7300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|digits_between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "Map name displayed in serverlist",
+            "env_variable": "SERVER_MAPNAME",
+            "default_value": "YourMapName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "Minutes between auto save (5.0 = 5 minutes)",
+            "env_variable": "SERVER_AUTOSAVEINTERVAL",
+            "default_value": "5.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosaves Count",
+            "description": "How many auto save files to keep.",
+            "env_variable": "SERVER_AUTOSAVESCOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin List",
+            "description": "List of server administrators only (steamID64s) allowed, separatet by comma.",
+            "env_variable": "SERVER_ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Should Load Latest Savegame",
+            "description": "",
+            "env_variable": "SERVER_LOADLATESTSAVEGAME",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Shared Technologies",
+            "description": "",
+            "env_variable": "SERVER_SHAREDTECHNOLOGIES",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Oxygen Consumption",
+            "description": "",
+            "env_variable": "SERVER_OXYGENCONSUMPTION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Free Construction",
+            "description": "",
+            "env_variable": "SERVER_FREECONSTRUCTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "SERVER_QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astro-colony-wine-0d3392acc8af",
+        "name": "Astro Colony [wine]",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astro-colony-wine-0d3392acc8af.json",
+        "sha256": "55fdfa87d44bf83a177ba72e6c6e601d341aa88327c92a678f22313cf5653838",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/astro_colony/egg-astro-colony-wine.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/0d3392acc8af.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-12T14:03:30+02:00",
+        "name": "Astro Colony [wine]",
+        "author": "limmek@swedon.se",
+        "description": "Explore endless Universe and create the most efficient constellation of colonies. Build conveyor systems to automate production. Take care of Astronauts and their needs! Establish new colonies as part of intergalactic simulation.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./AstroColony/Binaries/Win64/AstroColonyServer.exe -log -QueryPort={{SERVER_QUERY_PORT}} -SteamServerName=\"{{SERVER_NAME}}\"",
+        "config": {
+          "files": "{\"AstroColony/Saved/Config/WindowsServer/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/AstroColony.EHServerSubsystem].ServerPassword\": \"{{env.SERVER_PASSWORD}}\", \"[/Script/AstroColony.EHServerSubsystem].Seed\": \"{{env.SERVER_MAPSEED}}\", \"[/Script/AstroColony.EHServerSubsystem].MapName\": \"{{env.SERVER_MAPNAME}}\", \"[/Script/AstroColony.EHServerSubsystem].MaxPlayers\": \"{{env.SERVER_MAXPLAYERS}}\", \"[/Script/AstroColony.EHServerSubsystem].ShouldLoadLatestSavegame\": \"{{env.SERVER_LOADLATESTSAVEGAME}}\", \"[/Script/AstroColony.EHServerSubsystem].AdminList\": \"{{env.SERVER_ADMINS}}\", \"[/Script/AstroColony.EHServerSubsystem].SharedTechnologies\": \"{{env.SERVER_SHAREDTECHNOLOGIES}}\", \"[/Script/AstroColony.EHServerSubsystem].OxygenConsumption\": \"{{env.SERVER_OXYGENCONSUMPTION}}\", \"[/Script/AstroColony.EHServerSubsystem].FreeConstruction\": \"{{env.SERVER_FREECONSTRUCTION}}\", \"[/Script/AstroColony.EHServerSubsystem].AutosaveInterval\": \"{{env.SERVER_AUTOSAVEINTERVAL}}\", \"[/Script/AstroColony.EHServerSubsystem].AutosavesCount\": \"{{env.SERVER_AUTOSAVESCOUNT}}\"}}}",
+          "startup": "{\"done\": \"server create success\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/AstroColony/Binaries/Win64 +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# set up settings\r\ncreate_server_settings_ini() {\r\n    cat > ServerSettings.ini <<EOF\r\n[/Script/AstroColony.EHServerSubsystem]\r\nServerPassword=${SERVER_PASSWORD}\r\nSeed=${SERVER_MAPSEED}\r\nMapName=${SERVER_MAPNAME}\r\nMaxPlayers=${SERVER_MAXPLAYERS}\r\nShouldLoadLatestSavegame=${SERVER_LOADLATESTSAVEGAME}\r\nAdminList=${SERVER_ADMINS} \r\nSharedTechnologies=${SERVER_SHAREDTECHNOLOGIES}\r\nOxygenConsumption=${SERVER_OXYGENCONSUMPTION}\r\nFreeConstruction=${SERVER_FREECONSTRUCTION}\r\nAutosaveInterval=${SERVER_AUTOSAVEINTERVAL}\r\nAutosavesCount=${SERVER_AUTOSAVESCOUNT}\r\nEOF\r\n}\r\n\r\nFILE=/mnt/server/AstroColony/Saved/Config/WindowsServer/ServerSettings.ini\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config already exists, skipping\"\r\nelse \r\n    echo \"Config does not yet exist, making one\"\r\n    mkdir -p /mnt/server/AstroColony/Saved/Config/WindowsServer/\r\n    cd /mnt/server/AstroColony/Saved/Config/WindowsServer/\r\n    create_server_settings_ini\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "steam app id found here - https:\\/\\/developer.valvesoftware.com\\/wiki\\/Dedicated_Servers_List.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2662210",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2662210",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Windows Install Flag",
+            "description": "Required for windows game server installs",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "SERVER_QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Change the server name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Astro Colony Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set the game password. Leave empty to make server public.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Amount of max allowed players.",
+            "env_variable": "SERVER_MAXPLAYERS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Seed",
+            "description": "Set the map seed.",
+            "env_variable": "SERVER_MAPSEED",
+            "default_value": "1337",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|digits_between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "Set the name of the save file.",
+            "env_variable": "SERVER_MAPNAME",
+            "default_value": "YourMapName",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "",
+            "env_variable": "SERVER_AUTOSAVEINTERVAL",
+            "default_value": "5.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosaves Count",
+            "description": "",
+            "env_variable": "SERVER_AUTOSAVESCOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin List",
+            "description": "List of server administrators only (steamID64s) allowed, separatet by comma.",
+            "env_variable": "SERVER_ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Should Load Latest Savegame",
+            "description": "",
+            "env_variable": "SERVER_LOADLATESTSAVEGAME",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Shared Technologies",
+            "description": "",
+            "env_variable": "SERVER_SHAREDTECHNOLOGIES",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Oxygen Consumption",
+            "description": "",
+            "env_variable": "SERVER_OXYGENCONSUMPTION",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Free Construction",
+            "description": "",
+            "env_variable": "SERVER_FREECONSTRUCTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astroneer-dedicated-server-1fc75da54dd8",
+        "name": "Astroneer Dedicated Server",
+        "description": "A game of aerospace industry and interplanetary exploration.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astroneer-dedicated-server-1fc75da54dd8.json",
+        "sha256": "255f17bdf13f90dd06895988caaae2357f8fba7d7e8f7f9660d6ad9e477bcd1e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "astroneer/egg-astroneer-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/1fc75da54dd8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-02-20T09:47:43+01:00",
+        "name": "Astroneer Dedicated Server",
+        "author": "melethainiel.aerin@gmail.com",
+        "description": "A game of aerospace industry and interplanetary exploration.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "proton run ./Astro/Binaries/Win64/AstroServer-Win64-Shipping.exe",
+        "config": {
+          "files": "{\"Astro/Saved/Config/WindowsServer/Engine.ini\": {\"parser\": \"ini\", \"find\": {\"url.Port\": \"{{server.build.default.port}}\", \"[SystemSettings].net.AllowEncryption\": \"false\"}}, \"Astro/Saved/Config/WindowsServer/AstroServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/Astro.AstroServerSettings].PublicIP\": \"{{env.PUBLIC_IP}}\", \"[/Script/Astro.AstroServerSettings].OwnerName\": \"{{env.OWNER_NAME}}\", \"[/Script/Astro.AstroServerSettings].OwnerGuid\": \"{{env.OWNER_GUID}}\", \"[/Script/Astro.AstroServerSettings].PlayerProperties\": \"(PlayerFirstJoinName=\\\"{{env.OWNER_NAME}}\\\",PlayerCategory=Admin,PlayerGuid=\\\"{{env.OWNER_GUID}}\\\",PlayerRecentJoinName=\\\"\\\")\", \"[/Script/Astro.AstroServerSettings].ServerPassword\": \"{{env.SERVER_PWD}}\", \"[/Script/Astro.AstroServerSettings].ServerName\": \"{{env.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"nable to use setpriority safely\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n## download and install steamcmd\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Install steamcmd\"\r\necho \"-----------------------------------------\"\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n## install game using steamcmd\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Install game\"\r\necho \"-----------------------------------------\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Public IP",
+            "description": "Public IP to connect to the server.",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Name",
+            "description": "Steam username of the server owner",
+            "env_variable": "OWNER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Guid",
+            "description": "Steam id of the server owner",
+            "env_variable": "OWNER_GUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Windows Install",
+            "description": "Windows Install",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "728470",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "PROTON_LOG",
+            "description": "",
+            "env_variable": "PROTON_LOG",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astroneer-dedicated-server-4168d5c03251",
+        "name": "Astroneer Dedicated Server",
+        "description": "A game of aerospace industry and interplanetary exploration.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astroneer-dedicated-server-4168d5c03251.json",
+        "sha256": "c16c7436bb8a9761af637cba4f8903f37c0fc0395e9dbeb554e2b2ffa5bf561d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/astroneer/egg-astroneer-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/4168d5c03251.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-02-20T09:47:43+01:00",
+        "name": "Astroneer Dedicated Server",
+        "author": "melethainiel.aerin@gmail.com",
+        "description": "A game of aerospace industry and interplanetary exploration.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "proton run ./Astro/Binaries/Win64/AstroServer-Win64-Shipping.exe",
+        "config": {
+          "files": "{\"Astro/Saved/Config/WindowsServer/Engine.ini\": {\"parser\": \"ini\", \"find\": {\"url.Port\": \"{{server.build.default.port}}\", \"[SystemSettings].net.AllowEncryption\": \"false\"}}, \"Astro/Saved/Config/WindowsServer/AstroServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/Astro.AstroServerSettings].PublicIP\": \"{{env.PUBLIC_IP}}\", \"[/Script/Astro.AstroServerSettings].OwnerName\": \"{{env.OWNER_NAME}}\", \"[/Script/Astro.AstroServerSettings].OwnerGuid\": \"{{env.OWNER_GUID}}\", \"[/Script/Astro.AstroServerSettings].PlayerProperties\": \"(PlayerFirstJoinName=\\\"{{env.OWNER_NAME}}\\\",PlayerCategory=Admin,PlayerGuid=\\\"{{env.OWNER_GUID}}\\\",PlayerRecentJoinName=\\\"\\\")\", \"[/Script/Astro.AstroServerSettings].ServerPassword\": \"{{env.SERVER_PWD}}\", \"[/Script/Astro.AstroServerSettings].ServerName\": \"{{env.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"nable to use setpriority safely\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n## download and install steamcmd\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Install steamcmd\"\r\necho \"-----------------------------------------\"\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n## install game using steamcmd\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Install game\"\r\necho \"-----------------------------------------\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Public IP",
+            "description": "Public IP to connect to the server.",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Name",
+            "description": "Steam username of the server owner",
+            "env_variable": "OWNER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Guid",
+            "description": "Steam id of the server owner",
+            "env_variable": "OWNER_GUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Windows Install",
+            "description": "Windows Install",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "728470",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "PROTON_LOG",
+            "description": "",
+            "env_variable": "PROTON_LOG",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "astroneer-dedicated-server-5569e2aed2b1",
+        "name": "Astroneer Dedicated Server",
+        "description": "A game of aerospace industry and interplanetary exploration.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/astroneer-dedicated-server-5569e2aed2b1.json",
+        "sha256": "d7c1775f42979a8aaf47a24df04e63deebf16f0ba44c91d75b47549bf27f5ddb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "astroneer/egg-astroneer-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/5569e2aed2b1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Astroneer Dedicated Server",
+        "author": "melethainiel.aerin@gmail.com",
+        "uuid": "165ead11-926d-4b3b-a5d8-86c73d09427c",
+        "description": "A game of aerospace industry and interplanetary exploration.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "proton run ./Astro/Binaries/Win64/AstroServer-Win64-Shipping.exe",
+        "config": {
+          "files": "{\"Astro/Saved/Config/WindowsServer/Engine.ini\": {\"parser\": \"ini\", \"find\": {\"url.Port\": \"{{server.build.default.port}}\", \"[SystemSettings].net.AllowEncryption\": \"false\"}}, \"Astro/Saved/Config/WindowsServer/AstroServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/Astro.AstroServerSettings].PublicIP\": \"{{env.PUBLIC_IP}}\", \"[/Script/Astro.AstroServerSettings].OwnerName\": \"{{env.OWNER_NAME}}\", \"[/Script/Astro.AstroServerSettings].OwnerGuid\": \"{{env.OWNER_GUID}}\", \"[/Script/Astro.AstroServerSettings].PlayerProperties\": \"(PlayerFirstJoinName=\\\"{{env.OWNER_NAME}}\\\",PlayerCategory=Admin,PlayerGuid=\\\"{{env.OWNER_GUID}}\\\",PlayerRecentJoinName=\\\"\\\")\", \"[/Script/Astro.AstroServerSettings].ServerPassword\": \"{{env.SERVER_PWD}}\", \"[/Script/Astro.AstroServerSettings].ServerName\": \"{{env.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"nable to use setpriority safely\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n## download and install steamcmd\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Install steamcmd\"\r\necho \"-----------------------------------------\"\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n## install game using steamcmd\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Install game\"\r\necho \"-----------------------------------------\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Public IP",
+            "description": "Public IP to connect to the server.",
+            "env_variable": "PUBLIC_IP",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Name",
+            "description": "Steam username of the server owner",
+            "env_variable": "OWNER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Guid",
+            "description": "Steam id of the server owner",
+            "env_variable": "OWNER_GUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Windows Install",
+            "description": "Windows Install",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "728470",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "PROTON_LOG",
+            "description": "",
+            "env_variable": "PROTON_LOG",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1560 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "solace-crafting-eb1cd2507a55",
+        "name": "Solace Crafting",
+        "description": "Open-world fantasy survival RPG. Borderless distance-based difficulty with player built fast-travel, modular-building, and town management.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/solace-crafting-eb1cd2507a55.json",
+        "sha256": "9d75b3b65d6939ac06c335fe2675e1393ed375cac65a36ec249117150fa11c21",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "solace_crafting/egg-solace-crafting.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/eb1cd2507a55.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Solace Crafting",
+        "author": "eggs@goover.dev",
+        "uuid": "e2cf3c9a-0fe0-4737-9c5f-d7f6ba9b91a8",
+        "description": "Open-world fantasy survival RPG. Borderless distance-based difficulty with player built fast-travel, modular-building, and town management.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./Solace\\ Crafting.x86_64",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \" server started . (True)\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n\r\nmkdir -p \"$HOME/.config/unity3d/Big Kitty Games/Solace Crafting\"\r\n\r\ncat <<EOT > \"$HOME/.config/unity3d/Big Kitty Games/Solace Crafting/servercfg.dat\"\r\n{\r\n    \"name\": \"Solace Crafting Server\",\r\n    \"description\": \"\",\r\n    \"port\": 27015,\r\n    \"steamQueryPort\": 27016,\r\n    \"isPrivate\": false,\r\n    \"password\": \"\",\r\n    \"requireSteamID\": true,\r\n    \"maxPlayers\": 12,\r\n    \"allowAdmin\": false,\r\n    \"adminPassword\": \"password\",\r\n    \"allowModerator\": false,\r\n    \"moderatorPassword\": \"password\",\r\n    \"worldSaveToUse\": \"MultiplayerWorld\",\r\n    \"autoRestart\": 0\r\n}\r\nEOT\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1086950",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "soldat-380885108bdf",
+        "name": "Soldat",
+        "description": "Soldat is a unique 2D (side-view) multiplayer action game. It has been influenced by the best of games such as Liero, Worms, Quake, and Counter-Strike and provides a fast-paced gaming experience with tons of blood and flesh. Soldiers fight against each other in 2D battle arenas using a deadly arsenal of military weapons, across 7 default game modes. It features 18 different weapons and 60 maps to frag away on, with full support for user created content.\r\n\r\nSteam: https://store.steampowered.com/app/638490/Soldat/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/soldat-380885108bdf.json",
+        "sha256": "93dfaf072e0a59a177dd37fdfee034ee79721e908c2249433b89725f3fcf2138",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "soldat/egg-pterodactyl-soldat.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/soldat/egg-soldat.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/380885108bdf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:50+00:00",
+        "name": "Soldat",
+        "author": "eggs@goover.dev",
+        "description": "Soldat is a unique 2D (side-view) multiplayer action game. It has been influenced by the best of games such as Liero, Worms, Quake, and Counter-Strike and provides a fast-paced gaming experience with tons of blood and flesh. Soldiers fight against each other in 2D battle arenas using a deadly arsenal of military weapons, across 7 default game modes. It features 18 different weapons and 60 maps to frag away on, with full support for user created content.\r\n\r\nSteam: https://store.steampowered.com/app/638490/Soldat/",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./soldatserver",
+        "config": {
+          "files": "{\"soldat.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.Port\": \"{{server.build.default.port}}\", \"NETWORK.Max_Players\": \"{{server.build.env.MAX_PLAYERS}}\", \"NETWORK.Game_Password\": \"{{server.build.env.SRV_PWD}}\", \"NETWORK.Admin_Password\": \"{{server.build.env.ADMIN_PASSWD}}\", \"NETWORK.Server_Name\": \"{{server.build.env.SRV_NAME}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Done\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\ncd /mnt/server\r\nchmod +x soldatserver\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Admin Passwort",
+            "description": "Admin Password for the Server",
+            "env_variable": "ADMIN_PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password to join Server",
+            "env_variable": "SRV_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the Server",
+            "env_variable": "SRV_NAME",
+            "default_value": "MySoldatServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max Players can join",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,20",
+            "field_type": "text"
+          },
+          {
+            "name": "ADD IP",
+            "description": "Steam APP ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "638500",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:638500",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "soldat-8248dc9b2f1b",
+        "name": "Soldat",
+        "description": "Soldat is a unique 2D (side-view) multiplayer action game. It has been influenced by the best of games such as Liero, Worms, Quake, and Counter-Strike and provides a fast-paced gaming experience with tons of blood and flesh. Soldiers fight against each other in 2D battle arenas using a deadly arsenal of military weapons, across 7 default game modes. It features 18 different weapons and 60 maps to frag away on, with full support for user created content.\r\n\r\nSteam: https://store.steampowered.com/app/638490/Soldat/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/soldat-8248dc9b2f1b.json",
+        "sha256": "19c2a84e0999f7edb257ee638dd0f1f728e8f6ddced16307967cd34bfbf58fcb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "soldat/egg-soldat.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/8248dc9b2f1b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T11:57:01+02:00",
+        "name": "Soldat",
+        "author": "eggs@goover.dev",
+        "description": "Soldat is a unique 2D (side-view) multiplayer action game. It has been influenced by the best of games such as Liero, Worms, Quake, and Counter-Strike and provides a fast-paced gaming experience with tons of blood and flesh. Soldiers fight against each other in 2D battle arenas using a deadly arsenal of military weapons, across 7 default game modes. It features 18 different weapons and 60 maps to frag away on, with full support for user created content.\r\n\r\nSteam: https://store.steampowered.com/app/638490/Soldat/",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./soldatserver",
+        "config": {
+          "files": "{\"soldat.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.Port\": \"{{server.build.default.port}}\", \"NETWORK.Max_Players\": \"{{server.build.env.MAX_PLAYERS}}\", \"NETWORK.Game_Password\": \"{{server.build.env.SRV_PWD}}\", \"NETWORK.Admin_Password\": \"{{server.build.env.ADMIN_PASSWD}}\", \"NETWORK.Server_Name\": \"{{server.build.env.SRV_NAME}}\"}}}",
+          "startup": "{\"done\": \"Done\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\ncd /mnt/server\r\nchmod +x soldatserver\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Admin Passwort",
+            "description": "Admin Password for the Server",
+            "env_variable": "ADMIN_PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password to join Server",
+            "env_variable": "SRV_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the Server",
+            "env_variable": "SRV_NAME",
+            "default_value": "MySoldatServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max Players can join",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,20",
+            "field_type": "text"
+          },
+          {
+            "name": "ADD IP",
+            "description": "Steam APP ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "638500",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:638500",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "soldat-df7d31dd32ea",
+        "name": "Soldat",
+        "description": "Soldat is a unique 2D (side-view) multiplayer action game. It has been influenced by the best of games such as Liero, Worms, Quake, and Counter-Strike and provides a fast-paced gaming experience with tons of blood and flesh. Soldiers fight against each other in 2D battle arenas using a deadly arsenal of military weapons, across 7 default game modes. It features 18 different weapons and 60 maps to frag away on, with full support for user created content.\r\n\r\nSteam: https://store.steampowered.com/app/638490/Soldat/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/soldat-df7d31dd32ea.json",
+        "sha256": "ddeb4f7bea6e1a34b39e982ae8a298aa40e9e7992e356fc42941d66571a7b0fb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "soldat/egg-soldat.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/df7d31dd32ea.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Soldat",
+        "author": "eggs@goover.dev",
+        "uuid": "db399bf1-dd25-4cb2-b7df-8045f65054dc",
+        "description": "Soldat is a unique 2D (side-view) multiplayer action game. It has been influenced by the best of games such as Liero, Worms, Quake, and Counter-Strike and provides a fast-paced gaming experience with tons of blood and flesh. Soldiers fight against each other in 2D battle arenas using a deadly arsenal of military weapons, across 7 default game modes. It features 18 different weapons and 60 maps to frag away on, with full support for user created content.\r\n\r\nSteam: https://store.steampowered.com/app/638490/Soldat/",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./soldatserver",
+        "config": {
+          "files": "{\"soldat.ini\": {\"parser\": \"ini\", \"find\": {\"NETWORK.Port\": \"{{server.build.default.port}}\", \"NETWORK.Max_Players\": \"{{server.build.env.MAX_PLAYERS}}\", \"NETWORK.Game_Password\": \"{{server.build.env.SRV_PWD}}\", \"NETWORK.Admin_Password\": \"{{server.build.env.ADMIN_PASSWD}}\", \"NETWORK.Server_Name\": \"{{server.build.env.SRV_NAME}}\"}}}",
+          "startup": "{\"done\": \"Done\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\ncd /mnt/server\r\nchmod +x soldatserver\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Admin Passwort",
+            "description": "Admin Password for the Server",
+            "env_variable": "ADMIN_PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password to join Server",
+            "env_variable": "SRV_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the Server",
+            "env_variable": "SRV_NAME",
+            "default_value": "MySoldatServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max Players can join",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "ADD IP",
+            "description": "Steam APP ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "638500",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:638500",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "soldat-2-f92e811f6c54",
+        "name": "Soldat 2",
+        "description": "Soldat 2 is a 2D deathmatch shooter with real guns, ragdoll violence and physics-based movement.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/soldat-2-f92e811f6c54.json",
+        "sha256": "89a086a90ceb5570ce9bb3a0788d7d6762671225fef719221d7a57add1e6a054",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "soldat_2/egg-soldat2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/f92e811f6c54.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-06-16T15:45:13+02:00",
+        "name": "Soldat 2",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Soldat 2 is a 2D deathmatch shooter with real guns, ragdoll violence and physics-based movement.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./soldat2 Name={{SERVER_NAME}} Port={{SERVER_PORT}} WebSocketsPort={{WEBSOCKETS_PORT}} WebSocketsRconPort={{RCON_PORT}} MaxPlayers={{MAX_PLAYERS}} ServerPassword={{SERVER_PASSWORD}} RconPassword={{RCON_PASSWORD}}",
+        "config": {
+          "files": "{\"autoconfig.ini\": {\"parser\": \"ini\", \"find\": {\"GameServerConfig.Name\": \"{{env.SERVER_NAME}}\", \"GameServerConfig.Port\": \"{{server.build.default.port}}\", \"GameServerConfig.WebSocketsPort\": \"{{env.WEBSOCKETS_PORT}}\", \"GameServerConfig.WebSocketsRconPort\": \"{{env.RCON_PORT}}\", \"GameServerConfig.RconPassword\": \"{{env.RCON_PASSWORD}}\", \"GameServerConfig.MaxPlayers\": \"{{env.MAX_PLAYERS}}\", \"GameServerConfig.GreetMessage\": \"{{env.GREET_MESSAGE}}\", \"GameServerConfig.AdminPlayfabId\": \"{{env.ADMIN_PLAYFAB_ID}}\", \"GameServerConfig.ServerPassword\": \"{{env.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"ALL RULES SCRIPTS INITIALIZED\"}",
+          "logs": "{}",
+          "stop": "^SIGKILL"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# download & extract server files\r\nwget -O soldat2-linuxserver-release.tar.gz \"https://dl.thd.vg/soldat2-linuxserver-release.tar.gz\"\r\ntar -zxf soldat2-linuxserver-release.tar.gz\r\nrm soldat2-linuxserver-release.tar.gz\r\n\r\n# move content to /mnt/server\r\nmv soldat2-linuxserver-release/* soldat2-linuxserver-release/.* /mnt/server 2>/dev/null || true\r\nrm -r soldat2-linuxserver-release\r\n\r\ncd /mnt/server\r\nchmod +x ./soldat2\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name of your server (this will show in the master list) Do not include spaces",
+            "env_variable": "SERVER_NAME",
+            "default_value": "PterodactylServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The amount of players that can join your server at once. Maximum is 12.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:12",
+            "field_type": "text"
+          },
+          {
+            "name": "WebSockets Port",
+            "description": "WebSockets port (optional). Use 0 to disable.",
+            "env_variable": "WEBSOCKETS_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON WebSockets Port",
+            "description": "RCON WebSocket port (optional). Use 0 to disable.",
+            "env_variable": "RCON_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "The password for RCON access.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "RconPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Greet Message",
+            "description": "This message is shown to players when they join.",
+            "env_variable": "GREET_MESSAGE",
+            "default_value": "Welcome! Be friendly and have fun!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin PlayFab ID",
+            "description": "Your Playfab ID will show up in the server logs as 1 YOUR_NAME joined the server [YOUR_PLAYFAB_ID])",
+            "env_variable": "ADMIN_PLAYFAB_ID",
+            "default_value": "IDHere",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If set, players must enter this password to join.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "ServerPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sonic-robo-blast-2-77aafab36355",
+        "name": "Sonic Robo Blast 2",
+        "description": "Sonic Robo Blast 2 Dedicated Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sonic-robo-blast-2-77aafab36355.json",
+        "sha256": "f417e4354b31b3577461f4dc945c3d36147dbaa2c3893c44665205f34188c5c7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "sonic_robo_blast_2/egg-sonic-robo-blast2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/77aafab36355.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-03-10T13:31:01+01:00",
+        "name": "Sonic Robo Blast 2",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Sonic Robo Blast 2 Dedicated Server",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "rm ./latest-log.txt; wine ./srb2win.exe -dedicated -port {{SERVER_PORT}} -room {{ROOM_NR}} & ENS_PID=$! ; tail -c0 -F ./latest-log.txt --pid=$ENS_PID",
+        "config": {
+          "files": "{\"adedserv.cfg\": {\"parser\": \"file\", \"find\": {\"servername\": \"servername \\\"{{server.build.env.SRV_NAME}}\\\"\", \"password\": \"password {{server.build.env.SRV_PW}}\", \"maxplayers\": \"maxplayers {{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"DEDICATED: No players at round start, idling...\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# SRB2_VERSION\r\nif [[ \"$SRB2_VERSION\" == \"latest\" ]]; then\r\n    echo \"Fetching latest SRB2 version from GitHub...\"\r\n    SRB2_VERSION=$(curl -s https://api.github.com/repos/STJr/SRB2/releases/latest | jq -r '.tag_name' | sed 's/SRB2_release_//')\r\n    echo \"Latest SRB2 version is: $SRB2_VERSION\"\r\nfi\r\n\r\nSRB2_VERSION_NO_DOTS=\"${SRB2_VERSION//./}\"\r\nSRB2_URL=\"https://github.com/STJr/SRB2/releases/download/SRB2_release_${SRB2_VERSION}/SRB2-v${SRB2_VERSION_NO_DOTS}-Full.zip\"\r\n\r\napt update && apt install -y unzip wget jq curl libsdl2-2.0-0 libpng16-16\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server || exit\r\n\r\nwget -O SRB2.zip \"$SRB2_URL\"\r\nunzip SRB2.zip\r\nrm SRB2.zip\r\n\r\nchmod +x ./srb2win.exe\r\n\r\nCONFIG_FILE=\"/mnt/server/adedserv.cfg\"\r\n\r\nif [[ -f \"$CONFIG_FILE\" ]]; then\r\n    echo \"Ensuring necessary settings exist in configuration...\"\r\n    sed -i \"s/^servername.*/servername ${SRV_NAME}/\" \"$CONFIG_FILE\"\r\n    sed -i \"s/^password.*/password ${SRV_PW}/\" \"$CONFIG_FILE\"\r\n    sed -i \"s/^maxplayers.*/maxplayers ${MAX_PLAYERS}/\" \"$CONFIG_FILE\"\r\nelse\r\n    echo \"Configuration file missing! Creating a new one...\"\r\n    cat > \"$CONFIG_FILE\" <<EOL\r\nservername \"${SRV_NAME:-\"My SRB2 Server\"}\"\r\nwait 5\r\npassword ${SRV_PW:-\"ChangeMe\"}\r\nwait 5\r\nmaxplayers ${MAX_PLAYERS:-20}\r\nEOL\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed for SRB2 $SRB2_VERSION\"\r\necho -e \"-------------------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name of your server (this will show in the master list)",
+            "env_variable": "SRV_NAME",
+            "default_value": "Default Name",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "The password used for joining the server",
+            "env_variable": "SRV_PW",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The amount of players that can join your server at once\r\nMaximum amount of players: 32",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Master List Room Number",
+            "description": "This advertises the server on the Master Server. ID specifies the room in which the server is hosted: 33 is the Standard room, while 28 is the Casual room.\r\n\r\nMaster List: https://ms.srb2.org/",
+            "env_variable": "ROOM_NR",
+            "default_value": "33",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "SRB2 Version",
+            "description": "The version of Sonic Robo Blast 2 that will be used",
+            "env_variable": "SRB2_VERSION",
+            "default_value": "2.2.15",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "Used to suppress WINE FIXME messages. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:/home/container",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sons-of-the-forest-2e8e6135a59e",
+        "name": "Sons Of The Forest",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sons-of-the-forest-2e8e6135a59e.json",
+        "sha256": "0ae6f6b23b30ea05d53c3bf7badd8e874f8641463cf3f83be3e5522977695ee2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "sonsoftheforest/egg-pterodactyl-sons-of-the-forest.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/2e8e6135a59e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:52+00:00",
+        "name": "Sons Of The Forest",
+        "author": "eggs@goover.dev",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./SonsOfTheForestDS.exe -userdatapath \"/home/container/serverconfig\" -dedicatedserver.IpAddress \"0.0.0.0\" -dedicatedserver.GamePort \"{{SERVER_PORT}}\" -dedicatedserver.QueryPort \"{{QUERY_PORT}}\" -dedicatedserver.BlobSyncPort \"{{BLOBSYNC_PORT}}\" -dedicatedserver.MaxPlayers \"{{MAX_PLAYERS}}\" -dedicatedserver.Password \"{{SRV_PW}}\" -dedicatedserver.GameMode \"{{GAME_MODE}}\" -dedicatedserver.SkipNetworkAccessibilityTest \"{{SKIP_TESTS}}\" -dedicatedserver.SaveSlot \"{{SAVE_SLOT}}\" -dedicatedserver.LogFilesEnabled \"true\" -dedicatedserver.TimestampLogFilenames \"true\"",
+        "config": {
+          "files": "{\"serverconfig/dedicatedserver.cfg\": {\"parser\": \"json\", \"find\": {\"ServerName\": \"{{server.build.env.SRV_NAME}}\", \"SaveSlot\": \"{{server.build.env.SAVE_SLOT}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"#DSL Dedicated server loaded.\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Sons of the Forest Installscript${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\nmkdir -p /mnt/server/serverconfig\r\nFILE=$HOME/serverconfig/dedicatedserver.cfg\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}dedicatedserver.cfg found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No dedicatedserver.cfg found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o dedicatedserver.cfg https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/sonsoftheforest/dedicatedserver.cfg\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\nFILE=$HOME/serverconfig/ownerswhitelist.txt\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}ownerswhitelist.txt found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No ownerswhitelist.txt found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o ownerswhitelist.txt https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/sonsoftheforest/ownerswhitelist.txt\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\""
+          }
+        },
+        "variables": [
+          {
+            "name": "QueryPort",
+            "description": "UDP port used by Steam to list the server and enable the discovery services.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "BlobSyncPort",
+            "description": "BlobSyncPort UDP port used by the BlobSync system to initialize game systems and exchange data.",
+            "env_variable": "BLOBSYNC_PORT",
+            "default_value": "9700",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server visible in the server list, and in the Steam contacts.",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed simultaneously on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Sets the difficulty game mode when creating a new save. This parameter is ignored if loading a save (save mode set to “continue” with a save that exists on the slot). If the game mode is set to “custom”, then the custom game mode settings will be read from CustomGameModeSettings option, described later.",
+            "env_variable": "GAME_MODE",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in:normal,hard,hardsurvival,peaceful,custom",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2465200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Skip network Test",
+            "description": "if you have problems to connect to your server, set this to TRUE",
+            "env_variable": "SKIP_TESTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Slot",
+            "description": "If you uploaded an existing save from your PC you can enter the save slot number here.",
+            "env_variable": "SAVE_SLOT",
+            "default_value": "0000000001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sons-of-the-forest-3236ef4d48f5",
+        "name": "Sons Of The Forest",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sons-of-the-forest-3236ef4d48f5.json",
+        "sha256": "19508eda51f8e4f298d974e3802408433c804ed8e17ec99603d6267487fe317b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "sonsoftheforest/egg-sons-of-the-forest.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/3236ef4d48f5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-24T15:18:00+01:00",
+        "name": "Sons Of The Forest",
+        "author": "eggs@goover.dev",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./SonsOfTheForestDS.exe -userdatapath \"/home/container/serverconfig\" -dedicatedserver.IpAddress \"0.0.0.0\" -dedicatedserver.GamePort \"{{SERVER_PORT}}\" -dedicatedserver.QueryPort \"{{QUERY_PORT}}\" -dedicatedserver.BlobSyncPort \"{{BLOBSYNC_PORT}}\" -dedicatedserver.MaxPlayers \"{{MAX_PLAYERS}}\" -dedicatedserver.Password \"{{SRV_PW}}\" -dedicatedserver.GameMode \"{{GAME_MODE}}\" -dedicatedserver.SkipNetworkAccessibilityTest \"{{SKIP_TESTS}}\" -dedicatedserver.SaveSlot \"{{SAVE_SLOT}}\" -dedicatedserver.LogFilesEnabled \"true\" -dedicatedserver.TimestampLogFilenames \"true\"",
+        "config": {
+          "files": "{\"serverconfig/dedicatedserver.cfg\": {\"parser\": \"json\", \"find\": {\"ServerName\": \"{{server.build.env.SRV_NAME}}\", \"SaveSlot\": \"{{server.build.env.SAVE_SLOT}}\"}}}",
+          "startup": "{\"done\": \"#DSL Dedicated server loaded.\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Sons of the Forest Installscript${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\nmkdir -p /mnt/server/serverconfig\r\nFILE=$HOME/serverconfig/dedicatedserver.cfg\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}dedicatedserver.cfg found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No dedicatedserver.cfg found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o dedicatedserver.cfg https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/sonsoftheforest/dedicatedserver.cfg\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\nFILE=$HOME/serverconfig/ownerswhitelist.txt\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}ownerswhitelist.txt found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No ownerswhitelist.txt found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o ownerswhitelist.txt https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/sonsoftheforest/ownerswhitelist.txt\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "QueryPort",
+            "description": "UDP port used by Steam to list the server and enable the discovery services.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "BlobSyncPort",
+            "description": "BlobSyncPort UDP port used by the BlobSync system to initialize game systems and exchange data.",
+            "env_variable": "BLOBSYNC_PORT",
+            "default_value": "9700",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server visible in the server list, and in the Steam contacts.",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed simultaneously on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Sets the difficulty game mode when creating a new save. This parameter is ignored if loading a save (save mode set to “continue” with a save that exists on the slot). If the game mode is set to “custom”, then the custom game mode settings will be read from CustomGameModeSettings option, described later.",
+            "env_variable": "GAME_MODE",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in:normal,hard,hardsurvival,peaceful,custom",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2465200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Skip network Test",
+            "description": "if you have problems to connect to your server, set this to TRUE",
+            "env_variable": "SKIP_TESTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Slot",
+            "description": "If you uploaded an existing save from your PC you can enter the save slot number here.",
+            "env_variable": "SAVE_SLOT",
+            "default_value": "0000000001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sons-of-the-forest-6e433d94c64a",
+        "name": "Sons Of The Forest",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sons-of-the-forest-6e433d94c64a.json",
+        "sha256": "f3e2a01fec3096ec6b29ba0ed569f77d5bacdeab3fc07a1932c7ae15cfdb7af2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "sonsoftheforest/egg-sons-of-the-forest.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/6e433d94c64a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Sons Of The Forest",
+        "author": "eggs@goover.dev",
+        "uuid": "6b7638cd-8f9d-4e88-b9ca-8d6433d6a32e",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./SonsOfTheForestDS.exe -userdatapath \"/home/container/serverconfig\" -dedicatedserver.IpAddress \"0.0.0.0\" -dedicatedserver.GamePort \"{{SERVER_PORT}}\" -dedicatedserver.QueryPort \"{{QUERY_PORT}}\" -dedicatedserver.BlobSyncPort \"{{BLOBSYNC_PORT}}\" -dedicatedserver.MaxPlayers \"{{MAX_PLAYERS}}\" -dedicatedserver.Password \"{{SRV_PW}}\" -dedicatedserver.GameMode \"{{GAME_MODE}}\" -dedicatedserver.SkipNetworkAccessibilityTest \"{{SKIP_TESTS}}\" -dedicatedserver.SaveSlot \"{{SAVE_SLOT}}\" -dedicatedserver.LogFilesEnabled \"true\" -dedicatedserver.TimestampLogFilenames \"true\"",
+        "config": {
+          "files": "{\"serverconfig/dedicatedserver.cfg\": {\"parser\": \"json\", \"find\": {\"ServerName\": \"{{server.build.env.SRV_NAME}}\", \"SaveSlot\": \"{{server.build.env.SAVE_SLOT}}\"}}}",
+          "startup": "{\"done\": \"#DSL Dedicated server loaded.\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Sons of the Forest Installscript${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\nmkdir -p /mnt/server/serverconfig\r\nFILE=$HOME/serverconfig/dedicatedserver.cfg\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}dedicatedserver.cfg found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No dedicatedserver.cfg found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o dedicatedserver.cfg https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/sonsoftheforest/dedicatedserver.cfg\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\nFILE=$HOME/serverconfig/ownerswhitelist.txt\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}ownerswhitelist.txt found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No ownerswhitelist.txt found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o ownerswhitelist.txt https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/sonsoftheforest/ownerswhitelist.txt\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "QueryPort",
+            "description": "UDP port used by Steam to list the server and enable the discovery services.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "BlobSyncPort",
+            "description": "BlobSyncPort UDP port used by the BlobSync system to initialize game systems and exchange data.",
+            "env_variable": "BLOBSYNC_PORT",
+            "default_value": "9700",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server visible in the server list, and in the Steam contacts.",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed simultaneously on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Sets the difficulty game mode when creating a new save. This parameter is ignored if loading a save (save mode set to “continue” with a save that exists on the slot). If the game mode is set to “custom”, then the custom game mode settings will be read from CustomGameModeSettings option, described later.",
+            "env_variable": "GAME_MODE",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in:normal,hard,hardsurvival,peaceful,custom",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2465200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Skip network Test",
+            "description": "if you have problems to connect to your server, set this to TRUE",
+            "env_variable": "SKIP_TESTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Save Slot",
+            "description": "If you uploaded an existing save from your PC you can enter the save slot number here.",
+            "env_variable": "SAVE_SLOT",
+            "default_value": "0000000001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:30",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sons-of-the-forest-d59c0e182416",
+        "name": "Sons Of The Forest",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sons-of-the-forest-d59c0e182416.json",
+        "sha256": "a60844cc9bf99686a78067ddefdfc9a764d4b8f433b7ec7fbef0eb6257d18faf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/sonsoftheforest/egg-sons-of-the-forest.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/d59c0e182416.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-24T15:18:00+01:00",
+        "name": "Sons Of The Forest",
+        "author": "eggs@goover.dev",
+        "description": "Sons of the Forest is a horror survival game and sequel to The Forest by Endnight Games, Ltd.. Sent to find a missing billionaire on a remote island, you find yourself in a cannibal-infested hellscape. Craft, build, and struggle to survive, alone or with friends.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./SonsOfTheForestDS.exe -userdatapath \"/home/container/serverconfig\" -dedicatedserver.IpAddress \"0.0.0.0\" -dedicatedserver.GamePort \"{{SERVER_PORT}}\" -dedicatedserver.QueryPort \"{{QUERY_PORT}}\" -dedicatedserver.BlobSyncPort \"{{BLOBSYNC_PORT}}\" -dedicatedserver.MaxPlayers \"{{MAX_PLAYERS}}\" -dedicatedserver.Password \"{{SRV_PW}}\" -dedicatedserver.GameMode \"{{GAME_MODE}}\" -dedicatedserver.SkipNetworkAccessibilityTest \"{{SKIP_TESTS}}\" -dedicatedserver.SaveSlot \"{{SAVE_SLOT}}\" -dedicatedserver.LogFilesEnabled \"true\" -dedicatedserver.TimestampLogFilenames \"true\"",
+        "config": {
+          "files": "{\"serverconfig/dedicatedserver.cfg\": {\"parser\": \"json\", \"find\": {\"ServerName\": \"{{server.build.env.SRV_NAME}}\", \"SaveSlot\": \"{{server.build.env.SAVE_SLOT}}\"}}}",
+          "startup": "{\"done\": \"#DSL Dedicated server loaded.\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Sons of the Forest Installscript${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\nmkdir -p /mnt/server/serverconfig\r\nFILE=$HOME/serverconfig/dedicatedserver.cfg\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}dedicatedserver.cfg found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No dedicatedserver.cfg found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o dedicatedserver.cfg https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/sonsoftheforest/dedicatedserver.cfg\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\nFILE=$HOME/serverconfig/ownerswhitelist.txt\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}ownerswhitelist.txt found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No ownerswhitelist.txt found. Downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME/serverconfig/\r\n  curl -sSL -o ownerswhitelist.txt https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/sonsoftheforest/ownerswhitelist.txt\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "QueryPort",
+            "description": "UDP port used by Steam to list the server and enable the discovery services.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "BlobSyncPort",
+            "description": "BlobSyncPort UDP port used by the BlobSync system to initialize game systems and exchange data.",
+            "env_variable": "BLOBSYNC_PORT",
+            "default_value": "9700",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server visible in the server list, and in the Steam contacts.",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed simultaneously on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Sets the difficulty game mode when creating a new save. This parameter is ignored if loading a save (save mode set to “continue” with a save that exists on the slot). If the game mode is set to “custom”, then the custom game mode settings will be read from CustomGameModeSettings option, described later.",
+            "env_variable": "GAME_MODE",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in:normal,hard,hardsurvival,peaceful,custom",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2465200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Skip network Test",
+            "description": "if you have problems to connect to your server, set this to TRUE",
+            "env_variable": "SKIP_TESTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Slot",
+            "description": "If you uploaded an existing save from your PC you can enter the save slot number here.",
+            "env_variable": "SAVE_SLOT",
+            "default_value": "0000000001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1117 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "code-server-0e664a376612",
+        "name": "Code-Server",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/code-server-0e664a376612.json",
+        "sha256": "76b9e08395904fd0e953044e23080e4c2769fa37c6a3a03b092af3cdf74ed842",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "code-server/egg-pterodactyl-code--server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/0e664a376612.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-16T10:37:18+00:00",
+        "name": "Code-Server",
+        "author": "mario.franze@gmail.com",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "features": null,
+        "docker_images": {
+          "Java 11": "ghcr.io/parkervcp/yolks:java_11",
+          "Java 17": "ghcr.io/parkervcp/yolks:java_17",
+          "Java 21": "ghcr.io/parkervcp/yolks:java_21",
+          ".net 6": "ghcr.io/parkervcp/yolks:dotnet_6",
+          ".net 7": "ghcr.io/parkervcp/yolks:dotnet_7",
+          ".net 8": "ghcr.io/parkervcp/yolks:dotnet_8",
+          "Mono": "ghcr.io/parkervcp/yolks:mono_latest",
+          "Erlang 26": "ghcr.io/parkervcp/yolks:erlang_26",
+          "Python 3.11": "ghcr.io/parkervcp/yolks:python_3.11",
+          "Python 3.12": "ghcr.io/parkervcp/yolks:python_3.12",
+          "Python 3.13": "ghcr.io/parkervcp/yolks:python_3.13",
+          "Bun": "ghcr.io/parkervcp/yolks:bun_latest",
+          "Dart": "ghcr.io/parkervcp/yolks:dart_stable",
+          "Go 1.23": "ghcr.io/parkervcp/yolks:go_1.23",
+          "Nodejs 22": "ghcr.io/parkervcp/yolks:nodejs_22",
+          "Nodejs 23": "ghcr.io/parkervcp/yolks:nodejs_23",
+          "Elixir": "ghcr.io/parkervcp/yolks:elixir_latest",
+          "Rust": "ghcr.io/parkervcp/yolks:rust_latest"
+        },
+        "file_denylist": [],
+        "startup": "sh .local/lib/code-server-{{VERSION}}/bin/code-server",
+        "config": {
+          "files": "{\".config/code-server/config.yaml\": {\"parser\": \"file\", \"find\": {\"password\": \"password: {{server.build.env.PASSWORD}}\", \"bind-addr\": \"bind-addr: 0.0.0.0:{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"HTTP server listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nMATCH=linux-${ARCH}\r\n# Create initial directories\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho ${ARCH}\r\necho ${MATCH}\r\n# Create needed directories\r\nmkdir -p /mnt/server/.local/lib /mnt/server/.local/bin /mnt/server/.config/code-server /mnt/server/projects\r\n\r\n# Change permission of projects directory so it can be accessed by code-server\r\nchmod 777 /mnt/server/projects\r\ntouch \"/mnt/server/projects/PLACE YOUR PROJECTS HERE\"\r\n\r\n# Check for available versions. Defaults to latest if no valid version is found.\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"v${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n# Download the given Version and extract it\r\necho \"Downloading $DOWNLOAD_URL\"\r\ncurl -fL $DOWNLOAD_URL | tar -C /mnt/server/.local/lib -xz\r\nmv /mnt/server/.local/lib/code-server-*linux-${ARCH} /mnt/server/.local/lib/code-server-${VERSION}\r\n\r\nPATH=\"/mnt/server/.local/bin:$PATH\"\r\necho \"password: changeme\r\nbind-addr: 0.0.0.0\r\nauth: password\r\ncert: false\" > /mnt/server/.config/code-server/config.yaml\r\n\r\necho \"Install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "Password to login to your Code-Server instance",
+            "env_variable": "PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Version for (re)installation such as 3.9.3. Defaults to latest version if no valid version is provided",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "code-server-1e2c5351bd17",
+        "name": "Code-Server",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/code-server-1e2c5351bd17.json",
+        "sha256": "261dc9293f5e57c716601fe4383f9049ec8e2e489734957c2da7272f90980f77",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "code-server/egg-code--server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/1e2c5351bd17.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:57+00:00",
+        "name": "Code-Server",
+        "author": "mario.franze@gmail.com",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:nodejs_12": "ghcr.io/ptero-eggs/yolks:nodejs_12",
+          "ghcr.io/ptero-eggs/yolks:nodejs_14": "ghcr.io/ptero-eggs/yolks:nodejs_14",
+          "ghcr.io/ptero-eggs/yolks:nodejs_16": "ghcr.io/ptero-eggs/yolks:nodejs_16",
+          "ghcr.io/ptero-eggs/yolks:nodejs_17": "ghcr.io/ptero-eggs/yolks:nodejs_17",
+          "ghcr.io/ptero-eggs/yolks:nodejs_18": "ghcr.io/ptero-eggs/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "sh .local/lib/code-server-{{VERSION}}/bin/code-server",
+        "config": {
+          "files": "{\".config/code-server/config.yaml\": {\"parser\": \"file\", \"find\": {\"password\": \"password: {{server.build.env.PASSWORD}}\", \"bind-addr\": \"bind-addr: 0.0.0.0:{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"HTTP server listening on\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "apt update\r\napt install -y curl jq\r\n\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nMATCH=linux-${ARCH}\r\n# Create initial directories\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho ${ARCH}\r\necho ${MATCH}\r\n# Create needed directories\r\nmkdir -p /mnt/server/.local/lib /mnt/server/.local/bin /mnt/server/.config/code-server /mnt/server/projects\r\n\r\n# Change permission of projects directory so it can be accessed by code-server\r\nchmod 777 /mnt/server/projects\r\ntouch \"/mnt/server/projects/PLACE YOUR PROJECTS HERE\"\r\n\r\n# Check for available versions. Defaults to latest if no valid version is found.\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"v${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n# Download the given Version and extract it\r\necho \"Downloading $DOWNLOAD_URL\"\r\ncurl -fL $DOWNLOAD_URL | tar -C /mnt/server/.local/lib -xz\r\nmv /mnt/server/.local/lib/code-server-*linux-${ARCH} /mnt/server/.local/lib/code-server-${VERSION}\r\n\r\n\r\nPATH=\"/mnt/server/.local/bin:$PATH\"\r\necho \"password: changeme\r\nbind-addr: 0.0.0.0\r\nauth: password\r\ncert: false\" > /mnt/server/.config/code-server/config.yaml\r\n\r\necho \"Install complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "Password to login to your Code-Server instance",
+            "env_variable": "PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Version for (re)installation such as 3.9.3. Defaults to latest version if no valid version is provided",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "code-server-459f44a46f3b",
+        "name": "Code-Server",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/code-server-459f44a46f3b.json",
+        "sha256": "2bc108f8dc7487e8595c30e6ccc3da563d9c08d194a7b9c8a22fef59a2694ccb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "software/code-server/egg-code--server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/459f44a46f3b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-02-04T23:01:25+01:00",
+        "name": "Code-Server",
+        "author": "mario.franze@gmail.com",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18",
+          "ghcr.io/parkervcp/yolks:nodejs_17": "ghcr.io/parkervcp/yolks:nodejs_17",
+          "ghcr.io/parkervcp/yolks:nodejs_16": "ghcr.io/parkervcp/yolks:nodejs_16",
+          "ghcr.io/parkervcp/yolks:nodejs_14": "ghcr.io/parkervcp/yolks:nodejs_14",
+          "ghcr.io/parkervcp/yolks:nodejs_12": "ghcr.io/parkervcp/yolks:nodejs_12"
+        },
+        "file_denylist": [],
+        "startup": "sh .local/lib/code-server-{{VERSION}}/bin/code-server",
+        "config": {
+          "files": "{\".config/code-server/config.yaml\": {\"parser\": \"file\", \"find\": {\"password\": \"password: {{server.build.env.PASSWORD}}\", \"bind-addr\": \"bind-addr: 0.0.0.0:{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"HTTP server listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "apt update\r\napt install -y curl jq\r\n\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nMATCH=linux-${ARCH}\r\n# Create initial directories\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho ${ARCH}\r\necho ${MATCH}\r\n# Create needed directories\r\nmkdir -p /mnt/server/.local/lib /mnt/server/.local/bin /mnt/server/.config/code-server /mnt/server/projects\r\n\r\n# Change permission of projects directory so it can be accessed by code-server\r\nchmod 777 /mnt/server/projects\r\ntouch \"/mnt/server/projects/PLACE YOUR PROJECTS HERE\"\r\n\r\n# Check for available versions. Defaults to latest if no valid version is found.\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"v${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n# Download the given Version and extract it\r\necho \"Downloading $DOWNLOAD_URL\"\r\ncurl -fL $DOWNLOAD_URL | tar -C /mnt/server/.local/lib -xz\r\nmv /mnt/server/.local/lib/code-server-*linux-${ARCH} /mnt/server/.local/lib/code-server-${VERSION}\r\n\r\n\r\nPATH=\"/mnt/server/.local/bin:$PATH\"\r\necho \"password: changeme\r\nbind-addr: 0.0.0.0\r\nauth: password\r\ncert: false\" > /mnt/server/.config/code-server/config.yaml\r\n\r\necho \"Install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "Password to login to your Code-Server instance",
+            "env_variable": "PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Version for (re)installation such as 3.9.3. Defaults to latest version if no valid version is provided",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "code-server-7dbc0bd4c802",
+        "name": "Code-Server",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/code-server-7dbc0bd4c802.json",
+        "sha256": "021708de71de1984c489709082dc2ef01be2217e1530f80fed4673c937548e20",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "code-server/egg-code--server.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/7dbc0bd4c802.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-16T10:37:18+00:00",
+        "name": "Code-Server",
+        "author": "mario.franze@gmail.com",
+        "uuid": "45f8a4a1-92e4-47cd-ab78-e7f0fe7e7dee",
+        "description": "Run VS Code on any machine anywhere and access it in the browser.",
+        "features": [],
+        "docker_images": {
+          "Java 11": "ghcr.io/parkervcp/yolks:java_11",
+          "Java 17": "ghcr.io/parkervcp/yolks:java_17",
+          "Java 21": "ghcr.io/parkervcp/yolks:java_21",
+          ".net 6": "ghcr.io/parkervcp/yolks:dotnet_6",
+          ".net 7": "ghcr.io/parkervcp/yolks:dotnet_7",
+          ".net 8": "ghcr.io/parkervcp/yolks:dotnet_8",
+          "Mono": "ghcr.io/parkervcp/yolks:mono_latest",
+          "Erlang 26": "ghcr.io/parkervcp/yolks:erlang_26",
+          "Python 3.11": "ghcr.io/parkervcp/yolks:python_3.11",
+          "Python 3.12": "ghcr.io/parkervcp/yolks:python_3.12",
+          "Python 3.13": "ghcr.io/parkervcp/yolks:python_3.13",
+          "Bun": "ghcr.io/parkervcp/yolks:bun_latest",
+          "Dart": "ghcr.io/parkervcp/yolks:dart_stable",
+          "Go 1.23": "ghcr.io/parkervcp/yolks:go_1.23",
+          "Nodejs 22": "ghcr.io/parkervcp/yolks:nodejs_22",
+          "Nodejs 23": "ghcr.io/parkervcp/yolks:nodejs_23",
+          "Elixir": "ghcr.io/parkervcp/yolks:elixir_latest",
+          "Rust": "ghcr.io/parkervcp/yolks:rust_latest"
+        },
+        "file_denylist": [],
+        "startup": "sh .local/lib/code-server-{{VERSION}}/bin/code-server",
+        "config": {
+          "files": "{\".config/code-server/config.yaml\": {\"parser\": \"file\", \"find\": {\"password\": \"password: {{server.environment.PASSWORD}}\", \"bind-addr\": \"bind-addr: 0.0.0.0:{{server.allocations.default.port}}\"}}}",
+          "startup": "{\"done\": \"HTTP server listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nMATCH=linux-${ARCH}\r\n# Create initial directories\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho ${ARCH}\r\necho ${MATCH}\r\n# Create needed directories\r\nmkdir -p /mnt/server/.local/lib /mnt/server/.local/bin /mnt/server/.config/code-server /mnt/server/projects\r\n\r\n# Change permission of projects directory so it can be accessed by code-server\r\nchmod 777 /mnt/server/projects\r\ntouch \"/mnt/server/projects/PLACE YOUR PROJECTS HERE\"\r\n\r\n# Check for available versions. Defaults to latest if no valid version is found.\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/coder/code-server/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"v${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"v${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n# Download the given Version and extract it\r\necho \"Downloading $DOWNLOAD_URL\"\r\ncurl -fL $DOWNLOAD_URL | tar -C /mnt/server/.local/lib -xz\r\nmv /mnt/server/.local/lib/code-server-*linux-${ARCH} /mnt/server/.local/lib/code-server-${VERSION}\r\n\r\nPATH=\"/mnt/server/.local/bin:$PATH\"\r\necho \"password: changeme\r\nbind-addr: 0.0.0.0\r\nauth: password\r\ncert: false\" > /mnt/server/.config/code-server/config.yaml\r\n\r\necho \"Install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Password",
+            "description": "Password to login to your Code-Server instance",
+            "env_variable": "PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32"
+          },
+          {
+            "sort": 2,
+            "name": "Version",
+            "description": "Version for (re)installation such as 3.9.3. Defaults to latest version if no valid version is provided",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "dart-generic-0f1843f86fc9",
+        "name": "dart generic",
+        "description": "A generic dart CLI egg.\r\n\r\nThis will clone a dart CLI application. it defaults to master if no branch is specified.\r\n\r\nInstalls the pubspec.yaml packages on run. If you set user_upload then I assume you know what you are doing.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/dart-generic-0f1843f86fc9.json",
+        "sha256": "5ba53d04a27c39d83f663a0a97df4d4c22ff1d5a69839b18d9dad9befd45b05e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "dart/egg-dart-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/0f1843f86fc9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-07T15:06:24+02:00",
+        "name": "dart generic",
+        "author": "alden@knoban.com",
+        "description": "A generic dart CLI egg.\r\n\r\nThis will clone a dart CLI application. it defaults to master if no branch is specified.\r\n\r\nInstalls the pubspec.yaml packages on run. If you set user_upload then I assume you know what you are doing.",
+        "features": null,
+        "docker_images": {
+          "Dart_stable": "ghcr.io/ptero-eggs/yolks:dart_stable",
+          "Dart_3.3": "ghcr.io/ptero-eggs/yolks:dart_3.3",
+          "Dart_2.19": "ghcr.io/ptero-eggs/yolks:dart_2.19",
+          "Dart_2.18": "ghcr.io/ptero-eggs/yolks:dart_2.18",
+          "Dart_2.17": "ghcr.io/ptero-eggs/yolks:dart_2.17"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_RESET}} == \"1\" ]]; then git reset --hard; fi; if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; dart pub get; dart run",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Dart CLI Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git dart cli repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/kNoAPP/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Branch",
+            "description": "The branch of the bot to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Reset",
+            "description": "Hard reset the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_RESET",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "dart-generic-472cb14de8cd",
+        "name": "dart generic",
+        "description": "A generic dart CLI egg.\r\n\r\nThis will clone a dart CLI application. it defaults to master if no branch is specified.\r\n\r\nInstalls the pubspec.yaml packages on run. If you set user_upload then I assume you know what you are doing.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/dart-generic-472cb14de8cd.json",
+        "sha256": "1d8aea2eda93193a8379c3f6ccc987564e2aac18533a2e700c851695b34d6303",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "dart/egg-pterodactyl-dart-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "generic/dart/egg-dart-generic.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--generic/472cb14de8cd.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:54+00:00",
+        "name": "dart generic",
+        "author": "alden@knoban.com",
+        "description": "A generic dart CLI egg.\r\n\r\nThis will clone a dart CLI application. it defaults to master if no branch is specified.\r\n\r\nInstalls the pubspec.yaml packages on run. If you set user_upload then I assume you know what you are doing.",
+        "features": null,
+        "docker_images": {
+          "Dart_2.17": "ghcr.io/parkervcp/yolks:dart_2.17",
+          "Dart_2.18": "ghcr.io/parkervcp/yolks:dart_2.18",
+          "Dart_2.19": "ghcr.io/parkervcp/yolks:dart_2.19",
+          "Dart_3.3": "ghcr.io/parkervcp/yolks:dart_3.3",
+          "Dart_stable": "ghcr.io/parkervcp/yolks:dart_stable"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_RESET}} == \"1\" ]]; then git reset --hard; fi; if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; dart pub get; dart run",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Dart CLI Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git dart cli repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/kNoAPP/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Branch",
+            "description": "The branch of the bot to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Reset",
+            "description": "Hard reset the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_RESET",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "dart-generic-e746e6e617af",
+        "name": "dart generic",
+        "description": "A generic dart CLI egg.\r\n\r\nThis will clone a dart CLI application. it defaults to master if no branch is specified.\r\n\r\nInstalls the pubspec.yaml packages on run. If you set user_upload then I assume you know what you are doing.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/dart-generic-e746e6e617af.json",
+        "sha256": "f611e1a9152b920752543cb9abaedb41cb7ada9f08534319039d7d2f9aa51408",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "dart/egg-dart-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/e746e6e617af.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:54+00:00",
+        "name": "dart generic",
+        "author": "alden@knoban.com",
+        "uuid": "8328a5cc-4250-4d30-a66a-faf83393605e",
+        "description": "A generic dart CLI egg.\r\n\r\nThis will clone a dart CLI application. it defaults to master if no branch is specified.\r\n\r\nInstalls the pubspec.yaml packages on run. If you set user_upload then I assume you know what you are doing.",
+        "features": null,
+        "docker_images": {
+          "Dart_stable": "ghcr.io/parkervcp/yolks:dart_stable",
+          "Dart_3.3": "ghcr.io/parkervcp/yolks:dart_3.3",
+          "Dart_2.19": "ghcr.io/parkervcp/yolks:dart_2.19",
+          "Dart_2.18": "ghcr.io/parkervcp/yolks:dart_2.18",
+          "Dart_2.17": "ghcr.io/parkervcp/yolks:dart_2.17"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_RESET}} == \"1\" ]]; then git reset --hard; fi; if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; dart pub get; dart run",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Dart CLI Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git dart cli repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/kNoAPP/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Install Branch",
+            "description": "The branch of the bot to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Reset",
+            "description": "Hard reset the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_RESET",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "deno-generic-14eef50bfac8",
+        "name": "Deno Generic",
+        "description": "A generic egg to run deno code.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/deno-generic-14eef50bfac8.json",
+        "sha256": "537b7bb6e4b37ce4904c5c653622418317d2d594d9b1679cac910f29707ba401",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "generic/deno/egg-deno-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/14eef50bfac8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:45:59+02:00",
+        "name": "Deno Generic",
+        "author": "parker@parkervcp.com",
+        "description": "A generic egg to run deno code.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./deno run {{JS_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Deno Bot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\n## get deno\r\nGITHUB_PACKAGE=denoland/deno\r\nMATCH=linux\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else\r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL $DOWNLOAD_LINK -o ${DOWNLOAD_LINK##*/}\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2\r\nfi\r\n\r\n## cleaning up downloaded file\r\nrm -f ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot js file",
+            "description": "The JavaScript file to run",
+            "env_variable": "JS_FILE",
+            "default_value": "bot.js",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "deno-generic-4b2aeafc0b01",
+        "name": "Deno Generic",
+        "description": "A generic egg to run deno code.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/deno-generic-4b2aeafc0b01.json",
+        "sha256": "cffb8d254b1ffcd626c2482a1f11f979d19cb5e2f4d858a1db0f3824b6b81a2d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "deno/egg-deno-generic.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/4b2aeafc0b01.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-19T16:19:28+00:00",
+        "name": "Deno Generic",
+        "author": "parker@parkervcp.com",
+        "uuid": "9bf4389f-7df3-422e-b8ff-0c1e96c7da51",
+        "description": "A generic egg to run deno code.",
+        "tags": [],
+        "features": [],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./deno run {{JS_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Deno Bot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\n## filters to make sure the correct file is downloaded.\r\nGITHUB_PACKAGE=denoland/deno\r\nEXEC=deno-\r\nOS=linux\r\nNOT=sha256sum\r\n\r\n## get release info and download links\r\n## removes the body of messages as those may break jq\r\nLATEST_JSON=\"$(curl -sSL \"https://api.github.com/repos/denoland/deno/releases/latest\" | jq 'del(.body)')\"\r\nRELEASES=\"$(curl -sSL \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\" | jq 'del(.[].body)')\"\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    # gets the download url filtered by arch, executable name, os name, and doesn't show sha256sum files.\r\n    DOWNLOAD_URL=\"$(echo \"${LATEST_JSON}\" | jq -r --arg ARCH \"$(uname -m)\" --arg EXEC \"${EXEC}\" --arg OS ${OS} --arg NOT ${NOT} '.assets | .[].browser_download_url | select(contains($ARCH)) | select(contains($EXEC)) | select(contains($OS)) | select(contains($NOT) | not)')\"\r\nelse\r\n    VERSION_CHECK=\"$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\"\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=\"$(echo ${RELEASES} | jq -r --arg ARCH \"$(uname -m)\" --arg VERSION \"${VERSION}\" --arg EXEC \"${EXEC}\" --arg OS ${OS} --arg NOT ${NOT} '.[] | select(.tag_name==$VERSION) | .assets | .[].browser_download_url | select(contains($EXEC)) | select(contains($ARCH)) | select(contains($OS)) | select(contains($NOT) | not)')\"\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=\"$(echo \"${LATEST_JSON}\" | jq -r --arg ARCH \"$(uname -m)\" --arg EXEC \"${EXEC}\" --arg OS ${OS} --arg NOT ${NOT} '.assets | .[].browser_download_url | select(contains($EXEC)) | select(contains($ARCH)) | select(contains($OS)) | select(contains($NOT) | not)')\"\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else\r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL $DOWNLOAD_LINK -o ${DOWNLOAD_LINK##*/}\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2\r\nfi\r\n\r\n## cleaning up downloaded file\r\nrm -f ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 2,
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 5,
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 3,
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 6,
+            "name": "Bot js file",
+            "description": "The JavaScript file to run",
+            "env_variable": "JS_FILE",
+            "default_value": "bot.js",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": 4,
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean"
+          },
+          {
+            "sort": 1,
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "deno-generic-8665a278e489",
+        "name": "Deno Generic",
+        "description": "A generic egg to run deno code.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/deno-generic-8665a278e489.json",
+        "sha256": "b95a0ff180d244931a784ad418bd9cc5d841f8558f8fc152f8388caea4bf7e76",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "deno/egg-pterodactyl-deno-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/8665a278e489.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-19T16:22:05+00:00",
+        "name": "Deno Generic",
+        "author": "parker@parkervcp.com",
+        "description": "A generic egg to run deno code.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./deno run {{JS_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Deno Bot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\n## filters to make sure the correct file is downloaded.\r\nGITHUB_PACKAGE=denoland/deno\r\nEXEC=deno-\r\nOS=linux\r\nNOT=sha256sum\r\n\r\n## get release info and download links\r\n## removes the body of messages as those may break jq\r\nLATEST_JSON=\"$(curl -sSL \"https://api.github.com/repos/denoland/deno/releases/latest\" | jq 'del(.body)')\"\r\nRELEASES=\"$(curl -sSL \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\" | jq 'del(.[].body)')\"\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    # gets the download url filtered by arch, executable name, os name, and doesn't show sha256sum files.\r\n    DOWNLOAD_URL=\"$(echo \"${LATEST_JSON}\" | jq -r --arg ARCH \"$(uname -m)\" --arg EXEC \"${EXEC}\" --arg OS ${OS} --arg NOT ${NOT} '.assets | .[].browser_download_url | select(contains($ARCH)) | select(contains($EXEC)) | select(contains($OS)) | select(contains($NOT) | not)')\"\r\nelse\r\n    VERSION_CHECK=\"$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\"\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=\"$(echo ${RELEASES} | jq -r --arg ARCH \"$(uname -m)\" --arg VERSION \"${VERSION}\" --arg EXEC \"${EXEC}\" --arg OS ${OS} --arg NOT ${NOT} '.[] | select(.tag_name==$VERSION) | .assets | .[].browser_download_url | select(contains($EXEC)) | select(contains($ARCH)) | select(contains($OS)) | select(contains($NOT) | not)')\"\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=\"$(echo \"${LATEST_JSON}\" | jq -r --arg ARCH \"$(uname -m)\" --arg EXEC \"${EXEC}\" --arg OS ${OS} --arg NOT ${NOT} '.assets | .[].browser_download_url | select(contains($EXEC)) | select(contains($ARCH)) | select(contains($OS)) | select(contains($NOT) | not)')\"\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else\r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL $DOWNLOAD_LINK -o ${DOWNLOAD_LINK##*/}\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2\r\nfi\r\n\r\n## cleaning up downloaded file\r\nrm -f ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot js file",
+            "description": "The JavaScript file to run",
+            "env_variable": "JS_FILE",
+            "default_value": "bot.js",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "_soneyko": {"id":"soneyko-ubuntu-24-04","kind":"instance","category":"instances","resources":{"cpu":100,"memory_mb":512,"disk_mb":10240},"guest_os":"Ubuntu 24.04","persistence":"server-volume","shell":"/bin/bash","minimum_resources":{"cpu":25,"memory_mb":256,"disk_mb":5120}},
+  "meta":{"version":"PTDL_v2","update_url":null},
+  "name":"Ubuntu 24.04 LTS",
+  "author":"hello@soneyko.ai",
+  "description":"Persistent Ubuntu Linux environment with a terminal and apt. Packages and files are kept in the server volume. Uses unprivileged PRoot; no separate kernel, systemd, privileged Docker or host mounts.",
+  "docker_images":{"Ubuntu 24.04 LTS":"ghcr.io/trusted-technologies/soneyko-instance:ubuntu-24.04"},
+  "startup":"/usr/local/bin/soneyko-instance",
+  "config":{"files":"{}","startup":"{\"done\":\"Soneyko Linux environment ready\"}","logs":"{}","stop":"^C"},
+  "scripts":{"installation":{"script":"#!/bin/sh\nset -eu\nmkdir -p /mnt/server/.instance\necho 'Linux environment will be initialized on first start.'\n","container":"alpine:3.22","entrypoint":"ash"}},
+  "variables":[],"file_denylist":[],"features":[]
+}

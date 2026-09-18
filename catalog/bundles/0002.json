@@ -1,0 +1,1129 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "deno-generic-b678590081c8",
+        "name": "Deno Generic",
+        "description": "A generic egg to run deno code.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/deno-generic-b678590081c8.json",
+        "sha256": "3f9831fe2dbd05b06b4436a713b39f4e599c79b68c884f77fac5d6d57b726796",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "deno/egg-deno-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/b678590081c8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:45:59+02:00",
+        "name": "Deno Generic",
+        "author": "parker@parkervcp.com",
+        "description": "A generic egg to run deno code.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./deno run {{JS_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Deno Bot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\n## get deno\r\nGITHUB_PACKAGE=denoland/deno\r\nMATCH=linux\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else\r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL $DOWNLOAD_LINK -o ${DOWNLOAD_LINK##*/}\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2\r\nfi\r\n\r\n## cleaning up downloaded file\r\nrm -f ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot js file",
+            "description": "The JavaScript file to run",
+            "env_variable": "JS_FILE",
+            "default_value": "bot.js",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "elasticsearch-112b2a81d44c",
+        "name": "Elasticsearch",
+        "description": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/elasticsearch-112b2a81d44c.json",
+        "sha256": "17b13703897a6ac4eca5d04ff612c95b16c66861e0a1ba39f400373eb95f04eb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "elasticsearch/egg-pterodactyl-elasticsearch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/elasticsearch/egg-elasticsearch.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/112b2a81d44c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:58+00:00",
+        "name": "Elasticsearch",
+        "author": "dominic@stilma.net",
+        "description": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/elasticsearch -E network.host=0.0.0.0 -E http.port={{SERVER_PORT}} -E discovery.type={{DISCOVERY_SEED_HOSTS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"started\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Elasticsearch Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## Install Requirements\r\n\r\ncd /mnt/server\r\n\r\n## Install Elasticsearch\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"x86_64\" || echo \"aarch64\")\r\ncurl -sSL -o elasticsearch.tar.gz https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$VERSION-linux-${ARCH}.tar.gz\r\n\r\ntar -zxf  elasticsearch.tar.gz --directory /mnt/server\r\nmv elasticsearch*/* /mnt/server\r\nrm  elasticsearch.tar.gz\r\nrm -R elasticsearch-*\r\n\r\n## Finish command\r\necho \"All done! Just start it up :)\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Discovery Seed Hosts",
+            "description": "Please keep default if you are unsure.",
+            "env_variable": "DISCOVERY_SEED_HOSTS",
+            "default_value": "single-node",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required",
+            "field_type": "text"
+          },
+          {
+            "name": "Elasticsearch Version",
+            "description": "Go to https://www.elastic.co/downloads/elasticsearch and look at the version at the top.",
+            "env_variable": "VERSION",
+            "default_value": "8.13.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "elasticsearch-abc44feb24f1",
+        "name": "Elasticsearch",
+        "description": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/elasticsearch-abc44feb24f1.json",
+        "sha256": "4aa626a03dcadd7b4bb144f01ec3b6fba05cf575e4d7813bd3614b930020b244",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "elasticsearch/egg-elasticsearch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/abc44feb24f1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:58+00:00",
+        "name": "Elasticsearch",
+        "author": "dominic@stilma.net",
+        "description": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/elasticsearch -E network.host=0.0.0.0 -E http.port={{SERVER_PORT}} -E discovery.type={{DISCOVERY_SEED_HOSTS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"started\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Elasticsearch Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## Install Requirements\r\n\r\ncd /mnt/server\r\n\r\n## Install Elasticsearch\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"x86_64\" || echo \"aarch64\")\r\ncurl -sSL -o elasticsearch.tar.gz https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$VERSION-linux-${ARCH}.tar.gz\r\n\r\ntar -zxf  elasticsearch.tar.gz --directory /mnt/server\r\nmv elasticsearch*/* /mnt/server\r\nrm  elasticsearch.tar.gz\r\nrm -R elasticsearch-*\r\n\r\n## Finish command\r\necho \"All done! Just start it up :)\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Discovery Seed Hosts",
+            "description": "Please keep default if you are unsure.",
+            "env_variable": "DISCOVERY_SEED_HOSTS",
+            "default_value": "single-node",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required",
+            "field_type": "text"
+          },
+          {
+            "name": "Elasticsearch Version",
+            "description": "Go to https://www.elastic.co/downloads/elasticsearch and look at the version at the top.",
+            "env_variable": "VERSION",
+            "default_value": "8.13.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "elasticsearch-ad692430521d",
+        "name": "Elasticsearch",
+        "description": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/elasticsearch-ad692430521d.json",
+        "sha256": "2f1a9b9820a8aaec1fe0845343aa716b366662037af91d9d50865d23090440c3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "elasticsearch/egg-elasticsearch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/ad692430521d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:58+00:00",
+        "name": "Elasticsearch",
+        "author": "dominic@stilma.net",
+        "uuid": "9dfd90cd-07e8-4b60-b448-c4d22526633a",
+        "description": "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data for lightning fast search, fine‑tuned relevancy, and powerful analytics that scale with ease.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/elasticsearch -E network.host=0.0.0.0 -E http.port={{SERVER_PORT}} -E discovery.type={{DISCOVERY_SEED_HOSTS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Elasticsearch Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## Install Requirements\r\n\r\ncd /mnt/server\r\n\r\n## Install Elasticsearch\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"x86_64\" || echo \"aarch64\")\r\ncurl -sSL -o elasticsearch.tar.gz https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-$VERSION-linux-${ARCH}.tar.gz\r\n\r\ntar -zxf  elasticsearch.tar.gz --directory /mnt/server\r\nmv elasticsearch*/* /mnt/server\r\nrm  elasticsearch.tar.gz\r\nrm -R elasticsearch-*\r\n\r\n## Finish command\r\necho \"All done! Just start it up :)\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Discovery Seed Hosts",
+            "description": "Please keep default if you are unsure.",
+            "env_variable": "DISCOVERY_SEED_HOSTS",
+            "default_value": "single-node",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Elasticsearch Version",
+            "description": "Go to https://www.elastic.co/downloads/elasticsearch and look at the version at the top.",
+            "env_variable": "VERSION",
+            "default_value": "8.13.0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "elixir-55a704594c6c",
+        "name": "Elixir",
+        "description": "Elixir is a functional, concurrent, high-level general-purpose programming language that runs on the BEAM virtual machine, which is also used to implement the Erlang programming language.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/elixir-55a704594c6c.json",
+        "sha256": "91bc29c152396edbf953fe6a01f69aa770cffcd367946f979127b161da10c5bb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "elixir/egg-elixir.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/55a704594c6c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-01-08T09:43:11+01:00",
+        "name": "Elixir",
+        "author": "mravox@proton.me",
+        "description": "Elixir is a functional, concurrent, high-level general-purpose programming language that runs on the BEAM virtual machine, which is also used to implement the Erlang programming language.",
+        "features": null,
+        "docker_images": {
+          "Elixir Latest": "ghcr.io/ptero-eggs/yolks:elixir_latest",
+          "Elixir 1.15": "ghcr.io/ptero-eggs/yolks:elixir_1.15",
+          "Elixir 1.14": "ghcr.io/ptero-eggs/yolks:elixir_1.14",
+          "Elixir 1.13": "ghcr.io/ptero-eggs/yolks:elixir_1.13",
+          "Elixir 1.12": "ghcr.io/ptero-eggs/yolks:elixir_1.12"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; mix deps.get; mix run --no-halt",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"change this text 1\", \"change this text 2\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Elixir App Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${GIT_USERNAME}\" ] && [ -z \"${GIT_ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${GIT_USERNAME}:${GIT_ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git elixir repository\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${GIT_BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${GIT_BRANCH}'\"\r\n        git clone --single-branch --branch ${GIT_BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repository Address",
+            "description": "The Git repository address to clone .",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "The Git branch to install.",
+            "env_variable": "GIT_BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a Git Repository.\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Git username for authentication.",
+            "env_variable": "GIT_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Git access token for authentication.",
+            "env_variable": "GIT_ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "elixir-782ff171716d",
+        "name": "Elixir",
+        "description": "Elixir is a functional, concurrent, high-level general-purpose programming language that runs on the BEAM virtual machine, which is also used to implement the Erlang programming language.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/elixir-782ff171716d.json",
+        "sha256": "c7c0396794ca834f510b9b15b51d95e9ce40ad64761d412e04c598455da49cbc",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "elixir/egg-pterodactyl-elixir.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "generic/elixir/egg-elixir.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--generic/782ff171716d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:55+00:00",
+        "name": "Elixir",
+        "author": "mravox@proton.me",
+        "description": "Elixir is a functional, concurrent, high-level general-purpose programming language that runs on the BEAM virtual machine, which is also used to implement the Erlang programming language.",
+        "features": null,
+        "docker_images": {
+          "Elixir 1.12": "ghcr.io/parkervcp/yolks:elixir_1.12",
+          "Elixir 1.13": "ghcr.io/parkervcp/yolks:elixir_1.13",
+          "Elixir 1.14": "ghcr.io/parkervcp/yolks:elixir_1.14",
+          "Elixir 1.15": "ghcr.io/parkervcp/yolks:elixir_1.15",
+          "Elixir Latest": "ghcr.io/parkervcp/yolks:elixir_latest"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; mix deps.get; mix run --no-halt",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": [\"change this text 1\", \"change this text 2\"]}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Elixir App Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${GIT_USERNAME}\" ] && [ -z \"${GIT_ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${GIT_USERNAME}:${GIT_ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git elixir repository\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${GIT_BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${GIT_BRANCH}'\"\r\n        git clone --single-branch --branch ${GIT_BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repository Address",
+            "description": "The Git repository address to clone .",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "The Git branch to install.",
+            "env_variable": "GIT_BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a Git Repository.\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Git username for authentication.",
+            "env_variable": "GIT_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Git access token for authentication.",
+            "env_variable": "GIT_ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "elixir-d6a0e057bf69",
+        "name": "Elixir",
+        "description": "Elixir is a functional, concurrent, high-level general-purpose programming language that runs on the BEAM virtual machine, which is also used to implement the Erlang programming language.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/elixir-d6a0e057bf69.json",
+        "sha256": "fdde96aba9c8cdf09d202a220ecbae35de38a6410067452fc0f7a92484645877",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "elixir/egg-elixir.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/d6a0e057bf69.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:55+00:00",
+        "name": "Elixir",
+        "author": "mravox@proton.me",
+        "uuid": "80ba60b4-cc10-4e73-95ec-dd572e00cf6c",
+        "description": "Elixir is a functional, concurrent, high-level general-purpose programming language that runs on the BEAM virtual machine, which is also used to implement the Erlang programming language.",
+        "features": null,
+        "docker_images": {
+          "Elixir Latest": "ghcr.io/parkervcp/yolks:elixir_latest",
+          "Elixir 1.15": "ghcr.io/parkervcp/yolks:elixir_1.15",
+          "Elixir 1.14": "ghcr.io/parkervcp/yolks:elixir_1.14",
+          "Elixir 1.13": "ghcr.io/parkervcp/yolks:elixir_1.13",
+          "Elixir 1.12": "ghcr.io/parkervcp/yolks:elixir_1.12"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; mix deps.get; mix run --no-halt",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"change this text 1\", \"change this text 2\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Elixir App Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${GIT_USERNAME}\" ] && [ -z \"${GIT_ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${GIT_USERNAME}:${GIT_ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git elixir repository\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${GIT_BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${GIT_BRANCH}'\"\r\n        git clone --single-branch --branch ${GIT_BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repository Address",
+            "description": "The Git repository address to clone .",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "The Git branch to install.",
+            "env_variable": "GIT_BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a Git Repository.\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Git username for authentication.",
+            "env_variable": "GIT_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Git access token for authentication.",
+            "env_variable": "GIT_ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "folding-home-2ab231402e53",
+        "name": "Folding@Home",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/folding-home-2ab231402e53.json",
+        "sha256": "1d858c0affd3643161f2841d2f642677dbf806b12751818c8f8f01b297ecea5c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "foldingathome/egg-pterodactyl-folding--home.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/2ab231402e53.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-08T19:48:06+02:00",
+        "name": "Folding@Home",
+        "author": "fuggschen@krk-gaming.de",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./FAHClient --user={{FAH_USERNAME}} --team={{FAH_TEAM}} --passkey={{FAH_PASSKEY}} $(if {{FAH_ANON}}; then echo \"--fold-anon=true\"; fi) --command-port={{SERVER_PORT}} --password={{FAH_PASSWORD}} --power={{FAH_POWER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started FahCore\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n# Folding@Home install script\r\n#\r\n# Created by Fuggschen\r\n\r\nexport DEBIAN_FRONTEND=noninteractive\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"64bit\" || echo \"arm64\")\r\ncd /tmp\r\n\r\necho \"Removing previous Version\"\r\nmv /mnt/server/config.xml /tmp/config.xml\r\nrm -rf /mnt/server/*\r\n\r\necho \"Installing dependencies\"\r\napt update && apt upgrade -y && apt install curl bzip2 -y\r\n\r\necho \"Downloading FAHClient\"\r\ncurl -sSL -o fahclient.tar.bz2 https://download.foldingathome.org/releases/v7/public/fahclient/debian-stable-${ARCH}/release/fahclient_${FAH_VERSION}-64bit-release.tar.bz2\r\n\r\necho \"Installing FAHClient\"\r\ntar -xjf fahclient.tar.bz2 -C /mnt/server --strip-components=1\r\n\r\necho \"Cleaning up..\"\r\nrm -f fahclient.tar.bz2\r\nrm -f /mnt/server/sample-config.xml\r\nmv /tmp/config.xml /mnt/server/config.xml\r\n\r\nFILE=/mnt/server/config.xml\r\nif [[ ! -f  $FILE ]]\r\nthen\r\necho \"Setting up config.xml\"\r\ncat > $FILE << EOF\r\n<config>\r\n  <!-- Folding Slots -->\r\n  <slot id='0' type='CPU'/>\r\n  <!-- Maximum CPU Cores to use. Can't be more than 64 -->\r\n  <cpus v='64'/>\r\n</config>\r\nEOF\r\nfi\r\n\r\necho \"Done!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FaH Username",
+            "description": "Your Folding@Home Username",
+            "env_variable": "FAH_USERNAME",
+            "default_value": "Anonymous",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Team",
+            "description": "Your Folding@Home Team that you are folding for. For reference look here: https://stats.foldingathome.org/team",
+            "env_variable": "FAH_TEAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Passkey",
+            "description": "Your Folding@Home Passkey for your Username, if not Anonymous. Get your Passkey here: https://apps.foldingathome.org/getpasskey",
+            "env_variable": "FAH_PASSKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Anonymous Mode",
+            "description": "Set to true if you are folding Anonymously",
+            "env_variable": "FAH_ANON",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Version",
+            "description": "Set to wanted major Folding@Home Version. Check here: https://download.foldingathome.org/releases/v7/public/fahclient/debian-stable-64bit/release/",
+            "env_variable": "FAH_VERSION",
+            "default_value": "7.6.21",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "FaHControl Password",
+            "description": "Set a WebUI Password",
+            "env_variable": "FAH_PASSWORD",
+            "default_value": "SetPasswordHere",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Power",
+            "description": "The Powerlevel it should use:\r\n- light (only half the cpu power is used)\r\n- medium (full cpu power)\r\n- full (full cpu and gpu power but gpu is not supported)",
+            "env_variable": "FAH_POWER",
+            "default_value": "medium",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:light,medium,full",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "folding-home-48a1156de9aa",
+        "name": "Folding@Home",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/folding-home-48a1156de9aa.json",
+        "sha256": "ba1e2b3203401bdc3528c4a7152bf1943d1dbcef027de8b90a193be190646130",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "foldingathome/egg-folding--home.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/48a1156de9aa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-08T19:48:06+02:00",
+        "name": "Folding@Home",
+        "author": "fuggschen@krk-gaming.de",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./FAHClient --user={{FAH_USERNAME}} --team={{FAH_TEAM}} --passkey={{FAH_PASSKEY}} $(if {{FAH_ANON}}; then echo \"--fold-anon=true\"; fi) --command-port={{SERVER_PORT}} --password={{FAH_PASSWORD}} --power={{FAH_POWER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started FahCore\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n# Folding@Home install script\r\n#\r\n# Created by Fuggschen\r\n\r\nexport DEBIAN_FRONTEND=noninteractive\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"64bit\" || echo \"arm64\")\r\ncd /tmp\r\n\r\necho \"Removing previous Version\"\r\nmv /mnt/server/config.xml /tmp/config.xml\r\nrm -rf /mnt/server/*\r\n\r\necho \"Installing dependencies\"\r\napt update && apt upgrade -y && apt install curl bzip2 -y\r\n\r\necho \"Downloading FAHClient\"\r\ncurl -sSL -o fahclient.tar.bz2 https://download.foldingathome.org/releases/v7/public/fahclient/debian-stable-${ARCH}/release/fahclient_${FAH_VERSION}-64bit-release.tar.bz2\r\n\r\necho \"Installing FAHClient\"\r\ntar -xjf fahclient.tar.bz2 -C /mnt/server --strip-components=1\r\n\r\necho \"Cleaning up..\"\r\nrm -f fahclient.tar.bz2\r\nrm -f /mnt/server/sample-config.xml\r\nmv /tmp/config.xml /mnt/server/config.xml\r\n\r\nFILE=/mnt/server/config.xml\r\nif [[ ! -f  $FILE ]]\r\nthen\r\necho \"Setting up config.xml\"\r\ncat > $FILE << EOF\r\n<config>\r\n  <!-- Folding Slots -->\r\n  <slot id='0' type='CPU'/>\r\n  <!-- Maximum CPU Cores to use. Can't be more than 64 -->\r\n  <cpus v='64'/>\r\n</config>\r\nEOF\r\nfi\r\n\r\necho \"Done!\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FaH Username",
+            "description": "Your Folding@Home Username",
+            "env_variable": "FAH_USERNAME",
+            "default_value": "Anonymous",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Team",
+            "description": "Your Folding@Home Team that you are folding for. For reference look here: https://stats.foldingathome.org/team",
+            "env_variable": "FAH_TEAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Passkey",
+            "description": "Your Folding@Home Passkey for your Username, if not Anonymous. Get your Passkey here: https://apps.foldingathome.org/getpasskey",
+            "env_variable": "FAH_PASSKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Anonymous Mode",
+            "description": "Set to true if you are folding Anonymously",
+            "env_variable": "FAH_ANON",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Version",
+            "description": "Set to wanted major Folding@Home Version. Check here: https://download.foldingathome.org/releases/v7/public/fahclient/debian-stable-64bit/release/",
+            "env_variable": "FAH_VERSION",
+            "default_value": "7.6.21",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "FaHControl Password",
+            "description": "Set a WebUI Password",
+            "env_variable": "FAH_PASSWORD",
+            "default_value": "SetPasswordHere",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Power",
+            "description": "The Powerlevel it should use:\r\n- light (only half the cpu power is used)\r\n- medium (full cpu power)\r\n- full (full cpu and gpu power but gpu is not supported)",
+            "env_variable": "FAH_POWER",
+            "default_value": "medium",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:light,medium,full",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "folding-home-86deab2b67b1",
+        "name": "Folding@Home",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/folding-home-86deab2b67b1.json",
+        "sha256": "845d1598523afacf206aad4bda2afeb6386dcc5e211548eedd858e73b30ba5e3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "foldingathome/egg-folding--home.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/86deab2b67b1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-08T19:48:06+02:00",
+        "name": "Folding@Home",
+        "author": "fuggschen@krk-gaming.de",
+        "uuid": "6ac374df-1959-4d5e-a9c9-971c8c3f0b8f",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./FAHClient --user={{FAH_USERNAME}} --team={{FAH_TEAM}} --passkey={{FAH_PASSKEY}} $(if {{FAH_ANON}}; then echo \"--fold-anon=true\"; fi) --command-port={{SERVER_PORT}} --password={{FAH_PASSWORD}} --power={{FAH_POWER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started FahCore\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n# Folding@Home install script\r\n#\r\n# Created by Fuggschen\r\n\r\nexport DEBIAN_FRONTEND=noninteractive\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"64bit\" || echo \"arm64\")\r\ncd /tmp\r\n\r\necho \"Removing previous Version\"\r\nmv /mnt/server/config.xml /tmp/config.xml\r\nrm -rf /mnt/server/*\r\n\r\necho \"Installing dependencies\"\r\napt update && apt upgrade -y && apt install curl bzip2 -y\r\n\r\necho \"Downloading FAHClient\"\r\ncurl -sSL -o fahclient.tar.bz2 https://download.foldingathome.org/releases/v7/public/fahclient/debian-stable-${ARCH}/release/fahclient_${FAH_VERSION}-64bit-release.tar.bz2\r\n\r\necho \"Installing FAHClient\"\r\ntar -xjf fahclient.tar.bz2 -C /mnt/server --strip-components=1\r\n\r\necho \"Cleaning up..\"\r\nrm -f fahclient.tar.bz2\r\nrm -f /mnt/server/sample-config.xml\r\nmv /tmp/config.xml /mnt/server/config.xml\r\n\r\nFILE=/mnt/server/config.xml\r\nif [[ ! -f  $FILE ]]\r\nthen\r\necho \"Setting up config.xml\"\r\ncat > $FILE << EOF\r\n<config>\r\n  <!-- Folding Slots -->\r\n  <slot id='0' type='CPU'/>\r\n  <!-- Maximum CPU Cores to use. Can't be more than 64 -->\r\n  <cpus v='64'/>\r\n</config>\r\nEOF\r\nfi\r\n\r\necho \"Done!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "FaH Username",
+            "description": "Your Folding@Home Username",
+            "env_variable": "FAH_USERNAME",
+            "default_value": "Anonymous",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": 2,
+            "name": "FaH Team",
+            "description": "Your Folding@Home Team that you are folding for. For reference look here: https://stats.foldingathome.org/team",
+            "env_variable": "FAH_TEAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "sort": 3,
+            "name": "FaH Passkey",
+            "description": "Your Folding@Home Passkey for your Username, if not Anonymous. Get your Passkey here: https://apps.foldingathome.org/getpasskey",
+            "env_variable": "FAH_PASSKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "sort": 4,
+            "name": "FaH Anonymous Mode",
+            "description": "Set to true if you are folding Anonymously",
+            "env_variable": "FAH_ANON",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "sort": 5,
+            "name": "FaH Version",
+            "description": "Set to wanted major Folding@Home Version. Check here: https://download.foldingathome.org/releases/v7/public/fahclient/debian-stable-64bit/release/",
+            "env_variable": "FAH_VERSION",
+            "default_value": "7.6.21",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": 6,
+            "name": "FaHControl Password",
+            "description": "Set a WebUI Password",
+            "env_variable": "FAH_PASSWORD",
+            "default_value": "SetPasswordHere",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "sort": 7,
+            "name": "FaH Power",
+            "description": "The Powerlevel it should use:\r\n- light (only half the cpu power is used)\r\n- medium (full cpu power)\r\n- full (full cpu and gpu power but gpu is not supported)",
+            "env_variable": "FAH_POWER",
+            "default_value": "medium",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:light,medium,full",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

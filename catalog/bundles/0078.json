@@ -1,0 +1,1232 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "terraria-vanilla-0fafb4b2f99e",
+        "name": "Terraria Vanilla",
+        "description": "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/terraria-vanilla-0fafb4b2f99e.json",
+        "sha256": "39def1442597d7774ba17888f92524dcc46f800e9b3447511b9f2216902678b5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "terraria/vanilla/egg-pterodactyl-terraria-vanilla.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/terraria/vanilla/egg-terraria-vanilla.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/0fafb4b2f99e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:13+00:00",
+        "name": "Terraria Vanilla",
+        "author": "iamkubi@gmail.com",
+        "description": "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./TerrariaServer.bin.x86_64 -config serverconfig.txt",
+        "config": {
+          "files": "{\"serverconfig.txt\": {\"parser\": \"properties\", \"find\": {\"worldpath\": \"/home/container/saves/Worlds\", \"worldname\": \"{{server.build.env.WORLD_NAME}}\", \"world\": \"/home/container/saves/Worlds/{{server.build.env.WORLD_NAME}}.wld\", \"difficulty\": \"{{server.build.env.WORLD_DIFFICULTY}}\", \"autocreate\": \"{{server.build.env.WORLD_SIZE}}\", \"port\": \"{{server.build.default.port}}\", \"maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"motd\": \"{{server.build.env.SERVER_MOTD}}\", \"seed\": \"{{server.build.env.WORLD_SEED}}\", \"password\": \"{{server.build.env.PASSWORD}}\", \"npcstream\": \"{{server.build.env.NPCSTREAM}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file unzip jq\r\n\r\nDOWNLOAD_LINK=invalid\r\n\r\nmkdir -p /mnt/server/\r\ncd /mnt/server/\r\n\r\nif [ \"${TERRARIA_VERSION}\" == \"latest\" ] || [ \"${TERRARIA_VERSION}\" == \"\" ] ; then\r\n    V=$(curl -sSL https://terraria.org/api/get/dedicated-servers-names | jq -r .[] | head -1)\r\n    DOWNLOAD_LINK=\"https://terraria.org/api/download/pc-dedicated-server/${V}\"\r\nelse\r\n    CLEAN_VERSION=$(echo ${TERRARIA_VERSION} | sed 's/\\.//g')\r\n    echo -e \"Downloading terraria server files\"\r\n    DOWNLOAD_LINK=$(curl -sSL https://terraria.wiki.gg/wiki/Server#Downloads | grep '>Terraria Server ' | grep -Eoi '<a [^>]+>' | grep -Eo 'href=\\\"[^\\\\\\\"]+\\\"' | grep -Eo '(http|https):\\/\\/[^\\\"]+' | grep \"${CLEAN_VERSION}\" | cut -d'?' -f1)\r\nfi \r\n\r\n## this is a simple script to validate a download url actaully exists\r\necho ${DOWNLOAD_LINK}\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid.\"\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\nCLEAN_VERSION=$(echo ${DOWNLOAD_LINK##*/} | cut -d'-' -f3 | cut -d'.' -f1)\r\n\r\n\r\necho -e \"running 'curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}'\" \r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"Unpacking server files\"\r\nunzip ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"\"\r\ncp -R ${CLEAN_VERSION}/Linux/* ./\r\nchmod +x TerrariaServer.bin.x86_64\r\n\r\necho -e \"Cleaning up extra files.\"\r\nrm -rf ${CLEAN_VERSION}\r\n\r\necho -e \"Generating config file\"\r\ncat <<EOF > serverconfig.txt\r\nworldpath=/home/container/saves/Worlds\r\nworldname=default\r\nworld=/home/container/saves/Worlds/default.wld\r\ndifficulty=3\r\nautocreate=1\r\nport=7777\r\nmaxplayers=8\r\nEOF\r\n\r\nmkdir -p /mnt/server/saves/Worlds\r\n\r\necho -e \"Install complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Terraria version",
+            "description": "the version of Terraria that is to be used.\r\n\r\nYou can use the full version number or the file number. (ex. 1.3.5.3 or 1353)\r\n\r\nGet version numbers here - https://terraria.wiki.gg/wiki/Server#Downloads",
+            "env_variable": "TERRARIA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "World Difficulty\r\n\r\nOptions: 0(normal), 1(expert), 2(master), 3(journey)",
+            "env_variable": "WORLD_DIFFICULTY",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Server MOTD",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The Seed to use when creating the World",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "The password which should be used.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "NPCStream",
+            "description": "Reduces enemy skipping but increases bandwidth usage. The lower the number the less skipping will happen, but more data is sent. 0 is off.",
+            "env_variable": "NPCSTREAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:0,60",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "terraria-vanilla-81442a221455",
+        "name": "Terraria Vanilla",
+        "description": "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/terraria-vanilla-81442a221455.json",
+        "sha256": "dd1e760946b335e61fdb294ec11a4957459e75fe7d0edc90cfd1c8468cbbea0d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "terraria/vanilla/egg-terraria-vanilla.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/81442a221455.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-10-25T18:12:06+02:00",
+        "name": "Terraria Vanilla",
+        "author": "iamkubi@gmail.com",
+        "description": "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./TerrariaServer.bin.x86_64 -config serverconfig.txt",
+        "config": {
+          "files": "{\"serverconfig.txt\": {\"parser\": \"properties\", \"find\": {\"worldpath\": \"/home/container/saves/Worlds\", \"worldname\": \"{{server.build.env.WORLD_NAME}}\", \"world\": \"/home/container/saves/Worlds/{{server.build.env.WORLD_NAME}}.wld\", \"difficulty\": \"{{server.build.env.WORLD_DIFFICULTY}}\", \"autocreate\": \"{{server.build.env.WORLD_SIZE}}\", \"port\": \"{{server.build.default.port}}\", \"maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"motd\": \"{{server.build.env.SERVER_MOTD}}\", \"seed\": \"{{server.build.env.WORLD_SEED}}\", \"password\": \"{{server.build.env.PASSWORD}}\", \"npcstream\": \"{{server.build.env.NPCSTREAM}}\"}}}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file unzip jq\r\n\r\nDOWNLOAD_LINK=invalid\r\n\r\nmkdir -p /mnt/server/\r\ncd /mnt/server/\r\n\r\nif [ \"${TERRARIA_VERSION}\" == \"latest\" ] || [ \"${TERRARIA_VERSION}\" == \"\" ] ; then\r\n    V=$(curl -sSL https://terraria.org/api/get/dedicated-servers-names | jq -r .[] | head -1)\r\n    DOWNLOAD_LINK=\"https://terraria.org/api/download/pc-dedicated-server/${V}\"\r\nelse\r\n    CLEAN_VERSION=$(echo ${TERRARIA_VERSION} | sed 's/\\.//g')\r\n    echo -e \"Downloading terraria server files\"\r\n    DOWNLOAD_LINK=$(curl -sSL https://terraria.wiki.gg/wiki/Server#Downloads | grep '>Terraria Server ' | grep -Eoi '<a [^>]+>' | grep -Eo 'href=\\\"[^\\\\\\\"]+\\\"' | grep -Eo '(http|https):\\/\\/[^\\\"]+' | grep \"${CLEAN_VERSION}\" | cut -d'?' -f1)\r\nfi \r\n\r\n## this is a simple script to validate a download url actaully exists\r\necho ${DOWNLOAD_LINK}\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid.\"\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\nCLEAN_VERSION=$(echo ${DOWNLOAD_LINK##*/} | cut -d'-' -f3 | cut -d'.' -f1)\r\n\r\n\r\necho -e \"running 'curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}'\" \r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"Unpacking server files\"\r\nunzip ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"\"\r\ncp -R ${CLEAN_VERSION}/Linux/* ./\r\nchmod +x TerrariaServer.bin.x86_64\r\n\r\necho -e \"Cleaning up extra files.\"\r\nrm -rf ${CLEAN_VERSION}\r\n\r\necho -e \"Generating config file\"\r\ncat <<EOF > serverconfig.txt\r\nworldpath=/home/container/saves/Worlds\r\nworldname=default\r\nworld=/home/container/saves/Worlds/default.wld\r\ndifficulty=3\r\nautocreate=1\r\nport=7777\r\nmaxplayers=8\r\nEOF\r\n\r\nmkdir -p /mnt/server/saves/Worlds\r\n\r\necho -e \"Install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Terraria version",
+            "description": "the version of Terraria that is to be used.\r\n\r\nYou can use the full version number or the file number. (ex. 1.3.5.3 or 1353)\r\n\r\nGet version numbers here - https://terraria.wiki.gg/wiki/Server#Downloads",
+            "env_variable": "TERRARIA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "World Difficulty\r\n\r\nOptions: 0(normal), 1(expert), 2(master), 3(journey)",
+            "env_variable": "WORLD_DIFFICULTY",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Server MOTD",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The Seed to use when creating the World",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "The password which should be used.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "NPCStream",
+            "description": "Reduces enemy skipping but increases bandwidth usage. The lower the number the less skipping will happen, but more data is sent. 0 is off.",
+            "env_variable": "NPCSTREAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:0,60",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "terraria-vanilla-a7b33dd40229",
+        "name": "Terraria Vanilla",
+        "description": "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/terraria-vanilla-a7b33dd40229.json",
+        "sha256": "35a9df9053827194631901e9616396b53dcb7e4ebc7c1cf0e67853164facc3ff",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "terraria/vanilla/egg-terraria-vanilla.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/a7b33dd40229.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:13+00:00",
+        "name": "Terraria Vanilla",
+        "author": "iamkubi@gmail.com",
+        "uuid": "e83700ed-d145-454a-add1-230e027c72ee",
+        "description": "Dig, fight, explore, build! Nothing is impossible in this action-packed adventure game.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./TerrariaServer.bin.x86_64 -config serverconfig.txt",
+        "config": {
+          "files": "{\"serverconfig.txt\": {\"parser\": \"properties\", \"find\": {\"worldpath\": \"/home/container/saves/Worlds\", \"worldname\": \"{{server.build.env.WORLD_NAME}}\", \"world\": \"/home/container/saves/Worlds/{{server.build.env.WORLD_NAME}}.wld\", \"difficulty\": \"{{server.build.env.WORLD_DIFFICULTY}}\", \"autocreate\": \"{{server.build.env.WORLD_SIZE}}\", \"port\": \"{{server.build.default.port}}\", \"maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"motd\": \"{{server.build.env.SERVER_MOTD}}\", \"seed\": \"{{server.build.env.WORLD_SEED}}\", \"password\": \"{{server.build.env.PASSWORD}}\", \"npcstream\": \"{{server.build.env.NPCSTREAM}}\"}}}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file unzip jq\r\n\r\nDOWNLOAD_LINK=invalid\r\n\r\nmkdir -p /mnt/server/\r\ncd /mnt/server/\r\n\r\nif [ \"${TERRARIA_VERSION}\" == \"latest\" ] || [ \"${TERRARIA_VERSION}\" == \"\" ] ; then\r\n    V=$(curl -sSL https://terraria.org/api/get/dedicated-servers-names | jq -r .[] | head -1)\r\n    DOWNLOAD_LINK=\"https://terraria.org/api/download/pc-dedicated-server/${V}\"\r\nelse\r\n    CLEAN_VERSION=$(echo ${TERRARIA_VERSION} | sed 's/\\.//g')\r\n    echo -e \"Downloading terraria server files\"\r\n    DOWNLOAD_LINK=$(curl -sSL https://terraria.wiki.gg/wiki/Server#Downloads | grep '>Terraria Server ' | grep -Eoi '<a [^>]+>' | grep -Eo 'href=\\\"[^\\\\\\\"]+\\\"' | grep -Eo '(http|https):\\/\\/[^\\\"]+' | grep \"${CLEAN_VERSION}\" | cut -d'?' -f1)\r\nfi \r\n\r\n## this is a simple script to validate a download url actaully exists\r\necho ${DOWNLOAD_LINK}\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid.\"\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\nCLEAN_VERSION=$(echo ${DOWNLOAD_LINK##*/} | cut -d'-' -f3 | cut -d'.' -f1)\r\n\r\n\r\necho -e \"running 'curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}'\" \r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"Unpacking server files\"\r\nunzip ${DOWNLOAD_LINK##*/}\r\n\r\necho -e \"\"\r\ncp -R ${CLEAN_VERSION}/Linux/* ./\r\nchmod +x TerrariaServer.bin.x86_64\r\n\r\necho -e \"Cleaning up extra files.\"\r\nrm -rf ${CLEAN_VERSION}\r\n\r\necho -e \"Generating config file\"\r\ncat <<EOF > serverconfig.txt\r\nworldpath=/home/container/saves/Worlds\r\nworldname=default\r\nworld=/home/container/saves/Worlds/default.wld\r\ndifficulty=3\r\nautocreate=1\r\nport=7777\r\nmaxplayers=8\r\nEOF\r\n\r\nmkdir -p /mnt/server/saves/Worlds\r\n\r\necho -e \"Install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Terraria version",
+            "description": "the version of Terraria that is to be used.\r\n\r\nYou can use the full version number or the file number. (ex. 1.3.5.3 or 1353)\r\n\r\nGet version numbers here - https://terraria.wiki.gg/wiki/Server#Downloads",
+            "env_variable": "TERRARIA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:255",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:1,2,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "World Difficulty\r\n\r\nOptions: 0(normal), 1(expert), 2(master), 3(journey)",
+            "env_variable": "WORLD_DIFFICULTY",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Server MOTD",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The Seed to use when creating the World",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "The password which should be used.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "NPCStream",
+            "description": "Reduces enemy skipping but increases bandwidth usage. The lower the number the less skipping will happen, but more data is sent. 0 is off.",
+            "env_variable": "NPCSTREAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:0,60",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "terratech-worlds-1ded69342917",
+        "name": "TerraTech Worlds",
+        "description": "TerraTech Worlds",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/terratech-worlds-1ded69342917.json",
+        "sha256": "885135bc138e33c6a40ae8909b92f35db4a50390c7a161053fa8854208b785fe",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "terratech_worlds/egg-pterodactyl-terra-tech-worlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/1ded69342917.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:56+00:00",
+        "name": "TerraTech Worlds",
+        "author": "durzo@durzo.io",
+        "description": "TerraTech Worlds",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/TT2/Saved/Logs/TT2.log; proton run ./TT2/Binaries/Win64/TT2Server-Win64-Shipping.exe -log & TTW_PID=$!; tail -c0 -F /home/container/TT2/Saved/Logs/TT2.log --pid=$TTW_PID",
+        "config": {
+          "files": "{\"dedicated_server_config.json\": {\"parser\": \"json\", \"find\": {\"Port\": \"{{server.build.default.port}}\", \"Password\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SlotCount\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Waiting Players...\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/TT2/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n#Setup AppID TXT\r\ncd /mnt/server\r\necho \"2313330\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2533070",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2533070",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "terratech-worlds-8cdb978520b4",
+        "name": "TerraTech Worlds",
+        "description": "TerraTech Worlds",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/terratech-worlds-8cdb978520b4.json",
+        "sha256": "fa46d3f3b3113f285ceda90e2248f1f439758236546e0cde0555f6fb840a94b4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "terratech_worlds/egg-terra-tech-worlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8cdb978520b4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "TerraTech Worlds",
+        "author": "durzo@durzo.io",
+        "uuid": "5272071f-e6af-40e7-a19a-08264aa45a6f",
+        "description": "TerraTech Worlds",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/TT2/Saved/Logs/TT2.log; proton run ./TT2/Binaries/Win64/TT2Server-Win64-Shipping.exe -log & TTW_PID=$!; tail -c0 -F /home/container/TT2/Saved/Logs/TT2.log --pid=$TTW_PID",
+        "config": {
+          "files": "{\"dedicated_server_config.json\": {\"parser\": \"json\", \"find\": {\"Port\": \"{{server.build.default.port}}\", \"Password\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SlotCount\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"Waiting Players...\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/TT2/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n#Setup AppID TXT\r\ncd /mnt/server\r\necho \"2313330\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2533070",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2533070",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:6",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "terratech-worlds-94e9b13bc75f",
+        "name": "TerraTech Worlds",
+        "description": "TerraTech Worlds",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/terratech-worlds-94e9b13bc75f.json",
+        "sha256": "6ec46dd02d817900d2dbe7bb6e321e77056c4632e7161a67c2ff7c585c540786",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "terratech_worlds/egg-terra-tech-worlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/94e9b13bc75f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-23T13:50:53+01:00",
+        "name": "TerraTech Worlds",
+        "author": "durzo@durzo.io",
+        "description": "TerraTech Worlds",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/TT2/Saved/Logs/TT2.log; proton run ./TT2/Binaries/Win64/TT2Server-Win64-Shipping.exe -log & TTW_PID=$!; tail -c0 -F /home/container/TT2/Saved/Logs/TT2.log --pid=$TTW_PID",
+        "config": {
+          "files": "{\"dedicated_server_config.json\": {\"parser\": \"json\", \"find\": {\"Port\": \"{{server.build.default.port}}\", \"Password\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SlotCount\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"Waiting Players...\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/TT2/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n#Setup AppID TXT\r\ncd /mnt/server\r\necho \"2313330\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2533070",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2533070",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "terratech-worlds-a26b41186df0",
+        "name": "TerraTech Worlds",
+        "description": "TerraTech Worlds",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/terratech-worlds-a26b41186df0.json",
+        "sha256": "1c28d6f53ffc081188aa6d4464e83ec3efa6a7f9c1939c60ec0c0c12378a8ffe",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/terratech_worlds/egg-terra-tech-worlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/a26b41186df0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-23T13:50:53+01:00",
+        "name": "TerraTech Worlds",
+        "author": "durzo@durzo.io",
+        "description": "TerraTech Worlds",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm /home/container/TT2/Saved/Logs/TT2.log; proton run ./TT2/Binaries/Win64/TT2Server-Win64-Shipping.exe -log & TTW_PID=$!; tail -c0 -F /home/container/TT2/Saved/Logs/TT2.log --pid=$TTW_PID",
+        "config": {
+          "files": "{\"dedicated_server_config.json\": {\"parser\": \"json\", \"find\": {\"Port\": \"{{server.build.default.port}}\", \"Password\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SlotCount\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"Waiting Players...\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## install the steam sdk using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server/TT2/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n#Setup AppID TXT\r\ncd /mnt/server\r\necho \"2313330\" > steam_appid.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2533070",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2533070",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "the-battle-for-wesnoth-2294dcb63271",
+        "name": "The Battle for Wesnoth",
+        "description": "Egg for hosting a Battle for Wesnoth Server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/the-battle-for-wesnoth-2294dcb63271.json",
+        "sha256": "bf593420133a769519a094e72a65226d6ea94780ef150f3028770df125b9e47e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "thebattleforwesnoth/egg-pterodactyl-the-battle-for-wesnoth.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/2294dcb63271.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-20T10:57:52+01:00",
+        "name": "The Battle for Wesnoth",
+        "author": "mattman107@github.com",
+        "description": "Egg for hosting a Battle for Wesnoth Server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/games:thebattleforwesnoth": "ghcr.io/parkervcp/games:thebattleforwesnoth"
+        },
+        "file_denylist": [],
+        "startup": "./battleForWesnoth/build/wesnothd -p {{SERVER_PORT}} -c /home/container/wesnothd.cfg",
+        "config": {
+          "files": "{\"wesnothd.cfg\": {\"parser\": \"file\", \"find\": {\"passwd=\": \"passwd=\\\"{{server.build.env.PASSWD}}\\\"\", \"motd=\": \"motd=\\\"{{server.build.env.MOTD}}\\\"\"}}}",
+          "startup": "{\"done\": \"info server:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# Install build tools\r\necho \"deb http://deb.debian.org/debian bullseye-backports main\" >> /etc/apt/sources.list && \\\r\napt-get update && apt-get -y full-upgrade && \\\r\n    apt-get install -y libboost-filesystem-dev libboost-iostreams-dev libboost-locale-dev libboost-random-dev libboost-regex-dev libboost-program-options-dev libboost-system-dev libboost-coroutine-dev libboost-graph-dev \\\r\n    libsdl2-dev libcurl4-openssl-dev libcairo2-dev libvorbis-dev libbz2-dev zlib1g-dev libssl-dev libcrypto++-dev openssl cmake g++ libsdl2-image-dev libsdl2-mixer-dev libsdl-pango-dev\r\n\r\n\r\nif [ ! -d \"/mnt/server/battleForWesnoth\" ]; then\r\n    \r\n    #clone code repo\r\n    git clone --recurse-submodules --single-branch --branch ${BRANCH} https://github.com/wesnoth/wesnoth /mnt/server/battleForWesnoth\r\n    \r\n    # go into the stk-code directory\r\n    cd /mnt/server/battleForWesnoth\r\n    \r\n    # create the build directory\r\n    mkdir build\r\n    \r\n    mkdir /mnt/server/wesnothd\r\n    touch /mnt/server/wesnothd.cfg\r\nelse\r\n    git config --global --add safe.directory /mnt/server/battleForWesnoth\r\n    #update existing stuff\r\n    cd /mnt/server/battleForWesnoth\r\n    git pull\r\n    git submodule update --init --recursive\r\n\r\n\r\nfi\r\n\r\n#build the server\r\ncd build\r\ncmake ../ -DCMAKE_BUILD_TYPE=Release\r\nsed -i 's/ENABLE_GAME:BOOL=ON/ENABLE_GAME:BOOL=OFF/' /mnt/server/battleForWesnoth/build/CMakeCache.txt\r\nsed -i 's#FIFO_DIR:STRING=/var/run/wesnothd#FIFO_DIR:STRING=/home/container/wesnothd#' /mnt/server/battleForWesnoth/build/CMakeCache.txt\r\nmake\r\nchmod +x ./wesnothd",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Branch",
+            "description": "The Github Branch to choose from. I recommend checking what version of the game you have installed.",
+            "env_variable": "BRANCH",
+            "default_value": "1.18",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Admin Password for server admin commands.",
+            "env_variable": "PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Message of the Day",
+            "description": "A message that will display when a user joins the server.",
+            "env_variable": "MOTD",
+            "default_value": "Welcome to the Pterodactyl Server!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "the-battle-for-wesnoth-7efd32919779",
+        "name": "The Battle for Wesnoth",
+        "description": "Egg for hosting a Battle for Wesnoth Server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/the-battle-for-wesnoth-7efd32919779.json",
+        "sha256": "a56f57e93a89e5ddfdba5c66f25de1237b1fd8393b07c7d5406bd4a1aedee794",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "thebattleforwesnoth/egg-the-battle-for-wesnoth.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/7efd32919779.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-20T09:59:56+00:00",
+        "name": "The Battle for Wesnoth",
+        "author": "mattman107@github.com",
+        "uuid": "a90188c8-c70d-4c51-a049-5b6869903db0",
+        "description": "Egg for hosting a Battle for Wesnoth Server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/games:thebattleforwesnoth": "ghcr.io/parkervcp/games:thebattleforwesnoth"
+        },
+        "file_denylist": [],
+        "startup": "./battleForWesnoth/build/wesnothd -p {{SERVER_PORT}} -c /home/container/wesnothd.cfg",
+        "config": {
+          "files": "{\"wesnothd.cfg\": {\"parser\": \"file\", \"find\": {\"passwd=\": \"passwd=\\\"{{server.environment.PASSWD}}\\\"\", \"motd=\": \"motd=\\\"{{server.environment.MOTD}}\\\"\"}}}",
+          "startup": "{\"done\": \"info server:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# Install build tools\r\necho \"deb http://deb.debian.org/debian bullseye-backports main\" >> /etc/apt/sources.list && \\\r\napt-get update && apt-get -y full-upgrade && \\\r\n    apt-get install -y libboost-filesystem-dev libboost-iostreams-dev libboost-locale-dev libboost-random-dev libboost-regex-dev libboost-program-options-dev libboost-system-dev libboost-coroutine-dev libboost-graph-dev \\\r\n    libsdl2-dev libcurl4-openssl-dev libcairo2-dev libvorbis-dev libbz2-dev zlib1g-dev libssl-dev libcrypto++-dev openssl cmake g++ libsdl2-image-dev libsdl2-mixer-dev libsdl-pango-dev\r\n\r\n\r\nif [ ! -d \"/mnt/server/battleForWesnoth\" ]; then\r\n    \r\n    #clone code repo\r\n    git clone --recurse-submodules --single-branch --branch ${BRANCH} https://github.com/wesnoth/wesnoth /mnt/server/battleForWesnoth\r\n    \r\n    # go into the stk-code directory\r\n    cd /mnt/server/battleForWesnoth\r\n    \r\n    # create the build directory\r\n    mkdir build\r\n    \r\n    mkdir /mnt/server/wesnothd\r\n    touch /mnt/server/wesnothd.cfg\r\nelse\r\n    git config --global --add safe.directory /mnt/server/battleForWesnoth\r\n    #update existing stuff\r\n    cd /mnt/server/battleForWesnoth\r\n    git pull\r\n    git submodule update --init --recursive\r\n\r\n\r\nfi\r\n\r\n#build the server\r\ncd build\r\ncmake ../ -DCMAKE_BUILD_TYPE=Release\r\nsed -i 's/ENABLE_GAME:BOOL=ON/ENABLE_GAME:BOOL=OFF/' /mnt/server/battleForWesnoth/build/CMakeCache.txt\r\nsed -i 's#FIFO_DIR:STRING=/var/run/wesnothd#FIFO_DIR:STRING=/home/container/wesnothd#' /mnt/server/battleForWesnoth/build/CMakeCache.txt\r\nmake\r\nchmod +x ./wesnothd",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": null,
+            "name": "Branch",
+            "description": "The Github Branch to choose from. I recommend checking what version of the game you have installed.",
+            "env_variable": "BRANCH",
+            "default_value": "1.18",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50"
+          },
+          {
+            "sort": null,
+            "name": "Admin Password",
+            "description": "Admin Password for server admin commands.",
+            "env_variable": "PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": null,
+            "name": "Message of the Day",
+            "description": "A message that will display when a user joins the server.",
+            "env_variable": "MOTD",
+            "default_value": "Welcome to the Pterodactyl Server!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "the-bus-98176c3c701e",
+        "name": "The Bus",
+        "description": "The Bus is the next generation of city bus driving simulation. Sell tickets and transport passengers with various buses on different lines across the German capital Berlin on a realistic scale of 1:1. ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/the-bus-98176c3c701e.json",
+        "sha256": "c9641117cfa1d8adf668d1801821ff8797b2638010ab982836f406e33e463215",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "the_bus/pterodactyl-egg-the-bus.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/98176c3c701e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-07-14T16:15:15+00:00",
+        "name": "The Bus",
+        "author": "quinten@pelican.dev",
+        "description": "The Bus is the next generation of city bus driving simulation. Sell tickets and transport passengers with various buses on different lines across the German capital Berlin on a realistic scale of 1:1. ",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "SteamCMD": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "TheBus/Binaries/Linux/TheBusServer_Linux -log -newconsole -useperfthreads  -port={{SERVER_PORT}}",
+        "config": {
+          "files": "{\"TheBus/Settings/ServerSettings.cfg\": {\"parser\": \"json\", \"find\": {\"serverName\": \"{{server.build.env.SERVER_NAME}}\", \"serverPassword\": \"{{server.build.env.SERVER_PASSWORD}}\", \"adminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"listServerAsPublic\": \"{{server.build.env.SERVER_LIST}}\", \"maxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"LogLoad: (Engine Initialization)\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Admin Password",
+            "description": "Password to log in as admin on the server",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:8",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "Maximum number of players allowed to join the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Show In Server List",
+            "description": "Should the server be shown in the server list",
+            "env_variable": "SERVER_LIST",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "The Bus Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password required to join the server. Leave empty to use no password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "507320",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "in:507320",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta ID",
+            "description": "The name of the beta branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Password",
+            "description": "The password for the beta branch. Leave empty if not needed",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

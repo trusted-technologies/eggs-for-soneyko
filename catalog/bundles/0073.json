@@ -1,0 +1,1259 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "starbound-2696efb3bcaf",
+        "name": "Starbound",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starbound-2696efb3bcaf.json",
+        "sha256": "46b46e8f2aada4b49817311de3617d25657f11edbe4217647f13470f23685ed0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "starbound/egg-pterodactyl-starbound.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/2696efb3bcaf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:05:08+00:00",
+        "name": "Starbound",
+        "author": "parker@parkervcp.com",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./starbound_server",
+        "config": {
+          "files": "{\"storage/starbound_server.config\": {\"parser\": \"json\", \"find\": {\"gameServerPort\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Starting UniverseServer\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## Starbound specific setup.\r\ncd /mnt/server/\r\n\r\n\r\n## edit sbinit config\r\nmv /mnt/server/linux/* /mnt/server/\r\nrm -rf /mnt/server/linux\r\nsed -i -e 's/\\.\\./\\./g' /mnt/server/sbinit.config\r\n\r\n## pull starbound_server.config\r\nmkdir -p /mnt/server/storage\r\ncurl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/starbound/starbound_server.config > /mnt/server/storage/starbound_server.config\r\n\r\n## use Worksop content\r\nif [ \"${WORKSHOP}\" == \"1\" ]; then\r\n    for dir in /mnt/server/steamapps/workshop/content/211820/*/\r\n    do\r\n        # Removes the trailing slash from the full path\r\n        dir=${dir%*/}\r\n        echo Sym-linking mod ${dir##*/} files into the mods folder\r\n        INDEX=0\r\n        for pakfile in ${dir}/*.pak\r\n        do\r\n            ln -r -s $pakfile /mnt/server/mods/${dir##*/}_${INDEX}.pak\r\n            INDEX=$((INDEX+1))\r\n        done\r\n    done\r\nfi"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "211820",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Workshop content",
+            "description": "Set to true if you want to use your subscribed Workshop content",
+            "env_variable": "WORKSHOP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starbound-41ac4e0153e2",
+        "name": "Starbound",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starbound-41ac4e0153e2.json",
+        "sha256": "542992038be326205fdc96549c0069b7a272f6ea3610e5f8055e0de553be3868",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/starbound/egg-starbound.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/41ac4e0153e2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-08-20T08:17:48+02:00",
+        "name": "Starbound",
+        "author": "parker@parkervcp.com",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./starbound_server",
+        "config": {
+          "files": "{\"storage/starbound_server.config\": {\"parser\": \"json\", \"find\": {\"gameServerPort\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Starting UniverseServer\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## Starbound specific setup.\r\ncd /mnt/server/\r\n\r\n\r\n## edit sbinit config\r\nmv /mnt/server/linux/* /mnt/server/\r\nrm -rf /mnt/server/linux\r\nsed -i -e 's/\\.\\./\\./g' /mnt/server/sbinit.config\r\n\r\n## pull starbound_server.config\r\nmkdir -p /mnt/server/storage\r\ncurl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/starbound/starbound_server.config > /mnt/server/storage/starbound_server.config\r\n\r\n## use Worksop content\r\nif [ \"${WORKSHOP}\" == \"1\" ]; then\r\n    for dir in /mnt/server/steamapps/workshop/content/211820/*/\r\n    do\r\n        # Removes the trailing slash from the full path\r\n        dir=${dir%*/}\r\n        echo Sym-linking mod ${dir##*/} files into the mods folder\r\n        INDEX=0\r\n        for pakfile in ${dir}/*.pak\r\n        do\r\n            ln -r -s $pakfile /mnt/server/mods/${dir##*/}_${INDEX}.pak\r\n            INDEX=$((INDEX+1))\r\n        done\r\n    done\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "211820",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Workshop content",
+            "description": "Set to true if you want to use your subscribed Workshop content",
+            "env_variable": "WORKSHOP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starbound-afc027d8336c",
+        "name": "Starbound",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starbound-afc027d8336c.json",
+        "sha256": "1c2ee38e12705e31840ed3b42a14ee578eb25e57cfe5d9156abc1a9447ae53b6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "starbound/egg-starbound.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/afc027d8336c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Starbound",
+        "author": "parker@parkervcp.com",
+        "uuid": "c439661f-b5c8-4e82-80f7-9c1ac6559b6d",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./starbound_server",
+        "config": {
+          "files": "{\"storage/starbound_server.config\": {\"parser\": \"json\", \"find\": {\"gameServerPort\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Starting UniverseServer\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## Starbound specific setup.\r\ncd /mnt/server/\r\n\r\n\r\n## edit sbinit config\r\nmv /mnt/server/linux/* /mnt/server/\r\nrm -rf /mnt/server/linux\r\nsed -i -e 's/\\.\\./\\./g' /mnt/server/sbinit.config\r\n\r\n## pull starbound_server.config\r\nmkdir -p /mnt/server/storage\r\ncurl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/starbound/starbound_server.config > /mnt/server/storage/starbound_server.config\r\n\r\n## use Worksop content\r\nif [ \"${WORKSHOP}\" == \"1\" ]; then\r\n    for dir in /mnt/server/steamapps/workshop/content/211820/*/\r\n    do\r\n        # Removes the trailing slash from the full path\r\n        dir=${dir%*/}\r\n        echo Sym-linking mod ${dir##*/} files into the mods folder\r\n        INDEX=0\r\n        for pakfile in ${dir}/*.pak\r\n        do\r\n            ln -r -s $pakfile /mnt/server/mods/${dir##*/}_${INDEX}.pak\r\n            INDEX=$((INDEX+1))\r\n        done\r\n    done\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "211820",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:5",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Use Workshop content",
+            "description": "Set to true if you want to use your subscribed Workshop content",
+            "env_variable": "WORKSHOP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starbound-fbfba6e6911e",
+        "name": "Starbound",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starbound-fbfba6e6911e.json",
+        "sha256": "a4f846a92002758cd40a504e05b0dc1402dbe5698b0f56a00b11704ace3ab802",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "starbound/egg-starbound.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/fbfba6e6911e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-08-20T08:17:48+02:00",
+        "name": "Starbound",
+        "author": "parker@parkervcp.com",
+        "description": "Starbound takes place in a two-dimensional, procedurally generated universe which the player is able to explore in order to obtain new weapons, armor, and items, and to visit towns and villages inhabited by various intelligent lifeforms.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./starbound_server",
+        "config": {
+          "files": "{\"storage/starbound_server.config\": {\"parser\": \"json\", \"find\": {\"gameServerPort\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Starting UniverseServer\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## Starbound specific setup.\r\ncd /mnt/server/\r\n\r\n\r\n## edit sbinit config\r\nmv /mnt/server/linux/* /mnt/server/\r\nrm -rf /mnt/server/linux\r\nsed -i -e 's/\\.\\./\\./g' /mnt/server/sbinit.config\r\n\r\n## pull starbound_server.config\r\nmkdir -p /mnt/server/storage\r\ncurl -sSL https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/starbound/starbound_server.config > /mnt/server/storage/starbound_server.config\r\n\r\n## use Worksop content\r\nif [ \"${WORKSHOP}\" == \"1\" ]; then\r\n    for dir in /mnt/server/steamapps/workshop/content/211820/*/\r\n    do\r\n        # Removes the trailing slash from the full path\r\n        dir=${dir%*/}\r\n        echo Sym-linking mod ${dir##*/} files into the mods folder\r\n        INDEX=0\r\n        for pakfile in ${dir}/*.pak\r\n        do\r\n            ln -r -s $pakfile /mnt/server/mods/${dir##*/}_${INDEX}.pak\r\n            INDEX=$((INDEX+1))\r\n        done\r\n    done\r\nfi",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "211820",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Workshop content",
+            "description": "Set to true if you want to use your subscribed Workshop content",
+            "env_variable": "WORKSHOP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starmade-171dbf9547b9",
+        "name": "starmade",
+        "description": "starmade",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starmade-171dbf9547b9.json",
+        "sha256": "be6ae14af298d5654f7f24054b523606b25c18af44433865aa9f211d0d59c265",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "starmade/egg-starmade.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/171dbf9547b9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:29:54+02:00",
+        "name": "starmade",
+        "author": "contact@hunters-tavern.de",
+        "description": "starmade",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:java_16": "ghcr.io/ptero-eggs/yolks:java_16"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128m -Xmx{{SERVER_MEMORY}}m -jar {{SERVER_JARFILE}} -server -port:{{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"SenableGameState(1)\"}",
+          "logs": "{}",
+          "stop": "/shutdown 0"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# starmade Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl\r\n\r\ncd /mnt/server\r\n\r\nwget -O starter.jar http://files.star-made.org/StarMade-Starter.jar\r\n\r\njava -jar starter.jar -nogui\r\n\r\nmv ./StarMade/* ./\r\nrm -r ./StarMade\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "eclipse-temurin:16-jdk-focal",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jarfile",
+            "description": "",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "StarMade.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starmade-81b7a93d28f7",
+        "name": "starmade",
+        "description": "starmade",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starmade-81b7a93d28f7.json",
+        "sha256": "c5ac9d5ee2fd283f12696c7599ea940fad1243cbfe928267d0235163279a8107",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "starmade/egg-pterodactyl-starmade.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/starmade/egg-starmade.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/81b7a93d28f7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:11+00:00",
+        "name": "starmade",
+        "author": "contact@hunters-tavern.de",
+        "description": "starmade",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128m -Xmx{{SERVER_MEMORY}}m -jar {{SERVER_JARFILE}} -server -port:{{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"SenableGameState(1)\"}",
+          "stop": "/shutdown 0"
+        },
+        "scripts": {
+          "installation": {
+            "container": "eclipse-temurin:16-jdk-focal",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# starmade Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl\r\n\r\ncd /mnt/server\r\n\r\nwget -O starter.jar http://files.star-made.org/StarMade-Starter.jar\r\n\r\njava -jar starter.jar -nogui\r\n\r\nmv ./StarMade/* ./\r\nrm -r ./StarMade\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jarfile",
+            "description": "",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "StarMade.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starmade-fbcafd92e15a",
+        "name": "starmade",
+        "description": "starmade",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starmade-fbcafd92e15a.json",
+        "sha256": "d824e229f0ba2a8c03955d995db5488d25da830ced9d1ef976ec161a026d47b1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "starmade/egg-starmade.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/fbcafd92e15a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:11+00:00",
+        "name": "starmade",
+        "author": "contact@hunters-tavern.de",
+        "uuid": "dc4632b4-0a98-4dc3-8a62-0b57844f70c8",
+        "description": "starmade",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128m -Xmx{{SERVER_MEMORY}}m -jar {{SERVER_JARFILE}} -server -port:{{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"SenableGameState(1)\"}",
+          "logs": "{}",
+          "stop": "/shutdown 0"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# starmade Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl\r\n\r\ncd /mnt/server\r\n\r\nwget -O starter.jar http://files.star-made.org/StarMade-Starter.jar\r\n\r\njava -jar starter.jar -nogui\r\n\r\nmv ./StarMade/* ./\r\nrm -r ./StarMade\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "eclipse-temurin:16-jdk-focal",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jarfile",
+            "description": "",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "StarMade.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starrupture-3f806e938a9b",
+        "name": "StarRupture",
+        "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters. Developed by Creepy Jar.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starrupture-3f806e938a9b.json",
+        "sha256": "1d6437fcdb0c45beb96fa65879f6842ea766456b416a8c8c9ccac7833ab854a2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "star_rupture/pterodactyl-egg-star-rupture.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3f806e938a9b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-07T22:43:26+01:00",
+        "name": "StarRupture",
+        "author": "volyzos@gmail.com",
+        "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters. Developed by Creepy Jar.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "proton run ./StarRupture/Binaries/Win64/StarRuptureServerEOS-Win64-Shipping.exe -Log -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RCWebControlDisable -RCWebInterfaceDisable & SR_PID=$!; tail -c0 -F ./StarRupture/Saved/Logs/StarRupture.log --pid=$SR_PID",
+        "config": {
+          "files": "{\"DSSettings.txt\": {\"parser\": \"json\", \"find\": {\"SessionName\": \"{{server.build.env.DSS_SERVER_NAME}}\", \"SaveGameInterval\": \"{{server.build.env.DSS_SAVE_INTERVAL}}\", \"StartNewGame\": \"{{server.build.env.DSS_CREATE_NEW_GAME}}\", \"LoadSavedGame\": \"{{server.build.env.DSS_LOAD_SAVED_GAME}}\", \"SaveGameName\": \"{{server.build.env.DSS_SAVE_FILE_NAME}}\"}}}",
+          "startup": "{\"done\": \"LogCommonSession: OnUpdateSessionComplete(SessionName: GameSession, bWasSuccessful: true\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# StarRupture Dedicated Server Installation Script\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\necho \"-----------------------------------------\"\r\necho \"StarRupture Dedicated Server Installer\"\r\necho \"Proton Version\"\r\necho \"-----------------------------------------\"\r\n\r\n## Set Steam user for anonymous login\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"Steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\n## Download and install SteamCMD\r\necho \"-----------------------------------------\"\r\necho \"Installing SteamCMD...\"\r\necho \"-----------------------------------------\"\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## Install game server using SteamCMD\r\necho \"-----------------------------------------\"\r\necho \"Installing StarRupture Dedicated Server...\"\r\necho \"-----------------------------------------\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n## Set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## Set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## create DSSettings.txt\r\nif [ ! -f /mnt/server/DSSettings.txt ]; then\r\n    echo \"Creating default DSSettings.txt\"\r\n    cat << EOF > /mnt/server/DSSettings.txt\r\n    {\r\n        \"SessionName\": \"StarRuptureServer\",\r\n        \"SaveGameInterval\": \"300\",\r\n        \"StartNewGame\": \"false\",\r\n        \"LoadSavedGame\": \"true\",\r\n        \"SaveGameName\": \"AutoSave0.sav\"\r\n    }\r\nEOF\r\nfi\r\n\r\n## Installation complete\r\necho \"-----------------------------------------\"\r\necho \"Installation completed!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam App ID",
+            "description": "The Steam App ID for StarRupture Dedicated Server. Do not change.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3809400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3809400",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Required for Windows game server installation via SteamCMD.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Automatically update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Steam query port for server browser. May not be required for EOS-based servers.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The display name of your server.",
+            "env_variable": "DSS_SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted StarRupture Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Load saved game",
+            "description": "DSSettings option to load an existing save. (Must be the opposite of Create new game)",
+            "env_variable": "DSS_LOAD_SAVED_GAME",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Optional: Set to a beta branch name to install a beta version of the server.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Create new game",
+            "description": "DSSettings option to force the creation of a new game. (Must be the opposite of Create new game)\r\nOnce a game and a save is created, you have to disable create game and load game instead to avoid problems",
+            "env_variable": "DSS_CREATE_NEW_GAME",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Save interval",
+            "description": "Time between automatic saves in seconds",
+            "env_variable": "DSS_SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Save filename",
+            "description": "The save file filename on the disk. Useful if you create/import multiple saves and want to load a specific one.\r\n(Must end with .sav)",
+            "env_variable": "DSS_SAVE_FILE_NAME",
+            "default_value": "AutoSave0.sav",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "starrupture-a421f1522933",
+        "name": "StarRupture",
+        "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters. Developed by Creepy Jar.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starrupture-a421f1522933.json",
+        "sha256": "465fb61243691e5b9dbb9f7a0789264aa0188552727ed5f6a0eec5100969681c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "star_rupture/pelican-egg-star-rupture.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/a421f1522933.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-07T22:43:26+01:00",
+        "name": "StarRupture",
+        "author": "volyzos@gmail.com",
+        "uuid": "b6d7c9fa-5726-4048-9edf-107d171ffc6e",
+        "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters. Developed by Creepy Jar.",
+        "image": null,
+        "tags": [],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"DSSettings.txt\": {\"parser\": \"json\", \"find\": {\"SessionName\": \"{{server.environment.DSS_SERVER_NAME}}\", \"SaveGameInterval\": \"{{server.environment.DSS_SAVE_INTERVAL}}\", \"StartNewGame\": \"{{server.environment.DSS_CREATE_NEW_GAME}}\", \"LoadSavedGame\": \"{{server.environment.DSS_LOAD_SAVED_GAME}}\", \"SaveGameName\": \"{{server.environment.DSS_SAVE_FILE_NAME}}\"}}}",
+          "startup": "{\"done\": \"LogCommonSession: OnUpdateSessionComplete(SessionName: GameSession, bWasSuccessful: true\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# StarRupture Dedicated Server Installation Script\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\necho \"-----------------------------------------\"\r\necho \"StarRupture Dedicated Server Installer\"\r\necho \"Proton Version\"\r\necho \"-----------------------------------------\"\r\n\r\n## Set Steam user for anonymous login\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"Steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\n## Download and install SteamCMD\r\necho \"-----------------------------------------\"\r\necho \"Installing SteamCMD...\"\r\necho \"-----------------------------------------\"\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## Install game server using SteamCMD\r\necho \"-----------------------------------------\"\r\necho \"Installing StarRupture Dedicated Server...\"\r\necho \"-----------------------------------------\"\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n## Set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## Set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## create DSSettings.txt\r\nif [ ! -f /mnt/server/DSSettings.txt ]; then\r\n    echo \"Creating default DSSettings.txt\"\r\n    cat << EOF > /mnt/server/DSSettings.txt\r\n    {\r\n        \"SessionName\": \"StarRuptureServer\",\r\n        \"SaveGameInterval\": \"300\",\r\n        \"StartNewGame\": \"false\",\r\n        \"LoadSavedGame\": \"true\",\r\n        \"SaveGameName\": \"AutoSave0.sav\"\r\n    }\r\nEOF\r\nfi\r\n\r\n## Installation complete\r\necho \"-----------------------------------------\"\r\necho \"Installation completed!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam App ID",
+            "description": "The Steam App ID for StarRupture Dedicated Server. Do not change.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3809400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3809400",
+            "sort": 1
+          },
+          {
+            "name": "Windows Install",
+            "description": "Required for Windows game server installation via SteamCMD.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "sort": 2
+          },
+          {
+            "name": "Auto Update",
+            "description": "Automatically update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 3
+          },
+          {
+            "name": "Query Port",
+            "description": "Steam query port for server browser. May not be required for EOS-based servers.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|between:1024,65535",
+            "sort": 4
+          },
+          {
+            "name": "Server Name",
+            "description": "The display name of your server.",
+            "env_variable": "DSS_SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted StarRupture Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 5
+          },
+          {
+            "name": "Load saved game",
+            "description": "DSSettings option to load an existing save. (Must be the opposite of Create new game)",
+            "env_variable": "DSS_LOAD_SAVED_GAME",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 6
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Optional: Set to a beta branch name to install a beta version of the server.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": 7
+          },
+          {
+            "name": "Create new game",
+            "description": "DSSettings option to force the creation of a new game. (Must be the opposite of Create new game)\r\nOnce a game and a save is created, you have to disable create game and load game instead to avoid problems",
+            "env_variable": "DSS_CREATE_NEW_GAME",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 8
+          },
+          {
+            "name": "Game Save interval",
+            "description": "Time between automatic saves in seconds",
+            "env_variable": "DSS_SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": 9
+          },
+          {
+            "name": "Save filename",
+            "description": "The save file filename on the disk. Useful if you create/import multiple saves and want to load a specific one.\r\n(Must end with .sav)",
+            "env_variable": "DSS_SAVE_FILE_NAME",
+            "default_value": "AutoSave0.sav",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 10
+          }
+        ],
+        "startup": "proton run ./StarRupture/Binaries/Win64/StarRuptureServerEOS-Win64-Shipping.exe -Log -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RCWebControlDisable -RCWebInterfaceDisable & SR_PID=$!; tail -c0 -F ./StarRupture/Saved/Logs/StarRupture.log --pid=$SR_PID"
+      }
+    },
+    {
+      "entry": {
+        "id": "starrupture-wine-479977ba4c3d",
+        "name": "StarRupture Wine",
+        "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/starrupture-wine-479977ba4c3d.json",
+        "sha256": "520fe0c58a71931af9f975c8bbba4cbb3d2bb3d340717ae3a6674d4997943e6d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "starrupture/egg-star-rupture-wine.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/479977ba4c3d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-01-31T16:28:24+01:00",
+        "name": "StarRupture Wine",
+        "author": "brainshead@gmail.com",
+        "description": "StarRupture is a first-person open world base-building game with advanced combat and tons of exploration. Play alone or in a group on this sublime and ever-changing planet, extract and manage resources, create your complex industrial system and fight off hordes of alien monsters.",
+        "features": [],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/StarRupture/Binaries/Win64/StarRuptureServerEOS-Win64-Shipping.exe  -Log -Port=${SERVER_PORT} -RCWebControlDisable -RCWebInterfaceDisable  & SR_PID=$!; tail -c0 -F /home/container/StarRupture/Saved/Logs/StarRupture.log --pid=$SR_PID | grep -v -E \"LogCore: Warning|LogUObjectBase: Error\"",
+        "config": {
+          "files": "{\"DSSettings.txt\": {\"parser\": \"json\", \"find\": {\"SessionName\": \"{{server.build.env.SESSION_NAME}}\", \"SaveGameInterval\": \"{{server.build.env.SAVE_INTERVAL}}\", \"StartNewGame\": \"{{server.build.env.START_NEW}}\", \"LoadSavedGame\": \"{{server.build.env.LOAD_SAVE}}\", \"SaveGameName\": \"{{server.build.env.SAVEGAME_NAME}}\"}}}",
+          "startup": "{\"done\": \"OnUpdateSessionComplete\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n#Custom Commands\r\n\r\n## create DSSettings.txt\r\nif [ ! -f /mnt/server/DSSettings.txt ]; then\r\n    echo \"Creating default DSSettings.txt\"\r\n    cat << EOF > /mnt/server/DSSettings.txt\r\n    {\r\n        \"SessionName\": \"StarRuptureServer\",\r\n        \"SaveGameInterval\": \"300\",\r\n        \"StartNewGame\": \"false\",\r\n        \"LoadSavedGame\": \"true\",\r\n        \"SaveGameName\": \"AutoSave0.sav\"\r\n    }\r\nEOF\r\nfi\r\n\r\n## create .pteroignore to only back up necessary files\r\nif [ ! -f /mnt/server/.pteroignore ]; then\r\n    echo \"Creating default .pteroignore\"\r\n    cat << EOF > /mnt/server/.pteroignore\r\n    *\r\n    !Password.json\r\n    !PlayerPassword.json\r\n    !DSSettings.txt\r\n    !StarRupture/Saved/SaveGames/*/AutoSave0.met\r\n    !StarRupture/Saved/SaveGames/*/AutoSave0.sav\r\n    !StarRupture/Saved/SaveGames/SaveData.dat\r\nEOF\r\nfi\r\n\r\n## Generate password files if passwords are set\r\nif [[ -n \"${ADMIN_PASSWORD}\" ]] || [[ -n \"${PLAYER_PASSWORD}\" ]]; then\r\n    # Only generate if at least one password file is missing\r\n    if [[ ! -f /mnt/server/Password.json ]] || [[ ! -f /mnt/server/PlayerPassword.json ]]; then\r\n        echo \"Generating password files...\"\r\n\r\n        RESPONSE=$(curl -s --request POST \\\r\n            --url https://starrupture-utilities.com/passwords/ \\\r\n            --header 'Content-Type: multipart/form-data' \\\r\n            --form \"adminpassword=${ADMIN_PASSWORD}\" \\\r\n            --form \"playerpassword=${PLAYER_PASSWORD}\")\r\n\r\n        if [[ -n \"${RESPONSE}\" ]]; then\r\n            # Extract and save admin password if set and file doesn't exist\r\n            if [[ -n \"${ADMIN_PASSWORD}\" ]] && [[ ! -f /mnt/server/Password.json ]]; then\r\n                echo \"${RESPONSE}\" | jq '{password: .adminpassword}' > /mnt/server/Password.json\r\n                echo \"Password.json created successfully\"\r\n            fi\r\n\r\n            # Extract and save player password if set and file doesn't exist\r\n            if [[ -n \"${PLAYER_PASSWORD}\" ]] && [[ ! -f /mnt/server/PlayerPassword.json ]]; then\r\n                echo \"${RESPONSE}\" | jq '{password: .playerpassword}' > /mnt/server/PlayerPassword.json\r\n                echo \"PlayerPassword.json created successfully\"\r\n            fi\r\n        else\r\n            echo \"Warning: Failed to generate password files\"\r\n        fi\r\n    fi\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[STEAM] Steam User",
+            "description": "Steam User Account",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3809400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] WINEPREFIX",
+            "description": "Wine root directory for the container",
+            "env_variable": "WINEPREFIX",
+            "default_value": "/home/container/.wine",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] WINEDLLOVERRIDES",
+            "description": "",
+            "env_variable": "WINEDLLOVERRIDES",
+            "default_value": "mscoree,mshtml=",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Start new Savegame",
+            "description": "Setting this to `true` forces the creation of a new world. Be careful!",
+            "env_variable": "START_NEW",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Load saved Game",
+            "description": "true -> Loads an existing save; false -> Skips loading saved data",
+            "env_variable": "LOAD_SAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Save Interval",
+            "description": "Time between automatic saves (in seconds)\r\n\r\n300 = 5 minutes",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Savegame Name",
+            "description": "Filename of the save to load; Must exist in the server save directory under `/StarRupture/Saved/SaveGames/{SESSION_NAME}`",
+            "env_variable": "SAVEGAME_NAME",
+            "default_value": "AutoSave0.sav",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Session Name",
+            "description": "Name of the save game sessionName of the save game session",
+            "env_variable": "SESSION_NAME",
+            "default_value": "StarRuptureServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Admin Password",
+            "description": "The admin password used for \"Manage Server\"  In-Game",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Player Password",
+            "description": "The password used to join the server",
+            "env_variable": "PLAYER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

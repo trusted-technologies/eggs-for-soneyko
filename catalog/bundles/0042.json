@@ -1,0 +1,1253 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "foundry-b7b5d0d1c321",
+        "name": "Foundry",
+        "description": "Build a factory optimized to perfection or an artistic masterpiece in an infinite voxel world. Mine and harvest resources, automate your ever-growing production lines and manage complex systems while researching your way to mechanical mastery in FOUNDRY.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/foundry-b7b5d0d1c321.json",
+        "sha256": "babc553a9c32bc9ed0e47ed35ddb6825750d75500da6c3bf2f58dcf089fc65f3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "foundry/egg-pterodactyl-foundry.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/b7b5d0d1c321.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-08-25T11:31:45+02:00",
+        "name": "Foundry",
+        "author": "eggs@goover.dev",
+        "description": "Build a factory optimized to perfection or an artistic masterpiece in an infinite voxel world. Mine and harvest resources, automate your ever-growing production lines and manage complex systems while researching your way to mechanical mastery in FOUNDRY.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "xvfb :0 -screen 0 1024x768x16; DISPLAY=:0.0 xvfb-run wine /home/container/FoundryDedicatedServer.exe -log",
+        "config": {
+          "files": "{\"App.cfg\": {\"parser\": \"properties\", \"find\": {\"server_name\": \"{{server.build.env.SERVER_NAME}}\", \"server_password\": \"{{server.build.env.SRV_PW}}\", \"server_world_name\": \"{{server.build.env.WORLD_NAME}}\", \"server_max_players\": \"{{server.build.env.MAX_PLAYERS}}\", \"server_port\": \"{{server.build.default.port}}\", \"server_query_port\": \"{{server.build.env.QUERY_PORT}}\", \"pause_server_when_empty\": \"{{server.build.env.PAUSE_SERVER}}\", \"autosave_interval\": \"{{server.build.env.AUTOSAVE_INTERVAL}}\", \"server_is_public\": \"{{server.build.env.PUBLIC_SERVER}}\", \"server_persistent_data_override_folder\": \"{{server.build.env.SAVE_PATH}}\", \"map_seed\": \"{{server.build.env.MAP_SEED}}\"}}}",
+          "startup": "{\"done\": \"Dedicated server is now running!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Foundry Installscript${NC}\"\r\necho -e \"${YELLOW}Egg by gOOvER | 2024 MIT Licence${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\nmkdir -p $HOME/Mods\r\nmkdir -p $HOME/serverfiles\r\n\r\n#ccheck for config\r\nFILE=$HOME/App.cfg\r\n\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${GREEN}App.cfg found.${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\nelse  \r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  echo -e \"${RED}No App.cfg found. downloading default...${NC}\"\r\n  echo -e \"${BLUE}-------------------------------------------------${NC}\"\r\n  cd $HOME\r\n  curl -sSL -o App.cfg https://dedicated.foundry-game.com/App.cfg\r\n  echo -e \"${GREEN}..done..${NC}\"\r\nfi\r\n\r\n## cleanup to prevent errors\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${RED}deleting old wine dirs... please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\nif [ ! -d \"/mnt/server/.wine\" ]; then\r\n    rm -fR /mnt/server/.wine\r\n    rm -fR /mnt/server/.config\r\n    rm -fR /mnt/server/.cache\r\n    rm -fR /mnt/server/.local\r\n    rm -fR /mnt/server/appcache\r\nfi\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[SERVER] Steam Query Port",
+            "description": "Sets the network port used by the Steam server browser to query information about the game. This is only used if the server is set to public.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "This is the name of the server listed in the Steam server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server World Name",
+            "description": "Sets the server world name. This is the folder where the save files will be stored.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "MyFoundry",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Sets the server password.",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Pause Server When Empty",
+            "description": "Will the server pause when nobody is connected.",
+            "env_variable": "PAUSE_SERVER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Autosave Interval",
+            "description": "Sets the autosave frequency in seconds.",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Public",
+            "description": "Sets whether the server is listed on the Steam server browser.",
+            "env_variable": "PUBLIC_SERVER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Map Seed",
+            "description": "Sets the map seed used to generate the world.",
+            "env_variable": "MAP_SEED",
+            "default_value": "42938743982",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Max Players",
+            "description": "This sets the max amount of players on a server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Savepath",
+            "description": "",
+            "env_variable": "SAVE_PATH",
+            "default_value": "/home/container/serverfiles",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Auto update the server",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2915550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2915550",
+            "field_type": "text"
+          },
+          {
+            "name": "[WINE] WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "mono",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[WINE] WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[WINE] XVFB",
+            "description": "",
+            "env_variable": "XVFB",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "foundry-vtt-068ca3c3cb6a",
+        "name": "Foundry VTT",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/foundry-vtt-068ca3c3cb6a.json",
+        "sha256": "5ea83ff5c2ffea281fb7bf687798eb6addfa4ecfa27a44704ca5b882130ffea3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "foundry_vtt/egg-FoundryVTT.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/068ca3c3cb6a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-05-02T12:50:37+00:00",
+        "name": "Foundry VTT",
+        "author": "pterodactyl@demi.cloud",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:nodejs_22": "ghcr.io/ptero-eggs/yolks:nodejs_22"
+        },
+        "file_denylist": [],
+        "startup": "node ./app/main.js --dataPath=\"/home/container/data\"",
+        "config": {
+          "files": "{\"data/Config/options.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"language\": \"{{server.build.env.FOUNDRY_LANGUAGE}}\", \"updateChannel\": \"{{server.build.env.UPDATE_CHANNEL}}\"}}}",
+          "startup": "{\"done\": \"Server started and listening on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FoundryVTT install script\r\n#\r\n# Server Files: /mnt/server\r\ndeclare -r DIR_ROOT=\"/mnt/server\"\r\ndeclare -r DIR_APP=\"${DIR_ROOT}/app\"\r\ndeclare -r DIR_DATA=\"${DIR_ROOT}/data\"\r\ndeclare -r ZIP_FILE_NAME=\"foundryvtt.zip\"\r\n\r\nmain() {\r\n  apt update\r\n  apt install -y unzip\r\n\r\n  printf \"\\nBuilding directory structure...\\n\"\r\n  mkdir -p \"${DIR_ROOT}/data/Config\"\r\n  mkdir -p \"${DIR_ROOT}/app\"\r\n  # shellcheck disable=SC2164\r\n  cd \"${DIR_APP}\"\r\n  printf \"\\nDownloading FoundryVTT files...\\n\"\r\n  wget \"${TIMED_URL}\" -O \"${ZIP_FILE_NAME}\"\r\n  printf \"\\nunzipping FoundryVTT files...\\n\"\r\n  unzip \"${ZIP_FILE_NAME}\" -d \"${DIR_APP}\"\r\n  #rm \"${ZIP_FILE_NAME}\"\r\n\r\n  printf \"\\nGenerating default configuration...\\n\"\r\n  cat <<EOF >\"${DIR_DATA}/Config/options.json\"\r\n{\r\n  \"port\": 30000,\r\n  \"upnp\": false,\r\n  \"fullscreen\": false,\r\n  \"hostname\": null,\r\n  \"localHostname\": null,\r\n  \"routePrefix\": null,\r\n  \"sslCert\": null,\r\n  \"sslKey\": null,\r\n  \"awsConfig\": null,\r\n  \"dataPath\": \"/home/container/data\",\r\n  \"passwordSalt\": null,\r\n  \"proxySSL\": false,\r\n  \"proxyPort\": null,\r\n  \"minifyStaticFiles\": true,\r\n  \"updateChannel\": \"release\",\r\n  \"language\": \"en.core\",\r\n  \"upnpLeaseDuration\": null,\r\n  \"world\": null\r\n} \r\nEOF\r\n  printf \"Installation Done.\\n\"\r\n}\r\nmain \"@\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Timed URL",
+            "description": "This is required to download the foundry files. Available in your https://foundryvtt.com/ profile after you've purchased a license. This link generally lasts for about 5 minutes.",
+            "env_variable": "TIMED_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Language",
+            "description": "As may be expected, this setting configures the localization of the program and can be leveraged by localization modules to ensure that the interface is translated to the language of your choosing wherever possible.",
+            "env_variable": "FOUNDRY_LANGUAGE",
+            "default_value": "en.core",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Channel",
+            "description": "Select what channel you want to use for automatic updates",
+            "env_variable": "UPDATE_CHANNEL",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:256",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "foundry-vtt-949036702a77",
+        "name": "Foundry VTT",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/foundry-vtt-949036702a77.json",
+        "sha256": "eb6ffaafebf0b610a677369205ed299ecda477b38b04d8758e18b3d47e392729",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/FoundryVTT/egg-FoundryVTT.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/949036702a77.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-31T11:59:34+01:00",
+        "name": "Foundry VTT",
+        "author": "pterodactyl@demi.cloud",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "node ./app/resources/app/main.js --dataPath=\"/home/container/data\"",
+        "config": {
+          "files": "{\"data/Config/options.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"language\": \"{{server.build.env.FOUNDRY_LANGUAGE}}\", \"updateChannel\": \"{{server.build.env.UPDATE_CHANNEL}}\"}}}",
+          "startup": "{\"done\": \"Server started and listening on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FoundryVTT install script\r\n#\r\n# Server Files: /mnt/server\r\ndeclare -r DIR_ROOT=\"/mnt/server\"\r\ndeclare -r DIR_APP=\"${DIR_ROOT}/app\"\r\ndeclare -r DIR_DATA=\"${DIR_ROOT}/data\"\r\ndeclare -r ZIP_FILE_NAME=\"foundryvtt.zip\"\r\n\r\nmain() {\r\n  apt update\r\n  apt install -y unzip\r\n\r\n  printf \"\\nBuilding directory structure...\\n\"\r\n  mkdir -p \"${DIR_ROOT}/data/Config\"\r\n  mkdir -p \"${DIR_ROOT}/app\"\r\n  # shellcheck disable=SC2164\r\n  cd \"${DIR_APP}\"\r\n  printf \"\\nDownloading FoundryVTT files...\\n\"\r\n  wget \"${TIMED_URL}\" -O \"${ZIP_FILE_NAME}\"\r\n  printf \"\\nunzipping FoundryVTT files...\\n\"\r\n  unzip \"${ZIP_FILE_NAME}\" -d \"${DIR_APP}\"\r\n  #rm \"${ZIP_FILE_NAME}\"\r\n\r\n  printf \"\\nGenerating default configuration...\\n\"\r\n  cat <<EOF >\"${DIR_DATA}/Config/options.json\"\r\n{\r\n  \"port\": 30000,\r\n  \"upnp\": false,\r\n  \"fullscreen\": false,\r\n  \"hostname\": null,\r\n  \"localHostname\": null,\r\n  \"routePrefix\": null,\r\n  \"sslCert\": null,\r\n  \"sslKey\": null,\r\n  \"awsConfig\": null,\r\n  \"dataPath\": \"/home/container/data\",\r\n  \"passwordSalt\": null,\r\n  \"proxySSL\": false,\r\n  \"proxyPort\": null,\r\n  \"minifyStaticFiles\": true,\r\n  \"updateChannel\": \"release\",\r\n  \"language\": \"en.core\",\r\n  \"upnpLeaseDuration\": null,\r\n  \"world\": null\r\n} \r\nEOF\r\n  printf \"Installation Done.\\n\"\r\n}\r\nmain \"@\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Timed URL",
+            "description": "This is required to download the foundry files. Available in your https://foundryvtt.com/ profile after you've purchased a license. This link generally lasts for about 5 minutes.",
+            "env_variable": "TIMED_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Language",
+            "description": "As may be expected, this setting configures the localization of the program and can be leveraged by localization modules to ensure that the interface is translated to the language of your choosing wherever possible.",
+            "env_variable": "FOUNDRY_LANGUAGE",
+            "default_value": "en.core",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Channel",
+            "description": "Select what channel you want to use for automatic updates",
+            "env_variable": "UPDATE_CHANNEL",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:256",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "foundry-vtt-97dbea4edd3a",
+        "name": "Foundry VTT",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/foundry-vtt-97dbea4edd3a.json",
+        "sha256": "8b2d28f8fcbf9cd98db1f2d9c5334553a8b4ae64e190e05918f7319ce19c26bc",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "foundry_vtt/egg-foundry-v-t-t.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/97dbea4edd3a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "name": "Foundry VTT",
+        "exported_at": "2025-06-25T09:53:00+00:00",
+        "author": "pterodactyl@demi.cloud",
+        "uuid": "ce000ebf-dc6b-45ee-823d-b802005aaceb",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "tags": [],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18",
+          "ghcr.io/parkervcp/yolks:nodejs_20": "ghcr.io/parkervcp/yolks:nodejs_20"
+        },
+        "file_denylist": [],
+        "startup": "node ./app/main.js --dataPath=\"/home/container/data\"",
+        "config": {
+          "files": "{\"data/Config/options.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.allocations.default.port}}\", \"language\": \"{{server.environment.FOUNDRY_LANGUAGE}}\", \"updateChannel\": \"{{server.environment.UPDATE_CHANNEL}}\", \"world\": \"{{server.environment.WORLD_NAME}}\"}}}",
+          "startup": "{\"done\": \"Server started and listening on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# FoundryVTT install script\r\n#\r\n# Server Files: /mnt/server\r\ndeclare -r DIR_ROOT=\"/mnt/server\"\r\ndeclare -r DIR_APP=\"${DIR_ROOT}/app\"\r\ndeclare -r DIR_DATA=\"${DIR_ROOT}/data\"\r\ndeclare -r ZIP_FILE_NAME=\"foundryvtt.zip\"\r\n\r\nmain() {\r\n  apt update\r\n  apt install -y unzip\r\n\r\n  printf \"\\nBuilding directory structure...\\n\"\r\n  mkdir -p \"${DIR_ROOT}/data/Config\"\r\n  mkdir -p \"${DIR_ROOT}/app\"\r\n  # shellcheck disable=SC2164\r\n  cd \"${DIR_APP}\"\r\n  printf \"\\nDownloading FoundryVTT files...\\n\"\r\n  wget \"${TIMED_URL}\" -O \"${ZIP_FILE_NAME}\"\r\n  printf \"\\nunzipping FoundryVTT files...\\n\"\r\n  unzip -o \"${ZIP_FILE_NAME}\" -d \"${DIR_APP}\"\r\n  rm -f \"${ZIP_FILE_NAME}\"\r\n\r\n  printf \"\\nGenerating default configuration...\\n\"\r\n  cat <<EOF >\"${DIR_DATA}/Config/options.json\"\r\n{\r\n  \"port\": 30000,\r\n  \"upnp\": false,\r\n  \"fullscreen\": false,\r\n  \"hostname\": null,\r\n  \"localHostname\": null,\r\n  \"routePrefix\": null,\r\n  \"sslCert\": null,\r\n  \"sslKey\": null,\r\n  \"awsConfig\": null,\r\n  \"dataPath\": \"/home/container/data\",\r\n  \"passwordSalt\": null,\r\n  \"proxySSL\": false,\r\n  \"proxyPort\": null,\r\n  \"minifyStaticFiles\": true,\r\n  \"updateChannel\": \"release\",\r\n  \"language\": \"en.core\",\r\n  \"upnpLeaseDuration\": null,\r\n  \"world\": null\r\n} \r\nEOF\r\n  printf \"Installation Done.\\n\"\r\n}\r\nmain \"@\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Language",
+            "description": "As may be expected, this setting configures the localization of the program and can be leveraged by localization modules to ensure that the interface is translated to the language of your choosing wherever possible.",
+            "env_variable": "FOUNDRY_LANGUAGE",
+            "default_value": "en.core",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "sort": null
+          },
+          {
+            "name": "Startup World ID",
+            "description": "The ID of the world in Foundry, which is initially loaded. Leave empty to start into the setup screen.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null
+          },
+          {
+            "name": "Timed URL",
+            "description": "This is required to download the foundry files. Available in your https://foundryvtt.com/ profile after you've purchased a license. This link generally lasts for about 5 minutes. Make sure to select \"Node.js\", not \"Linux\" as the operating system.",
+            "env_variable": "TIMED_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|url",
+            "sort": null
+          },
+          {
+            "name": "Update Channel",
+            "description": "Select what channel you want to use for automatic updates",
+            "env_variable": "UPDATE_CHANNEL",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:256",
+            "sort": null
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "foundry-vtt-e6600f21fe6e",
+        "name": "Foundry VTT",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/foundry-vtt-e6600f21fe6e.json",
+        "sha256": "1abf3ab892154cd8e3f0356835c9b521c42868c4b504b01bf5723e78a17a0c24",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "foundry_vtt/egg-pterodactyl-foundry-v-t-t.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/e6600f21fe6e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:48+00:00",
+        "name": "Foundry VTT",
+        "author": "pterodactyl@demi.cloud",
+        "description": "Foundry VTT is a standalone application built for experiencing multiplayer tabletop RPGs using a feature-rich and modern self-hosted application where your players connect directly through the browser.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18",
+          "ghcr.io/parkervcp/yolks:nodejs_20": "ghcr.io/parkervcp/yolks:nodejs_20"
+        },
+        "file_denylist": [],
+        "startup": "node ./app/main.js --dataPath=\"/home/container/data\"",
+        "config": {
+          "files": "{\"data/Config/options.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"language\": \"{{server.build.env.FOUNDRY_LANGUAGE}}\", \"updateChannel\": \"{{server.build.env.UPDATE_CHANNEL}}\", \"world\": \"{{server.build.env.WORLD_NAME}}\"}}}",
+          "startup": "{\"done\": \"Server started and listening on port\"}",
+          "stop": "^C",
+          "logs": "{}"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# FoundryVTT install script\r\n#\r\n# Server Files: /mnt/server\r\ndeclare -r DIR_ROOT=\"/mnt/server\"\r\ndeclare -r DIR_APP=\"${DIR_ROOT}/app\"\r\ndeclare -r DIR_DATA=\"${DIR_ROOT}/data\"\r\ndeclare -r ZIP_FILE_NAME=\"foundryvtt.zip\"\r\n\r\nmain() {\r\n  apt update\r\n  apt install -y unzip\r\n\r\n  printf \"\\nBuilding directory structure...\\n\"\r\n  mkdir -p \"${DIR_ROOT}/data/Config\"\r\n  mkdir -p \"${DIR_ROOT}/app\"\r\n  # shellcheck disable=SC2164\r\n  cd \"${DIR_APP}\"\r\n  printf \"\\nDownloading FoundryVTT files...\\n\"\r\n  wget \"${TIMED_URL}\" -O \"${ZIP_FILE_NAME}\"\r\n  printf \"\\nunzipping FoundryVTT files...\\n\"\r\n  unzip -o \"${ZIP_FILE_NAME}\" -d \"${DIR_APP}\"\r\n  rm -f \"${ZIP_FILE_NAME}\"\r\n\r\n  printf \"\\nGenerating default configuration...\\n\"\r\n  cat <<EOF >\"${DIR_DATA}/Config/options.json\"\r\n{\r\n  \"port\": 30000,\r\n  \"upnp\": false,\r\n  \"fullscreen\": false,\r\n  \"hostname\": null,\r\n  \"localHostname\": null,\r\n  \"routePrefix\": null,\r\n  \"sslCert\": null,\r\n  \"sslKey\": null,\r\n  \"awsConfig\": null,\r\n  \"dataPath\": \"/home/container/data\",\r\n  \"passwordSalt\": null,\r\n  \"proxySSL\": false,\r\n  \"proxyPort\": null,\r\n  \"minifyStaticFiles\": true,\r\n  \"updateChannel\": \"release\",\r\n  \"language\": \"en.core\",\r\n  \"upnpLeaseDuration\": null,\r\n  \"world\": null\r\n} \r\nEOF\r\n  printf \"Installation Done.\\n\"\r\n}\r\nmain \"@\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Timed URL",
+            "description": "This is required to download the foundry files. Available in your https://foundryvtt.com/ profile after you've purchased a license. This link generally lasts for about 5 minutes. Make sure to select \"Node.js\", not \"Linux\" as the operating system.",
+            "env_variable": "TIMED_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Language",
+            "description": "As may be expected, this setting configures the localization of the program and can be leveraged by localization modules to ensure that the interface is translated to the language of your choosing wherever possible.",
+            "env_variable": "FOUNDRY_LANGUAGE",
+            "default_value": "en.core",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Channel",
+            "description": "Select what channel you want to use for automatic updates",
+            "env_variable": "UPDATE_CHANNEL",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Startup World ID",
+            "description": "The ID of the world in Foundry, which is initially loaded. Leave empty to start into the setup screen.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "frozen-flame-2276caa09b2f",
+        "name": "Frozen Flame",
+        "description": "Frozen Flame Dedicated Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/frozen-flame-2276caa09b2f.json",
+        "sha256": "5366a257ffc080be9a316ac622a744c8243779c50a18f9f5f12759ca63f83aa0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "frozen_flame/egg-frozen-flame.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/2276caa09b2f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Frozen Flame",
+        "author": "theblitzbat@gmail.com",
+        "uuid": "e3986111-0725-4ccd-b131-528873df84df",
+        "description": "Frozen Flame Dedicated Server",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./FrozenFlame/Binaries/Linux/FrozenFlameServer-Linux-Shipping -log -MetaGameServerName=\"{{SERVER_NAME}}\" -port={{SERVER_PORT}} -queryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -RconPassword=\"{{RCON_PASSWORD}}\"",
+        "config": {
+          "files": "{\"FrozenFlame/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerPassword\": \"ServerPassword=\\\"{{server.build.env.SERVER_PASSWORD}}\\\"\"}}}",
+          "startup": "{\"done\": \"LogWorld: Bringing up level for play took\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\nmkdir -p /mnt/server/FrozenFlame/Saved/Config/LinuxServer\r\n\r\ncd /mnt/server/FrozenFlame/Saved/Config/LinuxServer\r\n\r\nFILE=/mnt/server/FrozenFlame/Saved/Config/LinuxServer/Game.ini\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config file already exits. updating.\"\r\n    mv Game.ini Game.ini.back\r\n    curl -sSL o Game.ini https://raw.githubusercontent.com/DreamsideInteractive/FrozenFlameServer/main/Game.ini\r\nelse \r\n    echo \"Downloading a config file\"\r\n    curl -sSL -o Game.ini https://raw.githubusercontent.com/DreamsideInteractive/FrozenFlameServer/main/Game.ini\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Frozen Flame steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1348640",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum player count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The query port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The server name",
+            "env_variable": "SERVER_NAME",
+            "default_value": "My Frozen Flame Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The server password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update server software",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "frozen-flame-901512ca1407",
+        "name": "Frozen Flame",
+        "description": "Frozen Flame Dedicated Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/frozen-flame-901512ca1407.json",
+        "sha256": "9fff82ffe83eb2ad41c116471a87453f57a7d1e5264e095c2302ecbc4ff3512a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "frozen_flame/egg-frozen-flame.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/901512ca1407.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-07T19:05:11+02:00",
+        "name": "Frozen Flame",
+        "author": "theblitzbat@gmail.com",
+        "description": "Frozen Flame Dedicated Server",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./FrozenFlame/Binaries/Linux/FrozenFlameServer-Linux-Shipping -log -MetaGameServerName=\"{{SERVER_NAME}}\" -port={{SERVER_PORT}} -queryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -RconPassword=\"{{RCON_PASSWORD}}\"",
+        "config": {
+          "files": "{\"FrozenFlame/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerPassword\": \"ServerPassword=\\\"{{server.build.env.SERVER_PASSWORD}}\\\"\"}}}",
+          "startup": "{\"done\": \"LogWorld: Bringing up level for play took\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\nmkdir -p /mnt/server/FrozenFlame/Saved/Config/LinuxServer\r\n\r\ncd /mnt/server/FrozenFlame/Saved/Config/LinuxServer\r\n\r\nFILE=/mnt/server/FrozenFlame/Saved/Config/LinuxServer/Game.ini\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config file already exits. updating.\"\r\n    mv Game.ini Game.ini.back\r\n    curl -sSL o Game.ini https://raw.githubusercontent.com/DreamsideInteractive/FrozenFlameServer/main/Game.ini\r\nelse \r\n    echo \"Downloading a config file\"\r\n    curl -sSL -o Game.ini https://raw.githubusercontent.com/DreamsideInteractive/FrozenFlameServer/main/Game.ini\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Frozen Flame steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1348640",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum player count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The query port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The server name",
+            "env_variable": "SERVER_NAME",
+            "default_value": "My Frozen Flame Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The server password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update server software",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "frozen-flame-eb0dee93e462",
+        "name": "Frozen Flame",
+        "description": "Frozen Flame Dedicated Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/frozen-flame-eb0dee93e462.json",
+        "sha256": "f7c3961aa0d076a5e299255d7406431337b54f3f29de625101a35e412220ef93",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "frozen_flame/egg-pterodactyl-frozen-flame.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/frozen_flame/egg-frozen-flame.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/eb0dee93e462.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:14+00:00",
+        "name": "Frozen Flame",
+        "author": "theblitzbat@gmail.com",
+        "description": "Frozen Flame Dedicated Server",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./FrozenFlame/Binaries/Linux/FrozenFlameServer-Linux-Shipping -log -MetaGameServerName=\"{{SERVER_NAME}}\" -port={{SERVER_PORT}} -queryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -RconPassword=\"{{RCON_PASSWORD}}\"",
+        "config": {
+          "files": "{\"FrozenFlame/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerPassword\": \"ServerPassword=\\\"{{server.build.env.SERVER_PASSWORD}}\\\"\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"LogWorld: Bringing up level for play took\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\nmkdir -p /mnt/server/FrozenFlame/Saved/Config/LinuxServer\r\n\r\ncd /mnt/server/FrozenFlame/Saved/Config/LinuxServer\r\n\r\nFILE=/mnt/server/FrozenFlame/Saved/Config/LinuxServer/Game.ini\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config file already exits. updating.\"\r\n    mv Game.ini Game.ini.back\r\n    curl -sSL o Game.ini https://raw.githubusercontent.com/DreamsideInteractive/FrozenFlameServer/main/Game.ini\r\nelse \r\n    echo \"Downloading a config file\"\r\n    curl -sSL -o Game.ini https://raw.githubusercontent.com/DreamsideInteractive/FrozenFlameServer/main/Game.ini\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Frozen Flame steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1348640",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum player count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The query port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The server name",
+            "env_variable": "SERVER_NAME",
+            "default_value": "My Frozen Flame Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The server password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update server software",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "garry-s-mod-reworked-8fce40263471",
+        "name": "Garry's Mod - Reworked",
+        "description": "Garry's Mod, is a sandbox physics game created by Garry Newman, and developed by his company, Facepunch Studios.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/garry-s-mod-reworked-8fce40263471.json",
+        "sha256": "7d18e7bc6e1615bc772c3c8bc6b6b259f1e05fc449a58ac1018ac27227840b63",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "gmod/egg-pterodactyl-garry-s-mod--reworked.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8fce40263471.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-12T19:18:10+02:00",
+        "name": "Garry's Mod - Reworked",
+        "author": "vilhelm@prytznet.se",
+        "description": "Garry's Mod, is a sandbox physics game created by Garry Newman, and developed by his company, Facepunch Studios.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game garrysmod -console -maxplayers {{MAX_PLAYERS}} -port {{SERVER_PORT}} +ip 0.0.0.0 +map {{SRCDS_MAP}} -strictportbind -norestart +sv_setsteamaccount {{STEAM_ACC}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\nSRCDS_APPID=4020\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "gm_flatgrass",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Token",
+            "description": "The Steam Account Token required for the server to be displayed publicly.",
+            "env_variable": "STEAM_ACC",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_num|size:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Player Slots",
+            "description": "The amount of player slots on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "garrys-mod-7db063e6e9f8",
+        "name": "Garrys Mod",
+        "description": "Garrys Mod, is a sandbox physics game created by Garry Newman, and developed by his company, Facepunch Studios.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/garrys-mod-7db063e6e9f8.json",
+        "sha256": "3e70b39395c5d8c2319c8bd6e907b42e8e4c3661130cb3ecedfd2550cd07f5a6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gmod/egg-garry-s-mod.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/7db063e6e9f8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-20T14:48:44+02:00",
+        "name": "Garrys Mod",
+        "author": "support@pterodactyl.io",
+        "description": "Garrys Mod, is a sandbox physics game created by Garry Newman, and developed by his company, Facepunch Studios.",
+        "features": [
+          "gsl_token",
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game garrysmod -console -port {{SERVER_PORT}} +ip 0.0.0.0 +host_workshop_collection {{WORKSHOP_ID}} +map {{SRCDS_MAP}} +gamemode {{GAMEMODE}} -strictportbind -norestart +sv_setsteamaccount {{STEAM_TOKEN}} +maxplayers {{MAX_PLAYERS}}  -tickrate {{TICKRATE}}  $( [ \"$LUA_REFRESH\" == \"1\" ] || printf %s '-disableluarefresh' )",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# Creating needed default files for the game\r\ncd /mnt/server/garrysmod/lua/autorun/server\r\necho '\r\n-- Docs: https://wiki.garrysmod.com/page/resource/AddWorkshop\r\n-- Place the ID of the workshop addon you want to be downloaded to people who join your server, not the collection ID\r\n-- Use https://beta.configcreator.com/create/gmod/resources.lua to easily create a list based on your collection ID\r\n\r\nresource.AddWorkshop( \"\" )\r\n' > workshop.lua\r\n\r\ncd /mnt/server/garrysmod/cfg\r\necho '\r\n// Please do not set RCon in here, use the startup parameters.\r\n\r\nhostname\t\t\"New Gmod Server\"\r\nsv_password\t\t\"\"\r\nsv_loadingurl   \"\"\r\nsv_downloadurl  \"\"\r\n\r\n// Steam Server List Settings\r\n// sv_location \"eu\"\r\nsv_region \"255\"\r\nsv_lan \"0\"\r\nsv_max_queries_sec_global \"30000\"\r\nsv_max_queries_window \"45\"\r\nsv_max_queries_sec \"5\"\r\n\r\n// Server Limits\r\nsbox_maxprops\t\t100\r\nsbox_maxragdolls\t5\r\nsbox_maxnpcs\t\t10\r\nsbox_maxballoons\t10\r\nsbox_maxeffects\t\t10\r\nsbox_maxdynamite\t10\r\nsbox_maxlamps\t\t10\r\nsbox_maxthrusters\t10\r\nsbox_maxwheels\t\t10\r\nsbox_maxhoverballs\t10\r\nsbox_maxvehicles\t20\r\nsbox_maxbuttons\t\t10\r\nsbox_maxsents\t\t20\r\nsbox_maxemitters\t5\r\nsbox_godmode\t\t0\r\nsbox_noclip\t\t    0\r\n\r\n// Network Settings - Please keep these set to default.\r\n\r\nsv_minrate\t\t75000\r\nsv_maxrate\t\t0\r\ngmod_physiterations\t2\r\nnet_splitpacket_maxrate\t45000\r\ndecalfrequency\t\t12 \r\n\r\n// Execute Ban Files - Please do not edit\r\nexec banned_ip.cfg \r\nexec banned_user.cfg \r\n\r\n// Add custom lines under here\r\n' > server.cfg",
+            "container": "ghcr.io/pterodactyl/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "gm_flatgrass",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Token",
+            "description": "The Steam Account Token required for the server to be displayed publicly.",
+            "env_variable": "STEAM_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|alpha_num|size:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "Required for game to update on server restart. Do not modify this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "4020",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:4020",
+            "field_type": "text"
+          },
+          {
+            "name": "Workshop ID",
+            "description": "The ID of your workshop collection (the numbers at the end of the URL)",
+            "env_variable": "WORKSHOP_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "The gamemode of your server.",
+            "env_variable": "GAMEMODE",
+            "default_value": "sandbox",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on your game server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Tickrate",
+            "description": "The tickrate defines how fast the server will update each entity's location.",
+            "env_variable": "TICKRATE",
+            "default_value": "22",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Lua Refresh",
+            "description": "0 = disable Lua refresh,\r\n1 = enable Lua refresh",
+            "env_variable": "LUA_REFRESH",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

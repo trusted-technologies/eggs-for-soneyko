@@ -1,0 +1,1388 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "wine-generic-1b7abcfd7748",
+        "name": "Wine Generic",
+        "description": "a generic egg to run servers with wine",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wine-generic-1b7abcfd7748.json",
+        "sha256": "cea00a69a87c0b3e5228795d95ba49f8814881748af1185ffaf7f81b1a5eb54e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "wine/generic/egg-wine-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/1b7abcfd7748.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:45:20+02:00",
+        "name": "Wine Generic",
+        "author": "parker@parkervcp.com",
+        "description": "a generic egg to run servers with wine",
+        "features": null,
+        "docker_images": {
+          "Wine (Latest)": "ghcr.io/ptero-eggs/yolks:wine_latest",
+          "Wine (Staging)": "ghcr.io/ptero-eggs/yolks:wine_staging",
+          "Wine (Devel)": "ghcr.io/ptero-eggs/yolks:wine_devel"
+        },
+        "file_denylist": [],
+        "startup": "wine {{SERVER_EXECUTABLE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change me\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# The wine generic server installer\r\n# This will just pull a download link and unpack it in directory if specified.\r\n\r\napt update -y\r\napt install -y curl file unzip\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n# if an install dir is set then make it and change to it.\r\nif [ ! -z ${INSTALL_DIR} ]; then\r\n    mkdir -p ${INSTALL_DIR}\r\n    cd ${INSTALL_DIR}\r\nfi\r\n\r\n# validate server link\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\n# unpack servver files\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\n\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2 \r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Download URL",
+            "description": "URL to use to download a servers files.",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "https://beamng-mp.com/server/BeamMP_Server.zip",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Executable",
+            "description": "The server executable to run.",
+            "env_variable": "SERVER_EXECUTABLE",
+            "default_value": "BeamMP-Server.exe",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "sub directory to install into",
+            "description": "for example is the server needs to get installed into /home/container/server/bin/\r\n\r\nuse server/bin/",
+            "env_variable": "INSTALL_DIR",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wine-generic-77b5f4863aa3",
+        "name": "Wine Generic",
+        "description": "a generic egg to run servers with wine",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wine-generic-77b5f4863aa3.json",
+        "sha256": "b4b9408e5d18406806fc8e084f8c1540beeda41f4cab58c52269d451e239e64e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "wine/generic/egg-wine-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/77b5f4863aa3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:21+00:00",
+        "name": "Wine Generic",
+        "author": "parker@parkervcp.com",
+        "uuid": "76aee8a5-d155-4945-bfa5-997626113996",
+        "description": "a generic egg to run servers with wine",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest",
+          "ghcr.io/parkervcp/yolks:wine_staging": "ghcr.io/parkervcp/yolks:wine_staging",
+          "ghcr.io/parkervcp/yolks:wine_devel": "ghcr.io/parkervcp/yolks:wine_devel"
+        },
+        "file_denylist": [],
+        "startup": "wine {{SERVER_EXECUTABLE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change me\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# The wine generic server installer\r\n# This will just pull a download link and unpack it in directory if specified.\r\n\r\napt update -y\r\napt install -y curl file unzip\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n# if an install dir is set then make it and change to it.\r\nif [ ! -z ${INSTALL_DIR} ]; then\r\n    mkdir -p ${INSTALL_DIR}\r\n    cd ${INSTALL_DIR}\r\nfi\r\n\r\n# validate server link\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\n# unpack servver files\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\n\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2 \r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Download URL",
+            "description": "URL to use to download a servers files.",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "https://beamng-mp.com/server/BeamMP_Server.zip",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Executable",
+            "description": "The server executable to run.",
+            "env_variable": "SERVER_EXECUTABLE",
+            "default_value": "BeamMP-Server.exe",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "sub directory to install into",
+            "description": "for example is the server needs to get installed into /home/container/server/bin/\r\n\r\nuse server/bin/",
+            "env_variable": "INSTALL_DIR",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wine-generic-c347ab587a2d",
+        "name": "Wine Generic",
+        "description": "a generic egg to run servers with wine",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wine-generic-c347ab587a2d.json",
+        "sha256": "af6612d8aeb89aaec9ae3c58ac1e1d00786f6bf6938e5952d8e3be832ca32b24",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "wine/generic/egg-pterodactyl-wine-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/wine/generic/egg-wine-generic.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/c347ab587a2d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:21+00:00",
+        "name": "Wine Generic",
+        "author": "parker@parkervcp.com",
+        "description": "a generic egg to run servers with wine",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_devel": "ghcr.io/parkervcp/yolks:wine_devel",
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest",
+          "ghcr.io/parkervcp/yolks:wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "wine {{SERVER_EXECUTABLE}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"change me\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# The wine generic server installer\r\n# This will just pull a download link and unpack it in directory if specified.\r\n\r\napt update -y\r\napt install -y curl file unzip\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n# if an install dir is set then make it and change to it.\r\nif [ ! -z ${INSTALL_DIR} ]; then\r\n    mkdir -p ${INSTALL_DIR}\r\n    cd ${INSTALL_DIR}\r\nfi\r\n\r\n# validate server link\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\n# unpack servver files\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\n\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2 \r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Download URL",
+            "description": "URL to use to download a servers files.",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "https://beamng-mp.com/server/BeamMP_Server.zip",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Executable",
+            "description": "The server executable to run.",
+            "env_variable": "SERVER_EXECUTABLE",
+            "default_value": "BeamMP-Server.exe",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "sub directory to install into",
+            "description": "for example is the server needs to get installed into /home/container/server/bin/\r\n\r\nuse server/bin/",
+            "env_variable": "INSTALL_DIR",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "world-of-padman-5ebf7d0b6884",
+        "name": "World of PADMAN",
+        "description": "World of PADMAN (WoP) standalone server. with automatic configuration generation.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/world-of-padman-5ebf7d0b6884.json",
+        "sha256": "a01721a4dcfe8fca227ba4d27fb553d4172686f5037f740de38fcca89881343e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "world_of_padman/pterodactyl-egg-world-of-p-a-d-m-a-n.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/5ebf7d0b6884.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-06-09T09:27:59+00:00",
+        "name": "World of PADMAN",
+        "author": "bas1874@github.com",
+        "description": "World of PADMAN (WoP) standalone server. with automatic configuration generation.",
+        "features": [],
+        "docker_images": {
+          "Ubuntu": "ghcr.io/pelican-eggs/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "./wopded +set fs_homepath . +set fs_basepath . +set fs_game {{FS_GAME}} +set dedicated {{DEDICATED_TYPE}} +set net_port {{SERVER_PORT}} +set com_hunkMegs {{SERVER_MEMORY}} +exec {{SERVER_CONFIG}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"InitGame:\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# World of PADMAN Installation Script\n\n\ncd /mnt/server\n\n## get release info and download links\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/PadWorld-Entertainment/worldofpadman/releases/latest\")\nRELEASES=$(curl --silent \"https://api.github.com/repos/PadWorld-Entertainment/worldofpadman/releases\")\n\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i unified.zip)\nelse\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i unified.zip)\n    else\n        echo -e \"defaulting to latest release\"\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\n    fi\nfi\n\necho \"Downloading from ${DOWNLOAD_URL}...\"\ncurl -sSL ${DOWNLOAD_URL} -o wop.zip\n\necho \"Extracting files...\"\nunzip -q -o wop.zip\nrm wop.zip\n\n# 2. Permissions & Architecture Symlink\necho \"Setting up executables...\"\nchmod +x wopded.*\n\nARCH=$(uname -m)\nif [ \"$ARCH\" == \"aarch64\" ] || [ \"$ARCH\" == \"arm64\" ]; then\n    ln -sf wopded.aarch64 wopded\nelif [ \"$ARCH\" == \"x86_64\" ] || [ \"$ARCH\" == \"amd64\" ]; then\n    ln -sf wopded.x86_64 wopded\nelse\n    ln -sf wopded.x86 wopded\nfi\n\n# 3. Generate Config\nmkdir -p ${FS_GAME}\n\necho \"Generating ${FS_GAME}/${SERVER_CONFIG}...\"\ncat << EOF > ${FS_GAME}/${SERVER_CONFIG}\n//\n//    World of PADMAN - Panel generated server settings\n//\n\n// Server name and message\nset sv_hostName \"${SERVER_HOSTNAME}\"\nset g_MOTD      \"Welcome to World of PADMAN!\"\n\n// Server settings\nset sv_maxClients \"12\"\nset sv_VoIP       \"1\"\nset sv_maxRate    \"9000\"\n\n// Download Settings\nset sv_allowdownload \"${ALLOW_DOWNLOAD}\"\n\n// Bot settings\nset bot_enable     \"1\"\nset bot_minPlayers \"4\"\nset g_spSkill      \"2\"\n\n// Passwords\nset rconPassword \"${RCON_PASSWORD}\"\nset g_password   \"\"\n\n// Game settings\nset g_allowVote \"1\"\nset g_doWarmup  \"1\"\nset g_warmup    \"30\"\n\n// Execution of map rotation\nexec \"rotation.cfg\"\n\n// Fallback map just in case rotation fails\nmap wop_padgarden\nEOF\n\necho \"Installation complete!\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Allow Downloads",
+            "description": "1 = Allow players to download maps from the server. 0 = Disable.",
+            "env_variable": "ALLOW_DOWNLOAD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Config File Name",
+            "description": "The name of the config file inside the fs_game folder.",
+            "env_variable": "SERVER_CONFIG",
+            "default_value": "server-settings.cfg",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Version",
+            "description": "The version of World of PADMAN to download (e.g., latest or v1.7.0).",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mod Folder (fs_game)",
+            "description": "The folder name for the game data. Default is 'wop'.",
+            "env_variable": "FS_GAME",
+            "default_value": "wop",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "Password for remote admin. Leave empty to disable RCON.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name of the server displayed in the browser.",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "A World of PADMAN Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Visibility",
+            "description": "1 = LAN, 2 = Internet (Master Server).",
+            "env_variable": "DEDICATED_TYPE",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:1,2",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wreckfest-75f0a28f9e28",
+        "name": "Wreckfest",
+        "description": "Wreckfest is a demolition derby themed racing game with soft-body damage modeling, sophisticated driving dynamics and in-depth vehicle upgrading, featuring both demolition derbies and more traditional track races. It’s all about fun, breakneck racing and over-the-top crashes.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wreckfest-75f0a28f9e28.json",
+        "sha256": "ce024e40c0b346fd7611f1c6646b8c144955632fa50a4c06fcf869cb1461a902",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "wreckfest/pterodactyl-egg-wreckfest.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/75f0a28f9e28.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-01-10T08:54:47+00:00",
+        "name": "Wreckfest",
+        "author": "djjoker13@gmail.com",
+        "description": "Wreckfest is a demolition derby themed racing game with soft-body damage modeling, sophisticated driving dynamics and in-depth vehicle upgrading, featuring both demolition derbies and more traditional track races. It’s all about fun, breakneck racing and over-the-top crashes.",
+        "features": null,
+        "docker_images": {
+          "Wine Latest": "ghcr.io/pelican-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "rm -f server_console.log && touch server_console.log && xvfb-run --auto-servernum wine ./Wreckfest_x64.exe -s server_config={{CONFIG_PATH}} -server_set game_port={{SERVER_PORT}} -server_set query_port={{QUERY_PORT}} -server_set steam_port={{STEAM_PORT}} -s server_name=\"{{SERVER_NAME}}\" -s password=\"{{SERVER_PASSWORD}}\" -server_set log=server_console.log  & WR_PID=$!; tail -c0 -F  /home/container/server_console.log --pid=$WR_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server connected\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\ncd /mnt/server\r\nCONFIG_URL=\"https://raw.githubusercontent.com/pelican-eggs/games-steamcmd/main/wreckfest/server_config.cfg\"\r\nif [ ! -z \"$CONFIG_URL\" ]; then\r\n    if [ ! -f \"server_config.cfg\" ]; then\r\n        echo \"Downloading config from GitHub...\"\r\n        curl -sSL -o server_config.cfg \"$CONFIG_URL\"\r\n    else\r\n        echo \"Config file already exists, skipping download.\"\r\n    fi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "Steam App ID.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "361580",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:361580",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Automatically update on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Config Path",
+            "description": "Config file name.",
+            "env_variable": "CONFIG_PATH",
+            "default_value": "server_config.cfg",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Port for server queries.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Server Name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Wreckfest Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:63",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Join Password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:31",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Port",
+            "description": "Port for Steam connection.",
+            "env_variable": "STEAM_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Set to 1 for Windows.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wreckfest-2-2d733b4b14ef",
+        "name": "Wreckfest 2",
+        "description": "Ready for mayhem? Wreckfest is back, offering the best in full-contact racing with unrivaled destruction! Witness head-to-head battles as you tear apart rival vehicles bit by bit. Powered by the enhanced physics engine, developed by the creators of Wreckfest & FlatOut!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wreckfest-2-2d733b4b14ef.json",
+        "sha256": "e752cc4aab66cb4fe58afbce0b75941142f951199cba389eacbf68d0cc3e9a71",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "wreckfest_2/egg-pterodactyl-wreckfest2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/2d733b4b14ef.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-06-22T20:29:01+00:00",
+        "name": "Wreckfest 2",
+        "author": "djjoker13@gmail.com",
+        "description": "Ready for mayhem? Wreckfest is back, offering the best in full-contact racing with unrivaled destruction! Witness head-to-head battles as you tear apart rival vehicles bit by bit. Powered by the enhanced physics engine, developed by the creators of Wreckfest & FlatOut!",
+        "features": null,
+        "docker_images": {
+          "Wine Latest": "ghcr.io/pelican-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "mkdir -p /home/container/save; rm -f /home/container/server.log; touch /home/container/server.log; echo ${STEAM_APPID_FILE:-1203190} > /home/container/steam_appid.txt; (Xvfb :99 -screen 0 1024x768x24 -ac & XVFB_PID=$!; tail -n +1 -F /home/container/server.log & LOG_PID=$!; export DISPLAY=:99; trap \"kill ${LOG_PID} ${XVFB_PID} 2>/dev/null\" EXIT; wine ./Wreckfest2.exe --server --save-dir=\"$(winepath -w /home/container/save)\")",
+        "config": {
+          "files": "{\"save/server_config.scnf\": {\"parser\": \"json\", \"find\": {\"net server config.0.name\": \"{{server.build.env.SERVER_NAME}}\", \"net server config.0.password\": \"{{server.build.env.SERVER_PASSWORD}}\", \"net server config.0.game port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server Started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\necho ${STEAM_APPID_FILE:-1203190} > /mnt/server/steam_appid.txt\r\nmkdir -p /mnt/server/save\r\ncd /mnt/server/save\r\nCONFIG_URL=\"https://raw.githubusercontent.com/pelican-eggs/games-steamcmd/main/wreckfest_2/server_config.scnf\"\r\nif [ ! -z \"$CONFIG_URL\" ]; then\r\n    if [ ! -f \"/mnt/server/save/server_config.scnf\" ]; then\r\n        echo \"Downloading config from GitHub...\"\r\n        curl -sSL -o server_config.scnf \"$CONFIG_URL\"\r\n    else\r\n        echo \"Config file already exists, skipping download.\"\r\n    fi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server App ID",
+            "description": "SteamCMD app ID for the Wreckfest 2 Dedicated Server tool.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3519390",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:3519390",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID File",
+            "description": "Value written to steam_appid.txt at runtime. The official server batch uses the public Wreckfest 2 app ID.",
+            "env_variable": "STEAM_APPID_FILE",
+            "default_value": "1203190",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1203190",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Automatically update on start.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Set to 1 for Windows.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Server Name.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Wreckfest 2 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:63",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Server Password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:31",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wurm-unlimited-5d7d22fa0ccf",
+        "name": "Wurm Unlimited",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wurm-unlimited-5d7d22fa0ccf.json",
+        "sha256": "73812f1aba34c8ae4536d4d36f45ed38a57fec0142d66b9ca33dd257f1be7dac",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "wurm_unlimited/egg-wurm-unlimited.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5d7d22fa0ccf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-18T14:40:15+01:00",
+        "name": "Wurm Unlimited",
+        "author": "josdekurk@gmail.com",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./WurmServerLauncher ip=0.0.0.0 externalport={{SERVER_PORT}} start={{SERVER_WORLD}} maxplayers={{MAX_PLAYERS}} servername=\"{{SERVERNAME}}\" adminpwd={{ADMINPWD}} serverpassword={{SERVERPWD}} epicsettings={{EPIC}} queryport={{QUERY_PORT}} pvp={{PVP}}",
+        "config": {
+          "files": "{\"LaunchConfig.ini\": {\"parser\": \"properties\", \"find\": {\"CleanLogsOnStart\": \"{{server.build.env.SERVER_CLEAN_LOGS_ON_START}}\"}}}",
+          "startup": "{\"done\": \"Wurm Server launcher finished at\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n# Copying steamclient.so as per https://www.wurmpedia.com/index.php/Server_administration_(Wurm_Unlimited)#Headless\r\nmkdir -p /mnt/server/nativelibs\r\ncp -v linux64/steamclient.so /mnt/server/nativelibs\r\n\r\nmkdir -p ./backup\r\ncp ./WurmServerLauncher ./backup/\r\ncp -r ./dist/Adventure ./backup/\r\ncp -r ./dist/Creative ./backup/\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "402370",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:402370",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Passwod",
+            "description": "Unlocks the admin commands from within the game, that can be used to change the gameplay settings of the server, such as skill gain rate and field growth time.",
+            "env_variable": "ADMINPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Used to set the steam query port (27016-27030 UDP)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will be visible in server browsers.",
+            "env_variable": "SERVERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the max number of players allowed on the server, if this is set through this command line option then the internal game commands to change the player limit will not work.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "",
+            "env_variable": "PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Sets the password that is used when trying to connect to the server.",
+            "env_variable": "SERVERPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Epic",
+            "description": "If true the server will follow the rules from the Epic servers in Wurm Online. For instance it will use the skill curve.",
+            "env_variable": "EPIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Clean Logs on Start",
+            "description": "Clear the logfile on server start",
+            "env_variable": "SERVER_CLEAN_LOGS_ON_START",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "World",
+            "description": "World to use when launching Wurm. The defaults provided are Creative and Adventure (case sensitive)",
+            "env_variable": "SERVER_WORLD",
+            "default_value": "dist/Adventure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta",
+            "description": "Leave empty for the public branch and beta for the beta branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,beta",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wurm-unlimited-d86cbfb26564",
+        "name": "Wurm Unlimited",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wurm-unlimited-d86cbfb26564.json",
+        "sha256": "bf63a2bc58665571d09e311756f59dd2dd0ee3a767ef88d621cf5a5122c4fb4f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "wurm_unlimited/egg-pterodactyl-wurm-unlimited.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/d86cbfb26564.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:05:08+00:00",
+        "name": "Wurm Unlimited",
+        "author": "josdekurk@gmail.com",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./WurmServerLauncher ip=0.0.0.0 externalport={{SERVER_PORT}} start={{SERVER_WORLD}} maxplayers={{MAX_PLAYERS}} servername=\"{{SERVERNAME}}\" adminpwd={{ADMINPWD}} serverpassword={{SERVERPWD}} epicsettings={{EPIC}} queryport={{QUERY_PORT}} pvp={{PVP}}",
+        "config": {
+          "files": "{\"LaunchConfig.ini\": {\"parser\": \"properties\", \"find\": {\"CleanLogsOnStart\": \"{{server.build.env.SERVER_CLEAN_LOGS_ON_START}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Wurm Server launcher finished at\"}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n# Copying steamclient.so as per https://www.wurmpedia.com/index.php/Server_administration_(Wurm_Unlimited)#Headless\r\nmkdir -p /mnt/server/nativelibs\r\ncp -v linux64/steamclient.so /mnt/server/nativelibs\r\n\r\nmkdir -p ./backup\r\ncp ./WurmServerLauncher ./backup/\r\ncp -r ./dist/Adventure ./backup/\r\ncp -r ./dist/Creative ./backup/\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "402370",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:402370",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Passwod",
+            "description": "Unlocks the admin commands from within the game, that can be used to change the gameplay settings of the server, such as skill gain rate and field growth time.",
+            "env_variable": "ADMINPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Used to set the steam query port (27016-27030 UDP)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will be visible in server browsers.",
+            "env_variable": "SERVERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the max number of players allowed on the server, if this is set through this command line option then the internal game commands to change the player limit will not work.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "",
+            "env_variable": "PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Sets the password that is used when trying to connect to the server.",
+            "env_variable": "SERVERPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Epic",
+            "description": "If true the server will follow the rules from the Epic servers in Wurm Online. For instance it will use the skill curve.",
+            "env_variable": "EPIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Clean Logs on Start",
+            "description": "Clear the logfile on server start",
+            "env_variable": "SERVER_CLEAN_LOGS_ON_START",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "World",
+            "description": "World to use when launching Wurm. The defaults provided are Creative and Adventure (case sensitive)",
+            "env_variable": "SERVER_WORLD",
+            "default_value": "dist/Adventure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta",
+            "description": "Leave empty for the public branch and beta for the beta branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,beta",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wurm-unlimited-e4d2cdbc21da",
+        "name": "Wurm Unlimited",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wurm-unlimited-e4d2cdbc21da.json",
+        "sha256": "85643b76e6705cc4684725ff37119f9ff18f615dedce08255e987cd13667542e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "wurm_unlimited/egg-wurm-unlimited.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e4d2cdbc21da.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Wurm Unlimited",
+        "author": "josdekurk@gmail.com",
+        "uuid": "e485e3cb-16a5-4d69-baca-1826c8cca197",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./WurmServerLauncher ip=0.0.0.0 externalport={{SERVER_PORT}} start={{SERVER_WORLD}} maxplayers={{MAX_PLAYERS}} servername=\"{{SERVERNAME}}\" adminpwd={{ADMINPWD}} serverpassword={{SERVERPWD}} epicsettings={{EPIC}} queryport={{QUERY_PORT}} pvp={{PVP}}",
+        "config": {
+          "files": "{\"LaunchConfig.ini\": {\"parser\": \"properties\", \"find\": {\"CleanLogsOnStart\": \"{{server.build.env.SERVER_CLEAN_LOGS_ON_START}}\"}}}",
+          "startup": "{\"done\": \"Wurm Server launcher finished at\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n# Copying steamclient.so as per https://www.wurmpedia.com/index.php/Server_administration_(Wurm_Unlimited)#Headless\r\nmkdir -p /mnt/server/nativelibs\r\ncp -v linux64/steamclient.so /mnt/server/nativelibs\r\n\r\nmkdir -p ./backup\r\ncp ./WurmServerLauncher ./backup/\r\ncp -r ./dist/Adventure ./backup/\r\ncp -r ./dist/Creative ./backup/\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "402370",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:402370",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Passwod",
+            "description": "Unlocks the admin commands from within the game, that can be used to change the gameplay settings of the server, such as skill gain rate and field growth time.",
+            "env_variable": "ADMINPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Used to set the steam query port (27016-27030 UDP)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will be visible in server browsers.",
+            "env_variable": "SERVERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the max number of players allowed on the server, if this is set through this command line option then the internal game commands to change the player limit will not work.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "",
+            "env_variable": "PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Sets the password that is used when trying to connect to the server.",
+            "env_variable": "SERVERPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Epic",
+            "description": "If true the server will follow the rules from the Epic servers in Wurm Online. For instance it will use the skill curve.",
+            "env_variable": "EPIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Clean Logs on Start",
+            "description": "Clear the logfile on server start",
+            "env_variable": "SERVER_CLEAN_LOGS_ON_START",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World",
+            "description": "World to use when launching Wurm. The defaults provided are Creative and Adventure (case sensitive)",
+            "env_variable": "SERVER_WORLD",
+            "default_value": "dist/Adventure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Beta",
+            "description": "Leave empty for the public branch and beta for the beta branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,beta",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "wurm-unlimited-f0002583c7a5",
+        "name": "Wurm Unlimited",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/wurm-unlimited-f0002583c7a5.json",
+        "sha256": "1f05bd412282a9a99816c56a12beece08042885d7d4ac4a51e6e30015964d613",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/wurm_unlimited/egg-wurm-unlimited.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/f0002583c7a5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-18T14:40:15+01:00",
+        "name": "Wurm Unlimited",
+        "author": "josdekurk@gmail.com",
+        "description": "Wurm Unlimited is the standalone version of the fantasy sandbox world Wurm Online, the MMORPG where the players are in charge! A pioneer in the ideas of player influence, crafting and adventure, it is now one of the most deep and feature packed true sandbox experiences available.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./WurmServerLauncher ip=0.0.0.0 externalport={{SERVER_PORT}} start={{SERVER_WORLD}} maxplayers={{MAX_PLAYERS}} servername=\"{{SERVERNAME}}\" adminpwd={{ADMINPWD}} serverpassword={{SERVERPWD}} epicsettings={{EPIC}} queryport={{QUERY_PORT}} pvp={{PVP}}",
+        "config": {
+          "files": "{\"LaunchConfig.ini\": {\"parser\": \"properties\", \"find\": {\"CleanLogsOnStart\": \"{{server.build.env.SERVER_CLEAN_LOGS_ON_START}}\"}}}",
+          "startup": "{\"done\": \"Wurm Server launcher finished at\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n# Copying steamclient.so as per https://www.wurmpedia.com/index.php/Server_administration_(Wurm_Unlimited)#Headless\r\nmkdir -p /mnt/server/nativelibs\r\ncp -v linux64/steamclient.so /mnt/server/nativelibs\r\n\r\nmkdir -p ./backup\r\ncp ./WurmServerLauncher ./backup/\r\ncp -r ./dist/Adventure ./backup/\r\ncp -r ./dist/Creative ./backup/\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "402370",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:402370",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Passwod",
+            "description": "Unlocks the admin commands from within the game, that can be used to change the gameplay settings of the server, such as skill gain rate and field growth time.",
+            "env_variable": "ADMINPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Used to set the steam query port (27016-27030 UDP)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will be visible in server browsers.",
+            "env_variable": "SERVERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the max number of players allowed on the server, if this is set through this command line option then the internal game commands to change the player limit will not work.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "",
+            "env_variable": "PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Sets the password that is used when trying to connect to the server.",
+            "env_variable": "SERVERPWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Epic",
+            "description": "If true the server will follow the rules from the Epic servers in Wurm Online. For instance it will use the skill curve.",
+            "env_variable": "EPIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Clean Logs on Start",
+            "description": "Clear the logfile on server start",
+            "env_variable": "SERVER_CLEAN_LOGS_ON_START",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "World",
+            "description": "World to use when launching Wurm. The defaults provided are Creative and Adventure (case sensitive)",
+            "env_variable": "SERVER_WORLD",
+            "default_value": "dist/Adventure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta",
+            "description": "Leave empty for the public branch and beta for the beta branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,beta",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

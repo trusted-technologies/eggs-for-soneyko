@@ -1,0 +1,2017 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "eco-0be944f62b47",
+        "name": "Eco",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/eco-0be944f62b47.json",
+        "sha256": "6b71740f632c5521ff997410a6c13e7c7a1d34513a044f2e773eb78ad1829eac",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/eco/egg-eco.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/0be944f62b47.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-04T11:28:40+01:00",
+        "name": "Eco",
+        "author": "eggs@goover.dev",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:dotnet": "ghcr.io/parkervcp/steamcmd:dotnet"
+        },
+        "file_denylist": [],
+        "startup": "./EcoServer",
+        "config": {
+          "files": "{\"Configs/Network.eco\": {\"parser\": \"json\", \"find\": {\"GameServerPort\": \"{{server.build.default.port}}\", \"WebServerPort\": \"{{server.build.env.WEB_PORT}}\", \"PublicServer\": \"{{server.build.env.PUB_SRV}}\", \"Password\": \"{{server.build.env.SRV_PWD}}\", \"UPnPEnabled\": \"{{server.build.env.UPNP}}\", \"Description\": \"{{server.build.env.SRV_DES}}\", \"DetailedDescription\": \"{{server.build.env.DEDES}}\", \"Playtime\": \"{{server.build.env.PLAYTIME}}\", \"MaxConnections\": \"{{server.build.env.MAX_CON}}\", \"WebServerUrl\": \"{{server.build.env.WEBSRVURL}}\"}}}",
+          "startup": "{\"done\": \" = Unix\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\ncp -f $HOME/Configs/Network.eco.template $HOME/Configs/Network.eco\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "739590",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Web server port",
+            "description": "port",
+            "env_variable": "WEB_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|digits_between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Public Server = true | Private Server = false",
+            "env_variable": "PUB_SRV",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password to join the Server",
+            "env_variable": "SRV_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Server Description",
+            "env_variable": "SRV_DES",
+            "default_value": "Hosted by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "UPNP OFF",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Flags",
+            "description": "",
+            "env_variable": "INSTALL_FLAGS",
+            "default_value": "-beta default",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Webserver URL",
+            "description": "",
+            "env_variable": "WEBSRVURL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Connections",
+            "description": "",
+            "env_variable": "MAX_CON",
+            "default_value": "-1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Playtime",
+            "description": "",
+            "env_variable": "PLAYTIME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "DetailedDescription",
+            "description": "",
+            "env_variable": "DEDES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "eco-3e40145bf0c1",
+        "name": "Eco",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/eco-3e40145bf0c1.json",
+        "sha256": "26f619f70bd6a9b21047b15246426c980174f2e6524d22dfca46b7a3cac14c62",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "eco/egg-pterodactyl-eco.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3e40145bf0c1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-20T09:14:59+02:00",
+        "name": "Eco",
+        "author": "eggs@goover.dev",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:dotnet": "ghcr.io/parkervcp/steamcmd:dotnet"
+        },
+        "file_denylist": [],
+        "startup": "./EcoServer --username=\"{{SLG_USER}}\" --password=\"{{SLG_PW}}\"",
+        "config": {
+          "files": "{\"Configs/Network.eco\": {\"parser\": \"json\", \"find\": {\"GameServerPort\": \"{{server.build.default.port}}\", \"WebServerPort\": \"{{server.build.env.WEB_PORT}}\", \"PublicServer\": \"{{server.build.env.PUB_SRV}}\", \"Password\": \"{{server.build.env.SRV_PW}}\", \"UPnPEnabled\": \"{{server.build.env.UPNP}}\", \"Description\": \"{{server.build.env.SRV_NAME}}\", \"DetailedDescription\": \"{{server.build.env.DEDES}}\", \"Playtime\": \"{{server.build.env.PLAYTIME}}\", \"MaxConnections\": \"{{server.build.env.MAX_CON}}\", \"DiscordAddress\": \"{{server.build.env.DISCORD_SRV}}\", \"RconServerPort\": \"{{server.build.env.RCON_PORT}}\", \"RconPassword\": \"{{server.build.env.RCON_PW}}\", \"ServerCategory\": \"{{server.build.env.SRV_CAT}}\"}}, \"Configs/Localization.eco\": {\"parser\": \"json\", \"find\": {\"Language\": \"{{server.build.env.LANGUAGE}}\"}}}",
+          "startup": "{\"done\": \"Web Server now listening on:\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\n\r\nFILE=$HOME/Configs/Network.eco\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"Network.eco found.\"\r\nelse  \r\n  echo -e \"No Network.eco found. Moving default...\"\r\n  cp -f $HOME/Configs/Network.eco.template $HOME/Configs/Network.eco\r\n  echo -e \".done..\"\r\nfi\r\n\r\nFILE=$HOME/Configs/Localization.eco\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"Localization.eco found.\"\r\nelse  \r\n  echo -e \"No Localization.eco found. Moving default...\"\r\n  cp -f $HOME/Configs/Localization.eco.template $HOME/Configs/Localization.eco\r\n  echo -e \"..done..\"\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[STEAM] AppID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "739590",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:739590",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Webserver Port",
+            "description": "Port for the Webserver",
+            "env_variable": "WEB_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Public Server",
+            "description": "Set to True to have the server listed in the Eco client",
+            "env_variable": "PUB_SRV",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Set a password for the server, or leave this blank to not require a password. Players on the whitelist will not have to enter a password.",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Sets the name of your server in the client server browser. Chat_Commands#Text_markup can be used to add color or modify the appearance of the text.",
+            "env_variable": "SRV_NAME",
+            "default_value": "Hosted by panel",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "UPNP OFF",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Webserver URL",
+            "description": "your webserver url.",
+            "env_variable": "WEBSRVURL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Max Connections",
+            "description": "Maximum number of concurrent players (-1 no limits).",
+            "env_variable": "MAX_CON",
+            "default_value": "-1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Playtime",
+            "description": "This is automatically filled in if you created the server in the Eco client and made a Timetable (schedule of preferred playtimes). If this is blank, the best way to fill it in is to “Set Playtime” through the Game Menu (Esc), and copy and paste the data from playtime.eco.",
+            "env_variable": "PLAYTIME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Detailed Description",
+            "description": "Sets the long-form description of your server when people click on it in the server browser. Adding this description helps the server show up more prominently in the browser.",
+            "env_variable": "DEDES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] RCON Password",
+            "description": "",
+            "env_variable": "RCON_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Discord Server",
+            "description": "Invite link ID for a Discord server (the ID after the “discord.gg/”).",
+            "env_variable": "DISCORD_SRV",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Category",
+            "description": "Choose from 1 of 4 categories that will show up when players first click on “New Game” in the Eco client. Selecting a category makes it much more likely new players will join your server. Strings available for this option are: None; Beginner; Established; BeginnerHard; Strange",
+            "env_variable": "SRV_CAT",
+            "default_value": "None",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:None,Beginner,Established,BeginnerHard,Strange",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Language",
+            "description": "Defines the language.",
+            "env_variable": "LANGUAGE",
+            "default_value": "English",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:English,French,German",
+            "field_type": "text"
+          },
+          {
+            "name": "[ACCOUNT] SLG Username",
+            "description": "",
+            "env_variable": "SLG_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[ACCOUNT] SLG Pasword",
+            "description": "",
+            "env_variable": "SLG_PW",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "eco-c6d300db70f5",
+        "name": "Eco",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/eco-c6d300db70f5.json",
+        "sha256": "f3084658b5e78551e8980d12f04d9975e0533e46a9d904ccb4e802380012a399",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "eco/egg-eco.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/c6d300db70f5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Eco",
+        "author": "eggs@goover.dev",
+        "uuid": "ea2f3858-c12a-4a8b-9f6d-33573b26ccce",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:dotnet": "ghcr.io/parkervcp/steamcmd:dotnet"
+        },
+        "file_denylist": [],
+        "startup": "./EcoServer --username=\"{{SLG_USER}}\" --password=\"{{SLG_PW}}\"",
+        "config": {
+          "files": "{\"Configs/Network.eco\": {\"parser\": \"json\", \"find\": {\"GameServerPort\": \"{{server.allocations.default.port}}\", \"WebServerPort\": \"{{server.environment.WEB_PORT}}\", \"PublicServer\": \"{{server.environment.PUB_SRV}}\", \"Password\": \"{{server.environment.SRV_PW}}\", \"UPnPEnabled\": \"{{server.environment.UPNP}}\", \"Description\": \"{{server.environment.SRV_NAME}}\", \"DetailedDescription\": \"{{server.environment.DEDES}}\", \"Playtime\": \"{{server.environment.PLAYTIME}}\", \"MaxConnections\": \"{{server.environment.MAX_CON}}\", \"DiscordAddress\": \"{{server.environment.DISCORD_SRV}}\", \"RconServerPort\": \"{{server.environment.RCON_PORT}}\", \"RconPassword\": \"{{server.environment.RCON_PW}}\", \"ServerCategory\": \"{{server.environment.SRV_CAT}}\"}}, \"Configs/Localization.eco\": {\"parser\": \"json\", \"find\": {\"Language\": \"{{server.environment.LANGUAGE}}\"}}}",
+          "startup": "{\"done\": \"Web Server now listening on:\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\n\r\nFILE=$HOME/Configs/Network.eco\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"Network.eco found.\"\r\nelse  \r\n  echo -e \"No Network.eco found. Moving default...\"\r\n  cp -f $HOME/Configs/Network.eco.template $HOME/Configs/Network.eco\r\n  echo -e \".done..\"\r\nfi\r\n\r\nFILE=$HOME/Configs/Localization.eco\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"Localization.eco found.\"\r\nelse  \r\n  echo -e \"No Localization.eco found. Moving default...\"\r\n  cp -f $HOME/Configs/Localization.eco.template $HOME/Configs/Localization.eco\r\n  echo -e \"..done..\"\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": null,
+            "name": "[STEAM] AppID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "739590",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:739590",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Webserver Port",
+            "description": "Port for the Webserver",
+            "env_variable": "WEB_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Public Server",
+            "description": "Set to True to have the server listed in the Eco client",
+            "env_variable": "PUB_SRV",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server Password",
+            "description": "Set a password for the server, or leave this blank to not require a password. Players on the whitelist will not have to enter a password.",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server Name",
+            "description": "Sets the name of your server in the client server browser. Chat_Commands#Text_markup can be used to add color or modify the appearance of the text.",
+            "env_variable": "SRV_NAME",
+            "default_value": "Hosted by panel",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "UPNP",
+            "description": "UPNP OFF",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Webserver URL",
+            "description": "your webserver url.",
+            "env_variable": "WEBSRVURL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Max Connections",
+            "description": "Maximum number of concurrent players (-1 no limits).",
+            "env_variable": "MAX_CON",
+            "default_value": "-1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Playtime",
+            "description": "This is automatically filled in if you created the server in the Eco client and made a Timetable (schedule of preferred playtimes). If this is blank, the best way to fill it in is to “Set Playtime” through the Game Menu (Esc), and copy and paste the data from playtime.eco.",
+            "env_variable": "PLAYTIME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Detailed Description",
+            "description": "Sets the long-form description of your server when people click on it in the server browser. Adding this description helps the server show up more prominently in the browser.",
+            "env_variable": "DEDES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] RCON Password",
+            "description": "",
+            "env_variable": "RCON_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Discord Server",
+            "description": "Invite link ID for a Discord server (the ID after the “discord.gg/”).",
+            "env_variable": "DISCORD_SRV",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Server Category",
+            "description": "Choose from 1 of 4 categories that will show up when players first click on “New Game” in the Eco client. Selecting a category makes it much more likely new players will join your server. Strings available for this option are: None; Beginner; Established; BeginnerHard; Strange",
+            "env_variable": "SRV_CAT",
+            "default_value": "None",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:None,Beginner,Established,BeginnerHard,Strange",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[SERVER] Language",
+            "description": "Defines the language.",
+            "env_variable": "LANGUAGE",
+            "default_value": "English",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:English,French,German",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[ACCOUNT] SLG Username",
+            "description": "",
+            "env_variable": "SLG_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "[ACCOUNT] SLG Pasword",
+            "description": "",
+            "env_variable": "SLG_PW",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "eco-d41d7ca9117c",
+        "name": "Eco",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/eco-d41d7ca9117c.json",
+        "sha256": "ee9a98e75a0aff7566d2bc8e4b710e049b6e42d52024e06c970bda2005e14108",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "eco/egg-eco.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d41d7ca9117c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-20T09:14:59+02:00",
+        "name": "Eco",
+        "author": "eggs@goover.dev",
+        "description": "Eco is an online world from Strange Loop Games where players must build civilization using resources from an ecosystem that can be damaged and destroyed. The world of Eco is an incredibly reactive one, and whatever any player does in the world affects the underlying ecosystem.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:dotnet": "ghcr.io/ptero-eggs/steamcmd:dotnet"
+        },
+        "file_denylist": [],
+        "startup": "./EcoServer --username=\"{{SLG_USER}}\" --password=\"{{SLG_PW}}\"",
+        "config": {
+          "files": "{\"Configs/Network.eco\": {\"parser\": \"json\", \"find\": {\"GameServerPort\": \"{{server.build.default.port}}\", \"WebServerPort\": \"{{server.build.env.WEB_PORT}}\", \"PublicServer\": \"{{server.build.env.PUB_SRV}}\", \"Password\": \"{{server.build.env.SRV_PW}}\", \"UPnPEnabled\": \"{{server.build.env.UPNP}}\", \"Description\": \"{{server.build.env.SRV_NAME}}\", \"DetailedDescription\": \"{{server.build.env.DEDES}}\", \"Playtime\": \"{{server.build.env.PLAYTIME}}\", \"MaxConnections\": \"{{server.build.env.MAX_CON}}\", \"DiscordAddress\": \"{{server.build.env.DISCORD_SRV}}\", \"RconServerPort\": \"{{server.build.env.RCON_PORT}}\", \"RconPassword\": \"{{server.build.env.RCON_PW}}\", \"ServerCategory\": \"{{server.build.env.SRV_CAT}}\"}}, \"Configs/Localization.eco\": {\"parser\": \"json\", \"find\": {\"Language\": \"{{server.build.env.LANGUAGE}}\"}}}",
+          "startup": "{\"done\": \"Web Server now listening on:\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\n\r\nFILE=$HOME/Configs/Network.eco\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"Network.eco found.\"\r\nelse  \r\n  echo -e \"No Network.eco found. Moving default...\"\r\n  cp -f $HOME/Configs/Network.eco.template $HOME/Configs/Network.eco\r\n  echo -e \".done..\"\r\nfi\r\n\r\nFILE=$HOME/Configs/Localization.eco\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"Localization.eco found.\"\r\nelse  \r\n  echo -e \"No Localization.eco found. Moving default...\"\r\n  cp -f $HOME/Configs/Localization.eco.template $HOME/Configs/Localization.eco\r\n  echo -e \"..done..\"\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[STEAM] AppID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "739590",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:739590",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Webserver Port",
+            "description": "Port for the Webserver",
+            "env_variable": "WEB_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Public Server",
+            "description": "Set to True to have the server listed in the Eco client",
+            "env_variable": "PUB_SRV",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Set a password for the server, or leave this blank to not require a password. Players on the whitelist will not have to enter a password.",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Sets the name of your server in the client server browser. Chat_Commands#Text_markup can be used to add color or modify the appearance of the text.",
+            "env_variable": "SRV_NAME",
+            "default_value": "Hosted by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "UPNP OFF",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Webserver URL",
+            "description": "your webserver url.",
+            "env_variable": "WEBSRVURL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Max Connections",
+            "description": "Maximum number of concurrent players (-1 no limits).",
+            "env_variable": "MAX_CON",
+            "default_value": "-1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Playtime",
+            "description": "This is automatically filled in if you created the server in the Eco client and made a Timetable (schedule of preferred playtimes). If this is blank, the best way to fill it in is to “Set Playtime” through the Game Menu (Esc), and copy and paste the data from playtime.eco.",
+            "env_variable": "PLAYTIME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Detailed Description",
+            "description": "Sets the long-form description of your server when people click on it in the server browser. Adding this description helps the server show up more prominently in the browser.",
+            "env_variable": "DEDES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] RCON Password",
+            "description": "",
+            "env_variable": "RCON_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Discord Server",
+            "description": "Invite link ID for a Discord server (the ID after the “discord.gg/”).",
+            "env_variable": "DISCORD_SRV",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Category",
+            "description": "Choose from 1 of 4 categories that will show up when players first click on “New Game” in the Eco client. Selecting a category makes it much more likely new players will join your server. Strings available for this option are: None; Beginner; Established; BeginnerHard; Strange",
+            "env_variable": "SRV_CAT",
+            "default_value": "None",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:None,Beginner,Established,BeginnerHard,Strange",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Language",
+            "description": "Defines the language.",
+            "env_variable": "LANGUAGE",
+            "default_value": "English",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:English,French,German",
+            "field_type": "text"
+          },
+          {
+            "name": "[ACCOUNT] SLG Username",
+            "description": "",
+            "env_variable": "SLG_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "[ACCOUNT] SLG Pasword",
+            "description": "",
+            "env_variable": "SLG_PW",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "empyrion-galactic-survival-395bcf070dff",
+        "name": "Empyrion: Galactic Survival",
+        "description": "Build and explore in a true space sandbox survival adventure. Construct mighty capital vessels, sprawling planetary settlements, and vast space stations in your galactic journey to discover the mysteries of Empyrion!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/empyrion-galactic-survival-395bcf070dff.json",
+        "sha256": "d42f109b9bfbd1fad1011a98ac7b6fc2bb32a0a9f038bdf7151609a8ff921715",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "empyrion/egg-empyrion--galactic-survival.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/395bcf070dff.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-25T15:56:40+00:00",
+        "name": "Empyrion: Galactic Survival",
+        "author": "eggs@purpleflaghosting.com",
+        "description": "Build and explore in a true space sandbox survival adventure. Construct mighty capital vessels, sprawling planetary settlements, and vast space stations in your galactic journey to discover the mysteries of Empyrion!",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "cd DedicatedServer ; wine EmpyrionDedicated.exe -batchmode -nographics -logFile ../Logs/server/server.log & PID=$! ; tail -c0 -F ../Logs/server/server.log & until nc -z 127.0.0.1 {{TELNET_PORT}}; do sleep 1;done ; telnet -E 127.0.0.1 {{TELNET_PORT}} ; wait $PID",
+        "config": {
+          "files": "{\"dedicated.yaml\": {\"parser\": \"yaml\", \"find\": {\"ServerConfig.Srv_Port\": \"{{server.build.default.port}}\", \"ServerConfig.Srv_Name\": \"{{env.SERVER_NAME}}\", \"ServerConfig.Srv_MaxPlayers\": \"{{env.MAX_PLAYERS}}\", \"ServerConfig.Srv_Description\": \"{{env.SERVER_DESCRIPTION}}\", \"ServerConfig.Srv_Public\": \"{{env.SERVER_PUBLIC}}\", \"ServerConfig.Srv_Password\": \"{{env.SERVER_PASSWORD}}\", \"ServerConfig.Tel_Enabled\": true, \"ServerConfig.Tel_Port\": \"{{env.TELNET_PORT}}\", \"ServerConfig.Tel_Pwd\": \"\", \"GameConfig.Seed\": \"{{env.GAME_SEED}}\", \"ServerConfig.EACActive\": \"{{env.EAC_ACTIVE}}\", \"ServerConfig.MaxAllowedSizeClass\": \"{{env.MAX_ALLOWED_SIZE_CLASS}}\", \"ServerConfig.AllowedBlueprints\": \"{{env.ALLOWED_BLUEPRINTS}}\", \"ServerConfig.HeartbeatServer\": \"{{env.SERVER_HEARTBEAT}}\", \"ServerConfig.TimeoutBootingPfServer\": \"{{env.TIMEOUT_BOOTING_PF_SERVER}}\", \"GameConfig.GameName\": \"{{env.GAME_NAME}}\", \"GameConfig.Mode\": \"{{env.GAME_MODE}}\", \"GameConfig.CustomScenario\": \"{{env.CUSTOM_SCENARIO}}\"}}}",
+          "startup": "{}",
+          "logs": "{}",
+          "stop": "saveandexit 0"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "530870",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Port",
+            "description": "DO NOT expose to the internet. Used internally for console connection.",
+            "env_variable": "TELNET_PORT",
+            "default_value": "1030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Server name to show in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Server info, can contain [b]bold[/b] text or a [u][url=empyriongame.com]link[/url][/u].",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "An Empyrion Galactic Survival server hosted on Pterodactyl.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:127",
+            "field_type": "text"
+          },
+          {
+            "name": "Seed",
+            "description": "The seed determines how the world is procedurally generated - the same seed means the same world",
+            "env_variable": "GAME_SEED",
+            "default_value": "1011345",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,9999999",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max number of players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Public",
+            "description": "Disable if you want to hide your server in the Server Browser. If server is not visible you can connect via IP or via joining a friend's game.",
+            "env_variable": "SERVER_PUBLIC",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password required to enter the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Beta ID",
+            "description": "Installs beta branch if specified.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Allowed Blueprints",
+            "description": "None = Blueprint system completely disabled, StockOnly = only stock blueprints can be produced, All = all types allowed (default)",
+            "env_variable": "ALLOWED_BLUEPRINTS",
+            "default_value": "All",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:All,StockOnly,None",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Heartbeat",
+            "description": "Timeout in seconds after which a playfield server process will be killed (and all players on it disconnected) if it does no longer send heartbeat messages to the dedi. Set 0 to disable this feature",
+            "env_variable": "SERVER_HEARTBEAT",
+            "default_value": "15",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,180",
+            "field_type": "text"
+          },
+          {
+            "name": "Timeout Booting PfServer",
+            "description": "Monitors booting playfield server processes, kills them if they time out (time in seconds, 0 = disabled). This is a conservative default, for faster servers 60 seconds should be ok",
+            "env_variable": "TIMEOUT_BOOTING_PF_SERVER",
+            "default_value": "90",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,600",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Survival or Creative.",
+            "env_variable": "GAME_MODE",
+            "default_value": "Survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20|in:Survival,Creative",
+            "field_type": "text"
+          },
+          {
+            "name": "EAC Active",
+            "description": "",
+            "env_variable": "EAC_ACTIVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Allowed Size Class",
+            "description": "Restrict allowed Blueprint size class: restricted types are not allowed to be produced or spawned 1 = allow only small blueprints, ... , 10 = allow very large blueprints, ..., 50 = allow gigantic blueprints, ... , 0 = no limits. Warning: large blueprints can have very strong performance impact!",
+            "env_variable": "MAX_ALLOWED_SIZE_CLASS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Custom Scenario",
+            "description": "Enable custom scenario. Name of custom scenario from folder Content\\Scenarios.",
+            "env_variable": "CUSTOM_SCENARIO",
+            "default_value": "Default Multiplayer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Determines name of the save game.",
+            "env_variable": "GAME_NAME",
+            "default_value": "DediGame",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "empyrion-galactic-survival-89b4b58e7179",
+        "name": "Empyrion: Galactic Survival",
+        "description": "Empyrion: Galactic Survival dedicated server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/empyrion-galactic-survival-89b4b58e7179.json",
+        "sha256": "5f37831d40aa28e8ce23c237ecdbf9c68d24fc57b8010eb684f9e2e0147cac4e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "empyrion/egg-pterodactyl-empyrion--galactic-survival.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/empyrion/egg-empyrion--galactic-survival.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/89b4b58e7179.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:10+00:00",
+        "name": "Empyrion: Galactic Survival",
+        "author": "eggs@goover.dev",
+        "description": "Empyrion: Galactic Survival dedicated server",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "cd empyrion; WINEDLLOVERRIDES=\"mscoree,mshtml=\" wine ./DedicatedServer/EmpyrionDedicated.exe -batchmode -log -logFile ./logs/current.log & echo -e \"Checking on telnet connection\" && until nc -z 127.0.0.1 ${TELNET_PORT}; do echo -e \"Waiting on telnet connection...\"; sleep 5; done && $( [[ -z ${TELNET_PWD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\")",
+        "config": {
+          "files": "{\"empyrion/dedicated.yaml\": {\"parser\": \"yaml\", \"find\": {\"ServerConfig.Srv_Port\": \"{{server.build.default.port}}\", \"ServerConfig.Srv_Name\": \"{{env.SRV_NAME}}\", \"ServerConfig.Srv_Password\": \"{{env.SRV_PWD}}\", \"ServerConfig.Srv_MaxPlayers\": \"{{env.MAX_PLAYERS}}\", \"ServerConfig.Tel_Enabled\": \"{{env.TELNET_ENABLED}}\", \"ServerConfig.Tel_Port\": \"{{env.TELNET_PORT}}\", \"ServerConfig.Srv_Description\": \"{{env.SRV_DESC}}\", \"GameConfig.Seed\": \"{{env.SEED}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Connected to 127.0.0.1.\"}",
+          "stop": "saveandexit 0"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Empyrion Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napt update\r\napt -y install curl unzip\r\ncd /tmp\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\nmkdir -p /mnt/server/steam\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steam\r\n\r\nexport HOME=/mnt/server\r\n\r\nmkdir -p /mnt/server/empyrion\r\nmkdir -p /mnt/server/Logs\r\nmkdir -p /mnt/server/empyrion/logs\r\ntouch /mnt/server/empyrion/logs/current.log\r\n\r\ncd /mnt/server/steam\r\nchown -R root:root /mnt\r\n\r\nif [ \"${VERSION}\" == \"experimental\" ]; then\r\n    ./steamcmd.sh +force_install_dir /mnt/server/empyrion +login anonymous +@sSteamCmdForcePlatformType windows +app_update 530870 -beta experimental validate +quit\r\nelse\r\n    ./steamcmd.sh +force_install_dir /mnt/server/empyrion +login anonymous +@sSteamCmdForcePlatformType windows +app_update 530870 validate +quit\r\nfi\r\n\r\n## setup 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v /mnt/server/steam/linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\n\r\n## setup 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v /mnt/server/steam/linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name that will be shown in the Server Browser.",
+            "env_variable": "SRV_NAME",
+            "default_value": "My Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password used to connect to the server - Optional, defaults to no password.",
+            "env_variable": "SRV_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of player allowed to join simultaneously in the server. Defaults to 20.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Telnet",
+            "description": "Telnet access to control the server.",
+            "env_variable": "TELNET_ENABLED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|regex:/^(?:true)?(?:false)?\\b/",
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Port",
+            "description": "Telnet Server Port DO NOT EXPOSE THIS TO THE INTERNET.",
+            "env_variable": "TELNET_PORT",
+            "default_value": "30004",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Seed",
+            "description": "World generation seed. Numeric between 1 and 7 characters.",
+            "env_variable": "SEED",
+            "default_value": "1011345",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Server info between the \" \", can contain [b]bold[/b] text or a [u][url=empyriongame.com]link[/url][/u] up to 127 chars.",
+            "env_variable": "SRV_DESC",
+            "default_value": "Empyrion Galactic Survival Dedicated Server running on Pterodactyl Panel",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:127",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Enable 'experimental'. Optional, defaults to public branch.",
+            "env_variable": "VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2019 dotnet48",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "530870",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "empyrion-galactic-survival-931c9ca8f389",
+        "name": "Empyrion: Galactic Survival",
+        "description": "Empyrion: Galactic Survival dedicated server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/empyrion-galactic-survival-931c9ca8f389.json",
+        "sha256": "a3595b858b71e2b853c7ae4bb0ae6acc094c950fa751b1c0997023b33b0694a5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "empyrion/egg-empyrion--galactic-survival.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/931c9ca8f389.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Empyrion: Galactic Survival",
+        "author": "eggs@goover.dev",
+        "uuid": "3a1450cf-20a8-4fa9-98d1-f38c9f1b5636",
+        "description": "Empyrion: Galactic Survival dedicated server",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "cd empyrion; WINEDLLOVERRIDES=\"mscoree,mshtml=\" wine ./DedicatedServer/EmpyrionDedicated.exe -batchmode -log -logFile ./logs/current.log & echo -e \"Checking on telnet connection\" && until nc -z 127.0.0.1 ${TELNET_PORT}; do echo -e \"Waiting on telnet connection...\"; sleep 5; done && $( [[ -z ${TELNET_PWD} ]] && printf %s \"telnet -E 127.0.0.1 ${TELNET_PORT}\")",
+        "config": {
+          "files": "{\"empyrion/dedicated.yaml\": {\"parser\": \"yaml\", \"find\": {\"ServerConfig.Srv_Port\": \"{{server.build.default.port}}\", \"ServerConfig.Srv_Name\": \"{{env.SRV_NAME}}\", \"ServerConfig.Srv_Password\": \"{{env.SRV_PWD}}\", \"ServerConfig.Srv_MaxPlayers\": \"{{env.MAX_PLAYERS}}\", \"ServerConfig.Tel_Enabled\": \"{{env.TELNET_ENABLED}}\", \"ServerConfig.Tel_Port\": \"{{env.TELNET_PORT}}\", \"ServerConfig.Srv_Description\": \"{{env.SRV_DESC}}\", \"GameConfig.Seed\": \"{{env.SEED}}\"}}}",
+          "startup": "{\"done\": \"Connected to 127.0.0.1.\"}",
+          "logs": "{}",
+          "stop": "saveandexit 0"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Empyrion Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napt update\r\napt -y install curl unzip\r\ncd /tmp\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\nmkdir -p /mnt/server/steam\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steam\r\n\r\nexport HOME=/mnt/server\r\n\r\nmkdir -p /mnt/server/empyrion\r\nmkdir -p /mnt/server/Logs\r\nmkdir -p /mnt/server/empyrion/logs\r\ntouch /mnt/server/empyrion/logs/current.log\r\n\r\ncd /mnt/server/steam\r\nchown -R root:root /mnt\r\n\r\nif [ \"${VERSION}\" == \"experimental\" ]; then\r\n    ./steamcmd.sh +force_install_dir /mnt/server/empyrion +login anonymous +@sSteamCmdForcePlatformType windows +app_update 530870 -beta experimental validate +quit\r\nelse\r\n    ./steamcmd.sh +force_install_dir /mnt/server/empyrion +login anonymous +@sSteamCmdForcePlatformType windows +app_update 530870 validate +quit\r\nfi\r\n\r\n## setup 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v /mnt/server/steam/linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\n\r\n## setup 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v /mnt/server/steam/linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name that will be shown in the Server Browser.",
+            "env_variable": "SRV_NAME",
+            "default_value": "My Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password used to connect to the server - Optional, defaults to no password.",
+            "env_variable": "SRV_PWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of player allowed to join simultaneously in the server. Defaults to 20.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Telnet",
+            "description": "Telnet access to control the server.",
+            "env_variable": "TELNET_ENABLED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|regex:/^(?:true)?(?:false)?\\b/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Telnet Port",
+            "description": "Telnet Server Port DO NOT EXPOSE THIS TO THE INTERNET.",
+            "env_variable": "TELNET_PORT",
+            "default_value": "30004",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Seed",
+            "description": "World generation seed. Numeric between 1 and 7 characters.",
+            "env_variable": "SEED",
+            "default_value": "1011345",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Server info between the \" \", can contain [b]bold[/b] text or a [u][url=empyriongame.com]link[/url][/u] up to 127 chars.",
+            "env_variable": "SRV_DESC",
+            "default_value": "Empyrion Galactic Survival Dedicated Server running on Pterodactyl Panel",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:127",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Enable 'experimental'. Optional, defaults to public branch.",
+            "env_variable": "VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2019 dotnet48",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "530870",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "enshrouded-0f0ec3b68806",
+        "name": "Enshrouded",
+        "description": "Enshrouded is a game of survival, crafting, and Action RPG combat, set within a sprawling voxel-based continent. As you journey across the mountains and deserts of an open world, you are free to choose your path and shape your destiny.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/enshrouded-0f0ec3b68806.json",
+        "sha256": "f93236c0034d3f055ec1620ca4aec4d6bef2186e1d7528c61995388b9b732d71",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "enshrouded/egg-enshrouded.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0f0ec3b68806.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-11-11T10:40:06+01:00",
+        "name": "Enshrouded",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Enshrouded is a game of survival, crafting, and Action RPG combat, set within a sprawling voxel-based continent. As you journey across the mountains and deserts of an open world, you are free to choose your path and shape your destiny.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm ./logs/enshrouded_server.log; proton run ./enshrouded_server.exe & ENS_PID=$! ; tail -c0 -F ./logs/enshrouded_server.log --pid=$ENS_PID",
+        "config": {
+          "files": "{\"enshrouded_server.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SRV_NAME}}\", \"queryPort\": \"{{server.build.default.port}}\", \"slotCount\": \"{{server.build.env.MAX_PLAYERS}}\", \"userGroups[0].password\": \"{{server.build.env.SRV_PW}}\", \"userGroups[1].name\": \"Friend\", \"userGroups[1].password\": \"{{server.build.env.SRV_PW2}}\", \"userGroups[2].name\": \"Guest\", \"userGroups[2].password\": \"{{server.build.env.SRV_PW3}}\", \"userGroups[3].name\": \"Visitor\", \"userGroups[3].password\": \"{{server.build.env.SRV_PW4}}\"}}}",
+          "startup": "{\"done\": \"[Session] 'HostOnline' (up)!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## Download and install SteamCMD\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## Downloading the servers default config file\r\nFILE=$HOME/enshrouded_server.json\r\nif [ -f \"$FILE\" ]; then\r\n  echo -e \"ennshrouded_server.json configuration found\"\r\nelse  \r\n  echo -e \"No enshrouded_server.json found. Downloading default configuration..\"\r\n  cd $HOME\r\n  curl -sSL -o enshrouded_server.json https://raw.githubusercontent.com/Ptero-Eggs/game-eggs/refs/heads/main/enshrouded/enshrouded_server.json\r\n  echo -e \"Configuration file downloaded\"\r\nfi\r\n\r\n## End of installation\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Name of the server",
+            "env_variable": "SRV_NAME",
+            "default_value": "My Enshrouded Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Max Players",
+            "description": "Maximum number of players allowed",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[USER GROUP] ''Admin'' Group Password",
+            "description": "Password for the Admin user-group.\r\nPlayers using this password get:\r\n- canAccessInventories: true\r\n- canEditBase: true\r\n- canExtendBase: true\r\n- canKickBan: true.\r\nThe passwords for the usergroups can not all be the same/empty/only numerical",
+            "env_variable": "SRV_PW",
+            "default_value": "ChangeMe1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|not_regex:/^\\d+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "[USER GROUP] ''Friend'' Group Password",
+            "description": "Password for the Friend user-group.\r\nPlayers using this password get:\r\n- canAccessInventories: true\r\n- canEditBase: true\r\n- canExtendBase: true\r\n- canKickBan: false.\r\nThe passwords for the usergroups can not all be the same/empty/only numerical",
+            "env_variable": "SRV_PW2",
+            "default_value": "ChangeMe2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|not_regex:/^\\d+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "[USER GROUP] ''Guest'' Group Password",
+            "description": "Password for the Guest user-group.\r\nPlayers using this password get:\r\n- canAccessInventories: false\r\n- canEditBase: false\r\n- canExtendBase: false\r\n- canKickBan: false.\r\nThe passwords for the usergroups can not all be the same/empty/only numerical",
+            "env_variable": "SRV_PW3",
+            "default_value": "ChangeMe3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|not_regex:/^\\d+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "[USER GROUP] ''Visitor'' Group Password",
+            "description": "Password for the Visitor user-group.\r\nPlayers using this password get:\r\n- canAccessInventories: false\r\n- canEditBase: false\r\n- canExtendBase: false\r\n- canKickBan: false\r\n- canEditWorld: false\r\nThe passwords for the usergroups can not all be the same/empty/only numerical",
+            "env_variable": "SRV_PW4",
+            "default_value": "ChangeMe4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|not_regex:/^\\d+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2278520",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2278520",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Windows Install",
+            "description": "Whether to install the Windows version",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Validate",
+            "description": "Validate the server files through Steam",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "enshrouded-94a25ff79752",
+        "name": "Enshrouded",
+        "description": "Enshrouded is a game of survival, crafting, and Action RPG combat, set within a sprawling voxel-based continent. As you journey across the mountains and deserts of an open world, you are free to choose your path and shape your destiny.  Credit to gOOvER for the help with the proton image which seems to be performing better over the wine egg.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/enshrouded-94a25ff79752.json",
+        "sha256": "1260e357de3eb50a78222908d542aca1b50c5a566891e44f589cc8cb591bbca8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "enshrouded/egg-enshrouded.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/94a25ff79752.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Enshrouded",
+        "author": "vapokrocks@gmail.com",
+        "uuid": "a2db5dc5-a5b6-4a24-a78c-5913c367b202",
+        "description": "Enshrouded is a game of survival, crafting, and Action RPG combat, set within a sprawling voxel-based continent. As you journey across the mountains and deserts of an open world, you are free to choose your path and shape your destiny.  Credit to gOOvER for the help with the proton image which seems to be performing better over the wine egg.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm ./logs/enshrouded_server.log; proton run ./enshrouded_server.exe & ENS_PID=$! ; tail -c0 -F ./logs/enshrouded_server.log --pid=$ENS_PID",
+        "config": {
+          "files": "{\"enshrouded_server.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SRV_NAME}}\", \"password\": \"{{server.build.env.SRV_PW}}\", \"slotCount\": \"{{server.build.env.MAX_PLAYERS}}\", \"gamePort\": \"{{server.build.default.port}}\", \"queryPort\": \"{{server.build.env.QUERY_PORT}}\"}}}",
+          "startup": "{\"done\": \"[Session] 'HostOnline' (up)!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Enshrouded  Installscript${NC}\"\r\necho -e \"${YELLOW}Egg by gOOvER | https://goover.dev${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates jq dos2unix\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) $( [[ \"${STEAM_SDK}\" == \"1\" ]] && printf %s '+app_update 1007' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\n\r\nFILE=/mnt/server/enshrouded_server.json\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config already exist skipping\"\r\nelse \r\n    echo \"Config does not yet exist, making one\"\r\n    cd /mnt/server\r\n    touch enshrouded_server.json\r\n    echo \"{\" >> enshrouded_server.json\r\n    echo '\t\"name\": \"Enshrouded Server\",' >> enshrouded_server.json\r\n    echo '\t\"password\": \"\",' >> enshrouded_server.json\r\n    echo '\t\"saveDirectory\": \"./savegame\",' >> enshrouded_server.json\r\n    echo '\t\"logDirectory\": \"./logs\",' >> enshrouded_server.json\r\n    echo '\t\"ip\": \"0.0.0.0\",' >> enshrouded_server.json\r\n    echo '\t\"gamePort\": 15636,' >> enshrouded_server.json\r\n    echo '\t\"queryPort\": 15637,' >> enshrouded_server.json\r\n    echo '\t\"slotCount\": 16' >> enshrouded_server.json\r\n    echo '}' >> enshrouded_server.json\r\nfi\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[SERVER] Steam Query Port",
+            "description": "Steam Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2278520",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2278520",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Name of the server",
+            "env_variable": "SRV_NAME",
+            "default_value": "My Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Server password",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Max Players",
+            "description": "Maximum number of players allowed",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Validate",
+            "description": "Validate the serverfiles through Steam",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "enshrouded-9e5e3b492a0f",
+        "name": "Enshrouded",
+        "description": "Enshrouded is a game of survival, crafting, and Action RPG combat, set within a sprawling voxel-based continent. As you journey across the mountains and deserts of an open world, you are free to choose your path and shape your destiny.  Credit to gOOvER for the help with the proton image which seems to be performing better over the wine egg.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/enshrouded-9e5e3b492a0f.json",
+        "sha256": "0da9b7a5279cc6cafd232a24a9a245acb72740ebfab8ecf866584b4c3cd992d3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/enshrouded/egg-enshrouded.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/9e5e3b492a0f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-25T17:55:50+01:00",
+        "name": "Enshrouded",
+        "author": "vapokrocks@gmail.com",
+        "description": "Enshrouded is a game of survival, crafting, and Action RPG combat, set within a sprawling voxel-based continent. As you journey across the mountains and deserts of an open world, you are free to choose your path and shape your destiny.  Credit to gOOvER for the help with the proton image which seems to be performing better over the wine egg.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rm ./logs/enshrouded_server.log; proton run ./enshrouded_server.exe & ENS_PID=$! ; tail -c0 -F ./logs/enshrouded_server.log --pid=$ENS_PID",
+        "config": {
+          "files": "{\"enshrouded_server.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.build.env.SRV_NAME}}\", \"password\": \"{{server.build.env.SRV_PW}}\", \"slotCount\": \"{{server.build.env.MAX_PLAYERS}}\", \"gamePort\": \"{{server.build.default.port}}\", \"queryPort\": \"{{server.build.env.QUERY_PORT}}\"}}}",
+          "startup": "{\"done\": \"[Session] 'HostOnline' (up)!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\nclear\r\nRED='\\033[0;31m'\r\nGREEN='\\033[0;32m'\r\nYELLOW='\\033[1;33m'\r\nBLUE='\\033[0;34m'\r\nNC='\\033[0m'\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}Enshrouded  Installscript${NC}\"\r\necho -e \"${YELLOW}Egg by gOOvER | https://goover.dev${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates jq dos2unix\r\n\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## install game using steamcmd\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) $( [[ \"${STEAM_SDK}\" == \"1\" ]] && printf %s '+app_update 1007' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\necho -e \"${GREEN}..done..${NC}\"\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n# add below your custom commands if needed\r\n\r\nFILE=/mnt/server/enshrouded_server.json\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config already exist skipping\"\r\nelse \r\n    echo \"Config does not yet exist, making one\"\r\n    cd /mnt/server\r\n    touch enshrouded_server.json\r\n    echo \"{\" >> enshrouded_server.json\r\n    echo '\t\"name\": \"Enshrouded Server\",' >> enshrouded_server.json\r\n    echo '\t\"password\": \"\",' >> enshrouded_server.json\r\n    echo '\t\"saveDirectory\": \"./savegame\",' >> enshrouded_server.json\r\n    echo '\t\"logDirectory\": \"./logs\",' >> enshrouded_server.json\r\n    echo '\t\"ip\": \"0.0.0.0\",' >> enshrouded_server.json\r\n    echo '\t\"gamePort\": 15636,' >> enshrouded_server.json\r\n    echo '\t\"queryPort\": 15637,' >> enshrouded_server.json\r\n    echo '\t\"slotCount\": 16' >> enshrouded_server.json\r\n    echo '}' >> enshrouded_server.json\r\nfi\r\n## install end\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[SERVER] Steam Query Port",
+            "description": "Steam Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2278520",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2278520",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Name",
+            "description": "Name of the server",
+            "env_variable": "SRV_NAME",
+            "default_value": "My Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Server Password",
+            "description": "Server password",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[SERVER] Max Players",
+            "description": "Maximum number of players allowed",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Validate",
+            "description": "Validate the serverfiles through Steam",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

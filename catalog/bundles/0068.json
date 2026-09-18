@@ -1,0 +1,1299 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "sa-mp-af5cb8d33f50",
+        "name": "SA-MP",
+        "description": "SA-MP is a free Massively Multiplayer Online game mod for the PC version of Rockstar Games Grand Theft Auto: San Andreas (tm).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sa-mp-af5cb8d33f50.json",
+        "sha256": "a3e0235bebca421960e1ebf086931cd37e7c2e75b2e32bd0c01356a60e3897cc",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/samp/egg-s-a--m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/af5cb8d33f50.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:08+00:00",
+        "name": "SA-MP",
+        "author": "bl4ckspr4y@protonmail.com",
+        "uuid": "3fdde27f-8b7a-426e-b50b-34471e74a10b",
+        "description": "SA-MP is a free Massively Multiplayer Online game mod for the PC version of Rockstar Games Grand Theft Auto: San Andreas (tm).",
+        "features": null,
+        "docker_images": {
+          "Samp": "ghcr.io/parkervcp/games:samp"
+        },
+        "file_denylist": [],
+        "startup": "./samp03svr",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"port\": \"port {{server.build.default.port}}\", \"rcon_password\": \"rcon_password {{server.build.env.RCON_PASS}}\"}}}",
+          "startup": "{\"done\": \"Started server on \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# Check if VERSION is set and starts with an uppercase \"R\"\r\nif [[ -n \"$VERSION\" && \"$VERSION\" == R* ]]; then\r\n    VERSION=\"0.3.7\"\r\n    echo \"Updated VERSION: $VERSION\"\r\nfi\r\n\r\ncd /tmp || exit\r\necho \"running: curl -sSL -o samp.tar.gz https://sampcenter.com/download/server/linux/${VERSION}.tar.gz\"\r\ncurl -sSL -o samp.tar.gz https://sampcenter.com/download/server/linux/${VERSION}.tar.gz\r\n\r\nmkdir -p /mnt/server\r\ntar -xzvf samp.tar.gz --strip-components=1 -C /mnt/server/\r\n\r\ncd /mnt/server || exit\r\n\r\nsed -i '3d' /mnt/server/server.cfg\r\necho \"rcon_password ${RCON_PASS}\" >> /mnt/server/server.cfg\r\n\r\nchown -R root:root /mnt\r\n\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Example: if the download url is https://sampcenter.com/download/server/linux/0.3.7.tar.gz then the variable should be: `0.3.7`",
+            "env_variable": "Version",
+            "default_value": "0.3.7",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon password",
+            "description": "The password used for rcon",
+            "env_variable": "RCON_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "satisfactory-63255936b071",
+        "name": "Satisfactory",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/satisfactory-63255936b071.json",
+        "sha256": "2be41634675da5bfb6852ff03e7de4a78938ced2546aa1ef35b38406750c7442",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/satisfactory/egg-satisfactory.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/63255936b071.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-06-13T23:59:02+00:00",
+        "name": "Satisfactory",
+        "author": "rehlmgaming@gmail.com",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./Engine/Binaries/Linux/*-Linux-Shipping FactoryGame ?listen -Port={{SERVER_PORT}} -ServerQueryPort={{QUERY_PORT}} -BeaconPort={{BEACON_PORT}} -multihome=0.0.0.0 $(if {{DISABLE_SEASONAL}}; then echo \"-DisableSeasonalEvents\"; fi)",
+        "config": {
+          "files": "{\"FactoryGame/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\"}}, \"FactoryGame/Saved/Config/LinuxServer/Engine.ini\": {\"parser\": \"file\", \"find\": {\"mNumRotatingAutosaves\": \"mNumRotatingAutosaves={{server.build.env.NUM_AUTOSAVES}}\", \"bImplicitSend\": \"bImplicitSend={{server.build.env.UPLOAD_CRASH_REPORT}}\", \"InitialConnectTimeout\": \"InitialConnectTimeout={{server.build.env.INIT_CONNECT_TIMEOUT}}\", \"ConnectionTimeout\": \"ConnectionTimeout={{server.build.env.CONNECT_TIMEOUT}}\"}}, \"FactoryGame/Saved/Config/LinuxServer/GameUserSettings.ini\": {\"parser\": \"file\", \"find\": {\"mFloatValues\": \"mFloatValues=((\\\"FG.AutosaveInterval\\\", {{server.build.env.AUTOSAVE_INTERVAL}}))\", \"mIntValues\": \"mIntValues=((\\\"FG.NetworkQuality\\\", {{server.build.env.NETWORK_QUALITY}}))\"}}}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Satisfactory Egg - egg-satisfactory.json\r\n# Authors: Red-Thirten, Kubi, matthewp, Software-Noob, and Zarklord\r\n# Date: 2023/06/13\r\n# License: MIT License\r\n\r\n## Download and install SteamCMD\r\ncd /tmp\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\nmkdir -p /mnt/server/steamcmd\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir /mnt/server +login anonymous +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +exit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Satisfactory setup\r\n# Check for successful installation and make the server binary executable.\r\n# Use `find` to see if a valid server binary exists using a wildcard, because\r\n# the binary name can differ between UE4 and UE5.\r\ncd /mnt/server/Engine/Binaries/Linux\r\ncount=$(find . -maxdepth 1 -name '*-Linux-Shipping' -type f -executable | wc -l)\r\nif [[ $count -eq 0 ]]; then\r\n    echo -e \"\\n\\nSteamCMD failed to install the Satisfactory Dedicated Server!\"\r\n    echo -e \"\\tTry reinstalling the server again.\\n\"\r\n    exit 1\r\nelse\r\n    chmod +x *-Linux-Shipping\r\nfi\r\n\r\n# Make Config directory and default .ini files (since they are not initially present before first server start)\r\nmkdir -p /mnt/server/FactoryGame/Saved/Config/LinuxServer/ && cd \"$_\"\r\n# Currently, this will delete & re-create certain .ini files during a re-install if they are already present.\r\n# While undesirable, this is required due to a current Pterodactyl ini config parser limitation.\r\n# When the patch to this limitation hits the production branch, this will be updated.\r\nrm -f Engine.ini Game.ini GameUserSettings.ini\r\n\r\necho -e '\\nCreating default \"Engine.ini\" configuration file...'\r\ncat > Engine.ini << EOF\r\n[/Script/FactoryGame.FGSaveSession]\r\nmNumRotatingAutosaves=${NUM_AUTOSAVES}\r\n\r\n[CrashReportClient]\r\nbImplicitSend=${UPLOAD_CRASH_REPORT}\r\n\r\n[/Script/OnlineSubsystemUtils.IpNetDriver]\r\nInitialConnectTimeout=${INIT_CONNECT_TIMEOUT}\r\nConnectionTimeout=${CONNECT_TIMEOUT}\r\nEOF\r\n\r\necho -e 'Creating default \"Game.ini\" configuration file...'\r\ncat > Game.ini << EOF\r\n[/Script/Engine.GameSession]\r\nMaxPlayers=${MAX_PLAYERS}\r\nEOF\r\n\r\necho -e 'Creating default \"GameUserSettings.ini\" configuration file...'\r\ncat > GameUserSettings.ini << EOF\r\n[/Script/FactoryGame.FGGameUserSettings]\r\nmIntValues=((\"FG.NetworkQuality\", ${NETWORK_QUALITY}))\r\nmFloatValues=((\"FG.AutosaveInterval\", ${AUTOSAVE_INTERVAL}))\r\nmAutoDetectSettingsHandled=False\r\nmPrimaryLanguage=\r\nCurrentFGGameUserSettingsVersion=0\r\nbUseVSync=False\r\nbUseDynamicResolution=False\r\nResolutionSizeX=1280\r\nResolutionSizeY=720\r\nLastUserConfirmedResolutionSizeX=1280\r\nLastUserConfirmedResolutionSizeY=720\r\nWindowPosX=-1\r\nWindowPosY=-1\r\nFullscreenMode=1\r\nLastConfirmedFullscreenMode=1\r\nPreferredFullscreenMode=1\r\nVersion=5\r\nAudioQualityLevel=0\r\nLastConfirmedAudioQualityLevel=0\r\nFrameRateLimit=0.000000\r\nDesiredScreenWidth=1280\r\nDesiredScreenHeight=720\r\nLastUserConfirmedDesiredScreenWidth=1280\r\nLastUserConfirmedDesiredScreenHeight=720\r\nLastRecommendedScreenWidth=-1.000000\r\nLastRecommendedScreenHeight=-1.000000\r\nLastCPUBenchmarkResult=-1.000000\r\nLastGPUBenchmarkResult=-1.000000\r\nLastGPUBenchmarkMultiplier=1.000000\r\nbUseHDRDisplayOutput=False\r\nHDRDisplayOutputNits=1000\r\n\r\n[ScalabilityGroups]\r\nsg.ResolutionQuality=100.000000\r\nsg.ViewDistanceQuality=3\r\nsg.AntiAliasingQuality=3\r\nsg.ShadowQuality=3\r\nsg.PostProcessQuality=3\r\nsg.TextureQuality=3\r\nsg.EffectsQuality=3\r\nsg.FoliageQuality=3\r\nsg.ShadingQuality=3\r\n\r\n[/Script/Engine.GameUserSettings]\r\nbUseDesiredScreenHeight=False\r\n\r\n\r\nEOF\r\n\r\necho -e \"\\nSatisfactory Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "This is the port that your clients will type in and use to connect to the lobby (not the game world). Ensure this port matches your externally forwarded port, and is distanced from other running Satisfactory servers in Pterodactyl (increments of 100 are recommended). This is also true for the Primary/Game Port!",
+            "env_variable": "QUERY_PORT",
+            "default_value": "15777",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[REQUIRED] Beacon Port",
+            "description": "This port provides a lightweight way for clients to contact a server and interact with it without committing to a normal game connection (likely used for client administration). Ensure this port matches your externally forwarded port, and is distanced from other running Satisfactory servers in Pterodactyl (increments of 100 are recommended).",
+            "env_variable": "BEACON_PORT",
+            "default_value": "15000",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "How often, in seconds, the server should generate a new autosave (ex. 300 = 5 min). Keep in mind that shorter times mean that while the server will save the game more often, it also means a potential drop in server performance. NOTE: This overrides any \"FG.AutosaveInterval\" commands made to the console!",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Number of Rotating Autosaves",
+            "description": "Number of session auto-saves for the server to keep before the oldest save is deleted and the others are moved down the list.",
+            "env_variable": "NUM_AUTOSAVES",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Upload Crash Reports",
+            "description": "Accepted values are \"true\" or \"false\". Determines if the server should upload any crash reports to the developer to help pinpoint issues for future patches.",
+            "env_variable": "UPLOAD_CRASH_REPORT",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable Seasonal Events",
+            "description": "Accepted values are \"true\" or \"false\". Setting to \"true\" will disable any currently active seasonal events.",
+            "env_variable": "DISABLE_SEASONAL",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "[Experimental] Max Players",
+            "description": "[Requires server re-install to change default value!] The server and client are currently not optimized to support more than 4 players. However, you can override this value here at your own risk of poor performance.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Client Initial Connection Timeout",
+            "description": "Time in seconds to wait for a new client connection to be established before destroying the connection.",
+            "env_variable": "INIT_CONNECT_TIMEOUT",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Client Established Connection Timeout",
+            "description": "Time in seconds to wait before considering an established client connection timed out. Typically shorter than the time to wait on an initial connection because this connection should already have been setup and any interruption should be trapped quicker.",
+            "env_variable": "CONNECT_TIMEOUT",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Network Quality",
+            "description": "[0 = Low, 1 = Medium, 2 = High, 3 = Ultra] Sets the network configuration for the game server (shouldn't need to be changed). NOTE: This overrides any \"FG.NetworkQuality\" commands made to the console!",
+            "env_variable": "NETWORK_QUALITY",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,3",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Branch Name",
+            "description": "[Accepted Values: \"public\", \"experimental\", or leave empty to use the primary branch of the server] Used to download or switch to a non-primary branch of the game server. \"Automatic Updates\" and \"Validate Server Files\" must be set to \"1\" to switch branches if the server is already installed. NOTE: Any non-primary branches may not be fully compatible/stable!",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable|in:public,experimental",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Satisfactory Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1690800",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "satisfactory-9235755db3b1",
+        "name": "Satisfactory",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/satisfactory-9235755db3b1.json",
+        "sha256": "dca4c3a3fc3e334d2d072cf43673384d682c3b58b32bce58de9ba9521ca3af88",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "satisfactory/egg-satisfactory.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/9235755db3b1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Satisfactory",
+        "author": "red_thirten@yahoo.com",
+        "uuid": "dafdb96a-e8c1-449f-a6ae-b7ba209c05ff",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Engine/Binaries/Linux/*-Linux-Shipping FactoryGame -Port={{SERVER_PORT}} -ReliablePort={{RELIABLE_PORT}}",
+        "config": {
+          "files": "{\"FactoryGame/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/Engine.GameSession].MaxPlayers\": \"{{server.environment.MAX_PLAYERS}}\"}}, \"FactoryGame/Saved/Config/LinuxServer/Engine.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/FactoryGame.FGSaveSession].mNumRotatingAutosaves\": \"{{server.environment.NUM_AUTOSAVES}}\", \"[/Script/OnlineSubsystemUtils.IpNetDriver].InitialConnectTimeout\": \"{{server.environment.INIT_CONNECT_TIMEOUT}}\", \"[/Script/OnlineSubsystemUtils.IpNetDriver].ConnectionTimeout\": \"{{server.environment.CONNECT_TIMEOUT}}\"}}}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Satisfactory Egg - egg-satisfactory.json\r\n# Authors: Red-Thirten, Kubi, matthewp, Software-Noob, and Zarklord\r\n# Date: 2024/09/10\r\n# License: MIT License\r\n\r\n## Download and install SteamCMD\r\ncd /tmp\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\nmkdir -p /mnt/server/steamcmd\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir /mnt/server +login anonymous +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +exit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Satisfactory setup\r\n# Check for successful installation and make the server binary executable.\r\n# Use `find` to see if a valid server binary exists using a wildcard, because\r\n# the binary name may change in the future.\r\n# (eg. it changed when the engine was updated from UE4 to UE5)\r\ncd /mnt/server/Engine/Binaries/Linux\r\ncount=$(find . -maxdepth 1 -name '*-Linux-Shipping' -type f -executable | wc -l)\r\nif [[ $count -eq 0 ]]; then\r\n    echo -e \"\\n\\nSteamCMD failed to install the Satisfactory Dedicated Server!\"\r\n    echo -e \"\\tTry reinstalling the server again.\\n\"\r\n    exit 1\r\nelse\r\n    chmod +x *-Linux-Shipping\r\nfi\r\n\r\necho -e \"\\nSatisfactory Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Host] Reliable Messaging Port",
+            "description": "This port is required for the initial handshake between clients and the server. When connecting, clients should connect to the server's primary port; NOT this port.",
+            "env_variable": "RELIABLE_PORT",
+            "default_value": "8888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:0|max:65535",
+            "sort": 1
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 2
+          },
+          {
+            "name": "Number of Rotating Autosaves",
+            "description": "Number of session auto-saves for the server to keep before the oldest save is deleted and the others are moved down the list.",
+            "env_variable": "NUM_AUTOSAVES",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "sort": 3
+          },
+          {
+            "name": "[Experimental] Max Players",
+            "description": "The server and client are currently not optimized to support more than 4 players. However, you can override this value here at your own risk of poor performance.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "sort": 4
+          },
+          {
+            "name": "[Advanced] Client Initial Connection Timeout",
+            "description": "Time in seconds to wait for a new client connection to be established before destroying the connection.",
+            "env_variable": "INIT_CONNECT_TIMEOUT",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "sort": 5
+          },
+          {
+            "name": "[Advanced] Client Established Connection Timeout",
+            "description": "Time in seconds to wait before considering an established client connection timed out. Typically shorter than the time to wait on an initial connection because this connection should already have been setup and any interruption should be trapped quicker.",
+            "env_variable": "CONNECT_TIMEOUT",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "sort": 6
+          },
+          {
+            "name": "[Advanced] Branch Name",
+            "description": "[Accepted Values: \"public\", \"experimental\", or leave empty to use the primary branch of the server] Used to download or switch to a non-primary branch of the game server. \"Automatic Updates\" and \"Validate Server Files\" must be set to \"1\" to switch branches if the server is already installed. NOTE: Any non-primary branches may not be fully compatible/stable!",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable|in:public,experimental",
+            "sort": 7
+          },
+          {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 8
+          },
+          {
+            "name": "[System] Satisfactory Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1690800",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:1690800",
+            "sort": 9
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "satisfactory-c227ed978ac7",
+        "name": "Satisfactory",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/satisfactory-c227ed978ac7.json",
+        "sha256": "6e71eb794dfea3847a313516109f885b8a09d368c48d85915049646514496369",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "satisfactory/egg-satisfactory.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c227ed978ac7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-21T17:27:04+10:00",
+        "name": "Satisfactory",
+        "author": "red_thirten@yahoo.com",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Engine/Binaries/Linux/*-Linux-Shipping FactoryGame -Port={{SERVER_PORT}} -ReliablePort={{RELIABLE_PORT}} -ExternalReliablePort={{RELIABLE_PORT}}",
+        "config": {
+          "files": "{\"FactoryGame/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/Engine.GameSession].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\"}}, \"FactoryGame/Saved/Config/LinuxServer/Engine.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/FactoryGame.FGSaveSession].mNumRotatingAutosaves\": \"{{server.build.env.NUM_AUTOSAVES}}\", \"[/Script/OnlineSubsystemUtils.IpNetDriver].InitialConnectTimeout\": \"{{server.build.env.INIT_CONNECT_TIMEOUT}}\", \"[/Script/OnlineSubsystemUtils.IpNetDriver].ConnectionTimeout\": \"{{server.build.env.CONNECT_TIMEOUT}}\"}}}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Satisfactory Egg - egg-satisfactory.json\r\n# Authors: Red-Thirten, Kubi, matthewp, Software-Noob, and Zarklord\r\n# Date: 2024/09/10\r\n# License: MIT License\r\n\r\n## Download and install SteamCMD\r\ncd /tmp\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\nmkdir -p /mnt/server/steamcmd\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir /mnt/server +login anonymous +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +exit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Satisfactory setup\r\n# Check for successful installation and make the server binary executable.\r\n# Use `find` to see if a valid server binary exists using a wildcard, because\r\n# the binary name may change in the future.\r\n# (eg. it changed when the engine was updated from UE4 to UE5)\r\ncd /mnt/server/Engine/Binaries/Linux\r\ncount=$(find . -maxdepth 1 -name '*-Linux-Shipping' -type f -executable | wc -l)\r\nif [[ $count -eq 0 ]]; then\r\n    echo -e \"\\n\\nSteamCMD failed to install the Satisfactory Dedicated Server!\"\r\n    echo -e \"\\tTry reinstalling the server again.\\n\"\r\n    exit 1\r\nelse\r\n    chmod +x *-Linux-Shipping\r\nfi\r\n\r\necho -e \"\\nSatisfactory Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Validate Server Files",
+            "description": "Validates all server files via SteamCMD when Automatic Updates is enabled. (1 Enable | 0 Disable) Significantly increases startup time — only enable if you suspect file corruption.",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of concurrent players. Coffee Stain officially optimizes the game for 4 players. Higher values work but may degrade performance on large factories.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Number of Rotating Autosaves",
+            "description": "How many autosave slots the server keeps before overwriting the oldest (writes to Engine.ini). This setting is NOT exposed in the in-game Server Manager — the panel is the only place to change it without editing files directly.",
+            "env_variable": "NUM_AUTOSAVES",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Client Initial Connection Timeout",
+            "description": "Seconds to wait for a new client connection to fully establish before dropping it. Bump to 60 if players on slow connections fail to join the first time.",
+            "env_variable": "INIT_CONNECT_TIMEOUT",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Client Established Connection Timeout",
+            "description": "Seconds to wait before considering an already-connected client timed out. Typically shorter than the initial timeout because the connection is already established and interruptions should be detected faster.",
+            "env_variable": "CONNECT_TIMEOUT",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch Name",
+            "description": "Steam branch to install. Leave empty for the default (stable) branch, set to \"experimental\" for the experimental branch, or enter a private branch name if you have access. To switch branches on an existing server, also enable Automatic Updates and Validate Server Files.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch Password",
+            "description": "Password for the selected Steam branch. Only needed for password-protected branches; leave empty for \"public\" or \"experimental\".",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Satisfactory App ID",
+            "description": "Steam App ID used for installation and updates. Should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1690800",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:1690800",
+            "field_type": "text"
+          },
+          {
+            "name": "Reliable Port",
+            "description": "Reliable messaging port (TCP). Required for Satisfactory 1.1 and above. Must be opened in your firewall and match externally — if you change this, also update the port forward on your router. Passed to both -ReliablePort (bind) and -ExternalReliablePort (advertised in TLS handshake).",
+            "env_variable": "RELIABLE_PORT",
+            "default_value": "8888",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1024|max:65535",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "satisfactory-e672d4dc5ec1",
+        "name": "Satisfactory",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/satisfactory-e672d4dc5ec1.json",
+        "sha256": "a56e351295464ccbdc0aea1e6019843dc876dee369162a4eaf55ed53dd1f3c9e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "satisfactory/egg-pterodactyl-satisfactory.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e672d4dc5ec1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-04T10:49:13-07:00",
+        "name": "Satisfactory",
+        "author": "red_thirten@yahoo.com",
+        "description": "Satisfactory is a first-person open-world factory building game with a dash of exploration and combat. Play alone or with friends, explore an alien planet, create multi-story factories, and enter conveyor belt heaven!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Engine/Binaries/Linux/*-Linux-Shipping FactoryGame -Port={{SERVER_PORT}} -ReliablePort={{RELIABLE_PORT}}",
+        "config": {
+          "files": "{\"FactoryGame/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/Engine.GameSession].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\"}}, \"FactoryGame/Saved/Config/LinuxServer/Engine.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/FactoryGame.FGSaveSession].mNumRotatingAutosaves\": \"{{server.build.env.NUM_AUTOSAVES}}\", \"[/Script/OnlineSubsystemUtils.IpNetDriver].InitialConnectTimeout\": \"{{server.build.env.INIT_CONNECT_TIMEOUT}}\", \"[/Script/OnlineSubsystemUtils.IpNetDriver].ConnectionTimeout\": \"{{server.build.env.CONNECT_TIMEOUT}}\"}}}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Satisfactory Egg - egg-satisfactory.json\r\n# Authors: Red-Thirten, Kubi, matthewp, Software-Noob, and Zarklord\r\n# Date: 2024/09/10\r\n# License: MIT License\r\n\r\n## Download and install SteamCMD\r\ncd /tmp\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\nmkdir -p /mnt/server/steamcmd\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir /mnt/server +login anonymous +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +exit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Satisfactory setup\r\n# Check for successful installation and make the server binary executable.\r\n# Use `find` to see if a valid server binary exists using a wildcard, because\r\n# the binary name may change in the future.\r\n# (eg. it changed when the engine was updated from UE4 to UE5)\r\ncd /mnt/server/Engine/Binaries/Linux\r\ncount=$(find . -maxdepth 1 -name '*-Linux-Shipping' -type f -executable | wc -l)\r\nif [[ $count -eq 0 ]]; then\r\n    echo -e \"\\n\\nSteamCMD failed to install the Satisfactory Dedicated Server!\"\r\n    echo -e \"\\tTry reinstalling the server again.\\n\"\r\n    exit 1\r\nelse\r\n    chmod +x *-Linux-Shipping\r\nfi\r\n\r\necho -e \"\\nSatisfactory Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Host] Reliable Messaging Port",
+            "description": "This port is required for the initial handshake between clients and the server. When connecting, clients should connect to the server's primary port; NOT this port.",
+            "env_variable": "RELIABLE_PORT",
+            "default_value": "8888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:0|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Number of Rotating Autosaves",
+            "description": "Number of session auto-saves for the server to keep before the oldest save is deleted and the others are moved down the list.",
+            "env_variable": "NUM_AUTOSAVES",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "[Experimental] Max Players",
+            "description": "The server and client are currently not optimized to support more than 4 players. However, you can override this value here at your own risk of poor performance.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Client Initial Connection Timeout",
+            "description": "Time in seconds to wait for a new client connection to be established before destroying the connection.",
+            "env_variable": "INIT_CONNECT_TIMEOUT",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Client Established Connection Timeout",
+            "description": "Time in seconds to wait before considering an established client connection timed out. Typically shorter than the time to wait on an initial connection because this connection should already have been setup and any interruption should be trapped quicker.",
+            "env_variable": "CONNECT_TIMEOUT",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Branch Name",
+            "description": "[Accepted Values: \"public\", \"experimental\", or leave empty to use the primary branch of the server] Used to download or switch to a non-primary branch of the game server. \"Automatic Updates\" and \"Validate Server Files\" must be set to \"1\" to switch branches if the server is already installed. NOTE: Any non-primary branches may not be fully compatible/stable!",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable|in:public,experimental",
+            "field_type": "text"
+          },
+          {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Satisfactory Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1690800",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:1690800",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "scp-sl-0be49acbd644",
+        "name": "SCP:SL",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/scp-sl-0be49acbd644.json",
+        "sha256": "987b765f8292926b2e7c9b931ef10ef886edfcb2a51a6f3eb6b7894c63d1c1f2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "scpsl/dedicated/egg-scpsl.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0be49acbd644.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-18T14:02:28+01:00",
+        "name": "SCP:SL",
+        "author": "eggs@goover.dev",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:mono_latest": "ghcr.io/ptero-eggs/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./LocalAdmin {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Waiting for players..\"}",
+          "logs": "{}",
+          "stop": "EXIT"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p $HOME/.config\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "996560",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:996560",
+            "field_type": "text"
+          },
+          {
+            "name": "Dotnet Bundle",
+            "description": "Only used for EXILED Framework Updater.",
+            "env_variable": "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
+            "default_value": "./dotnet-bundle",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Use this to instruct your panel whether to use a branch of SCP: SL (typically used for testing versions). To install the branch, you need to click \"Reinstall Server\" to execute the installation script.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch password",
+            "description": "Branch password (optional)",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "scp-sl-88217b89a227",
+        "name": "SCP:SL",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/scp-sl-88217b89a227.json",
+        "sha256": "5ffc7b622299b984a2a611727ed03707a49384ee7521f3220f2cca4b0d52f0a5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "scpsl/dedicated/egg-s-c-p--s-l.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/88217b89a227.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "SCP:SL",
+        "author": "eggs@goover.dev",
+        "uuid": "58d17d38-19e0-416b-b7dc-4e7d687c406f",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./LocalAdmin {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Waiting for players..\"}",
+          "logs": "{}",
+          "stop": "EXIT"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p $HOME/.config\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "996560",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:996560",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Dotnet Bundle",
+            "description": "Only used for EXILED Framework Updater.",
+            "env_variable": "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
+            "default_value": "./dotnet-bundle",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Use this to instruct your panel whether to use a branch of SCP: SL (typically used for testing versions). To install the branch, you need to click \"Reinstall Server\" to execute the installation script.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Branch password",
+            "description": "Branch password (optional)",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "scp-sl-bb331b8b77a1",
+        "name": "SCP:SL",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/scp-sl-bb331b8b77a1.json",
+        "sha256": "518c07dbbeab7e7c5caaa44777e3a87b316b3b94159a7b90055ddd8bc04c726b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "scpsl/dedicated/egg-pterodactyl-s-c-p--s-l.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/bb331b8b77a1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:46+00:00",
+        "name": "SCP:SL",
+        "author": "eggs@goover.dev",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./LocalAdmin {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Waiting for players..\"}",
+          "stop": "EXIT"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p $HOME/.config\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "996560",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:996560",
+            "field_type": "text"
+          },
+          {
+            "name": "Dotnet Bundle",
+            "description": "Only used for EXILED Framework Updater.",
+            "env_variable": "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
+            "default_value": "./dotnet-bundle",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Use this to instruct your panel whether to use a branch of SCP: SL (typically used for testing versions). To install the branch, you need to click \"Reinstall Server\" to execute the installation script.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch password",
+            "description": "Branch password (optional)",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "scp-sl-f96535e80c33",
+        "name": "SCP:SL",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/scp-sl-f96535e80c33.json",
+        "sha256": "1d24e5f09cc58d3d8d26061a7fcf49576f60363e644f7408bafa7de634eb579d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/scpsl/dedicated/egg-scpsl.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/f96535e80c33.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-18T14:02:28+01:00",
+        "name": "SCP:SL",
+        "author": "eggs@goover.dev",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./LocalAdmin {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Waiting for players..\"}",
+          "logs": "{}",
+          "stop": "EXIT"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p $HOME/.config\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "996560",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:996560",
+            "field_type": "text"
+          },
+          {
+            "name": "Dotnet Bundle",
+            "description": "Only used for EXILED Framework Updater.",
+            "env_variable": "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
+            "default_value": "./dotnet-bundle",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Use this to instruct your panel whether to use a branch of SCP: SL (typically used for testing versions). To install the branch, you need to click \"Reinstall Server\" to execute the installation script.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch password",
+            "description": "Branch password (optional)",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "scp-sl-exiled-ba060bd765af",
+        "name": "SCP:SL - Exiled",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server with Exiled Plugin Framework - https://github.com/ExMod-Team/EXILED",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/scp-sl-exiled-ba060bd765af.json",
+        "sha256": "b401a6d0ca2334b1512adeff7fa19ba939860100deb68adf3a7c67d7290a5dfd",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "scpsl/exiled/egg-s-c-p--s-l--exiled.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/ba060bd765af.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-11-15T12:35:55+00:00",
+        "name": "SCP:SL - Exiled",
+        "author": "eggs@purpleflaghosting.com",
+        "description": "Egg for SCP: Secret Laboratory Dedicated Linux Server with Exiled Plugin Framework - https://github.com/ExMod-Team/EXILED",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Mono - Latest": "ghcr.io/ptero-eggs/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./LocalAdmin {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Waiting for players\"}",
+          "logs": "{}",
+          "stop": "EXIT"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nmkdir -p $HOME/.config\r\n\r\n# Download Exiled installer\r\ncurl -L -o /tmp/Exiled.Installer-Linux https://github.com/ExMod-Team/EXILED/releases/latest/download/Exiled.Installer-Linux \r\nchmod +x /tmp/Exiled.Installer-Linux\r\n\r\n\r\n# Run Exiled installer\r\nif [[ -n $EXILED_VERSION  ]] && [[ \"${EXILED_VERSION}\" != \"latest\" ]]; then\r\n    echo \"Installing Exiled version ${EXILED_VERSION}...\"\r\n\r\n    if [[ \"${EXILED_PRE_RELEASES}\" == \"1\" ]]; then\r\n        echo \"Including Exiled pre-releases\"\r\n    fi\r\nelse\r\n    echo \"Installing the latest Exiled version...\"\r\n    EXILED_VERSION=\"\"\r\nfi\r\n\r\n# shellcheck disable=SC2046\r\n/tmp/Exiled.Installer-Linux --path /mnt/server/ --appdata /mnt/server/.config --skip-version-select --exiled /mnt/server/.config $( [[ \"${EXILED_PRE_RELEASES}\" == \"1\" ]] && echo \"--pre-releases \" || echo \"\" )$( [[ -n \"${EXILED_VERSION}\" ]] && echo \"--target-version ${EXILED_VERSION} \" || echo \"\" )\r\n\r\n\r\n\r\necho \"Installation complete.\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Exiled Version",
+            "description": "Exiled version to install. \"latest\" will install the latest release of Exiled.",
+            "env_variable": "EXILED_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Exiled Pre-Releases",
+            "description": "If Exiled Version is set to latest, this will cause it to include pre-release versions.\r\nThis is not required to be on when setting a specific Exiled version",
+            "env_variable": "EXILED_PRE_RELEASES",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "Steam AppID to install",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "996560",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Installs beta branch from steam if specified. Requires a reinstall to switch branches properly.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Dotnet Bundle",
+            "description": "For EXILED Framework Updater.",
+            "env_variable": "DOTNET_BUNDLE_EXTRACT_BASE_DIR",
+            "default_value": "./dotnet-bundle",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

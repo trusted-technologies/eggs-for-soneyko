@@ -1,0 +1,1102 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "qanga-4b6d363c892f",
+        "name": "QANGA",
+        "description": "QANGA: Dive into a sci-fi adventure of exploration and resilience across the cosmos. Merge your mind with a state-of-the-art cyborg crafted by ICLab's Industry labs, and journey through this expansive universe! ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/qanga-4b6d363c892f.json",
+        "sha256": "51543567ef4f18cb43165e45ae0fdb452322a40c5e20c6b41fa38386ae532ae0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "qanga/egg-q-a-n-g-a.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4b6d363c892f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "QANGA",
+        "author": "josdekurk@gmail.com",
+        "uuid": "7c7a14bb-51a4-4efd-91c5-991cf426a135",
+        "description": "QANGA: Dive into a sci-fi adventure of exploration and resilience across the cosmos. Merge your mind with a state-of-the-art cyborg crafted by ICLab's Industry labs, and journey through this expansive universe! ",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd Debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Qanga/Binaries/Linux/QangaServer-Linux-Shipping Qanga /Game/Maps/Universe/{{MAP}}? -server -log -port={{SERVER_PORT}} -map={{MAP}} -sessionName=\"{{SESSION_NAME}}\" -QueryPort={{QUERY_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Steam Sockets Adress\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1652070",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1652070"
+          },
+          {
+            "sort": 2,
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean"
+          },
+          {
+            "sort": 3,
+            "name": "Map",
+            "description": "The Server Map",
+            "env_variable": "MAP",
+            "default_value": "L_Persistent_Universe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string"
+          },
+          {
+            "sort": 4,
+            "name": "Session Name",
+            "description": "The Name of the Session",
+            "env_variable": "SESSION_NAME",
+            "default_value": "Survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:5|max:25"
+          },
+          {
+            "sort": 5,
+            "name": "Query Port",
+            "description": "The Query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "qanga-8af582de5ab8",
+        "name": "QANGA",
+        "description": "QANGA: Dive into a sci-fi adventure of exploration and resilience across the cosmos. Merge your mind with a state-of-the-art cyborg crafted by ICLab's Industry labs, and journey through this expansive universe! ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/qanga-8af582de5ab8.json",
+        "sha256": "e7a1de71d18aa98d27783582367362a68806a523fa11e398b6f39edd27ca0d6b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "qanga/egg-pterodactyl-q-a-n-g-a.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8af582de5ab8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-29T11:36:30+01:00",
+        "name": "QANGA",
+        "author": "josdekurk@gmail.com",
+        "description": "QANGA: Dive into a sci-fi adventure of exploration and resilience across the cosmos. Merge your mind with a state-of-the-art cyborg crafted by ICLab's Industry labs, and journey through this expansive universe! ",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd Debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Qanga/Binaries/Linux/QangaServer-Linux-Shipping Qanga /Game/Maps/Universe/{{MAP}}? -server -log -port={{SERVER_PORT}} -map={{MAP}} -sessionName=\"{{SESSION_NAME}}\" -QueryPort={{QUERY_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Steam Sockets Adress\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1652070",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1652070",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The Server Map",
+            "env_variable": "MAP",
+            "default_value": "L_Persistent_Universe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Session Name",
+            "description": "The Name of the Session",
+            "env_variable": "SESSION_NAME",
+            "default_value": "Survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:5|max:25",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The Query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "quake-live-2179fcfbe4a7",
+        "name": "Quake Live",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/quake-live-2179fcfbe4a7.json",
+        "sha256": "a45b26ecf4c2847ee32dbd035c99f1823f3d8c30c04afeea6585c0639fb8ae84",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/quake_live/egg-quake-live.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/2179fcfbe4a7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-01-12T15:34:50+01:00",
+        "name": "Quake Live",
+        "author": "patz.michael@gmail.com",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./qzeroded.x64  +set net_port {{SERVER_PORT}} +set sv_hostname \"{{SERVER_NAME}}\" +set sv_serverType \"{{SERVER_TYPE}}\" +set g_password \"{{PASSWORD}}\" +sv_fps \"{{FPS}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"zmq stats and rcon passwords updated\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "ld lib path",
+            "description": "",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./linux64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The Name that will show up in the Serverbrowser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Quake Live Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:70",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Type",
+            "description": "0 = Offline, 1 = LAN, 2 = Internet",
+            "env_variable": "SERVER_TYPE",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:2",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set a server-wide password, and stop all users from connecting without it",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "FPS",
+            "description": "Change how many frames the server runs per second. WARNING: Has not been tested extensively, and will have a direct impact on CPU and network usage!",
+            "env_variable": "FPS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "349090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:349090",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "quake-live-4d275d8f3d29",
+        "name": "Quake Live",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/quake-live-4d275d8f3d29.json",
+        "sha256": "5aa354eefee55cf8fe688368a271e2b4c63530ce45331117f5d408d00fb70ba6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "quake_live/egg-quake-live.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4d275d8f3d29.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Quake Live",
+        "author": "patz.michael@gmail.com",
+        "uuid": "6a8f06a9-ff12-4a2d-9c11-2f9c67d8b0bf",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./qzeroded.x64  +set net_port {{SERVER_PORT}} +set sv_hostname \"{{SERVER_NAME}}\" +set sv_serverType \"{{SERVER_TYPE}}\" +set g_password \"{{PASSWORD}}\" +sv_fps \"{{FPS}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"zmq stats and rcon passwords updated\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "ld lib path",
+            "description": "",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./linux64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The Name that will show up in the Serverbrowser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Quake Live Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:70",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Type",
+            "description": "0 = Offline, 1 = LAN, 2 = Internet",
+            "env_variable": "SERVER_TYPE",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:2",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set a server-wide password, and stop all users from connecting without it",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "FPS",
+            "description": "Change how many frames the server runs per second. WARNING: Has not been tested extensively, and will have a direct impact on CPU and network usage!",
+            "env_variable": "FPS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "349090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:349090",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "quake-live-8ad75bc9b85a",
+        "name": "Quake Live",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/quake-live-8ad75bc9b85a.json",
+        "sha256": "12509500dffc0d4cd95a06cf1effbf20be7401b46cde836d43aecaa815e1186c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "quake_live/egg-pterodactyl-quake-live.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8ad75bc9b85a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:37+00:00",
+        "name": "Quake Live",
+        "author": "patz.michael@gmail.com",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./qzeroded.x64  +set net_port {{SERVER_PORT}} +set sv_hostname \"{{SERVER_NAME}}\" +set sv_serverType \"{{SERVER_TYPE}}\" +set g_password \"{{PASSWORD}}\" +sv_fps \"{{FPS}}\"",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"zmq stats and rcon passwords updated\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "ld lib path",
+            "description": "",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./linux64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The Name that will show up in the Serverbrowser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Quake Live Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:70",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Type",
+            "description": "0 = Offline, 1 = LAN, 2 = Internet",
+            "env_variable": "SERVER_TYPE",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:2",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set a server-wide password, and stop all users from connecting without it",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "FPS",
+            "description": "Change how many frames the server runs per second. WARNING: Has not been tested extensively, and will have a direct impact on CPU and network usage!",
+            "env_variable": "FPS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "349090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:349090",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "quake-live-bbe2c0fad1e5",
+        "name": "Quake Live",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/quake-live-bbe2c0fad1e5.json",
+        "sha256": "55523a821f9fef1b35fd5dfebddfdfe808efddbe79d4324d07bd75baed05bc7d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "quake_live/egg-quake-live.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/bbe2c0fad1e5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-01-12T15:34:50+01:00",
+        "name": "Quake Live",
+        "author": "patz.michael@gmail.com",
+        "description": "Quake Live is a first-person shooter video game by id Software. It is an updated version of Quake III Arena that was originally designed as a free-to-play game launched via a web browser plug-in. On September 17, 2014, the game was re-launched as a standalone title on Steam.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./qzeroded.x64  +set net_port {{SERVER_PORT}} +set sv_hostname \"{{SERVER_NAME}}\" +set sv_serverType \"{{SERVER_TYPE}}\" +set g_password \"{{PASSWORD}}\" +sv_fps \"{{FPS}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"zmq stats and rcon passwords updated\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "ld lib path",
+            "description": "",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./linux64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The Name that will show up in the Serverbrowser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Quake Live Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:70",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Type",
+            "description": "0 = Offline, 1 = LAN, 2 = Internet",
+            "env_variable": "SERVER_TYPE",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:2",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set a server-wide password, and stop all users from connecting without it",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "FPS",
+            "description": "Change how many frames the server runs per second. WARNING: Has not been tested extensively, and will have a direct impact on CPU and network usage!",
+            "env_variable": "FPS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "349090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:349090",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "r5reloaded-d92681627c69",
+        "name": "R5Reloaded",
+        "description": "R5Reloaded - Modded Apex Legends server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/r5reloaded-d92681627c69.json",
+        "sha256": "55c3bfc9ce30fcc4ad04e0619602a1c5543b2688e1842c4ec78860906611e2ee",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "r5reloaded/egg-r5-reloaded.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d92681627c69.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-01T03:48:16+00:00",
+        "name": "R5Reloaded",
+        "author": "eggs@purpleflaghosting.com",
+        "description": "R5Reloaded - Modded Apex Legends server",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine r5apex_ds.exe -noconsole -port {{SERVER_PORT}} +launchplaylist \"{{PLAYLIST}}\" +hostname \"{{SERVER_NAME}}\" {{ARGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \":Installed NetKey:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "# Update package cache and install 7z\r\napt update\r\napt install p7zip-full -y\r\n\r\n# Change to server directory\r\ncd /mnt/server || exit 1\r\n\r\n# Download server file\r\necho \"Downloading: ${DL_URL}\"\r\nwget \"${DL_URL}\" -O server_download.7z\r\n\r\n# Extract\r\necho \"Extracting server files\"\r\n7z x server_download.7z\r\n\r\n# Cleanup\r\necho \"Cleaning up\"\r\nrm server_download.7z",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Playlist",
+            "description": "Playlist to load",
+            "env_variable": "PLAYLIST",
+            "default_value": "fs_dm",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Download URL",
+            "description": "URL to download R5Reloaded server build from",
+            "env_variable": "DL_URL",
+            "default_value": "https://r5reloaded.com/server-download",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:500",
+            "field_type": "text"
+          },
+          {
+            "name": "Args",
+            "description": "Additional arguments to append to the startup command",
+            "env_variable": "ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rage-mp-8af061c9d784",
+        "name": "Rage.MP",
+        "description": "https://rage.mp/\r\n\r\nModified to work with the latest version of RAGE:MP\r\nWill automatically install linux bridge.\r\n**This server requires 2 ports to be added for the server. the main port and the next (port+1) as ports for the server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rage-mp-8af061c9d784.json",
+        "sha256": "584b51632a21505ce483e902b4f82b4129cd1441b0d9420cb27d323975f91236",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/ragemp/egg-rage--m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/8af061c9d784.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-12-11T17:31:26+01:00",
+        "name": "Rage.MP",
+        "author": "noreply.waypointhosting@gmail.com",
+        "description": "https://rage.mp/\r\n\r\nModified to work with the latest version of RAGE:MP\r\nWill automatically install linux bridge.\r\n**This server requires 2 ports to be added for the server. the main port and the next (port+1) as ports for the server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./ragemp-server",
+        "config": {
+          "files": "{\"conf.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"bind\": \"0.0.0.0\", \"name\": \"{{server.build.env.SERVER_NAME}}\", \"maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"The server is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "^X"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nmkdir -p /mnt/server/tmp\r\ncd /mnt/server\r\n\r\nrm -rf bin/\r\nrm -rf dotnet/\r\nrm ragemp-server\r\n\r\ncd /mnt/server/tmp\r\necho \"Downloading rage.mp\"\r\ncurl -sSL -o linux_x64.tar.gz https://cdn.rage.mp/updater/prerelease/server-files/linux_x64.tar.gz\r\ntar -xzvf linux_x64.tar.gz\r\nrm linux_x64.tar.gz\r\ncd /mnt/server/tmp/ragemp-srv/\r\nmv * /mnt/server\r\n\r\ncd /mnt/server\r\nchmod +x ./ragemp-server\r\nrm -rf /mnt/server/tmp\r\n\r\nif [ -e conf.json ]; then\r\n    echo \"server config file exists\"\r\nelse\r\n    echo \"Downloading default rage.mp config\"\r\n    curl https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/gta/ragemp/conf.json >> conf.json\r\nfi\r\n\r\necho \"install complete\"\r\n\r\nexit 0",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Server name that will be displayed to the master server.  (64 Char max)",
+            "env_variable": "SERVER_NAME",
+            "default_value": "RAGE:MP Unofficial server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players your server will hold.  (Max 100)",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rage-mp-a8e3c5489d1c",
+        "name": "Rage.MP",
+        "description": "https://rage.mp/\r\n\r\nModified to work with the latest version of RAGE:MP\r\nWill automatically install linux bridge.\r\n**This server requires 2 ports to be added for the server. the main port and the next (port+1) as ports for the server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rage-mp-a8e3c5489d1c.json",
+        "sha256": "4b12de56abe600621a1f9b0453ecad2d0d7607a05c0945541d54a91bc85cd7d2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/ragemp/egg-pterodactyl-rage--m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/gta/ragemp/egg-rage--m-p.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/a8e3c5489d1c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:04+00:00",
+        "name": "Rage.MP",
+        "author": "noreply.waypointhosting@gmail.com",
+        "description": "https://rage.mp/\r\n\r\nModified to work with the latest version of RAGE:MP\r\nWill automatically install linux bridge.\r\n**This server requires 2 ports to be added for the server. the main port and the next (port+1) as ports for the server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./ragemp-server",
+        "config": {
+          "files": "{\"conf.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"bind\": \"0.0.0.0\", \"name\": \"{{server.build.env.SERVER_NAME}}\", \"maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"The server is ready to accept connections\"}",
+          "stop": "^X"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\nmkdir -p /mnt/server/tmp\r\ncd /mnt/server\r\n\r\nrm -rf bin/\r\nrm -rf dotnet/\r\nrm ragemp-server\r\n\r\ncd /mnt/server/tmp\r\necho \"Downloading rage.mp\"\r\ncurl -sSL -o linux_x64.tar.gz https://cdn.rage.mp/updater/prerelease/server-files/linux_x64.tar.gz\r\ntar -xzvf linux_x64.tar.gz\r\nrm linux_x64.tar.gz\r\ncd /mnt/server/tmp/ragemp-srv/\r\nmv * /mnt/server\r\n\r\ncd /mnt/server\r\nchmod +x ./ragemp-server\r\nrm -rf /mnt/server/tmp\r\n\r\nif [ -e conf.json ]; then\r\n    echo \"server config file exists\"\r\nelse\r\n    echo \"Downloading default rage.mp config\"\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/ragemp/conf.json >> conf.json\r\nfi\r\n\r\necho \"install complete\"\r\n\r\nexit 0"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Server name that will be displayed to the master server.  (64 Char max)",
+            "env_variable": "SERVER_NAME",
+            "default_value": "RAGE:MP Unofficial server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players your server will hold.  (Max 100)",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rage-mp-c40638b828a5",
+        "name": "Rage.MP",
+        "description": "https://rage.mp/\r\n\r\nModified to work with the latest version of RAGE:MP\r\nWill automatically install linux bridge.\r\n**This server requires 2 ports to be added for the server. the main port and the next (port+1) as ports for the server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rage-mp-c40638b828a5.json",
+        "sha256": "3269c21a47611246c3a1828690be52137914ed4ff8bc5d2821de9ec2392f6e41",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/ragemp/egg-rage--m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/c40638b828a5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:04+00:00",
+        "name": "Rage.MP",
+        "author": "noreply.waypointhosting@gmail.com",
+        "uuid": "82c049db-06e3-416a-8ed3-805cc53105a9",
+        "description": "https://rage.mp/\r\n\r\nModified to work with the latest version of RAGE:MP\r\nWill automatically install linux bridge.\r\n**This server requires 2 ports to be added for the server. the main port and the next (port+1) as ports for the server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./ragemp-server",
+        "config": {
+          "files": "{\"conf.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"bind\": \"0.0.0.0\", \"name\": \"{{server.build.env.SERVER_NAME}}\", \"maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"The server is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "^X"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nmkdir -p /mnt/server/tmp\r\ncd /mnt/server\r\n\r\nrm -rf bin/\r\nrm -rf dotnet/\r\nrm ragemp-server\r\n\r\ncd /mnt/server/tmp\r\necho \"Downloading rage.mp\"\r\ncurl -sSL -o linux_x64.tar.gz https://cdn.rage.mp/updater/prerelease/server-files/linux_x64.tar.gz\r\ntar -xzvf linux_x64.tar.gz\r\nrm linux_x64.tar.gz\r\ncd /mnt/server/tmp/ragemp-srv/\r\nmv * /mnt/server\r\n\r\ncd /mnt/server\r\nchmod +x ./ragemp-server\r\nrm -rf /mnt/server/tmp\r\n\r\nif [ -e conf.json ]; then\r\n    echo \"server config file exists\"\r\nelse\r\n    echo \"Downloading default rage.mp config\"\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/ragemp/conf.json >> conf.json\r\nfi\r\n\r\necho \"install complete\"\r\n\r\nexit 0",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Server name that will be displayed to the master server.  (64 Char max)",
+            "env_variable": "SERVER_NAME",
+            "default_value": "RAGE:MP Unofficial server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players your server will hold.  (Max 100)",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,100",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,934 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "powernukkitx-b51cfc75798d",
+        "name": "PowerNukkitX",
+        "description": "PowerNukkitX support for Pelican",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/powernukkitx-b51cfc75798d.json",
+        "sha256": "4dee7c44f717d575beca5777fc22a4ee066c6fa497b9b289faaceaa08d82a3d3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/PowerNukkitX/egg-power-nukkit-x.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/b51cfc75798d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "PowerNukkitX",
+        "author": "powernukkitx@github.com",
+        "uuid": "27250406-1acf-4dce-b39f-3413cc290b64",
+        "description": "PowerNukkitX support for Pelican",
+        "tags": [
+          "minecraft"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./pnx start {{AUTOREBOOT}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\napt-get update\r\napt-get install -y git curl wget jq file tar unzip zip openssl\r\nmkdir -p /mnt/server/ # Not required. Only here for parkervcp's local test setup\r\ncd /mnt/server || exit 1\r\nUPGRADE=\"no\"\r\nif [ -d \"./java\" ]; then\r\nUPGRADE=\"yes\"\r\nfi\r\nwget https://github.com/PowerNukkitX/PNX-CLI/releases/download/0.1.6/PNX-CLI-Linux-x86.zip -O pnx.zip\r\nwget https://raw.githubusercontent.com/PowerNukkitX/PowerNukkitX/master/src/main/resources/default-nukkit.yml -O nukkit.yml\r\nunzip pnx.zip\r\nrm -fr pnx.zip 2>&1 >/dev/null\r\nmv ./target/linux-x86/pnx ./ 2>&1 >/dev/null\r\nrm -fr target 2>&1 >/dev/null\r\nrm -fr java 2>&1 >/dev/null\r\nchmod +x pnx\r\n./pnx jvm install=GraalVM\r\nif [ \"$UPGRADE\" == \"no\" ]; then\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server install --latest\r\nelse\r\n./pnx server install --dev\r\nfi\r\nelse\r\nrm -fr libs 2>&1 >/dev/null\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server update --latest\r\nelse\r\n./pnx server update --dev\r\nfi\r\nfi\r\nrm -fr tmp-GraalVM.tar.gz 2>&1 >/dev/null\r\ncat <<EOF\r\n----------------------------------------\r\n| |\r\n| PowerNukkitX Installation Done |\r\n| |\r\n----------------------------------------\r\nEOF",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version to install",
+            "description": "Choose between latest or dev",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "AutoReboot mode",
+            "description": "to set auto reboot mode please enter -r",
+            "env_variable": "AUTOREBOOT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:2",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "purpur-4599339c4d8f",
+        "name": "Purpur",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/purpur-4599339c4d8f.json",
+        "sha256": "0229910b3ea03b463b50afc3128aa3b1f89430ec0fe86b7a88be8fc21476d547",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/purpur/egg-pterodactyl-purpur.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/4599339c4d8f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-20T10:52:34+01:00",
+        "name": "Purpur",
+        "author": "purpur@birdflop.com",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java --add-modules=jdk.incubator.vector -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=purpur\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds.all | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r '.builds.latest'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION}/${BUILD_NUMBER}/download\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the .jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the Purpur release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "purpur-656789936e7c",
+        "name": "Purpur",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/purpur-656789936e7c.json",
+        "sha256": "ae9c5901f0f2f750f8d450451519bb95e74903ea0e8223323336c2f513300c2b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/purpur/egg-purpur.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/656789936e7c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-03-27T14:40:52+01:00",
+        "name": "Purpur",
+        "author": "purpur@birdflop.com",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25",
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java --add-modules=jdk.incubator.vector -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=purpur\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds.all | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r '.builds.latest'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION}/${BUILD_NUMBER}/download\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the .jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the Purpur release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "purpur-a78a23f76808",
+        "name": "Purpur",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/purpur-a78a23f76808.json",
+        "sha256": "702279635ecff03f0d30be90a2c20135d85ed5cd4e14e389819408f66541bb86",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/purpur/egg-purpur.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/a78a23f76808.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-13T17:26:13+0000",
+        "name": "Purpur",
+        "author": "purpur@birdflop.com",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18",
+          "Java 21": "ghcr.io/pterodactyl/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java --add-modules=jdk.incubator.vector -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=purpur\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds.all | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r '.builds.latest'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION}/${BUILD_NUMBER}/download\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the .jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the Purpur release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "purpur-geyser-floodgate-467ca69d0ffb",
+        "name": "Purpur-Geyser-Floodgate",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/purpur-geyser-floodgate-467ca69d0ffb.json",
+        "sha256": "98e7d3068de085c52bf228cb874f01e477b84d9ccba7be559b5e7f1664d24c81",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "crossplay/purpur-geysermc-floodgate/egg-pterodactyl-purpur--geyser--floodgate.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/467ca69d0ffb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-17T22:59:20+02:00",
+        "name": "Purpur-Geyser-Floodgate",
+        "author": "purpur@birdflop.com",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true --add-modules=jdk.incubator.vector -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=purpur\r\n\r\n# Download paths for Geyser and Floodgate. Do not change!!\r\nGEYSER_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot\"\r\nFLOODGATE_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot\"\r\n\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds.all | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r '.builds.latest'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION}/${BUILD_NUMBER}/download\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Downloading the requested purpur buid with curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\nmkdir -p /mnt/server/plugins\r\ncurl -sSL -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/geyser-spigot ${GEYSER_DOWNLOAD_URL}\"\r\ncurl -sSL -L -o plugins/geyser-spigot.jar ${GEYSER_DOWNLOAD_URL}\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/floodgate-spigot.jar ${FLOODGATE_DOWNLOAD_URL}\"\r\ncurl -sSL -L ${FLOODGATE_DOWNLOAD_URL} -o plugins/floodgate-spigot.jar\r\n\r\nif [ ! -f server.properties ]; then\r\n\techo -e \"Downloading MC server.properties\"\r\n\tcurl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi\r\necho -e \"Installation Finished\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the .jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the Purpur release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest-stable.\r\n\r\nAccepted values: 'latest-stable' 'latest-successful'",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "purpur-geyser-floodgate-86a78ce4107a",
+        "name": "Purpur-Geyser-Floodgate",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/purpur-geyser-floodgate-86a78ce4107a.json",
+        "sha256": "cf9c0b4bb19720b8eca04c6d8830ead7c47ff05c83557efd25f8c45176c097ba",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/crossplay/purpur-geysermc-floodgate/egg-purpur-geyser-floodgate.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/86a78ce4107a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-11-27T08:13:04+00:00",
+        "name": "Purpur-Geyser-Floodgate",
+        "author": "purpur@birdflop.com",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 23": "ghcr.io/ptero-eggs/yolks:java_23",
+          "Java 24": "ghcr.io/ptero-eggs/yolks:java_24",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true --add-modules=jdk.incubator.vector -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=purpur\r\n\r\n# Download paths for Geyser and Floodgate. Do not change!!\r\nGEYSER_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot\"\r\nFLOODGATE_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot\"\r\n\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds.all | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r '.builds.latest'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION}/${BUILD_NUMBER}/download\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Downloading the requested purpur buid with curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\nmkdir -p /mnt/server/plugins\r\ncurl -sSL -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/geyser-spigot ${GEYSER_DOWNLOAD_URL}\"\r\ncurl -sSL -o plugins/geyser-spigot.jar ${GEYSER_DOWNLOAD_URL}\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/floodgate-spigot.jar ${FLOODGATE_DOWNLOAD_URL}\"\r\ncurl -sSL -o plugins/floodgate-spigot.jar ${FLOODGATE_DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n\techo -e \"Downloading MC server.properties\"\r\n\tcurl -o server.properties https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/java/server.properties\r\nfi\r\necho -e \"Installation Finished\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the .jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the Purpur release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest-stable.\r\n\r\nAccepted values: 'latest-stable' 'latest-successful'",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "purpur-geyser-floodgate-d50ad07b9f71",
+        "name": "Purpur-Geyser-Floodgate",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/purpur-geyser-floodgate-d50ad07b9f71.json",
+        "sha256": "8a151ee15a28e02a2f2965c363abefb622708a7a183de766831432f2355f1123",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/crossplay/purpur-geysermc-floodgate/egg-purpur-geysermc-floodgate.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/d50ad07b9f71.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-23T20:45:16+01:00",
+        "name": "Purpur-Geyser-Floodgate",
+        "author": "purpur@birdflop.com",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17",
+          "ghcr.io/pterodactyl/yolks:java_16": "ghcr.io/pterodactyl/yolks:java_16",
+          "ghcr.io/pterodactyl/yolks:java_11": "ghcr.io/pterodactyl/yolks:java_11",
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true --add-modules=jdk.incubator.vector -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=purpur\r\n\r\n# Download paths for Geyser and Floodgate. Do not change!!\r\nGEYSER_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot\"\r\nFLOODGATE_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot\"\r\n\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds.all | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r '.builds.latest'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION}/${BUILD_NUMBER}/download\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Downloading the requested purpur buid with curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\nmkdir -p /mnt/server/plugins\r\ncurl -sSL-o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/geyser-spigot ${GEYSER_DOWNLOAD_URL}\"\r\ncurl -sSL -L plugins/geyser-spigot.jar ${GEYSER_DOWNLOAD_URL}\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/floodgate-spigot.jar ${FLOODGATE_DOWNLOAD_URL}\"\r\ncurl -sSL -L plugins/floodgate-spigot.jar ${FLOODGATE_DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n\techo -e \"Downloading MC server.properties\"\r\n\tcurl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi\r\necho -e \"Installation Finished\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the .jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the Purpur release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest-stable.\r\n\r\nAccepted values: 'latest-stable' 'latest-successful'",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "purpur-geyser-floodgate-d6c13c149777",
+        "name": "Purpur-Geyser-Floodgate",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/purpur-geyser-floodgate-d6c13c149777.json",
+        "sha256": "8ad3a222584c0a52fb0ff8b19992792c3959fa794c17e54975fdd3a2897a548c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "crossplay/purpur-geysermc-floodgate/egg-purpur--geyser--floodgate.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/d6c13c149777.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Purpur-Geyser-Floodgate",
+        "author": "purpur@birdflop.com",
+        "uuid": "92364e41-07ba-43fd-b33e-2f655cd7ef61",
+        "description": "A drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features, with the addition of GeyserMC and Floodgate",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true --add-modules=jdk.incubator.vector -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.allocations.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=purpur\r\n\r\n# Download paths for Geyser and Floodgate. Do not change!!\r\nGEYSER_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/spigot\"\r\nFLOODGATE_DOWNLOAD_URL=\"https://download.geysermc.org/v2/projects/floodgate/versions/latest/builds/latest/downloads/spigot\"\r\n\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.purpurmc.org/v2/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds.all | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION} | jq -r '.builds.latest'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.purpurmc.org/v2/${PROJECT}/${MINECRAFT_VERSION}/${BUILD_NUMBER}/download\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Downloading the requested purpur buid with curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\nmkdir -p /mnt/server/plugins\r\ncurl -sSL -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/geyser-spigot ${GEYSER_DOWNLOAD_URL}\"\r\ncurl -sSL -L ${GEYSER_DOWNLOAD_URL} -o plugins/geyser-spigot.jar\r\n\r\n\r\necho -e \"Downloading last successful build with curl -o plugins/floodgate-spigot.jar ${FLOODGATE_DOWNLOAD_URL}\"\r\ncurl -sSL -L ${FLOODGATE_DOWNLOAD_URL} -o plugins/floodgate-spigot.jar\r\n\r\nif [ ! -f server.properties ]; then\r\n\techo -e \"Downloading MC server.properties\"\r\n\tcurl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi\r\necho -e \"Installation Finished\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": 2,
+            "name": "Server Jar File",
+            "description": "The name of the .jar file to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/|max:80",
+            "field_type": "text"
+          },
+          {
+            "sort": 3,
+            "name": "Build Number",
+            "description": "The build number for the Purpur release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest-stable.\r\n\r\nAccepted values: 'latest-stable' 'latest-successful'",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "quilt-26afedb40165",
+        "name": "Quilt",
+        "description": "The Quilt project is an open-source, community-driven modding toolchain designed primarily for Minecraft. By focusing on speed, ease of use and modularity, Quilt aims to provide a sleek and modern modding toolchain with an open ecosystem.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/quilt-26afedb40165.json",
+        "sha256": "8971abb8d2a458af732a6f8a5dbd5cd2d27cc7a2d21ff966094fed3522bc95b3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/quilt/egg-quilt.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/26afedb40165.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "Quilt",
+        "author": "diedyesterdaywashere@gmail.com",
+        "description": "The Quilt project is an open-source, community-driven modding toolchain designed primarily for Minecraft. By focusing on speed, ease of use and modularity, Quilt aims to provide a sleek and modern modding toolchain with an open ecosystem.",
+        "features": null,
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}} nogui",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Quilt Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nwget -O quilt.jar https://quiltmc.org/api/v1/download-latest-installer/java-universal\r\njava -jar quilt.jar \\\r\n  install server $MC_VERSION \\\r\n  --download-server\r\ncd /mnt/server/server\r\nmv * /mnt/server\r\ncd ..\r\nrm quilt.jar\r\nrmdir /mnt/server/server\r\nmv server.jar minecraft.jar\r\nmv quilt-server-launch.jar server.jar\r\necho \"serverJar=minecraft.jar\" > quilt-server-launcher.properties\r\necho -e \"Server is Ready!\"",
+            "container": "eclipse-temurin:18-jdk-jammy",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "Version of Minecraft that will be installed. You can only choose the exact version number, for example \"1.20.2\", \"latest\" won't work!",
+            "env_variable": "MC_VERSION",
+            "default_value": "1.20.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the jarfile that will be ran on server launch.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "quilt-3c0dbfa9c2ce",
+        "name": "Quilt",
+        "description": "The Quilt project is an open-source, community-driven modding toolchain designed primarily for Minecraft. By focusing on speed, ease of use and modularity, Quilt aims to provide a sleek and modern modding toolchain with an open ecosystem.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/quilt-3c0dbfa9c2ce.json",
+        "sha256": "3350a4a18d1cc084e9dede5c9da43fc893f991a2f6c729afadc3ea9b22848d95",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/quilt/egg-pterodactyl-quilt.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/3c0dbfa9c2ce.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:59+00:00",
+        "name": "Quilt",
+        "author": "diedyesterdaywashere@gmail.com",
+        "description": "The Quilt project is an open-source, community-driven modding toolchain designed primarily for Minecraft. By focusing on speed, ease of use and modularity, Quilt aims to provide a sleek and modern modding toolchain with an open ecosystem.",
+        "features": null,
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}} nogui",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:java_21",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Quilt Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y wget\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nwget -O quilt.jar https://quiltmc.org/api/v1/download-latest-installer/java-universal\r\njava -jar quilt.jar \\\r\n  install server $MC_VERSION \\\r\n  --download-server\r\ncd /mnt/server/server\r\nmv * /mnt/server\r\ncd ..\r\nrm quilt.jar\r\nrmdir /mnt/server/server\r\nmv server.jar minecraft.jar\r\nmv quilt-server-launch.jar server.jar\r\necho \"serverJar=minecraft.jar\" > quilt-server-launcher.properties\r\necho -e \"Server is Ready!\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "Version of Minecraft that will be installed. You can only choose the exact version number, for example \"1.20.2\", \"latest\" won't work!",
+            "env_variable": "MC_VERSION",
+            "default_value": "1.20.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the jarfile that will be ran on server launch.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1480 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "supertuxkart-c240cc25fb04",
+        "name": "SuperTuxKart",
+        "description": "Egg for hosting a SuperTuxKart Server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/supertuxkart-c240cc25fb04.json",
+        "sha256": "bdee26592bd4b4312799d097dfae1389e0a8a5266c7052793a3123c6dbde314f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "SuperTuxKart/egg-pterodactyl-super-tux-kart.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/SuperTuxKart/egg-super-tux-kart.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/c240cc25fb04.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:12+00:00",
+        "name": "SuperTuxKart",
+        "author": "mattamn107@github.com",
+        "description": "Egg for hosting a SuperTuxKart Server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/supertuxkart --server-config={{CONFIG_NAME}} --lan-server={{SERVER_NAME}} --network-console --port=\"{{SERVER_PORT}}\" --difficulty={{DIFFICULTY}} --mode={{MODE}} --max-players={{MAX_PLAYERS}} --motd=\"{{MOTD}}\"",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Available command:\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n# Install build tools\r\necho \"deb http://deb.debian.org/debian bullseye-backports main\" >> /etc/apt/sources.list && \\\r\napt-get update && apt-get -y full-upgrade && \\\r\n    apt-get install -y build-essential cmake libbluetooth-dev libsdl2-dev \\\r\n    libcurl4-openssl-dev libenet-dev libfreetype6-dev libharfbuzz-dev \\\r\n    libjpeg-dev libogg-dev libopenal-dev libpng-dev \\\r\n    libssl-dev libvorbis-dev libmbedtls-dev pkg-config zlib1g-dev subversion\r\n\r\nif [ ! -d \"/mnt/server/stk-code\" ] && [ ! -d \"/mnt/server/stk-assets\" ]; then\r\n    \r\n    #clone code repo\r\n    git clone https://github.com/supertuxkart/stk-code /mnt/server/stk-code\r\n    \r\n    #get assets\r\n    svn co https://svn.code.sf.net/p/supertuxkart/code/stk-assets /mnt/server/stk-assets\r\n    \r\n    # go into the stk-code directory\r\n    cd /mnt/server/stk-code\r\n    \r\n    # create and enter the cmake_build directory\r\n    mkdir cmake_build\r\n    \r\nelse\r\n\r\n    #update existing stuff\r\n    cd /mnt/server/stk-assets\r\n    svn up\r\n    \r\n    cd /mnt/server/stk-code\r\n    git pull\r\n\r\n\r\nfi\r\n\r\n#build the server\r\ncd cmake_build\r\ncmake .. -DSERVER_ONLY=ON\r\nmake\r\n\r\n#copy binary to root/bin and make it executable\r\nmkdir /mnt/server/bin\r\ncp /mnt/server/stk-code/cmake_build/bin/supertuxkart /mnt/server/bin/supertuxkart\r\nchmod +x /mnt/server/bin/supertuxkart\r\n\r\n#copy data folder\r\ncp -r /mnt/server/stk-code/data /mnt/server/data\r\n\r\n#copy extra assets to data folder\r\ncd /mnt/server/stk-assets\r\ncp -r library models music sfx textures tracks karts /mnt/server/data/\r\n\r\n# Delete repo's to save disk space.\r\n#rm -rf /mnt/server/stk-code && rm -rf /mnt/server/stk-assets"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Config File Name",
+            "description": "Name of the Config File.",
+            "env_variable": "CONFIG_NAME",
+            "default_value": "config.xml",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.xml)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Mode",
+            "description": "0 = Normal Race\r\n1 = Time Trial\r\n2 = Battle\r\n3 = Soccer\r\n4 = Follow The Leader\r\n5 = Capture the Flag",
+            "env_variable": "MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3,4,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Speed of the carts and AI difficulty\r\n0 = Beginner\r\n1 = Intermediate\r\n2 = Expert\r\n3 = SuperTux",
+            "env_variable": "DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "How many players can there be in the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,24",
+            "field_type": "text"
+          },
+          {
+            "name": "Message of the Day",
+            "description": "Message of the Day displayed in the server.",
+            "env_variable": "MOTD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "supertuxkart-fd043d114b38",
+        "name": "SuperTuxKart",
+        "description": "Egg for hosting a SuperTuxKart Server.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/supertuxkart-fd043d114b38.json",
+        "sha256": "196aad626a078f3ff3999ea4695e9ff24e3efa43d697ce356ac1f69f686db1f8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "SuperTuxKart/egg-super-tux-kart.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/fd043d114b38.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-24T19:19:23+01:00",
+        "name": "SuperTuxKart",
+        "author": "mattamn107@github.com",
+        "description": "Egg for hosting a SuperTuxKart Server.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/supertuxkart --server-config={{CONFIG_NAME}} --lan-server={{SERVER_NAME}} --network-console --port=\"{{SERVER_PORT}}\" --difficulty={{DIFFICULTY}} --mode={{MODE}} --max-players={{MAX_PLAYERS}} --motd=\"{{MOTD}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Available command:\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# Install build tools\r\necho \"deb http://deb.debian.org/debian bullseye-backports main\" >> /etc/apt/sources.list && \\\r\napt-get update && apt-get -y full-upgrade && \\\r\n    apt-get install -y build-essential cmake libbluetooth-dev libsdl2-dev \\\r\n    libcurl4-openssl-dev libenet-dev libfreetype6-dev libharfbuzz-dev \\\r\n    libjpeg-dev libogg-dev libopenal-dev libpng-dev \\\r\n    libssl-dev libvorbis-dev libmbedtls-dev pkg-config zlib1g-dev subversion\r\n\r\nif [ ! -d \"/mnt/server/stk-code\" ] && [ ! -d \"/mnt/server/stk-assets\" ]; then\r\n    \r\n    #clone code repo\r\n    git clone https://github.com/supertuxkart/stk-code /mnt/server/stk-code\r\n    \r\n    #get assets\r\n    svn co https://svn.code.sf.net/p/supertuxkart/code/stk-assets /mnt/server/stk-assets\r\n    \r\n    # go into the stk-code directory\r\n    cd /mnt/server/stk-code\r\n    \r\n    # create and enter the cmake_build directory\r\n    mkdir cmake_build\r\n    \r\nelse\r\n\r\n    #update existing stuff\r\n    cd /mnt/server/stk-assets\r\n    svn up\r\n    \r\n    cd /mnt/server/stk-code\r\n    git pull\r\n\r\n\r\nfi\r\n\r\n#build the server\r\ncd cmake_build\r\ncmake .. -DSERVER_ONLY=ON\r\nmake\r\n\r\n#copy binary to root/bin and make it executable\r\nmkdir /mnt/server/bin\r\ncp /mnt/server/stk-code/cmake_build/bin/supertuxkart /mnt/server/bin/supertuxkart\r\nchmod +x /mnt/server/bin/supertuxkart\r\n\r\n#copy data folder\r\ncp -r /mnt/server/stk-code/data /mnt/server/data\r\n\r\n#copy extra assets to data folder\r\ncd /mnt/server/stk-assets\r\ncp -r library models music sfx textures tracks karts /mnt/server/data/\r\n\r\n# Delete repo's to save disk space.\r\n#rm -rf /mnt/server/stk-code && rm -rf /mnt/server/stk-assets",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Config File Name",
+            "description": "Name of the Config File.",
+            "env_variable": "CONFIG_NAME",
+            "default_value": "config.xml",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.xml)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Mode",
+            "description": "0 = Normal Race\r\n1 = Time Trial\r\n2 = Battle\r\n3 = Soccer\r\n4 = Follow The Leader\r\n5 = Capture the Flag",
+            "env_variable": "MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3,4,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Speed of the carts and AI difficulty\r\n0 = Beginner\r\n1 = Intermediate\r\n2 = Expert\r\n3 = SuperTux",
+            "env_variable": "DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "How many players can there be in the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,24",
+            "field_type": "text"
+          },
+          {
+            "name": "Message of the Day",
+            "description": "Message of the Day displayed in the server.",
+            "env_variable": "MOTD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sven-co-op-4fe612019c59",
+        "name": "Sven Co-op",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sven-co-op-4fe612019c59.json",
+        "sha256": "1b6032eb04d4d74dff09735a74128142e93a19e7ea34f36837ccc0afae3dda0f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "svencoop/egg-pterodactyl-sven-co-op.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4fe612019c59.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-28T11:24:05+00:00",
+        "name": "Sven Co-op",
+        "author": "pteroducktyl@yildri.nl",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./svends_run -console -port {{SERVER_PORT}} +maxplayers {{SC_PLAYERS}} +map {{SC_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{\"svencoop/server.cfg\": {\"parser\": \"file\", \"find\": {\"hostname\": \"hostname \\\"{{env.SC_NAME}}\\\"\", \"sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"//sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"sv_region\": \"sv_region {{env.SC_REGION}}\"}}}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\n#mkdir -p /mnt/server/.steam/sdk32\r\n#cp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Default Map",
+            "description": "The default map for the server.",
+            "env_variable": "SC_MAP",
+            "default_value": "svencoop1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can play on the server at once.",
+            "env_variable": "SC_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name your server will appear as on the in Sven Co-op in-game server list.",
+            "env_variable": "SC_NAME",
+            "default_value": "Sven Co-op server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "Password required to join the server. Leave blank to disable.",
+            "env_variable": "SC_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Region",
+            "description": "The region your server is in. This is used in Steam's server browser, so players can look for servers near by. This does not restrict players from connecting to your server.\r\n\r\n-1: Do not list server in the server browser.\r\n0: USA east coast.\r\n1: USA west coast.\r\n2: South America (continent)\r\n3: Europe.\r\n4: Asia.\r\n5: Australia (continent, aka Oceania)\r\n6: Middle East.\r\n7: Africa.\r\n255: International.",
+            "env_variable": "SC_REGION",
+            "default_value": "255",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:-1,255",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "Required for game to update on server restart. Do not modify this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "276060",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sven-co-op-7096a885bf1d",
+        "name": "Sven Co-op",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sven-co-op-7096a885bf1d.json",
+        "sha256": "023b20b86f3e591880598391df1bb25a7a7e58a0b69e84c67e0dbde4ff665888",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/svencoop/egg-sven-co-op.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/7096a885bf1d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-28T16:36:08+02:00",
+        "name": "Sven Co-op",
+        "author": "pteroducktyl@yildri.nl",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./svends_run -console -port {{SERVER_PORT}} +maxplayers {{SC_PLAYERS}} +map {{SC_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{\"svencoop/server.cfg\": {\"parser\": \"file\", \"find\": {\"hostname\": \"hostname \\\"{{env.SC_NAME}}\\\"\", \"sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"//sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"sv_region\": \"sv_region {{env.SC_REGION}}\"}}}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Default Map",
+            "description": "The default map for the server.",
+            "env_variable": "SC_MAP",
+            "default_value": "svencoop1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can play on the server at once.",
+            "env_variable": "SC_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name your server will appear as on the in Sven Co-op in-game server list.",
+            "env_variable": "SC_NAME",
+            "default_value": "Sven Co-op server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "Password required to join the server. Leave blank to disable.",
+            "env_variable": "SC_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Region",
+            "description": "The region your server is in. This is used in Steam's server browser, so players can look for servers near by. This does not restrict players from connecting to your server.\r\n\r\n-1: Do not list server in the server browser.\r\n0: USA east coast.\r\n1: USA west coast.\r\n2: South America (continent)\r\n3: Europe.\r\n4: Asia.\r\n5: Australia (continent, aka Oceania)\r\n6: Middle East.\r\n7: Africa.\r\n255: International.",
+            "env_variable": "SC_REGION",
+            "default_value": "255",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:-1,255",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "Required for game to update on server restart. Do not modify this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "276060",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sven-co-op-a8d63e8d9386",
+        "name": "Sven Co-op",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sven-co-op-a8d63e8d9386.json",
+        "sha256": "38c6f232f63e30138f7fb875c3d88bde7517a5fff62c4aa8031a4b4a92088f1a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "svencoop/egg-sven-co-op.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/a8d63e8d9386.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Sven Co-op",
+        "author": "pteroducktyl@yildri.nl",
+        "uuid": "4f3fdfa0-cb76-4548-892d-6f9dc66adcae",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./svends_run -console -port {{SERVER_PORT}} +maxplayers {{SC_PLAYERS}} +map {{SC_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{\"svencoop/server.cfg\": {\"parser\": \"file\", \"find\": {\"hostname\": \"hostname \\\"{{env.SC_NAME}}\\\"\", \"sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"//sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"sv_region\": \"sv_region {{env.SC_REGION}}\"}}}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\n#mkdir -p /mnt/server/.steam/sdk32\r\n#cp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Default Map",
+            "description": "The default map for the server.",
+            "env_variable": "SC_MAP",
+            "default_value": "svencoop1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 1
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can play on the server at once.",
+            "env_variable": "SC_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,32",
+            "sort": 2
+          },
+          {
+            "name": "Server Name",
+            "description": "The name your server will appear as on the in Sven Co-op in-game server list.",
+            "env_variable": "SC_NAME",
+            "default_value": "Sven Co-op server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "sort": 3
+          },
+          {
+            "name": "Password",
+            "description": "Password required to join the server. Leave blank to disable.",
+            "env_variable": "SC_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": 4
+          },
+          {
+            "name": "Region",
+            "description": "The region your server is in. This is used in Steam's server browser, so players can look for servers near by. This does not restrict players from connecting to your server.\r\n\r\n-1: Do not list server in the server browser.\r\n0: USA east coast.\r\n1: USA west coast.\r\n2: South America (continent)\r\n3: Europe.\r\n4: Asia.\r\n5: Australia (continent, aka Oceania)\r\n6: Middle East.\r\n7: Africa.\r\n255: International.",
+            "env_variable": "SC_REGION",
+            "default_value": "255",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:-1,255",
+            "sort": 5
+          },
+          {
+            "name": "Source AppID",
+            "description": "Required for game to update on server restart. Do not modify this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "276060",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 6
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sven-co-op-e483730315eb",
+        "name": "Sven Co-op",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sven-co-op-e483730315eb.json",
+        "sha256": "ad9e7b79e22e5e282a165b42685b037c82ee135cf6bc27b4d475753109cbc943",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "svencoop/egg-sven-co-op.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/e483730315eb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-28T16:36:08+02:00",
+        "name": "Sven Co-op",
+        "author": "pteroducktyl@yildri.nl",
+        "description": "Sven Co-op is a co-operative game originally based around Valve Software's Half-Life. In this game players must work together against computer controlled enemies and solve puzzles as a team.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./svends_run -console -port {{SERVER_PORT}} +maxplayers {{SC_PLAYERS}} +map {{SC_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{\"svencoop/server.cfg\": {\"parser\": \"file\", \"find\": {\"hostname\": \"hostname \\\"{{env.SC_NAME}}\\\"\", \"sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"//sv_password\": \"sv_password \\\"{{env.SC_PASSWORD}}\\\"\", \"sv_region\": \"sv_region {{env.SC_REGION}}\"}}}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Default Map",
+            "description": "The default map for the server.",
+            "env_variable": "SC_MAP",
+            "default_value": "svencoop1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can play on the server at once.",
+            "env_variable": "SC_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name your server will appear as on the in Sven Co-op in-game server list.",
+            "env_variable": "SC_NAME",
+            "default_value": "Sven Co-op server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "Password required to join the server. Leave blank to disable.",
+            "env_variable": "SC_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Region",
+            "description": "The region your server is in. This is used in Steam's server browser, so players can look for servers near by. This does not restrict players from connecting to your server.\r\n\r\n-1: Do not list server in the server browser.\r\n0: USA east coast.\r\n1: USA west coast.\r\n2: South America (continent)\r\n3: Europe.\r\n4: Asia.\r\n5: Australia (continent, aka Oceania)\r\n6: Middle East.\r\n7: Africa.\r\n255: International.",
+            "env_variable": "SC_REGION",
+            "default_value": "255",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:-1,255",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "Required for game to update on server restart. Do not modify this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "276060",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "swords-n-magic-and-stuff-1c578bf999f2",
+        "name": "Swords 'n Magic and Stuff",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/swords-n-magic-and-stuff-1c578bf999f2.json",
+        "sha256": "b125584885f69c6d0b609168d02bd440788ebf16c387eeec10998c9f0ea1e040",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "swords_'n_Magic_and_Stuff/egg-pterodactyl-swords-n-magic-and-stuff.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/1c578bf999f2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-20T05:15:41+00:00",
+        "name": "Swords 'n Magic and Stuff",
+        "author": "josdekurk@gmail.com",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "features": null,
+        "docker_images": {
+          "Wine": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/SNM2020/Binaries/Win64/SNMASServer-Win64-Shipping.exe -port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -log",
+        "image": null,
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Succeeded to create Steam session with ID\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/SNM2020/Saved/Config/WindowsServer/\r\n\r\nif [ ! -f /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini ]\r\nthen\r\n    echo \"The config file does not yet exists, making a new one\"\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nelse\r\n    echo \"Old config file found. Replacing it with a up to date one but a backup will be made\"\r\n    mv /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game-$(date \"+%Y.%m.%d-%H.%M.%S\").ini.old\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "The port that Steam uses for clients to query the server (ping, etc)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Reset time",
+            "description": "This is the number of days between resets.",
+            "env_variable": "SNM_DAYS_UNTIL_RESET",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "You can specify the maximum number of players",
+            "env_variable": "SNM_MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "This is the server name used for your server.\r\n\r\nYou must pick between 2 and 5 UNIQUE words (no duplicate words).\r\nThe words are case insensitive \r\nThe list of approved words changes can be found: `SNM2020/Saved/Logs/Allowed-Words.txt`",
+            "env_variable": "SNM_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin steam id",
+            "description": "This the Steam ID of the owner/admin of this server.",
+            "env_variable": "SNM_OWNER_STEAM_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "This is the server password; it is disabled by default.",
+            "env_variable": "SNM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Reset time day",
+            "description": "This is the local time of day when the server will\r\nreset. The format is HH:MM, and it is 24 hour format.\r\nMidnight => 00:00, 10:30AM => 10:30, 4:30PM => 16:30",
+            "env_variable": "SNM_RESET_TIME_OF_DAY",
+            "default_value": "00:00",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "App id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2058450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win32,win64",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "swords-n-magic-and-stuff-439b1f9257c5",
+        "name": "Swords 'n Magic and Stuff",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/swords-n-magic-and-stuff-439b1f9257c5.json",
+        "sha256": "cdfea4748f9fee3435550663cc1b7f4bfc6b2705dc3ee69cf6a776e855634f38",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "swords_'n_Magic_and_Stuff/egg-swords-n-magic-and-stuff.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/439b1f9257c5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-11-08T12:12:07+01:00",
+        "name": "Swords 'n Magic and Stuff",
+        "author": "josdekurk@gmail.com",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "features": null,
+        "docker_images": {
+          "Wine": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/SNM2020/Binaries/Win64/SNMASServer-Win64-Shipping.exe -port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -log & ENS_PID=$! ; tail -c0 -F ./SNM2020/Saved/Logs/SNM2020.log --pid=$ENS_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Succeeded to create Steam session with ID\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/SNM2020/Saved/Config/WindowsServer/\r\n\r\nif [ ! -f /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini ]\r\nthen\r\n    echo \"The config file does not yet exists, making a new one\"\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nelse\r\n    echo \"Old config file found. Replacing it with a up to date one but a backup will be made\"\r\n    mv /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game-$(date \"+%Y.%m.%d-%H.%M.%S\").ini.old\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2058450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win32,win64",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "The port that Steam uses for clients to query the server (ping, etc)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "This is the server name used for your server.\r\n\r\nYou must pick between 2 and 5 UNIQUE words (no duplicate words).\r\nThe words are case insensitive \r\nThe list of approved words changes can be found: `SNM2020/Saved/Logs/Allowed-Words.txt`",
+            "env_variable": "SNM_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin steam id",
+            "description": "This the Steam ID of the owner/admin of this server.",
+            "env_variable": "SNM_OWNER_STEAM_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "This is the server password; it is disabled by default.",
+            "env_variable": "SNM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "You can specify the maximum number of players",
+            "env_variable": "SNM_MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Reset time",
+            "description": "This is the number of days between resets.",
+            "env_variable": "SNM_DAYS_UNTIL_RESET",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Reset time",
+            "description": "This is the local time of day when the server will\r\nreset. The format is HH:MM, and it is 24 hour format.\r\nMidnight => 00:00, 10:30AM => 10:30, 4:30PM => 16:30",
+            "env_variable": "SNM_RESET_TIME_OF_DAY",
+            "default_value": "00:00",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "swords-n-magic-and-stuff-c08cd752fca8",
+        "name": "Swords 'n Magic and Stuff",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/swords-n-magic-and-stuff-c08cd752fca8.json",
+        "sha256": "5da6c85bd37b6096584efeb36627e05693add35faccf8cfd63c8022ac69e3fad",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/swords_'n_Magic_and_Stuff/egg-swords-n-magic-and-stuff.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/c08cd752fca8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-08-10T18:31:24+02:00",
+        "name": "Swords 'n Magic and Stuff",
+        "author": "josdekurk@gmail.com",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "features": null,
+        "docker_images": {
+          "Wine": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/SNM2020/Binaries/Win64/SNMASServer-Win64-Shipping.exe -port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -log",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Succeeded to create Steam session with ID\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/SNM2020/Saved/Config/WindowsServer/\r\n\r\nif [ ! -f /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini ]\r\nthen\r\n    echo \"The config file does not yet exists, making a new one\"\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nelse\r\n    echo \"Old config file found. Replacing it with a up to date one but a backup will be made\"\r\n    mv /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game-$(date \"+%Y.%m.%d-%H.%M.%S\").ini.old\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2058450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win32,win64",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "The port that Steam uses for clients to query the server (ping, etc)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "This is the server name used for your server.\r\n\r\nYou must pick between 2 and 5 UNIQUE words (no duplicate words).\r\nThe words are case insensitive \r\nThe list of approved words changes can be found: `SNM2020/Saved/Logs/Allowed-Words.txt`",
+            "env_variable": "SNM_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin steam id",
+            "description": "This the Steam ID of the owner/admin of this server.",
+            "env_variable": "SNM_OWNER_STEAM_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "This is the server password; it is disabled by default.",
+            "env_variable": "SNM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "You can specify the maximum number of players",
+            "env_variable": "SNM_MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Reset time",
+            "description": "This is the number of days between resets.",
+            "env_variable": "SNM_DAYS_UNTIL_RESET",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Reset time",
+            "description": "This is the local time of day when the server will\r\nreset. The format is HH:MM, and it is 24 hour format.\r\nMidnight => 00:00, 10:30AM => 10:30, 4:30PM => 16:30",
+            "env_variable": "SNM_RESET_TIME_OF_DAY",
+            "default_value": "00:00",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "swords-n-magic-and-stuff-e1df51b76f31",
+        "name": "Swords 'n Magic and Stuff",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/swords-n-magic-and-stuff-e1df51b76f31.json",
+        "sha256": "8955a6a77a447d67d693d002bb6f7ee76ae9bc534f6a975816761ffb829c1de7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "swords_'n_Magic_and_Stuff/egg-swords-n-magic-and-stuff.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e1df51b76f31.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Swords 'n Magic and Stuff",
+        "author": "josdekurk@gmail.com",
+        "uuid": "7f358d3f-6269-474f-9c7c-2eb08ca180fb",
+        "description": "Grab your friends and set out for adventure in a world of swords, magic, and stuff. Discover tons of cool loot, uncover hidden secrets, and meet new friends and foes along the way. Make your mark and find a place to call home in this cute, multiplayer, open world RPG",
+        "image": null,
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "Wine": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Succeeded to create Steam session with ID\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/SNM2020/Saved/Config/WindowsServer/\r\n\r\nif [ ! -f /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini ]\r\nthen\r\n    echo \"The config file does not yet exists, making a new one\"\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nelse\r\n    echo \"Old config file found. Replacing it with a up to date one but a backup will be made\"\r\n    mv /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game-$(date \"+%Y.%m.%d-%H.%M.%S\").ini.old\r\n    mv /mnt/server/SNM2020/Content/Docs/Dedicated-Server-Game.ini /mnt/server/SNM2020/Saved/Config/WindowsServer/Game.ini\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": null,
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean"
+          },
+          {
+            "sort": null,
+            "name": "Query port",
+            "description": "The port that Steam uses for clients to query the server (ping, etc)",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|"
+          },
+          {
+            "sort": null,
+            "name": "Reset time",
+            "description": "This is the number of days between resets.",
+            "env_variable": "SNM_DAYS_UNTIL_RESET",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": null,
+            "name": "Max players",
+            "description": "You can specify the maximum number of players",
+            "env_variable": "SNM_MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:16"
+          },
+          {
+            "sort": null,
+            "name": "Server name",
+            "description": "This is the server name used for your server.\r\n\r\nYou must pick between 2 and 5 UNIQUE words (no duplicate words).\r\nThe words are case insensitive \r\nThe list of approved words changes can be found: `SNM2020/Saved/Logs/Allowed-Words.txt`",
+            "env_variable": "SNM_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64"
+          },
+          {
+            "sort": null,
+            "name": "Admin steam id",
+            "description": "This the Steam ID of the owner/admin of this server.",
+            "env_variable": "SNM_OWNER_STEAM_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": null,
+            "name": "Server password",
+            "description": "This is the server password; it is disabled by default.",
+            "env_variable": "SNM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32"
+          },
+          {
+            "sort": null,
+            "name": "Reset time day",
+            "description": "This is the local time of day when the server will\r\nreset. The format is HH:MM, and it is 24 hour format.\r\nMidnight => 00:00, 10:30AM => 10:30, 4:30PM => 16:30",
+            "env_variable": "SNM_RESET_TIME_OF_DAY",
+            "default_value": "00:00",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": null,
+            "name": "App id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2058450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": null,
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean"
+          },
+          {
+            "sort": null,
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win32,win64"
+          },
+          {
+            "sort": null,
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:32"
+          },
+          {
+            "sort": null,
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2019",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:64"
+          }
+        ],
+        "startup": "wine /home/container/SNM2020/Binaries/Win64/SNMASServer-Win64-Shipping.exe -port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -log"
+      }
+    }
+  ]
+}

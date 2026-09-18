@@ -1,0 +1,1218 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "resonite-e45c1705577c",
+        "name": "Resonite",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/resonite-e45c1705577c.json",
+        "sha256": "24ef89a9785074c2ed46354f15d427adb9a3dc377f3498df04d3442149b5d8f9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/resonite/egg-resonite.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/e45c1705577c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T09:52:45+00:00",
+        "name": "Resonite",
+        "author": "espeon@espeon.dev",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "features": null,
+        "docker_images": {
+          "Mono": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono Headless/Resonite.exe -HeadlessConfig Headless/Config/Config.json -Logs Headless/Logs $(if {{ENABLE_MODLOADER}}; then echo \"-LoadAssembly \"Libraries/ResoniteModLoader.dll\"\"; fi)",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World running...\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) -betapassword ${SRCDS_BETAPASS} ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## check if config file exists\r\necho \"Looking for existing config file...\"\r\nif ! [ -f \"/mnt/server/Headless/Config/Config.json\" ]; then\r\necho \"Config does not exist, creating new config.\"\r\n## create default config\r\nmkdir -p /mnt/server/Headless/Config\r\ncurl -sSL -o /mnt/server/Headless/Config/Config.json https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/resonite/Config.json\r\nelse\r\n## leave existing config\r\necho \"Config already exists, leaving it as is.\"\r\nfi\r\n## check if mod loader is enabled\r\necho \"Checking if mod loader needs to be installed...\"\r\nif [ \"$ENABLE_MODLOADER\" = true ]; then\r\necho \"Installing/Updating mod loader as its enabled.\"\r\nmkdir -p /mnt/server/Libraries\r\nmkdir -p /mnt/server/rml_libs\r\nmkdir -p /mnt/server/rml_mods\r\ncurl -sSL -o /mnt/server/Libraries/ResoniteModLoader.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/ResoniteModLoader.dll\r\ncurl -sSL -o /mnt/server/rml_libs/0Harmony.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/0Harmony.dll\r\nelse\r\necho \"Skipping installing mod loader as its not enabled.\"\r\nfi\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Account User",
+            "description": "The username for your Steam account.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Password",
+            "description": "The password for your Steam account.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Token/Code",
+            "description": "The Steam Guard code or Login Token emailed to you.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Mod Loader",
+            "description": "See: https://github.com/resonite-modding-group/ResoniteModLoader for more information on Resonite Mod Loader.",
+            "env_variable": "ENABLE_MODLOADER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Password",
+            "description": "This is the \"Beta Password\" that is only acquired by going to the Resonite Patreon, subscribing to the tier with Headless access, and then after your Resonite account shows \"Patreon Supporter\", message the Resonite bot in game with /headlessCode, and paste that code here.",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch name",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "headless",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2519830",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rimworld-together-0210c9f6da56",
+        "name": "Rimworld Together",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rimworld-together-0210c9f6da56.json",
+        "sha256": "63d8389cf93bc0ba0f5969caa7c8fd93661e4d5ee6aa90bf5fe3ead3910208c5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "rimworld/together/egg-rimworld-together.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/0210c9f6da56.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-05-03T06:57:38-04:00",
+        "name": "Rimworld Together",
+        "author": "josdekurk@gmail.com",
+        "uuid": "8dd06443-3ea8-41ca-8200-24f05435f454",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:dotnet_7": "ghcr.io/parkervcp/yolks:dotnet_7"
+        },
+        "file_denylist": [],
+        "startup": "./GameServer",
+        "config": {
+          "files": "{\"Configs/ServerConfig.json\": {\"parser\": \"json\", \"find\": {\"IP\": \"0.0.0.0\", \"Port\": \"{{server.allocations.default.port}}\", \"MaxPlayers\": \"{{server.environment.MAX_PLAYERS}}\", \"verboseLogs\": \"{{server.environment.VERBOSE}}\"}}}",
+          "startup": "{\"done\": \"Server launched\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/usr/bin/env bash\r\nset -euo pipefail\r\n\r\n# 1. Set repository variables\r\nOWNER=\"RimWorldTogether\"\r\nREPO=\"Rimworld-Together\"\r\n\r\n# 2. Detect architecture\r\nARCH=$(uname -m)\r\ncase \"$ARCH\" in\r\n  x86_64)   MATCH=\"linux-x64\" ;;\r\n  aarch64)  MATCH=\"linux-arm64\" ;;\r\n  arm)      MATCH=\"linux-arm\" ;;\r\n  *)        echo \"Architecture '$ARCH' not supported\"; exit 1 ;;\r\nesac\r\n\r\n# 3. Collect API data\r\nif [[ -z \"${VERSION:-}\" ]] || [[ \"${VERSION}\" == \"latest\" ]]; then\r\n    # Latest release\r\n    JSON=$(curl -sSL \"https://api.github.com/repos/$OWNER/$REPO/releases/latest\")\r\nelse\r\n    # All releases (to check if the tag exists)\r\n    ALL=$(curl -sSL \"https://api.github.com/repos/$OWNER/$REPO/releases\")\r\n    # Checks the existence of the tag\r\n    TAG_EXISTS=$(echo \"$ALL\" | jq -r --arg V \"$VERSION\" '.[] | select(.tag_name==$V) | .tag_name')\r\n    if [[ -z \"$TAG_EXISTS\" ]]; then\r\n        echo \"Tag '$VERSION' not found; using latest\"\r\n        JSON=$(curl -sSL \"https://api.github.com/repos/$OWNER/$REPO/releases/latest\")\r\n    else\r\n        JSON=$(echo \"$ALL\" | jq -r --arg V \"$VERSION\" '.[] | select(.tag_name==$V)')\r\n    fi\r\nfi\r\n\r\n# 4. Extract correct asset download URL\r\nDOWNLOAD_URL=$(echo \"$JSON\" \\\r\n  | jq -r '.assets[].browser_download_url' \\\r\n  | grep -i \"$MATCH\")\r\n\r\nif [[ -z \"$DOWNLOAD_URL\" ]]; then\r\n    echo \"No assets found for architecture '$MATCH'\"\r\n    exit 1\r\nfi\r\n\r\n# 5. Prepare directory and download\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho \"Downloading: $DOWNLOAD_URL\"\r\ncurl -sSL -o server.zip \"$DOWNLOAD_URL\"\r\nunzip -o server.zip\r\nrm server.zip\r\n\r\n# 6. Adjust permissions\r\nchmod +x GameServer\r\n\r\n# 7. Generate configuration if needed\r\nCONFIG=\"/mnt/server/Configs/ServerConfig.json\"\r\nif [[ -f \"$CONFIG\" ]]; then\r\n    echo \"Config file exists\"\r\nelse\r\n    mkdir -p /mnt/server/Configs\r\n\r\n    # Use jq -n to create JSON from environment variables\r\n    jq -n \\\r\n      --argjson port \"${SERVER_PORT:-0}\" \\\r\n      --argjson maxPlayers \"${MAX_PLAYERS:-0}\" \\\r\n      --argjson verboseLogs \"${VERBOSE:-false}\" \\\r\n      '{\r\n        Port: $port,\r\n        MaxPlayers: $maxPlayers,\r\n        verboseLogs: $verboseLogs\r\n      }' > \"$CONFIG\"\r\n\r\n    echo \"Config file created in $CONFIG\"\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 1
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join. Default: 100",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "sort": 2
+          },
+          {
+            "name": "Verbose",
+            "description": "If the console output should be verbose or not.",
+            "env_variable": "VERBOSE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:false,true",
+            "sort": 3
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rimworld-together-0af3d8da8c4a",
+        "name": "Rimworld Together",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rimworld-together-0af3d8da8c4a.json",
+        "sha256": "29fc9d5ae39229120286ad394cfc14c175f04363d568a7a55f18af2d940abac3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/rimworld/together/egg-rimworld-together.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/0af3d8da8c4a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T10:31:49+02:00",
+        "name": "Rimworld Together",
+        "author": "josdekurk@gmail.com",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:dotnet_7": "ghcr.io/parkervcp/yolks:dotnet_7"
+        },
+        "file_denylist": [],
+        "startup": "./GameServer",
+        "config": {
+          "files": "{\"Core/ServerConfig.json\": {\"parser\": \"json\", \"find\": {\"IP\": \"0.0.0.0\", \"Port\": \"{{server.build.default.port}}\", \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"verboseLogs\": \"{{server.build.env.VERBOSE}}\"}}}",
+          "startup": "{\"done\": \"Server launched\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl -L --silent \"https://api.github.com/repos/RimworldTogether/Rimworld-Together/releases/latest\")\r\nRELEASES=$(curl -L --silent \"https://api.github.com/repos/RimworldTogether/Rimworld-Together/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"Linux-x64 \" || echo \"Linux-ARM-x64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o server.zip ${DOWNLOAD_URL}\r\nunzip -o server.zip\r\nrm server.zip\r\nchmod +x GameServer\r\n\r\n\r\nif [ -f \"/mnt/server/Core/ServerConfig.json\" ]; then\r\n    echo \"Config file exits\"\r\nelse \r\n    mkdir -p /mnt/server/Core\r\n    echo \"{\\\"IP\\\":\\\"0.0.0.0\\\",\\\"Port\\\":$SERVER_PORT,\\\"MaxPlayers\\\":$MAX_PLAYERS,\\\"verboseLogs\\\":$VERBOSE}\" | jq . > /mnt/server/Core/ServerConfig.json\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join. Default: 100",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "field_type": "text"
+          },
+          {
+            "name": "Verbose",
+            "description": "If the console output should be verbose or not.",
+            "env_variable": "VERBOSE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:false,true",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rimworld-together-4e14210a7caf",
+        "name": "Rimworld Together",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rimworld-together-4e14210a7caf.json",
+        "sha256": "fdd0b621dbfd29864216ac6df2504c65dd91f6e2e499c20898149b61fb66b408",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "rimworld/together/egg-pterodactyl-rimworld-together.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/4e14210a7caf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-05-03T06:57:38-04:00",
+        "name": "Rimworld Together",
+        "author": "josdekurk@gmail.com",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:dotnet_7": "ghcr.io/parkervcp/yolks:dotnet_7"
+        },
+        "file_denylist": [],
+        "startup": "./GameServer",
+        "config": {
+          "files": "{\"Configs/ServerConfig.json\": {\"parser\": \"json\", \"find\": {\"IP\": \"0.0.0.0\", \"Port\": \"{{server.build.default.port}}\", \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"verboseLogs\": \"{{server.build.env.VERBOSE}}\"}}}",
+          "startup": "{\"done\": \"Server launched\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/usr/bin/env bash\r\nset -euo pipefail\r\n\r\n# 1. Set repository variables\r\nOWNER=\"RimWorldTogether\"\r\nREPO=\"Rimworld-Together\"\r\n\r\n# 2. Detect architecture\r\nARCH=$(uname -m)\r\ncase \"$ARCH\" in\r\n  x86_64)   MATCH=\"linux-x64\" ;;\r\n  aarch64)  MATCH=\"linux-arm64\" ;;\r\n  arm)      MATCH=\"linux-arm\" ;;\r\n  *)        echo \"Architecture '$ARCH' not supported\"; exit 1 ;;\r\nesac\r\n\r\n# 3. Collect API data\r\nif [[ -z \"${VERSION:-}\" ]] || [[ \"${VERSION}\" == \"latest\" ]]; then\r\n    # Latest release\r\n    JSON=$(curl -sSL \"https://api.github.com/repos/$OWNER/$REPO/releases/latest\")\r\nelse\r\n    # All releases (to check if the tag exists)\r\n    ALL=$(curl -sSL \"https://api.github.com/repos/$OWNER/$REPO/releases\")\r\n    # Checks the existence of the tag\r\n    TAG_EXISTS=$(echo \"$ALL\" | jq -r --arg V \"$VERSION\" '.[] | select(.tag_name==$V) | .tag_name')\r\n    if [[ -z \"$TAG_EXISTS\" ]]; then\r\n        echo \"Tag '$VERSION' not found; using latest\"\r\n        JSON=$(curl -sSL \"https://api.github.com/repos/$OWNER/$REPO/releases/latest\")\r\n    else\r\n        JSON=$(echo \"$ALL\" | jq -r --arg V \"$VERSION\" '.[] | select(.tag_name==$V)')\r\n    fi\r\nfi\r\n\r\n# 4. Extract correct asset download URL\r\nDOWNLOAD_URL=$(echo \"$JSON\" \\\r\n  | jq -r '.assets[].browser_download_url' \\\r\n  | grep -i \"$MATCH\")\r\n\r\nif [[ -z \"$DOWNLOAD_URL\" ]]; then\r\n    echo \"No assets found for architecture '$MATCH'\"\r\n    exit 1\r\nfi\r\n\r\n# 5. Prepare directory and download\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho \"Downloading: $DOWNLOAD_URL\"\r\ncurl -sSL -o server.zip \"$DOWNLOAD_URL\"\r\nunzip -o server.zip\r\nrm server.zip\r\n\r\n# 6. Adjust permissions\r\nchmod +x GameServer\r\n\r\n# 7. Generate configuration if needed\r\nCONFIG=\"/mnt/server/Configs/ServerConfig.json\"\r\nif [[ -f \"$CONFIG\" ]]; then\r\n    echo \"Config file exists\"\r\nelse\r\n    mkdir -p /mnt/server/Configs\r\n\r\n    # Use jq -n to create JSON from environment variables\r\n    jq -n \\\r\n      --argjson port \"${SERVER_PORT:-0}\" \\\r\n      --argjson maxPlayers \"${MAX_PLAYERS:-0}\" \\\r\n      --argjson verboseLogs \"${VERBOSE:-false}\" \\\r\n      '{\r\n        Port: $port,\r\n        MaxPlayers: $maxPlayers,\r\n        verboseLogs: $verboseLogs\r\n      }' > \"$CONFIG\"\r\n\r\n    echo \"Config file created in $CONFIG\"\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join. Default: 100",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "field_type": "text"
+          },
+          {
+            "name": "Verbose",
+            "description": "If the console output should be verbose or not.",
+            "env_variable": "VERBOSE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:false,true",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rimworld-together-5866eacd09f1",
+        "name": "Rimworld Together",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rimworld-together-5866eacd09f1.json",
+        "sha256": "9140a86aef3488642c5583777645f78fcab951b0f59d04b3a55ec743ba3ed92f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "rimworld/together/egg-rimworld-together.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5866eacd09f1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-03T17:06:25+00:00",
+        "name": "Rimworld Together",
+        "author": "josdekurk@gmail.com",
+        "description": "A community driven multiplayer mod, for Rimworld.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:dotnet_7": "ghcr.io/ptero-eggs/yolks:dotnet_7"
+        },
+        "file_denylist": [],
+        "startup": "./GameServer",
+        "config": {
+          "files": "{\"Configs/ServerConfig.json\": {\"parser\": \"json\", \"find\": {\"IP\": \"0.0.0.0\", \"Port\": \"{{server.build.default.port}}\", \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"VerboseLogs\": \"{{server.build.env.VERBOSE}}\"}}}",
+          "startup": "{\"done\": \"Server launched\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl -L --silent \"https://api.github.com/repos/RimworldTogether/Rimworld-Together/releases/latest\")\r\nRELEASES=$(curl -L --silent \"https://api.github.com/repos/RimworldTogether/Rimworld-Together/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"Linux-x64 \" || echo \"Linux-ARM-x64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o server.zip ${DOWNLOAD_URL}\r\nunzip -o server.zip\r\nrm server.zip\r\nchmod +x GameServer\r\n\r\n\r\nif [ -f \"/mnt/server/Core/ServerConfig.json\" ]; then\r\n    echo \"Config file exits\"\r\nelse \r\n    mkdir -p /mnt/server/Core\r\n    echo \"{\\\"IP\\\":\\\"0.0.0.0\\\",\\\"Port\\\":$SERVER_PORT,\\\"MaxPlayers\\\":$MAX_PLAYERS,\\\"verboseLogs\\\":$VERBOSE}\" | jq . > /mnt/server/Core/ServerConfig.json\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join. Default: 100",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "field_type": "text"
+          },
+          {
+            "name": "Verbose",
+            "description": "If the console output should be verbose or not.",
+            "env_variable": "VERBOSE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:false,true",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rimworld-open-world-9cac46f46711",
+        "name": "Rimworld: Open World",
+        "description": "The Open World mod allows you to create and join servers to play with people all around the world, it introduces plenty of new features including trading, gifting, bartering, PvP and so much more!\r\n\r\nhttps://github.com/D12-Dev/OpenWorld",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rimworld-open-world-9cac46f46711.json",
+        "sha256": "7a1be937af4ca90d0e50456440335f5c7c344d04c4727a458f65f9c33aa5913a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "rimworld/open_world/egg-pterodactyl-rimworld--open-world.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/rimworld/open_world/egg-rimworld-open-world.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/9cac46f46711.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:08+00:00",
+        "name": "Rimworld: Open World",
+        "author": "kyle@williquette.us",
+        "description": "The Open World mod allows you to create and join servers to play with people all around the world, it introduces plenty of new features including trading, gifting, bartering, PvP and so much more!\r\n\r\nhttps://github.com/D12-Dev/OpenWorld",
+        "features": null,
+        "docker_images": {
+          "Dotnet 3.1": "ghcr.io/parkervcp/yolks:dotnet_3.1",
+          "Dotnet 6": "ghcr.io/parkervcp/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./OpenWorldServer",
+        "config": {
+          "files": "{\"Data/Config.json\": {\"parser\": \"json\", \"find\": {\"LocalAddress\": \"0.0.0.0\", \"ServerPort\": \"{{server.build.default.port}}\", \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"EnforceMods\": \"{{server.build.env.ENFORCE_MODS}}\", \"UseModBlacklist\": \"{{server.build.env.USE_MOD_BLACKLIST}}\", \"UseCustomDifficulty\": \"{{server.build.env.USE_CUSTOM_DIFF}}\", \"UseWhitelist\": \"{{server.build.env.WHITELIST}}\", \"AllowCustomScenarios\": \"{{server.build.env.CUSTOM_SCEN}}\", \"PlayerVersion\": \"{{server.build.env.PLAYER_VERSION}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \" Server Launched\"}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\napt update\r\napt -y install curl jq unzip git\r\n\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/D12-Dev/OpenWorld/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/D12-Dev/OpenWorld/releases\")\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${ARCH} | head -1)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${ARCH} | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${ARCH}| head -1)\r\n    fi\r\nfi\r\n\r\n\r\n#Download the Rimworld Open World server\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o ${ARCH}.zip\"\r\ncurl -sSL ${DOWNLOAD_URL} -o ${ARCH}.zip\r\necho -e \"Unzipping ${ARCH}.zip\"\r\nunzip -o ${ARCH}.zip\r\nmv ${ARCH}/* /mnt/server\r\nchmod +x \"OpenWorldServer\"\r\nrm -rf ${ARCH}.zip ${ARCH}/\r\n\r\n\r\n\r\ncd /mnt/server\r\nFILE=/mnt/server/Data/Config.json\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"config already exists.\"\r\nelse \r\n    echo \"Config does not exist, making one\"\r\n    mkdir -p /mnt/server/Data\r\n    cd /mnt/server/Data\r\ncat << EOF > \"Config.json\"\r\n{\r\n  \"LocalAddress\": \"0.0.0.0\",\r\n  \"ServerPort\": 25555,\r\n  \"MaxPlayers\": 10,\r\n  \"PlayerVersion\": \"1.2\",\r\n  \"EnforceMods\": false,\r\n  \"UseModBlacklist\": false,\r\n  \"UseCustomDifficulty\": false,\r\n  \"UseWhitelist\": false,\r\n  \"AllowCustomScenarios\": false\r\n}\r\nEOF\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Open World Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "sets the maximum number of players allowed to connect at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Mods",
+            "description": "This forces players to use the mods listed in the the \"Mods Enforced\" folder, with this disabled it will allow players to join with any mods they would like",
+            "env_variable": "ENFORCE_MODS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Mod Blacklist",
+            "description": "enabled you to blacklist mods from being used, usually used when enforced mods are disabled.",
+            "env_variable": "USE_MOD_BLACKLIST",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Custom Difficulty",
+            "description": "forces all players to use the difficulty setting set in the \"Difficulty\" file. MAKE SURE YOU GIVE A VALUE TO EVERYTHING OR IT WILL BE AT 0%",
+            "env_variable": "USE_CUSTOM_DIFF",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Whitelist",
+            "description": "allows only the usernames listed in the \"Whitelist\" file to join the server.",
+            "env_variable": "WHITELIST",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Custom Scenarios",
+            "description": "allows people to create custom scenarios when creating their save on the server.",
+            "env_variable": "CUSTOM_SCEN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Player Version",
+            "description": "version the server will accept clients joining in with.\r\n\r\nTO see the latest:\r\nhttps://discord.com/channels/992806266109964319/992881103071354890\r\n\r\nfor example for v1.12 you would write 1.12",
+            "env_variable": "PLAYER_VERSION",
+            "default_value": "1.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rimworld-open-world-bcac1b0c6d46",
+        "name": "Rimworld: Open World",
+        "description": "The Open World mod allows you to create and join servers to play with people all around the world, it introduces plenty of new features including trading, gifting, bartering, PvP and so much more!\r\n\r\nhttps://github.com/D12-Dev/OpenWorld",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rimworld-open-world-bcac1b0c6d46.json",
+        "sha256": "f8dd1b8b9ae3b43b39e5d47539ec1dec6c49da2c68984e06009fd70da340b582",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "rimworld/open_world/egg-rimworld--open-world.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/bcac1b0c6d46.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:08+00:00",
+        "name": "Rimworld: Open World",
+        "author": "kyle@williquette.us",
+        "uuid": "80928b18-5257-4286-b31a-739999939e8f",
+        "description": "The Open World mod allows you to create and join servers to play with people all around the world, it introduces plenty of new features including trading, gifting, bartering, PvP and so much more!\r\n\r\nhttps://github.com/D12-Dev/OpenWorld",
+        "features": null,
+        "docker_images": {
+          "Dotnet 3.1": "ghcr.io/parkervcp/yolks:dotnet_3.1",
+          "Dotnet 6": "ghcr.io/parkervcp/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./OpenWorldServer",
+        "config": {
+          "files": "{\"Data/Config.json\": {\"parser\": \"json\", \"find\": {\"LocalAddress\": \"0.0.0.0\", \"ServerPort\": \"{{server.build.default.port}}\", \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"EnforceMods\": \"{{server.build.env.ENFORCE_MODS}}\", \"UseModBlacklist\": \"{{server.build.env.USE_MOD_BLACKLIST}}\", \"UseCustomDifficulty\": \"{{server.build.env.USE_CUSTOM_DIFF}}\", \"UseWhitelist\": \"{{server.build.env.WHITELIST}}\", \"AllowCustomScenarios\": \"{{server.build.env.CUSTOM_SCEN}}\", \"PlayerVersion\": \"{{server.build.env.PLAYER_VERSION}}\"}}}",
+          "startup": "{\"done\": \" Server Launched\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\napt update\r\napt -y install curl jq unzip git\r\n\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/D12-Dev/OpenWorld/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/D12-Dev/OpenWorld/releases\")\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${ARCH} | head -1)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${ARCH} | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${ARCH}| head -1)\r\n    fi\r\nfi\r\n\r\n\r\n#Download the Rimworld Open World server\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o ${ARCH}.zip\"\r\ncurl -sSL ${DOWNLOAD_URL} -o ${ARCH}.zip\r\necho -e \"Unzipping ${ARCH}.zip\"\r\nunzip -o ${ARCH}.zip\r\nmv ${ARCH}/* /mnt/server\r\nchmod +x \"OpenWorldServer\"\r\nrm -rf ${ARCH}.zip ${ARCH}/\r\n\r\n\r\n\r\ncd /mnt/server\r\nFILE=/mnt/server/Data/Config.json\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"config already exists.\"\r\nelse \r\n    echo \"Config does not exist, making one\"\r\n    mkdir -p /mnt/server/Data\r\n    cd /mnt/server/Data\r\ncat << EOF > \"Config.json\"\r\n{\r\n  \"LocalAddress\": \"0.0.0.0\",\r\n  \"ServerPort\": 25555,\r\n  \"MaxPlayers\": 10,\r\n  \"PlayerVersion\": \"1.2\",\r\n  \"EnforceMods\": false,\r\n  \"UseModBlacklist\": false,\r\n  \"UseCustomDifficulty\": false,\r\n  \"UseWhitelist\": false,\r\n  \"AllowCustomScenarios\": false\r\n}\r\nEOF\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Open World Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "sets the maximum number of players allowed to connect at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Mods",
+            "description": "This forces players to use the mods listed in the the \"Mods Enforced\" folder, with this disabled it will allow players to join with any mods they would like",
+            "env_variable": "ENFORCE_MODS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Use Mod Blacklist",
+            "description": "enabled you to blacklist mods from being used, usually used when enforced mods are disabled.",
+            "env_variable": "USE_MOD_BLACKLIST",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Use Custom Difficulty",
+            "description": "forces all players to use the difficulty setting set in the \"Difficulty\" file. MAKE SURE YOU GIVE A VALUE TO EVERYTHING OR IT WILL BE AT 0%",
+            "env_variable": "USE_CUSTOM_DIFF",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Use Whitelist",
+            "description": "allows only the usernames listed in the \"Whitelist\" file to join the server.",
+            "env_variable": "WHITELIST",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Custom Scenarios",
+            "description": "allows people to create custom scenarios when creating their save on the server.",
+            "env_variable": "CUSTOM_SCEN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Player Version",
+            "description": "version the server will accept clients joining in with.\r\n\r\nTO see the latest:\r\nhttps://discord.com/channels/992806266109964319/992881103071354890\r\n\r\nfor example for v1.12 you would write 1.12",
+            "env_variable": "PLAYER_VERSION",
+            "default_value": "1.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rimworld-open-world-c059a22d558a",
+        "name": "Rimworld: Open World",
+        "description": "The Open World mod allows you to create and join servers to play with people all around the world, it introduces plenty of new features including trading, gifting, bartering, PvP and so much more!\r\n\r\nhttps://github.com/D12-Dev/OpenWorld",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rimworld-open-world-c059a22d558a.json",
+        "sha256": "4d614cfa20d7dc8036caf93866411d14f25d91fde3af0faccace7a25b726a8a3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "rimworld/open_world/egg-rimworld-open-world.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c059a22d558a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-27T13:03:41+03:00",
+        "name": "Rimworld: Open World",
+        "author": "kyle@williquette.us",
+        "description": "The Open World mod allows you to create and join servers to play with people all around the world, it introduces plenty of new features including trading, gifting, bartering, PvP and so much more!\r\n\r\nhttps://github.com/D12-Dev/OpenWorld",
+        "features": null,
+        "docker_images": {
+          "Dotnet 3.1": "ghcr.io/ptero-eggs/yolks:dotnet_3.1",
+          "Dotnet 6": "ghcr.io/ptero-eggs/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./OpenWorldServer",
+        "config": {
+          "files": "{\"Data/Config.json\": {\"parser\": \"json\", \"find\": {\"LocalAddress\": \"0.0.0.0\", \"ServerPort\": \"{{server.build.default.port}}\", \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"EnforceMods\": \"{{server.build.env.ENFORCE_MODS}}\", \"UseModBlacklist\": \"{{server.build.env.USE_MOD_BLACKLIST}}\", \"UseCustomDifficulty\": \"{{server.build.env.USE_CUSTOM_DIFF}}\", \"UseWhitelist\": \"{{server.build.env.WHITELIST}}\", \"AllowCustomScenarios\": \"{{server.build.env.CUSTOM_SCEN}}\", \"PlayerVersion\": \"{{server.build.env.PLAYER_VERSION}}\"}}}",
+          "startup": "{\"done\": \" Server Launched\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\napt update\r\napt -y install curl jq unzip git\r\n\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/D12-Dev/OpenWorld/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/D12-Dev/OpenWorld/releases\")\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${ARCH} | head -1)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${ARCH} | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${ARCH}| head -1)\r\n    fi\r\nfi\r\n\r\n\r\n#Download the Rimworld Open World server\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o ${ARCH}.zip\"\r\ncurl -sSL ${DOWNLOAD_URL} -o ${ARCH}.zip\r\necho -e \"Unzipping ${ARCH}.zip\"\r\nunzip -o ${ARCH}.zip\r\nmv ${ARCH}/* /mnt/server\r\nchmod +x \"OpenWorldServer\"\r\nrm -rf ${ARCH}.zip ${ARCH}/\r\n\r\n\r\n\r\ncd /mnt/server\r\nFILE=/mnt/server/Data/Config.json\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"config already exists.\"\r\nelse \r\n    echo \"Config does not exist, making one\"\r\n    mkdir -p /mnt/server/Data\r\n    cd /mnt/server/Data\r\ncat << EOF > \"Config.json\"\r\n{\r\n  \"LocalAddress\": \"0.0.0.0\",\r\n  \"ServerPort\": 25555,\r\n  \"MaxPlayers\": 10,\r\n  \"PlayerVersion\": \"1.2\",\r\n  \"EnforceMods\": false,\r\n  \"UseModBlacklist\": false,\r\n  \"UseCustomDifficulty\": false,\r\n  \"UseWhitelist\": false,\r\n  \"AllowCustomScenarios\": false\r\n}\r\nEOF\r\nfi\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Open World Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "sets the maximum number of players allowed to connect at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Mods",
+            "description": "This forces players to use the mods listed in the the \"Mods Enforced\" folder, with this disabled it will allow players to join with any mods they would like",
+            "env_variable": "ENFORCE_MODS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Mod Blacklist",
+            "description": "enabled you to blacklist mods from being used, usually used when enforced mods are disabled.",
+            "env_variable": "USE_MOD_BLACKLIST",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Custom Difficulty",
+            "description": "forces all players to use the difficulty setting set in the \"Difficulty\" file. MAKE SURE YOU GIVE A VALUE TO EVERYTHING OR IT WILL BE AT 0%",
+            "env_variable": "USE_CUSTOM_DIFF",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Whitelist",
+            "description": "allows only the usernames listed in the \"Whitelist\" file to join the server.",
+            "env_variable": "WHITELIST",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Custom Scenarios",
+            "description": "allows people to create custom scenarios when creating their save on the server.",
+            "env_variable": "CUSTOM_SCEN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Player Version",
+            "description": "version the server will accept clients joining in with.\r\n\r\nTO see the latest:\r\nhttps://discord.com/channels/992806266109964319/992881103071354890\r\n\r\nfor example for v1.12 you would write 1.12",
+            "env_variable": "PLAYER_VERSION",
+            "default_value": "1.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rising-world-java-legacy-16e3c87362f2",
+        "name": "Rising World Java Legacy",
+        "description": "Rising World is a voxel based open-world sandbox game, featuring a procedurally generated world, playable in single and multi-player.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rising-world-java-legacy-16e3c87362f2.json",
+        "sha256": "57bda000165761cbcae255afbdd7644f4e00d164523ac84b724ea832993da081",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "rising_world/legacy/egg-rising-world-java-legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/16e3c87362f2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Rising World Java Legacy",
+        "author": "eggs@goover.dev",
+        "uuid": "b60efdb2-7468-4c7e-8653-d075048111a0",
+        "description": "Rising World is a voxel based open-world sandbox game, featuring a procedurally generated world, playable in single and multi-player.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xmx{{SERVER_MEMORY}}M -jar server.jar +maxplayer={{MAX_PLAYERS}} +serverport={{SERVER_PORT}} +servername=\\\"{{SERVER_NAME}}\\\" +rconport {{RCON_PORT}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"rcon_enabled\": \"true\", \"rcon_password\": \"{{server.build.env.RCON_PASSWORD}}\", \"server_password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"RISING WORLD SERVER STARTED\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Rising World Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum player count for the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Overrides the default RCON Port",
+            "env_variable": "RCON_PORT",
+            "default_value": "4253",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "LD Library Path",
+            "description": "",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./linux64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "339010",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_BETAID",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "legacy",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rising-world-java-legacy-8df778ee90ee",
+        "name": "Rising World Java Legacy",
+        "description": "Rising World is a voxel based open-world sandbox game, featuring a procedurally generated world, playable in single and multi-player.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rising-world-java-legacy-8df778ee90ee.json",
+        "sha256": "5d25f54cce12f1c8d44afdb5a4566a5a19f3aa5d31d530728f38c4293ec16ae9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "rising_world/legacy/egg-pterodactyl-rising-world-java-legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/rising_world/legacy/egg-rising-world-legacy.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8df778ee90ee.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:41+00:00",
+        "name": "Rising World Java Legacy",
+        "author": "eggs@goover.dev",
+        "description": "Rising World is a voxel based open-world sandbox game, featuring a procedurally generated world, playable in single and multi-player.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xmx{{SERVER_MEMORY}}M -jar server.jar +maxplayer={{MAX_PLAYERS}} +serverport={{SERVER_PORT}} +servername=\\\"{{SERVER_NAME}}\\\" +rconport {{RCON_PORT}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"rcon_enabled\": \"true\", \"rcon_password\": \"{{server.build.env.RCON_PASSWORD}}\", \"server_password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"RISING WORLD SERVER STARTED\"}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Rising World Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum player count for the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Overrides the default RCON Port",
+            "env_variable": "RCON_PORT",
+            "default_value": "4253",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "LD Library Path",
+            "description": "",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./linux64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "339010",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_BETAID",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "legacy",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

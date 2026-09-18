@@ -1,0 +1,943 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "ftb-modpacks-ch-server-b122e2483ec8",
+        "name": "FTB-modpacks.ch Server",
+        "description": "Since the release of the FTB APP, FTB modpacks are now distributed through modpacks.ch. This egg was developed for support for modpacks that are distributed through this.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/ftb-modpacks-ch-server-b122e2483ec8.json",
+        "sha256": "586a0709a0c14d2ab89bb6e18371cb8efe07f7eb2d5f56983edc086118acf5ef",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/ftb/outdated/egg-pterodactyl-f-t-b-modpacks-ch-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/b122e2483ec8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:44+00:00",
+        "name": "FTB-modpacks.ch Server",
+        "author": "runemaster580@gmail.com",
+        "description": "Since the release of the FTB APP, FTB modpacks are now distributed through modpacks.ch. This egg was developed for support for modpacks that are distributed through this.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 18": "ghcr.io/pelican-eggs/yolks:java_18",
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -javaagent:log4jfix/Log4jPatcher-1.0.0.jar -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true $( [[  ! -f unix_args.txt ]] && printf %s \"-jar start-server.jar\" || printf %s \"@unix_args.txt\" )",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:java_8",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# FTB Pack Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server\r\nfi\r\ncd /mnt/server\r\n\r\n\r\n# Download needed software.\r\nfunction install_required {\r\n    apt update\r\n    apt install -y curl jq\r\n}\r\n\r\nfunction get_modpack_id {\r\n    urlencode() {\r\n        local string=\"${1// /%20}\"\r\n        echo \"$string\"\r\n    }\r\n    \r\n    # if no modpack id is set and modpack search term is set.\r\n    if [ -z ${FTB_MODPACK_ID} ] && [ ! -z \"${FTB_SEARCH_TERM}\" ]; then\r\n        encoded_search_term=$(urlencode \"$FTB_SEARCH_TERM\")\r\n        JSON_DATA=$(curl -sSL https://api.modpacks.ch/public/modpack/search/8?term=\"${encoded_search_term}\")\r\n    \r\n        # grabs the first modpack in array.\r\n        FTB_MODPACK_ID=$(echo -e ${JSON_DATA} | jq -r \".packs[0]\")\r\n    fi\r\n    \r\n    if [ -z ${FTB_MODPACK_VERSION_ID} ] && [ ! -z ${FTB_VERSION_STRING} ]; then\r\n        # grabs the correct version id matching the string.\r\n        FTB_MODPACK_VERSION_ID=$(curl -sSL https://api.modpacks.ch/public/modpack/${FTB_MODPACK_ID} | jq -r --arg VSTRING ${FTB_VERSION_STRING} '.versions[] | select(.name == $VSTRING) | .id')\r\n    fi\r\n}\r\n\r\nfunction run_installer {\r\n    # get architecture for installer\r\n    INSTALLER_TYPE=$([ \"$(uname -m)\" == \"x86_64\" ] && echo \"linux\" || echo \"arm/linux\")\r\n    echo \"ModpackID: ${FTB_MODPACK_ID} VersionID: ${FTB_MODPACK_VERSION_ID} InstallerType: ${INSTALLER_TYPE}\"\r\n\r\n    # download installer\r\n    curl -L https://api.modpacks.ch/public/modpack/0/0/server/${INSTALLER_TYPE} --output serversetup\r\n    chmod +x ./serversetup\r\n    \r\n    # remove old forge files (to allow updating)\r\n    rm -rf libraries/net/minecraftforge/forge\r\n    rm -rf libraries/net/neoforged/forge\r\n    rm -f unix_args.txt\r\n    \r\n    # run installer\r\n    ./serversetup ${FTB_MODPACK_ID} ${FTB_MODPACK_VERSION_ID} --auto --noscript --nojava\r\n}\r\n\r\n# allows startup command to work\r\nfunction move_startup_files {\r\n    # create symlink for forge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/minecraftforge/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/minecraftforge/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # create symlink for neoforge unix_args.txt if exists\r\n    if compgen -G \"libraries/net/neoforged/forge/*/unix_args.txt\"; then\r\n        ln -sf libraries/net/neoforged/forge/*/unix_args.txt unix_args.txt\r\n    fi\r\n    \r\n    # move forge/neoforge/fabric jar file to start-server.jar if exists\r\n    if compgen -G \"forge-*.jar\"; then\r\n        mv -f forge-*.jar start-server.jar\r\n    elif compgen -G \"fabric-*.jar\"; then\r\n        mv -f fabric-*.jar start-server.jar\r\n    fi\r\n}\r\n\r\n# installer cleanup\r\nfunction installer_cleanup {\r\n    rm serversetup\r\n    rm -f run.bat\r\n    rm -f run.sh\r\n}\r\n\r\n# run installation steps\r\ninstall_required\r\nget_modpack_id\r\nrun_installer\r\nmove_startup_files\r\ninstaller_cleanup\r\n\r\necho \"Finished installing FTB modpack\""
+          }
+        },
+        "variables": [
+          {
+            "name": "FTB Pack search term",
+            "description": "the search term for finding the modpack. needs to be at least 4 characters long.\r\nFind out what term is needed by using the ftb app and searching with the term. make sure it only returns 1 result.\r\ncan also be searched for via: https://api.modpacks.ch/public/modpack/search/8?term={SEARCHTERM}\r\n\r\nonly needed if the modpack id and modpack version id is unknown.",
+            "env_variable": "FTB_SEARCH_TERM",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB modpack ID",
+            "description": "The FTB Api modpack ID.\r\nNeeded if not using the search variable\r\n\r\nExample: FTB Interactions ID is 5.\r\nhttps://api.modpacks.ch/public/modpack/5",
+            "env_variable": "FTB_MODPACK_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version",
+            "description": "what version of the modpack to install. leave empty if using the modpack version id variable.",
+            "env_variable": "FTB_VERSION_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FTB Pack Version ID",
+            "description": "The modpack api version ID.\r\nneeded if not using the string for the version.\r\n\r\nExample FTB Revelations version id for version \"2.0.2\" is 86.\r\nwhich would come out as: https://api.modpacks.ch/public/modpack/5/86",
+            "env_variable": "FTB_MODPACK_VERSION_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "glowstone-2f99fc718500",
+        "name": "Glowstone",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/glowstone-2f99fc718500.json",
+        "sha256": "6bc314c3ce80d8322620b66e305454140b43f6eba369e5acec0bca2144c9cc56",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/glowstone/egg-glowstone.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/2f99fc718500.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "Glowstone",
+        "author": "support@pterodactyl.io",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "features": null,
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms768M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config/glowstone.yml\": {\"parser\": \"yaml\", \"find\": {\"server.port\": \"{{server.build.default.port}}\", \"console.prompt\": \"\"}}}",
+          "startup": "{\"done\": \"Ready for connections.\"}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y jq curl\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ $VERSION == *SNAPSHOT ]; then\r\n  echo -e \"Using Maven\"\r\n  \r\n  DOWNLOAD_URL=\"https://repo.glowstone.net/service/rest/v1/search/assets/download?group=net.glowstone&name=glowstone&sort=version&repository=snapshots&maven.baseVersion=${VERSION}&direction=desc&maven.classifier=\"\r\nelse \r\n    echo -e \"Using GitHub.\"\r\n\r\n    if [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n        echo -e \"using anon api call\"\r\n    else\r\n        echo -e \"user and oauth token set\"\r\n        alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\n    fi\r\n    \r\n    ## get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            echo -e \"defaulting to latest release\"\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\nfi\r\n\r\necho -e \"Downloading...\"\r\ncurl --silent -L -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Generating configuration...\"\r\njava -jar ${SERVER_JARFILE} --generate-config\r\n\r\necho -e \"Install Complete\"",
+            "container": "eclipse-temurin:8-jdk",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "glowstone.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Glowstone Version",
+            "description": "The version of Glowstone to download. If it ends in SNAPSHOT, it will attempt to download from the maven repository.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "GitHub User",
+            "description": "GitHub user to use for api calls.\r\n\r\nThis only needs to be set if you hit the GitHub API too often across multiple servers.",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "GitHub OAuth Token",
+            "description": "This can be either an OAuth or a Personal Access Token.\r\n\r\nThis is required for the install is you set a user.",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "GitHub Package",
+            "description": "The repository to download from.",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "GlowstoneMC/Glowstone",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "glowstone.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "glowstone-70b09b4c819f",
+        "name": "Glowstone",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/glowstone-70b09b4c819f.json",
+        "sha256": "3c178db8940aad8d3bdb0c1aec16885a2df72ec7819902119ee2514ec3f59847",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/glowstone/egg-glowstone.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/70b09b4c819f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-17T23:20:29+01:00",
+        "name": "Glowstone",
+        "author": "support@pterodactyl.io",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "features": null,
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms768M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config/glowstone.yml\": {\"parser\": \"yaml\", \"find\": {\"server.port\": \"{{server.build.default.port}}\", \"console.prompt\": \"\"}}}",
+          "startup": "{\"done\": \"Ready for connections.\"}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y jq curl\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ $VERSION == *SNAPSHOT ]; then\r\n  echo -e \"Using Maven\"\r\n  \r\n  DOWNLOAD_URL=\"https://repo.glowstone.net/service/rest/v1/search/assets/download?group=net.glowstone&name=glowstone&sort=version&repository=snapshots&maven.baseVersion=${VERSION}&direction=desc&maven.classifier=\"\r\nelse \r\n    echo -e \"Using GitHub.\"\r\n\r\n    if [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n        echo -e \"using anon api call\"\r\n    else\r\n        echo -e \"user and oauth token set\"\r\n        alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\n    fi\r\n    \r\n    ## get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            echo -e \"defaulting to latest release\"\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\nfi\r\n\r\necho -e \"Downloading...\"\r\ncurl --silent -L -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Generating configuration...\"\r\njava -jar ${SERVER_JARFILE} --generate-config\r\n\r\necho -e \"Install Complete\"",
+            "container": "eclipse-temurin:8-jdk",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "glowstone.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/"
+          },
+          {
+            "name": "Glowstone Version",
+            "description": "The version of Glowstone to download. If it ends in SNAPSHOT, it will attempt to download from the maven repository.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "name": "GitHub User",
+            "description": "GitHub user to use for api calls.\r\n\r\nThis only needs to be set if you hit the GitHub API too often across multiple servers.",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable"
+          },
+          {
+            "name": "GitHub OAuth Token",
+            "description": "This can be either an OAuth or a Personal Access Token.\r\n\r\nThis is required for the install is you set a user.",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable"
+          },
+          {
+            "name": "GitHub Package",
+            "description": "The repository to download from.",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "GlowstoneMC/Glowstone",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string"
+          },
+          {
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "glowstone.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "glowstone-aa7feacddbd7",
+        "name": "Glowstone",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/glowstone-aa7feacddbd7.json",
+        "sha256": "d3c27ba32419d5fcc5e816bee3e7b16d45c45c55625360a468bb3b37c2c55c64",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/glowstone/egg-pterodactyl-glowstone.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/aa7feacddbd7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:45+00:00",
+        "name": "Glowstone",
+        "author": "support@pterodactyl.io",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "features": null,
+        "docker_images": {
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 18": "ghcr.io/pelican-eggs/yolks:java_18",
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms768M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config/glowstone.yml\": {\"parser\": \"yaml\", \"find\": {\"server.port\": \"{{server.build.default.port}}\", \"console.prompt\": \"\"}}}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "startup": "{\"done\": \"Ready for connections.\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:java_8",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y jq curl\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ $VERSION == *SNAPSHOT ]; then\r\n  echo -e \"Using Maven\"\r\n  \r\n  DOWNLOAD_URL=\"https://repo.glowstone.net/service/rest/v1/search/assets/download?group=net.glowstone&name=glowstone&sort=version&repository=snapshots&maven.baseVersion=${VERSION}&direction=desc&maven.classifier=\"\r\nelse \r\n    echo -e \"Using GitHub.\"\r\n\r\n    if [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n        echo -e \"using anon api call\"\r\n    else\r\n        echo -e \"user and oauth token set\"\r\n        alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\n    fi\r\n    \r\n    ## get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            echo -e \"defaulting to latest release\"\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\nfi\r\n\r\necho -e \"Downloading...\"\r\ncurl --silent -L -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Generating configuration...\"\r\njava -jar ${SERVER_JARFILE} --generate-config\r\n\r\necho -e \"Install Complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "glowstone.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Glowstone Version",
+            "description": "The version of Glowstone to download. If it ends in SNAPSHOT, it will attempt to download from the maven repository.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "GitHub User",
+            "description": "GitHub user to use for api calls.\r\n\r\nThis only needs to be set if you hit the GitHub API too often across multiple servers.",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "GitHub OAuth Token",
+            "description": "This can be either an OAuth or a Personal Access Token.\r\n\r\nThis is required for the install is you set a user.",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "GitHub Package",
+            "description": "The repository to download from.",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "GlowstoneMC/Glowstone",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "glowstone.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "glowstone-baab6fd2e7a2",
+        "name": "Glowstone",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/glowstone-baab6fd2e7a2.json",
+        "sha256": "a480b332c18bed5657103746e0351d58c2d0636deb242054624c5c05d7d2db82",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/glowstone/egg-glowstone.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/baab6fd2e7a2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Glowstone",
+        "author": "support@pterodactyl.io",
+        "uuid": "0b0b94ea-aff2-49c0-80a0-736c1717f82e",
+        "description": "Glowstone is an open-source server implementation for Minecraft: Java Edition 1.12.2 and up.",
+        "image": null,
+        "tags": [
+          "minecraft"
+        ],
+        "features": null,
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 18": "ghcr.io/pelican-eggs/yolks:java_18"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"config/glowstone.yml\": {\"parser\": \"yaml\", \"find\": {\"server.port\": \"{{server.allocations.default.port}}\", \"console.prompt\": \"\"}}}",
+          "startup": "{\"done\": \"Ready for connections.\"}",
+          "logs": "{\"custom\": false, \"location\": \"logs/latest.log\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y jq curl\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ $VERSION == *SNAPSHOT ]; then\r\n  echo -e \"Using Maven\"\r\n  \r\n  DOWNLOAD_URL=\"https://repo.glowstone.net/service/rest/v1/search/assets/download?group=net.glowstone&name=glowstone&sort=version&repository=snapshots&maven.baseVersion=${VERSION}&direction=desc&maven.classifier=\"\r\nelse \r\n    echo -e \"Using GitHub.\"\r\n\r\n    if [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n        echo -e \"using anon api call\"\r\n    else\r\n        echo -e \"user and oauth token set\"\r\n        alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\n    fi\r\n    \r\n    ## get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            echo -e \"defaulting to latest release\"\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\nfi\r\n\r\necho -e \"Downloading...\"\r\ncurl --silent -L -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\necho -e \"Generating configuration...\"\r\njava -jar ${SERVER_JARFILE} --generate-config\r\n\r\necho -e \"Install Complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:java_8",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "GitHub OAuth Token",
+            "description": "This can be either an OAuth or a Personal Access Token.\r\n\r\nThis is required for the install is you set a user.",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": null
+          },
+          {
+            "name": "GitHub Package",
+            "description": "The repository to download from.",
+            "env_variable": "GITHUB_PACKAGE",
+            "default_value": "GlowstoneMC/Glowstone",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null
+          },
+          {
+            "name": "GitHub User",
+            "description": "GitHub user to use for api calls.\r\n\r\nThis only needs to be set if you hit the GitHub API too often across multiple servers.",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": null
+          },
+          {
+            "name": "Glowstone Version",
+            "description": "The version of Glowstone to download. If it ends in SNAPSHOT, it will attempt to download from the maven repository.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null
+          },
+          {
+            "name": "Match",
+            "description": "",
+            "env_variable": "MATCH",
+            "default_value": "glowstone.jar",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "glowstone.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "sort": null
+          }
+        ],
+        "startup": "java -Xms768M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -jar {{SERVER_JARFILE}}"
+      }
+    },
+    {
+      "entry": {
+        "id": "gomint-3860c590bfe3",
+        "name": "GoMint",
+        "description": "A performant and stable Minecraft server software for the Bedrock Edition that comes with a modern API and support for Java 11 LTS.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/gomint-3860c590bfe3.json",
+        "sha256": "68a980b9dbc1f2826548b1b3c3b32764e1854b1a46e55635c097ef4597527515",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/bedrock/gomint/egg-go-mint.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/3860c590bfe3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:06:25+02:00",
+        "name": "GoMint",
+        "author": "parker@parkervcp.com",
+        "description": "A performant and stable Minecraft server software for the Bedrock Edition that comes with a modern API and support for Java 11 LTS.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8",
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java --add-opens java.base/java.nio=io.netty.common --add-exports java.base/jdk.internal.misc=io.netty.common -p modules -m gomint.server/io.gomint.server.Bootstrap",
+        "config": {
+          "files": "{\"server.yml\": {\"parser\": \"yml\", \"find\": {\"listener.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Done in \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/bash\r\n\r\nGITHUB_PACKAGE=gomint/gomint\r\n\r\napt update\r\napt install -y curl jq file unzip\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n# retrieve latest tag to be used as version match, because gomint doesn't use normal releases\r\nLATEST_VERSION=$(curl -sL https://api.github.com/repos/gomint/gomint/tags | jq -r '.[-1].name')\r\n\r\nDOWNLOAD_URL=https://github.com/gomint/gomint/releases/download/${LATEST_VERSION}/${LATEST_VERSION}.zip\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"download link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        VALIDATED_URL=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"download link is invalid, something went wrong. Closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL -o ${VALIDATED_URL##*/} ${VALIDATED_URL}\r\n\r\nFILETYPE=$(file -F ',' ${VALIDATED_URL##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${VALIDATED_URL##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${VALIDATED_URL##*/} -d modules/\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${VALIDATED_URL##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    # exit 2 \r\nfi\r\n\r\n# Move files into correct folders and remove unnecessary stuff\r\nrm ${VALIDATED_URL##*/}\r\nmv modules/modules/* modules\r\nrm -rf modules/modules\r\nrm modules/start.*\r\n\r\n# Fetch server config\r\nif [ ! -f server.yml ]; then\r\n    curl -sSL -o server.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/bedrock/gomint/server.yml\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "gomint-92c828841bc6",
+        "name": "GoMint",
+        "description": "A performant and stable Minecraft server software for the Bedrock Edition that comes with a modern API and support for Java 11 LTS.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/gomint-92c828841bc6.json",
+        "sha256": "12f3aa629e744eb405b0706596086724522ffda948bce1c79b8c64279eaca25d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/bedrock/gomint/egg-go-mint.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/92c828841bc6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:06:25+02:00",
+        "name": "GoMint",
+        "author": "parker@parkervcp.com",
+        "description": "A performant and stable Minecraft server software for the Bedrock Edition that comes with a modern API and support for Java 11 LTS.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java --add-opens java.base/java.nio=io.netty.common --add-exports java.base/jdk.internal.misc=io.netty.common -p modules -m gomint.server/io.gomint.server.Bootstrap",
+        "config": {
+          "files": "{\"server.yml\": {\"parser\": \"yml\", \"find\": {\"listener.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Done in \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/bash\r\n\r\nGITHUB_PACKAGE=gomint/gomint\r\n\r\napt update\r\napt install -y curl jq file unzip\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n# retrieve latest tag to be used as version match, because gomint doesn't use normal releases\r\nLATEST_VERSION=$(curl -sL https://api.github.com/repos/gomint/gomint/tags | jq -r '.[-1].name')\r\n\r\nDOWNLOAD_URL=https://github.com/gomint/gomint/releases/download/${LATEST_VERSION}/${LATEST_VERSION}.zip\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"download link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        VALIDATED_URL=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"download link is invalid, something went wrong. Closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL -o ${VALIDATED_URL##*/} ${VALIDATED_URL}\r\n\r\nFILETYPE=$(file -F ',' ${VALIDATED_URL##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${VALIDATED_URL##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${VALIDATED_URL##*/} -d modules/\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${VALIDATED_URL##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    # exit 2 \r\nfi\r\n\r\n# Move files into correct folders and remove unnecessary stuff\r\nrm ${VALIDATED_URL##*/}\r\nmv modules/modules/* modules\r\nrm -rf modules/modules\r\nrm modules/start.*\r\n\r\n# Fetch server config\r\nif [ ! -f server.yml ]; then\r\n    curl -sSL -o server.yml https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/bedrock/gomint/server.yml\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "gomint-9643a0b84aee",
+        "name": "GoMint",
+        "description": "A performant and stable Minecraft server software for the Bedrock Edition that comes with a modern API and support for Java 11 LTS.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/gomint-9643a0b84aee.json",
+        "sha256": "525c7c307e667b8ebda66d70958f3bb2dca31f7cda5684b65d44e68db4786204",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/gomint/egg-go-mint.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/minecraft",
+            "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+            "path": "bedrock/gomint/egg-pterodactyl-go-mint.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--minecraft/9643a0b84aee.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "GoMint",
+        "author": "parker@parkervcp.com",
+        "uuid": "6ef2bba9-b43b-47a5-9ee6-0a811ce6e3ba",
+        "description": "A performant and stable Minecraft server software for the Bedrock Edition that comes with a modern API and support for Java 11 LTS.",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "ghcr.io/pelican-eggs/yolks:java_11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "ghcr.io/pelican-eggs/yolks:java_16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java --add-opens java.base/java.nio=io.netty.common --add-exports java.base/jdk.internal.misc=io.netty.common -p modules -m gomint.server/io.gomint.server.Bootstrap",
+        "config": {
+          "files": "{\"server.yml\": {\"parser\": \"yml\", \"find\": {\"listener.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Done in \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/bash\r\n\r\nGITHUB_PACKAGE=gomint/gomint\r\n\r\napt update\r\napt install -y curl jq file unzip\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n# retrieve latest tag to be used as version match, because gomint doesn't use normal releases\r\nLATEST_VERSION=$(curl -sL https://api.github.com/repos/gomint/gomint/tags | jq -r '.[-1].name')\r\n\r\nDOWNLOAD_URL=https://github.com/gomint/gomint/releases/download/${LATEST_VERSION}/${LATEST_VERSION}.zip\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"download link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        VALIDATED_URL=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"download link is invalid, something went wrong. Closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL -o ${VALIDATED_URL##*/} ${VALIDATED_URL}\r\n\r\nFILETYPE=$(file -F ',' ${VALIDATED_URL##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${VALIDATED_URL##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${VALIDATED_URL##*/} -d modules/\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${VALIDATED_URL##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    # exit 2 \r\nfi\r\n\r\n# Move files into correct folders and remove unnecessary stuff\r\nrm ${VALIDATED_URL##*/}\r\nmv modules/modules/* modules\r\nrm -rf modules/modules\r\nrm modules/start.*\r\n\r\n# Fetch server config\r\nif [ ! -f server.yml ]; then\r\n    curl -sSL -o server.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/bedrock/gomint/server.yml\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "hexxit-2e6d410c0ede",
+        "name": "Hexxit",
+        "description": "Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.\r\n\r\nHexxit is a new collection of mods for Minecraft that put adventure above all else, in the style of old Dungeons and Dragons campaigns. Exploration is interesting, the dangers are greater and the sense of satisfaction of clearing out a dungeon is intense. The modlist is full of quality content from some very talented individuals. Be sure to head over to the donate page and show your appreciation!\r\n\r\nhttps://www.technicpack.net/modpack/hexxit.552552",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/hexxit-2e6d410c0ede.json",
+        "sha256": "58b201bdd1ca7e2fdd5653a05ae0335c938b98144972ebdec309001a5ad910af",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/technic/hexxit/egg-hexxit.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/2e6d410c0ede.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:41:20+02:00",
+        "name": "Hexxit",
+        "author": "aevum@decess.us",
+        "description": "Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.\r\n\r\nHexxit is a new collection of mods for Minecraft that put adventure above all else, in the style of old Dungeons and Dragons campaigns. Exploration is interesting, the dangers are greater and the sense of satisfaction of clearing out a dungeon is intense. The modlist is full of quality content from some very talented individuals. Be sure to head over to the donate page and show your appreciation!\r\n\r\nhttps://www.technicpack.net/modpack/hexxit.552552",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Hexxit.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/hexxit/Hexxit_Server_v$MODPACK_VERSION.zip -o Hexxit_$MODPACK_VERSION.zip\r\n\r\nunzip Hexxit_$MODPACK_VERSION.zip\r\n\r\nrm -rf Hexxit_$MODPACK_VERSION.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "1.0.11",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "hexxit-719f196abfe1",
+        "name": "Hexxit",
+        "description": "Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.\r\n\r\nHexxit is a new collection of mods for Minecraft that put adventure above all else, in the style of old Dungeons and Dragons campaigns. Exploration is interesting, the dangers are greater and the sense of satisfaction of clearing out a dungeon is intense. The modlist is full of quality content from some very talented individuals. Be sure to head over to the donate page and show your appreciation!\r\n\r\nhttps://www.technicpack.net/modpack/hexxit.552552",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/hexxit-719f196abfe1.json",
+        "sha256": "943605945f36b08f74b3cb8c735b49699a43502635ac048f52a9d56089988f87",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/hexxit/egg-hexxit.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/719f196abfe1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Hexxit",
+        "author": "aevum@decess.us",
+        "uuid": "1224574b-36f5-497a-ae4e-fa3d3278033e",
+        "description": "Gear up and set forth on a campaign worthy of legend, for Hexxit has been unearthed! Dark dungeons, towering spires, weathered ruins and musty tomes lay before you. Lay claim to riches or create your own artifacts, tame beasts and carve out your own story in endless wonder. Alone or with friends, adventure awaits in Hexxit.\r\n\r\nHexxit is a new collection of mods for Minecraft that put adventure above all else, in the style of old Dungeons and Dragons campaigns. Exploration is interesting, the dangers are greater and the sense of satisfaction of clearing out a dungeon is intense. The modlist is full of quality content from some very talented individuals. Be sure to head over to the donate page and show your appreciation!\r\n\r\nhttps://www.technicpack.net/modpack/hexxit.552552",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Hexxit.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/hexxit/Hexxit_Server_v$MODPACK_VERSION.zip -o Hexxit_$MODPACK_VERSION.zip\r\n\r\nunzip Hexxit_$MODPACK_VERSION.zip\r\n\r\nrm -rf Hexxit_$MODPACK_VERSION.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "Version of the modpack to use",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "1.0.11",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

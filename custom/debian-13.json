@@ -1,0 +1,12 @@
+{
+  "_soneyko": {"id":"soneyko-debian-13","kind":"instance","category":"instances","resources":{"cpu":100,"memory_mb":512,"disk_mb":10240},"guest_os":"Debian 13","persistence":"server-volume","shell":"/bin/bash","minimum_resources":{"cpu":25,"memory_mb":256,"disk_mb":5120}},
+  "meta":{"version":"PTDL_v2","update_url":null},
+  "name":"Debian 13",
+  "author":"hello@soneyko.ai",
+  "description":"Persistent Debian Linux environment with a terminal and apt. Installed packages and files survive restarts and container recreation. Runs as an unprivileged PRoot guest in the server volume; this is a Linux userspace, not a virtual machine with its own kernel or systemd.",
+  "docker_images":{"Debian 13":"ghcr.io/trusted-technologies/soneyko-instance:debian-13"},
+  "startup":"/usr/local/bin/soneyko-instance",
+  "config":{"files":"{}","startup":"{\"done\":\"Soneyko Linux environment ready\"}","logs":"{}","stop":"^C"},
+  "scripts":{"installation":{"script":"#!/bin/sh\nset -eu\nmkdir -p /mnt/server/.instance\necho 'Linux environment will be initialized on first start.'\n","container":"alpine:3.22","entrypoint":"ash"}},
+  "variables":[],"file_denylist":[],"features":[]
+}

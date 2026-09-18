@@ -1,0 +1,2290 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "red-554978df80e6",
+        "name": "Red",
+        "description": "A multifunction Discord bot \r\n\r\nhttps://github.com/Cog-Creators/Red-DiscordBot",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/red-554978df80e6.json",
+        "sha256": "ba90445819e807caf27fd7a6782aefb6a21e0b179835742d39964a215a4fcef2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/redbot/egg-red.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/554978df80e6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:05+00:00",
+        "name": "Red",
+        "author": "parker@parkervcp.com",
+        "uuid": "b9413cbb-4422-4bd2-960f-1d4367248809",
+        "description": "A multifunction Discord bot \r\n\r\nhttps://github.com/Cog-Creators/Red-DiscordBot",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:bot_red": "ghcr.io/parkervcp/yolks:bot_red"
+        },
+        "file_denylist": [],
+        "startup": "PATH=$PATH:/home/container/.local/bin redbot pterodactyl --token {{TOKEN}} --prefix {{PREFIX}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Invite URL:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# red-discordbot install script\r\n\r\n## install deps\r\nmkdir -p /usr/share/man/man1\r\napt update\r\napt -y install git ca-certificates dnsutils iproute2 make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev libgdbm-dev uuid-dev git openjdk-17-jre-headless\r\n\r\n## config folder layouts\r\necho -e \"generating config folder layout\"\r\nmkdir -p /mnt/server/.config/{Red-DiscordBot,share}/ /mnt/server/.local/share/Red-DiscordBot/data/pterodactyl/\r\ncd /mnt/server/\r\nln -s .local/share/Red-DiscordBot/data/pterodactyl/ ./configs\r\n\r\n## install red\r\necho -e \"add container user to install\"\r\nln -s /mnt/server/ /home/container\r\nuseradd -m -d /home/container container\r\nchown -R container /mnt/server/\r\necho -e \"install red locally as user\"\r\npip install --upgrade pip\r\nsu - container -c 'pip install -U pip wheel'\r\nsu - container -c 'pip install -U Red-DiscordBot'\r\n\r\n## ensure the config is in place if it doesn't exist\r\nif [ ! -f /mnt/server/.config/Red-DiscordBot/config.json ]; then\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/redbot/config.json -o /mnt/server/.config/Red-DiscordBot/config.json\r\nfi\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installation completed\"\r\necho \"-------------------------------------------------------\"",
+            "container": "python:3.11-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Discord Bot Token",
+            "description": "Get your own token here - https://discordapp.com/developers/applications/",
+            "env_variable": "TOKEN",
+            "default_value": "GET_YOUR_OWN",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Command Prefix",
+            "description": "The prefix for commands from the bot.",
+            "env_variable": "PREFIX",
+            "default_value": ".",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Owner",
+            "description": "Owner of the Bot to use special commands",
+            "env_variable": "OWNER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "red-d9a272fcae83",
+        "name": "Red",
+        "description": "A multifunction Discord bot \r\n\r\nhttps://github.com/Cog-Creators/Red-DiscordBot",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/red-d9a272fcae83.json",
+        "sha256": "802a77dc03decc00d516b43f608b176ea2a5e9004d658dc647bbc2d72969448d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "bots/discord/redbot/egg-red.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/d9a272fcae83.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-14T09:33:41+00:00",
+        "name": "Red",
+        "author": "parker@parkervcp.com",
+        "description": "A multifunction Discord bot \r\n\r\nhttps://github.com/Cog-Creators/Red-DiscordBot",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:bot_red": "ghcr.io/ptero-eggs/yolks:bot_red"
+        },
+        "file_denylist": [],
+        "startup": "PATH=$PATH:/home/container/.local/bin redbot pterodactyl --token {{TOKEN}} --prefix {{PREFIX}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Invite URL:\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "python:3.11-slim",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# red-discordbot install script\r\n\r\n## install deps\r\nmkdir -p /usr/share/man/man1\r\napt update\r\napt -y install git ca-certificates dnsutils iproute2 make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev libgdbm-dev uuid-dev git\r\n\r\n## config folder layouts\r\necho -e \"generating config folder layout\"\r\nmkdir -p /mnt/server/.config/{Red-DiscordBot,share}/ /mnt/server/.local/share/Red-DiscordBot/data/pterodactyl/\r\ncd /mnt/server/\r\nln -s .local/share/Red-DiscordBot/data/pterodactyl/ ./configs\r\n\r\n## install red\r\necho -e \"add container user to install\"\r\nln -s /mnt/server/ /home/container\r\nuseradd -m -d /home/container container\r\nchown -R container /mnt/server/\r\necho -e \"install red locally as user\"\r\npip install --upgrade pip\r\nsu - container -c 'pip install -U pip wheel --no-warn-script-location'\r\nsu - container -c 'pip install -U Red-DiscordBot --no-warn-script-location'\r\n\r\n## ensure the config is in place if it doesn't exist\r\nif [ ! -f /mnt/server/.config/Red-DiscordBot/config.json ]; then\r\n    curl https://raw.githubusercontent.com/ptero-eggs/application-eggs/main/bots/discord/redbot/config.json -o /mnt/server/.config/Red-DiscordBot/config.json\r\nfi\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installation completed\"\r\necho \"-------------------------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Discord Bot Token",
+            "description": "Get your own token here - https://discordapp.com/developers/applications/",
+            "env_variable": "TOKEN",
+            "default_value": "GET_YOUR_OWN",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Command Prefix",
+            "description": "The prefix for commands from the bot.",
+            "env_variable": "PREFIX",
+            "default_value": ".",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Owner",
+            "description": "Owner of the Bot to use special commands",
+            "env_variable": "OWNER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ree6-0017f4a5470b",
+        "name": "Ree6",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/ree6-0017f4a5470b.json",
+        "sha256": "7876febab1799ccc23e8197e1cd37c67c9ed7dbc146cc8437d7d115d80a76de3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/ree6/egg-pterodactyl-ree6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/0017f4a5470b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:06+00:00",
+        "name": "Ree6",
+        "author": "presti@presti.me",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "features": null,
+        "docker_images": {
+          "Java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Dnogui=true -jar Ree6.jar",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"hikari.sql.user\": \"{{server.build.env.DATABASE_USER}}\", \"hikari.sql.db\": \"{{server.build.env.DATABASE_DB}}\", \"hikari.sql.pw\": \"{{server.build.env.DATABASE_PW}}\", \"hikari.sql.host\": \"{{server.build.env.DATABASE_HOST}}\", \"hikari.sql.port\": \"{{server.build.env.DATABASE_PORT}}\", \"hikari.misc.storage\": \"{{server.build.env.DATABASE_TYP}}\", \"hikari.misc.storageFile\": \"{{server.build.env.DATABASE_FILE}}\", \"hikari.misc.poolSize\": \"{{server.build.env.DATABASE_POOL}}\", \"hikari.misc.createEmbeddedServer\": \"{{server.build.env.DATABASE_EMBEDDED}}\", \"heartbeat.url\": \"{{server.build.env.HEARTBEAT_URL}}\", \"heartbeat.interval\": \"{{server.build.env.HEARTBEAT_INTERVAL}}\", \"dagpi.apitoken\": \"{{server.build.env.DAGPI_TOKEN}}\", \"amari.apitoken\": \"{{server.build.env.AMARI_TOKEN}}\", \"sentry.dsn\": \"{{server.build.env.SENTRY_DSN}}\", \"spotify.client.id\": \"{{server.build.env.SPOTIFY_CLIENT_ID}}\", \"spotify.client.secret\": \"{{server.build.env.SPOTIFY_CLIENT_SECRET}}\", \"twitch.client.id\": \"{{server.build.env.TWITCH_CLIENT_ID}}\", \"twitch.client.secret\": \"{{server.build.env.TWITCH_CLIENT_SECRET}}\", \"twitter.consumer.key\": \"{{server.build.env.TWITTER_CONSUMER_ID}}\", \"twitter.consumer.secret\": \"{{server.build.env.TWITTER_CONSUMER_SECRET}}\", \"twitter.access.key\": \"{{server.build.env.TWITTER_ACCESS_ID}}\", \"twitter.access.secret\": \"{{server.build.env.TWITTER_ACCESS_SECRET}}\", \"reddit.client.id\": \"{{server.build.env.REDDIT_CLIENT_ID}}\", \"reddit.client.secret\": \"{{server.build.env.REDDIT_CLIENT_SECRET}}\", \"instagram.username\": \"{{server.build.env.INSTAGRAM_USERNAME}}\", \"instagram.password\": \"{{server.build.env.INSTAGRAM_PASSWORD}}\", \"bot.tokens.release\": \"{{server.build.env.BOT_TOKEN}}\", \"openai.apiToken\": \"{{server.build.env.AI_TOKEN}}\", \"openai.apiUrl\": \"{{server.build.env.AI_URL}}\", \"openai.model\": \"{{server.build.env.AI_MODEL}}\", \"bot.misc.status\": \"{{server.build.env.MISC_STATUS}}\", \"bot.misc.feedbackChannelId\": \"{{server.build.env.MISC_FEEDBACK}}\", \"bot.misc.ownerId\": \"{{server.build.env.MISC_OWNER}}\", \"bot.misc.predefineInformation\": \"{{server.build.env.MISC_PREDEF}}\", \"bot.misc.invite\": \"{{server.build.env.MISC_INVITE}}\", \"bot.misc.support\": \"{{server.build.env.MISC_SUPPORT}}\", \"bot.misc.website\": \"{{server.build.env.MISC_WEB}}\", \"bot.misc.webinterface\": \"{{server.build.env.MISC_INTERFACE}}\", \"bot.misc.recording\": \"{{server.build.env.MISC_RECORD}}\", \"bot.misc.twitchAuth\": \"{{server.build.env.MISC_TWITCH}}\", \"bot.misc.advertisement\": \"{{server.build.env.MISC_ADV}}\", \"bot.misc.name\": \"{{server.build.env.MISC_NAME}}\", \"bot.misc.shards\": \"{{server.build.env.MISC_SHARD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Finished Loading\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE and VERSION\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y jq curl\r\n\r\n\r\nCONFIG_LINK=\"https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/ree6/config.yml\"\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases\")\r\nMATCH=jar-with-dependencies.jar\r\n\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1 )\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i *.jar)\r\n    fi\r\nfi\r\n\r\n## Ree6 Setup\r\n[ ! -d /mnt/server ] && mkdir -p /mnt/server\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating Ree6...\\n\"\r\n\r\nif [ -f Ree6.jar ]; then\r\n    echo -e \"Updating Ree6.jar to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"Ree6.jar-old\")'\r\n    mv -f Ree6.jar Ree6.jar-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o Ree6.jar ${DOWNLOAD_LINK}\\n\"\r\ncurl -sSL -o  Ree6.jar ${DOWNLOAD_LINK}\r\n\r\nif [ -f config.yml ]; then\r\n    echo -e \"Updating config.yml to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"config.yml-old\")'\r\n    mv -f config.yml config.yml-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o config.yml ${CONFIG_LINK}\\n\"\r\ncurl -sSL -o config.yml ${CONFIG_LINK}\r\n    \r\n\r\necho -e \"\\nRee6 Successfully Installed!\""
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Dagpi token",
+            "description": "Your Dagpi.xyz API-Token, for tweet image generation!",
+            "env_variable": "DAGPI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Sentry DSN",
+            "description": "Your Sentry DSN, for error reporting!",
+            "env_variable": "SENTRY_DSN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Id",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Secret",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Url",
+            "description": "The URL to the Heartbeat-Server",
+            "env_variable": "HEARTBEAT_URL",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Interval",
+            "description": "The interval between the heartbeats.",
+            "env_variable": "HEARTBEAT_INTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Amari Token",
+            "description": "Your Amari API-Token, for Amari Level imports!",
+            "env_variable": "AMARI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Id",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Secret",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitter Bearer Key",
+            "description": "Twitter Application Configuration, used for the Twitter Notifications.",
+            "env_variable": "TWITTER_BEARER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Id",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Secret",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Username",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Password",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Username",
+            "description": "Username for the SQL connection.",
+            "env_variable": "DATABASE_USER",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Database",
+            "description": "Database for the SQL Connection",
+            "env_variable": "DATABASE_DB",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Password",
+            "description": "Password for the SQL connection.",
+            "env_variable": "DATABASE_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Port",
+            "description": "Port for the SQL connection.",
+            "env_variable": "DATABASE_PORT",
+            "default_value": "3306",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Database Typ",
+            "description": "The Typ of the Database Ree6 should use!\r\nPossible typs:\r\n- mariadb\r\n- sqlite\r\n- h2\r\n- postgres",
+            "env_variable": "DATABASE_TYP",
+            "default_value": "sqlite",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:mariadb,sqlite,postgres,postregsql,h2",
+            "field_type": "text"
+          },
+          {
+            "name": "Database Storagefile",
+            "description": "The location of the storagefile if sqlite is being used.",
+            "env_variable": "DATABASE_FILE",
+            "default_value": "storage/Ree6.db",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Database Poolsize",
+            "description": "The Database connection pool size!",
+            "env_variable": "DATABASE_POOL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Database host",
+            "description": "The Host address of the Database connection.",
+            "env_variable": "DATABASE_HOST",
+            "default_value": "localhost",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Token",
+            "description": "Your Authentication token that should be used in the AI API calls.",
+            "env_variable": "AI_TOKEN",
+            "default_value": "OpenAI API-Token",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Url",
+            "description": "The URL that should receive the API calls.",
+            "env_variable": "AI_URL",
+            "default_value": "https://api.openai.com/v1/chat/completions",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Model",
+            "description": "The AI model that should be used in the API calls.",
+            "env_variable": "AI_MODEL",
+            "default_value": "gpt-3.5-turbo-0301",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Activity Status",
+            "description": "The Activity status of the Bot that will be shown.",
+            "env_variable": "MISC_STATUS",
+            "default_value": "ree6.de | %guilds% Servers. (%shard%)",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Feedback Channel",
+            "description": "The Channel Id of the Feedback channel.",
+            "env_variable": "MISC_FEEDBACK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Bot Owner Id",
+            "description": "The ID of the Bot Owner, this will be used internally on some checks.",
+            "env_variable": "MISC_OWNER",
+            "default_value": "321580743488831490",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Invite Link",
+            "description": "The Invite link to invite the Bot.",
+            "env_variable": "MISC_INVITE",
+            "default_value": "https://invite.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Predefined Information for AI",
+            "description": "The Information for the AI.",
+            "env_variable": "MISC_PREDEF",
+            "default_value": "You are Ree6 a Discord bot.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Support Link",
+            "description": "The Url link for users to receive support.",
+            "env_variable": "MISC_SUPPORT",
+            "default_value": "https://support.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Website",
+            "description": "The Url to the Website of the Bot.",
+            "env_variable": "MISC_WEB",
+            "default_value": "https://ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Webinterface",
+            "description": "The Url to the Webinterface.",
+            "env_variable": "MISC_INTERFACE",
+            "default_value": "https://cp.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Record Url",
+            "description": "The Url that uses can access to get their recording.",
+            "env_variable": "MISC_RECORD",
+            "default_value": "https://cp.ree6.de/external/recording",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Url",
+            "description": "The Url used to connect a Twitch Account with the Ree6 System.",
+            "env_variable": "MISC_TWITCH",
+            "default_value": "https://cp.ree6.de/external/twitch",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertisment",
+            "description": "The Advertisement in Embed Footers and the rest.",
+            "env_variable": "MISC_ADV",
+            "default_value": "powered by Tube-hosting",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Name",
+            "description": "The Name of the Bot.",
+            "env_variable": "MISC_NAME",
+            "default_value": "Ree6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Shards",
+            "description": "The amount of shards that should be created.",
+            "env_variable": "MISC_SHARD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ree6-105c4bab2c6f",
+        "name": "Ree6",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/ree6-105c4bab2c6f.json",
+        "sha256": "8103869058e3d2360f9202e3ad72f246551d2e9a4b455785f815bb187230d2bb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "bots/discord/ree6/egg-ree6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/105c4bab2c6f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-06-14T13:03:27+02:00",
+        "name": "Ree6",
+        "author": "presti@presti.me",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "features": null,
+        "docker_images": {
+          "Java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Dnogui=true -jar Ree6.jar",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"hikari.sql.user\": \"{{server.build.env.DATABASE_USER}}\", \"hikari.sql.db\": \"{{server.build.env.DATABASE_DB}}\", \"hikari.sql.pw\": \"{{server.build.env.DATABASE_PW}}\", \"hikari.sql.host\": \"{{server.build.env.DATABASE_HOST}}\", \"hikari.sql.port\": \"{{server.build.env.DATABASE_PORT}}\", \"hikari.misc.storage\": \"{{server.build.env.DATABASE_TYP}}\", \"hikari.misc.storageFile\": \"{{server.build.env.DATABASE_FILE}}\", \"hikari.misc.poolSize\": \"{{server.build.env.DATABASE_POOL}}\", \"hikari.misc.createEmbeddedServer\": \"{{server.build.env.DATABASE_EMBEDDED}}\", \"heartbeat.url\": \"{{server.build.env.HEARTBEAT_URL}}\", \"heartbeat.interval\": \"{{server.build.env.HEARTBEAT_INTERVAL}}\", \"dagpi.apitoken\": \"{{server.build.env.DAGPI_TOKEN}}\", \"amari.apitoken\": \"{{server.build.env.AMARI_TOKEN}}\", \"sentry.dsn\": \"{{server.build.env.SENTRY_DSN}}\", \"spotify.client.id\": \"{{server.build.env.SPOTIFY_CLIENT_ID}}\", \"spotify.client.secret\": \"{{server.build.env.SPOTIFY_CLIENT_SECRET}}\", \"twitch.client.id\": \"{{server.build.env.TWITCH_CLIENT_ID}}\", \"twitch.client.secret\": \"{{server.build.env.TWITCH_CLIENT_SECRET}}\", \"twitter.consumer.key\": \"{{server.build.env.TWITTER_CONSUMER_ID}}\", \"twitter.consumer.secret\": \"{{server.build.env.TWITTER_CONSUMER_SECRET}}\", \"twitter.access.key\": \"{{server.build.env.TWITTER_ACCESS_ID}}\", \"twitter.access.secret\": \"{{server.build.env.TWITTER_ACCESS_SECRET}}\", \"reddit.client.id\": \"{{server.build.env.REDDIT_CLIENT_ID}}\", \"reddit.client.secret\": \"{{server.build.env.REDDIT_CLIENT_SECRET}}\", \"instagram.username\": \"{{server.build.env.INSTAGRAM_USERNAME}}\", \"instagram.password\": \"{{server.build.env.INSTAGRAM_PASSWORD}}\", \"bot.tokens.release\": \"{{server.build.env.BOT_TOKEN}}\", \"openai.apiToken\": \"{{server.build.env.AI_TOKEN}}\", \"openai.apiUrl\": \"{{server.build.env.AI_URL}}\", \"openai.model\": \"{{server.build.env.AI_MODEL}}\", \"bot.misc.status\": \"{{server.build.env.MISC_STATUS}}\", \"bot.misc.feedbackChannelId\": \"{{server.build.env.MISC_FEEDBACK}}\", \"bot.misc.ownerId\": \"{{server.build.env.MISC_OWNER}}\", \"bot.misc.predefineInformation\": \"{{server.build.env.MISC_PREDEF}}\", \"bot.misc.invite\": \"{{server.build.env.MISC_INVITE}}\", \"bot.misc.support\": \"{{server.build.env.MISC_SUPPORT}}\", \"bot.misc.website\": \"{{server.build.env.MISC_WEB}}\", \"bot.misc.webinterface\": \"{{server.build.env.MISC_INTERFACE}}\", \"bot.misc.record\": \"{{server.build.env.MISC_RECORD}}\", \"bot.misc.twitchAuth\": \"{{server.build.env.MISC_TWITCH}}\", \"bot.misc.advertisement\": \"{{server.build.env.MISC_ADV}}\", \"bot.misc.name\": \"{{server.build.env.MISC_NAME}}\", \"bot.misc.shards\": \"{{server.build.env.MISC_SHARD}}\"}}}",
+          "startup": "{\"done\": \"Finished Loading\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE and VERSION\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y jq curl\r\n\r\n\r\nCONFIG_LINK=\"https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/ree6/config.yml\"\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases\")\r\nMATCH=jar-with-dependencies.jar\r\n\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1 )\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i *.jar)\r\n    fi\r\nfi\r\n\r\n## Ree6 Setup\r\n[ ! -d /mnt/server ] && mkdir -p /mnt/server\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating Ree6...\\n\"\r\n\r\nif [ -f Ree6.jar ]; then\r\n    echo -e \"Updating Ree6.jar to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"Ree6.jar-old\")'\r\n    mv -f Ree6.jar Ree6.jar-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o Ree6.jar ${DOWNLOAD_LINK}\\n\"\r\ncurl -sSL -o  Ree6.jar ${DOWNLOAD_LINK}\r\n\r\nif [ -f config.yml ]; then\r\n    echo -e \"Updating config.yml to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"config.yml-old\")'\r\n    mv -f config.yml config.yml-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o config.yml ${CONFIG_LINK}\\n\"\r\ncurl -sSL -o config.yml ${CONFIG_LINK}\r\n    \r\n\r\necho -e \"\\nRee6 Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Dagpi token",
+            "description": "Your Dagpi.xyz API-Token, for tweet image generation!",
+            "env_variable": "DAGPI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Sentry DSN",
+            "description": "Your Sentry DSN, for error reporting!",
+            "env_variable": "SENTRY_DSN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Id",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Secret",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Url",
+            "description": "The URL to the Heartbeat-Server",
+            "env_variable": "HEARTBEAT_URL",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Interval",
+            "description": "The interval between the heartbeats.",
+            "env_variable": "HEARTBEAT_INTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Amari Token",
+            "description": "Your Amari API-Token, for Amari Level imports!",
+            "env_variable": "AMARI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Id",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Secret",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitter Bearer Key",
+            "description": "Twitter Application Configuration, used for the Twitter Notifications.",
+            "env_variable": "TWITTER_BEARER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Id",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Secret",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Username",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Password",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Username",
+            "description": "Username for the SQL connection.",
+            "env_variable": "DATABASE_USER",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Database",
+            "description": "Database for the SQL Connection",
+            "env_variable": "DATABASE_DB",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Password",
+            "description": "Password for the SQL connection.",
+            "env_variable": "DATABASE_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Port",
+            "description": "Port for the SQL connection.",
+            "env_variable": "DATABASE_PORT",
+            "default_value": "3306",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Database Typ",
+            "description": "The Typ of the Database Ree6 should use!\r\nPossible typs:\r\n- mariadb\r\n- sqlite\r\n- h2\r\n- postgres",
+            "env_variable": "DATABASE_TYP",
+            "default_value": "sqlite",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:mariadb,sqlite,postgres,postregsql,h2",
+            "field_type": "text"
+          },
+          {
+            "name": "Database Storagefile",
+            "description": "The location of the storagefile if sqlite is being used.",
+            "env_variable": "DATABASE_FILE",
+            "default_value": "storage/Ree6.db",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Database Poolsize",
+            "description": "The Database connection pool size!",
+            "env_variable": "DATABASE_POOL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Database host",
+            "description": "The Host address of the Database connection.",
+            "env_variable": "DATABASE_HOST",
+            "default_value": "localhost",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Token",
+            "description": "Your Authentication token that should be used in the AI API calls.",
+            "env_variable": "AI_TOKEN",
+            "default_value": "OpenAI API-Token",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Url",
+            "description": "The URL that should receive the API calls.",
+            "env_variable": "AI_URL",
+            "default_value": "https://api.openai.com/v1/chat/completions",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Model",
+            "description": "The AI model that should be used in the API calls.",
+            "env_variable": "AI_MODEL",
+            "default_value": "gpt-3.5-turbo-0301",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Activity Status",
+            "description": "The Activity status of the Bot that will be shown.",
+            "env_variable": "MISC_STATUS",
+            "default_value": "ree6.de | %guilds% Servers. (%shard%)",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Feedback Channel",
+            "description": "The Channel Id of the Feedback channel.",
+            "env_variable": "MISC_FEEDBACK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Bot Owner Id",
+            "description": "The ID of the Bot Owner, this will be used internally on some checks.",
+            "env_variable": "MISC_OWNER",
+            "default_value": "321580743488831490",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Invite Link",
+            "description": "The Invite link to invite the Bot.",
+            "env_variable": "MISC_INVITE",
+            "default_value": "https://invite.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Predefined Information for AI",
+            "description": "The Information for the AI.",
+            "env_variable": "MISC_PREDEF",
+            "default_value": "You are Ree6 a Discord bot.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Support Link",
+            "description": "The Url link for users to receive support.",
+            "env_variable": "MISC_SUPPORT",
+            "default_value": "https://support.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Website",
+            "description": "The Url to the Website of the Bot.",
+            "env_variable": "MISC_WEB",
+            "default_value": "https://ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Webinterface",
+            "description": "The Url to the Webinterface.",
+            "env_variable": "MISC_INTERFACE",
+            "default_value": "https://cp.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Record Url",
+            "description": "The Url that uses can access to get their recording.",
+            "env_variable": "MISC_RECORD",
+            "default_value": "https://cp.ree6.de/external/recording",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Url",
+            "description": "The Url used to connect a Twitch Account with the Ree6 System.",
+            "env_variable": "MISC_TWITCH",
+            "default_value": "https://cp.ree6.de/external/twitch",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertisment",
+            "description": "The Advertisement in Embed Footers and the rest.",
+            "env_variable": "MISC_ADV",
+            "default_value": "powered by Tube-hosting",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Name",
+            "description": "The Name of the Bot.",
+            "env_variable": "MISC_NAME",
+            "default_value": "Ree6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Shards",
+            "description": "The amount of shards that should be created.",
+            "env_variable": "MISC_SHARD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ree6-b1e9295667ff",
+        "name": "Ree6",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/ree6-b1e9295667ff.json",
+        "sha256": "e9a87893d86bad58a99b074fd2c8e3d0bff64967bb3ee6853807e89087539fc1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "bots/discord/ree6/egg-ree6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/b1e9295667ff.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:06+00:00",
+        "name": "Ree6",
+        "author": "presti@presti.me",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "features": null,
+        "docker_images": {
+          "Java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Dnogui=true -jar Ree6.jar",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"hikari.sql.user\": \"{{server.build.env.DATABASE_USER}}\", \"hikari.sql.db\": \"{{server.build.env.DATABASE_DB}}\", \"hikari.sql.pw\": \"{{server.build.env.DATABASE_PW}}\", \"hikari.sql.host\": \"{{server.build.env.DATABASE_HOST}}\", \"hikari.sql.port\": \"{{server.build.env.DATABASE_PORT}}\", \"hikari.misc.storage\": \"{{server.build.env.DATABASE_TYP}}\", \"hikari.misc.storageFile\": \"{{server.build.env.DATABASE_FILE}}\", \"hikari.misc.poolSize\": \"{{server.build.env.DATABASE_POOL}}\", \"hikari.misc.createEmbeddedServer\": \"{{server.build.env.DATABASE_EMBEDDED}}\", \"heartbeat.url\": \"{{server.build.env.HEARTBEAT_URL}}\", \"heartbeat.interval\": \"{{server.build.env.HEARTBEAT_INTERVAL}}\", \"dagpi.apitoken\": \"{{server.build.env.DAGPI_TOKEN}}\", \"amari.apitoken\": \"{{server.build.env.AMARI_TOKEN}}\", \"sentry.dsn\": \"{{server.build.env.SENTRY_DSN}}\", \"spotify.client.id\": \"{{server.build.env.SPOTIFY_CLIENT_ID}}\", \"spotify.client.secret\": \"{{server.build.env.SPOTIFY_CLIENT_SECRET}}\", \"twitch.client.id\": \"{{server.build.env.TWITCH_CLIENT_ID}}\", \"twitch.client.secret\": \"{{server.build.env.TWITCH_CLIENT_SECRET}}\", \"twitter.consumer.key\": \"{{server.build.env.TWITTER_CONSUMER_ID}}\", \"twitter.consumer.secret\": \"{{server.build.env.TWITTER_CONSUMER_SECRET}}\", \"twitter.access.key\": \"{{server.build.env.TWITTER_ACCESS_ID}}\", \"twitter.access.secret\": \"{{server.build.env.TWITTER_ACCESS_SECRET}}\", \"reddit.client.id\": \"{{server.build.env.REDDIT_CLIENT_ID}}\", \"reddit.client.secret\": \"{{server.build.env.REDDIT_CLIENT_SECRET}}\", \"instagram.username\": \"{{server.build.env.INSTAGRAM_USERNAME}}\", \"instagram.password\": \"{{server.build.env.INSTAGRAM_PASSWORD}}\", \"bot.tokens.release\": \"{{server.build.env.BOT_TOKEN}}\", \"openai.apiToken\": \"{{server.build.env.AI_TOKEN}}\", \"openai.apiUrl\": \"{{server.build.env.AI_URL}}\", \"openai.model\": \"{{server.build.env.AI_MODEL}}\", \"bot.misc.status\": \"{{server.build.env.MISC_STATUS}}\", \"bot.misc.feedbackChannelId\": \"{{server.build.env.MISC_FEEDBACK}}\", \"bot.misc.ownerId\": \"{{server.build.env.MISC_OWNER}}\", \"bot.misc.predefineInformation\": \"{{server.build.env.MISC_PREDEF}}\", \"bot.misc.invite\": \"{{server.build.env.MISC_INVITE}}\", \"bot.misc.support\": \"{{server.build.env.MISC_SUPPORT}}\", \"bot.misc.website\": \"{{server.build.env.MISC_WEB}}\", \"bot.misc.webinterface\": \"{{server.build.env.MISC_INTERFACE}}\", \"bot.misc.recording\": \"{{server.build.env.MISC_RECORD}}\", \"bot.misc.twitchAuth\": \"{{server.build.env.MISC_TWITCH}}\", \"bot.misc.advertisement\": \"{{server.build.env.MISC_ADV}}\", \"bot.misc.name\": \"{{server.build.env.MISC_NAME}}\", \"bot.misc.shards\": \"{{server.build.env.MISC_SHARD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Finished Loading\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE and VERSION\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y jq curl\r\n\r\n\r\nCONFIG_LINK=\"https://raw.githubusercontent.com/ptero-eggs/application-eggs/main/bots/discord/ree6/config.yml\"\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases\")\r\nMATCH=jar-with-dependencies.jar\r\n\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1 )\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i *.jar)\r\n    fi\r\nfi\r\n\r\n## Ree6 Setup\r\n[ ! -d /mnt/server ] && mkdir -p /mnt/server\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating Ree6...\\n\"\r\n\r\nif [ -f Ree6.jar ]; then\r\n    echo -e \"Updating Ree6.jar to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"Ree6.jar-old\")'\r\n    mv -f Ree6.jar Ree6.jar-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o Ree6.jar ${DOWNLOAD_LINK}\\n\"\r\ncurl -sSL -o  Ree6.jar ${DOWNLOAD_LINK}\r\n\r\nif [ -f config.yml ]; then\r\n    echo -e \"Updating config.yml to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"config.yml-old\")'\r\n    mv -f config.yml config.yml-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o config.yml ${CONFIG_LINK}\\n\"\r\ncurl -sSL -o config.yml ${CONFIG_LINK}\r\n    \r\n\r\necho -e \"\\nRee6 Successfully Installed!\""
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Dagpi token",
+            "description": "Your Dagpi.xyz API-Token, for tweet image generation!",
+            "env_variable": "DAGPI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Sentry DSN",
+            "description": "Your Sentry DSN, for error reporting!",
+            "env_variable": "SENTRY_DSN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Id",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Secret",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Url",
+            "description": "The URL to the Heartbeat-Server",
+            "env_variable": "HEARTBEAT_URL",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Interval",
+            "description": "The interval between the heartbeats.",
+            "env_variable": "HEARTBEAT_INTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Amari Token",
+            "description": "Your Amari API-Token, for Amari Level imports!",
+            "env_variable": "AMARI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Id",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Secret",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitter Bearer Key",
+            "description": "Twitter Application Configuration, used for the Twitter Notifications.",
+            "env_variable": "TWITTER_BEARER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Id",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Secret",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Username",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Password",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Username",
+            "description": "Username for the SQL connection.",
+            "env_variable": "DATABASE_USER",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Database",
+            "description": "Database for the SQL Connection",
+            "env_variable": "DATABASE_DB",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Password",
+            "description": "Password for the SQL connection.",
+            "env_variable": "DATABASE_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Port",
+            "description": "Port for the SQL connection.",
+            "env_variable": "DATABASE_PORT",
+            "default_value": "3306",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Database Typ",
+            "description": "The Typ of the Database Ree6 should use!\r\nPossible typs:\r\n- mariadb\r\n- sqlite\r\n- h2\r\n- postgres",
+            "env_variable": "DATABASE_TYP",
+            "default_value": "sqlite",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:mariadb,sqlite,postgres,postregsql,h2",
+            "field_type": "text"
+          },
+          {
+            "name": "Database Storagefile",
+            "description": "The location of the storagefile if sqlite is being used.",
+            "env_variable": "DATABASE_FILE",
+            "default_value": "storage/Ree6.db",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Database Poolsize",
+            "description": "The Database connection pool size!",
+            "env_variable": "DATABASE_POOL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Database host",
+            "description": "The Host address of the Database connection.",
+            "env_variable": "DATABASE_HOST",
+            "default_value": "localhost",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Token",
+            "description": "Your Authentication token that should be used in the AI API calls.",
+            "env_variable": "AI_TOKEN",
+            "default_value": "OpenAI API-Token",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Url",
+            "description": "The URL that should receive the API calls.",
+            "env_variable": "AI_URL",
+            "default_value": "https://api.openai.com/v1/chat/completions",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Model",
+            "description": "The AI model that should be used in the API calls.",
+            "env_variable": "AI_MODEL",
+            "default_value": "gpt-3.5-turbo-0301",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Activity Status",
+            "description": "The Activity status of the Bot that will be shown.",
+            "env_variable": "MISC_STATUS",
+            "default_value": "ree6.de | %guilds% Servers. (%shard%)",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Feedback Channel",
+            "description": "The Channel Id of the Feedback channel.",
+            "env_variable": "MISC_FEEDBACK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Bot Owner Id",
+            "description": "The ID of the Bot Owner, this will be used internally on some checks.",
+            "env_variable": "MISC_OWNER",
+            "default_value": "321580743488831490",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Invite Link",
+            "description": "The Invite link to invite the Bot.",
+            "env_variable": "MISC_INVITE",
+            "default_value": "https://invite.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Predefined Information for AI",
+            "description": "The Information for the AI.",
+            "env_variable": "MISC_PREDEF",
+            "default_value": "You are Ree6 a Discord bot.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Support Link",
+            "description": "The Url link for users to receive support.",
+            "env_variable": "MISC_SUPPORT",
+            "default_value": "https://support.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Website",
+            "description": "The Url to the Website of the Bot.",
+            "env_variable": "MISC_WEB",
+            "default_value": "https://ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Webinterface",
+            "description": "The Url to the Webinterface.",
+            "env_variable": "MISC_INTERFACE",
+            "default_value": "https://cp.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Record Url",
+            "description": "The Url that uses can access to get their recording.",
+            "env_variable": "MISC_RECORD",
+            "default_value": "https://cp.ree6.de/external/recording",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Url",
+            "description": "The Url used to connect a Twitch Account with the Ree6 System.",
+            "env_variable": "MISC_TWITCH",
+            "default_value": "https://cp.ree6.de/external/twitch",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertisment",
+            "description": "The Advertisement in Embed Footers and the rest.",
+            "env_variable": "MISC_ADV",
+            "default_value": "powered by Tube-hosting",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Name",
+            "description": "The Name of the Bot.",
+            "env_variable": "MISC_NAME",
+            "default_value": "Ree6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Shards",
+            "description": "The amount of shards that should be created.",
+            "env_variable": "MISC_SHARD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ree6-f1b0665a53d6",
+        "name": "Ree6",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/ree6-f1b0665a53d6.json",
+        "sha256": "0b101be55fc65ad3acbbe26321df0c3b4473606290381884248ee5c7f5c8f1a0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/ree6/egg-ree6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/f1b0665a53d6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:06+00:00",
+        "name": "Ree6",
+        "author": "presti@presti.me",
+        "uuid": "819a8b3d-6e7b-4494-848d-7bdb56287b4f",
+        "description": "All-in-one, open source and 100% free Discord Bot!",
+        "features": null,
+        "docker_images": {
+          "Java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Dnogui=true -jar Ree6.jar",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"hikari.sql.user\": \"{{server.build.env.DATABASE_USER}}\", \"hikari.sql.db\": \"{{server.build.env.DATABASE_DB}}\", \"hikari.sql.pw\": \"{{server.build.env.DATABASE_PW}}\", \"hikari.sql.host\": \"{{server.build.env.DATABASE_HOST}}\", \"hikari.sql.port\": \"{{server.build.env.DATABASE_PORT}}\", \"hikari.misc.storage\": \"{{server.build.env.DATABASE_TYP}}\", \"hikari.misc.storageFile\": \"{{server.build.env.DATABASE_FILE}}\", \"hikari.misc.poolSize\": \"{{server.build.env.DATABASE_POOL}}\", \"hikari.misc.createEmbeddedServer\": \"{{server.build.env.DATABASE_EMBEDDED}}\", \"heartbeat.url\": \"{{server.build.env.HEARTBEAT_URL}}\", \"heartbeat.interval\": \"{{server.build.env.HEARTBEAT_INTERVAL}}\", \"dagpi.apitoken\": \"{{server.build.env.DAGPI_TOKEN}}\", \"amari.apitoken\": \"{{server.build.env.AMARI_TOKEN}}\", \"sentry.dsn\": \"{{server.build.env.SENTRY_DSN}}\", \"spotify.client.id\": \"{{server.build.env.SPOTIFY_CLIENT_ID}}\", \"spotify.client.secret\": \"{{server.build.env.SPOTIFY_CLIENT_SECRET}}\", \"twitch.client.id\": \"{{server.build.env.TWITCH_CLIENT_ID}}\", \"twitch.client.secret\": \"{{server.build.env.TWITCH_CLIENT_SECRET}}\", \"twitter.consumer.key\": \"{{server.build.env.TWITTER_CONSUMER_ID}}\", \"twitter.consumer.secret\": \"{{server.build.env.TWITTER_CONSUMER_SECRET}}\", \"twitter.access.key\": \"{{server.build.env.TWITTER_ACCESS_ID}}\", \"twitter.access.secret\": \"{{server.build.env.TWITTER_ACCESS_SECRET}}\", \"reddit.client.id\": \"{{server.build.env.REDDIT_CLIENT_ID}}\", \"reddit.client.secret\": \"{{server.build.env.REDDIT_CLIENT_SECRET}}\", \"instagram.username\": \"{{server.build.env.INSTAGRAM_USERNAME}}\", \"instagram.password\": \"{{server.build.env.INSTAGRAM_PASSWORD}}\", \"bot.tokens.release\": \"{{server.build.env.BOT_TOKEN}}\", \"openai.apiToken\": \"{{server.build.env.AI_TOKEN}}\", \"openai.apiUrl\": \"{{server.build.env.AI_URL}}\", \"openai.model\": \"{{server.build.env.AI_MODEL}}\", \"bot.misc.status\": \"{{server.build.env.MISC_STATUS}}\", \"bot.misc.feedbackChannelId\": \"{{server.build.env.MISC_FEEDBACK}}\", \"bot.misc.ownerId\": \"{{server.build.env.MISC_OWNER}}\", \"bot.misc.predefineInformation\": \"{{server.build.env.MISC_PREDEF}}\", \"bot.misc.invite\": \"{{server.build.env.MISC_INVITE}}\", \"bot.misc.support\": \"{{server.build.env.MISC_SUPPORT}}\", \"bot.misc.website\": \"{{server.build.env.MISC_WEB}}\", \"bot.misc.webinterface\": \"{{server.build.env.MISC_INTERFACE}}\", \"bot.misc.recording\": \"{{server.build.env.MISC_RECORD}}\", \"bot.misc.twitchAuth\": \"{{server.build.env.MISC_TWITCH}}\", \"bot.misc.advertisement\": \"{{server.build.env.MISC_ADV}}\", \"bot.misc.name\": \"{{server.build.env.MISC_NAME}}\", \"bot.misc.shards\": \"{{server.build.env.MISC_SHARD}}\"}}}",
+          "startup": "{\"done\": \"Finished Loading\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n## this is a simple script to use the github API for release versions.\r\n## this requires the egg has a variable for GITHUB_PACKAGE and VERSION\r\n## this supports using oauth/personal access tokens via GITHUB_USER and GITHUB_OAUTH_TOKEN (both are required.)\r\n## if you are getting hit with GitHub API limit issues then you need to have the user and token set.\r\napt update\r\napt install -y jq curl\r\n\r\n\r\nCONFIG_LINK=\"https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/ree6/config.yml\"\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Ree6-Applications/Ree6/releases\")\r\nMATCH=jar-with-dependencies.jar\r\n\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1 )\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i *.jar)\r\n    fi\r\nfi\r\n\r\n## Ree6 Setup\r\n[ ! -d /mnt/server ] && mkdir -p /mnt/server\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating Ree6...\\n\"\r\n\r\nif [ -f Ree6.jar ]; then\r\n    echo -e \"Updating Ree6.jar to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"Ree6.jar-old\")'\r\n    mv -f Ree6.jar Ree6.jar-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o Ree6.jar ${DOWNLOAD_LINK}\\n\"\r\ncurl -sSL -o  Ree6.jar ${DOWNLOAD_LINK}\r\n\r\nif [ -f config.yml ]; then\r\n    echo -e \"Updating config.yml to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"config.yml-old\")'\r\n    mv -f config.yml config.yml-old\r\nfi\r\n\r\necho -e \"Running: curl -sSL -o config.yml ${CONFIG_LINK}\\n\"\r\ncurl -sSL -o config.yml ${CONFIG_LINK}\r\n    \r\n\r\necho -e \"\\nRee6 Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Dagpi token",
+            "description": "Your Dagpi.xyz API-Token, for tweet image generation!",
+            "env_variable": "DAGPI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Sentry DSN",
+            "description": "Your Sentry DSN, for error reporting!",
+            "env_variable": "SENTRY_DSN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Id",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Secret",
+            "description": "Spotify Application Configuration, used to parse Spotify Tracks/Playlists to YouTube search queries.",
+            "env_variable": "SPOTIFY_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Url",
+            "description": "The URL to the Heartbeat-Server",
+            "env_variable": "HEARTBEAT_URL",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Heartbeat Interval",
+            "description": "The interval between the heartbeats.",
+            "env_variable": "HEARTBEAT_INTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Amari Token",
+            "description": "Your Amari API-Token, for Amari Level imports!",
+            "env_variable": "AMARI_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Id",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Client Secret",
+            "description": "Twitch Application Configuration, used for the StreamTools and Twitch Notifications.",
+            "env_variable": "TWITCH_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Twitter Bearer Key",
+            "description": "Twitter Application Configuration, used for the Twitter Notifications.",
+            "env_variable": "TWITTER_BEARER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Id",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Reddit Client Secret",
+            "description": "Reddit Application Configuration, used for the Reddit Notification.",
+            "env_variable": "REDDIT_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Username",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Instagram Password",
+            "description": "Instagram Application Configuration, used for the Instagram Notification.",
+            "env_variable": "INSTAGRAM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Username",
+            "description": "Username for the SQL connection.",
+            "env_variable": "DATABASE_USER",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Database",
+            "description": "Database for the SQL Connection",
+            "env_variable": "DATABASE_DB",
+            "default_value": "root",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Password",
+            "description": "Password for the SQL connection.",
+            "env_variable": "DATABASE_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SQL Port",
+            "description": "Port for the SQL connection.",
+            "env_variable": "DATABASE_PORT",
+            "default_value": "3306",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Database Typ",
+            "description": "The Typ of the Database Ree6 should use!\r\nPossible typs:\r\n- mariadb\r\n- sqlite\r\n- h2\r\n- postgres",
+            "env_variable": "DATABASE_TYP",
+            "default_value": "sqlite",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:mariadb,sqlite,postgres,postregsql,h2",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Database Storagefile",
+            "description": "The location of the storagefile if sqlite is being used.",
+            "env_variable": "DATABASE_FILE",
+            "default_value": "storage/Ree6.db",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Database Poolsize",
+            "description": "The Database connection pool size!",
+            "env_variable": "DATABASE_POOL",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Database host",
+            "description": "The Host address of the Database connection.",
+            "env_variable": "DATABASE_HOST",
+            "default_value": "localhost",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Token",
+            "description": "Your Authentication token that should be used in the AI API calls.",
+            "env_variable": "AI_TOKEN",
+            "default_value": "OpenAI API-Token",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Url",
+            "description": "The URL that should receive the API calls.",
+            "env_variable": "AI_URL",
+            "default_value": "https://api.openai.com/v1/chat/completions",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "OpenAI Model",
+            "description": "The AI model that should be used in the API calls.",
+            "env_variable": "AI_MODEL",
+            "default_value": "gpt-3.5-turbo-0301",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Activity Status",
+            "description": "The Activity status of the Bot that will be shown.",
+            "env_variable": "MISC_STATUS",
+            "default_value": "ree6.de | %guilds% Servers. (%shard%)",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Feedback Channel",
+            "description": "The Channel Id of the Feedback channel.",
+            "env_variable": "MISC_FEEDBACK",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[DEVELOPER-STUFF] Bot Owner Id",
+            "description": "The ID of the Bot Owner, this will be used internally on some checks.",
+            "env_variable": "MISC_OWNER",
+            "default_value": "321580743488831490",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Invite Link",
+            "description": "The Invite link to invite the Bot.",
+            "env_variable": "MISC_INVITE",
+            "default_value": "https://invite.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Predefined Information for AI",
+            "description": "The Information for the AI.",
+            "env_variable": "MISC_PREDEF",
+            "default_value": "You are Ree6 a Discord bot.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Support Link",
+            "description": "The Url link for users to receive support.",
+            "env_variable": "MISC_SUPPORT",
+            "default_value": "https://support.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Website",
+            "description": "The Url to the Website of the Bot.",
+            "env_variable": "MISC_WEB",
+            "default_value": "https://ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Webinterface",
+            "description": "The Url to the Webinterface.",
+            "env_variable": "MISC_INTERFACE",
+            "default_value": "https://cp.ree6.de",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Record Url",
+            "description": "The Url that uses can access to get their recording.",
+            "env_variable": "MISC_RECORD",
+            "default_value": "https://cp.ree6.de/external/recording",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Twitch Url",
+            "description": "The Url used to connect a Twitch Account with the Ree6 System.",
+            "env_variable": "MISC_TWITCH",
+            "default_value": "https://cp.ree6.de/external/twitch",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Advertisment",
+            "description": "The Advertisement in Embed Footers and the rest.",
+            "env_variable": "MISC_ADV",
+            "default_value": "powered by Tube-hosting",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Name",
+            "description": "The Name of the Bot.",
+            "env_variable": "MISC_NAME",
+            "default_value": "Ree6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Shards",
+            "description": "The amount of shards that should be created.",
+            "env_variable": "MISC_SHARD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sinusbot-44643121c7bf",
+        "name": "Sinusbot",
+        "description": "Musicbot for Discord and Teamspeak.",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/sinusbot-44643121c7bf.json",
+        "sha256": "d23104a5ac4be97101586129fea81a68f3fade2f83559e7ae172c7ac34b467f6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "bots/discord/sinusbot/egg-sinusbot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/44643121c7bf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:07+00:00",
+        "name": "Sinusbot",
+        "author": "support@pterodactyl.io",
+        "description": "Musicbot for Discord and Teamspeak.",
+        "features": null,
+        "docker_images": {
+          "sinusbot": "ghcr.io/ptero-eggs/yolks:bot_sinusbot"
+        },
+        "file_denylist": [],
+        "startup": "./sinusbot --override-password=\"${OVERRIDE_PASSWORD}\"",
+        "config": {
+          "files": "{\"config.ini\": {\"parser\": \"file\", \"find\": {\"ListenPort\": \"ListenPort = {{server.build.default.port}}\", \"ListenHost\": \"ListenHost = \\\"0.0.0.0\\\"\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Initialization complete\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Sinusbot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt -y update\r\napt -y --no-install-recommends install ca-certificates bzip2 wget tar curl jq\r\napt -q clean all\r\n\r\n#Create needed directories\r\nmkdir -p /mnt/server/TeamSpeak3-Client-linux_amd64/plugins\r\nmkdir /mnt/server/youtube-dlp\r\n\r\ncd /mnt/server\r\n\r\n#Download Sinusbot\r\nwget -qO - https://www.sinusbot.com/dl/sinusbot.current.tar.bz2 | tar xj\r\n\r\n\r\n#Download Latest TeamSpeak Client\r\n#TS_VERSION=$(curl https://teamspeak.com/versions/client.json | jq -r '.linux.x86_64.version')\r\n#TS_DL_LINK=$(curl https://teamspeak.com/versions/client.json | jq -r '.linux.x86_64.mirrors.\"teamspeak.com\"')\r\n\r\n# Sinusbot is not yet updated...\r\nTS_VERSION=3.5.6\r\nTS_DL_LINK=https://files.teamspeak-services.com/releases/client/3.5.6/TeamSpeak3-Client-linux_amd64-3.5.6.run\r\n\r\necho -e \"downloading teamspeak version ${TS_VERSION}\"\r\necho -e \"running 'wget ${TS_DL_LINK}'\"\r\n\r\nwget ${TS_DL_LINK}\r\n\r\n# Install TeamSpeak Client\r\nchmod 0755 TeamSpeak3-Client-linux_amd64*.run\r\n./TeamSpeak3-Client-linux_amd64*.run --tar xfv -C TeamSpeak3-Client-linux_amd64\r\n\r\n## Cleaning up \r\n\r\nrm TeamSpeak3-Client-linux_amd64*.run\r\n# Remove glx-integration lib\r\nrm TeamSpeak3-Client-linux_amd64/xcbglintegrations/libqxcb-glx-integration.so\r\n\r\n#Install Sinusbot\r\nchmod +x sinusbot\r\ncp config.ini.dist config.ini\r\nsed -i \"s|^TS3Path.*|TS3Path = \\\"/home/container/TeamSpeak3-Client-linux_amd64/ts3client_linux_amd64\\\"|g\" config.ini\r\necho 'YoutubeDLPath = \"/home/container/youtube-dlp/youtube-dlp\"' >> config.ini\r\n\r\n#Install Sinusbot plugin\r\ncp plugin/libsoundbot_plugin.so TeamSpeak3-Client-linux_amd64/plugins\r\n\r\n#Download youtube-dlp\r\ncd /mnt/server/youtube-dlp\r\nwget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O youtube-dlp\r\nchmod a+rx youtube-dlp\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "Password for admin account.",
+            "env_variable": "OVERRIDE_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sinusbot-73fdf2a0772a",
+        "name": "Sinusbot",
+        "description": "Musicbot for Discord and Teamspeak.",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/sinusbot-73fdf2a0772a.json",
+        "sha256": "f994831590aa2e9d0c4ecda3874b6b6d0b312da9cbc5650e3acfb7c1bd71b316",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/sinusbot/egg-sinusbot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/73fdf2a0772a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:07+00:00",
+        "name": "Sinusbot",
+        "author": "support@pterodactyl.io",
+        "uuid": "901e5e18-bf96-4839-98dd-a9fc2dd1d8d9",
+        "description": "Musicbot for Discord and Teamspeak.",
+        "features": null,
+        "docker_images": {
+          "sinusbot": "ghcr.io/parkervcp/yolks:bot_sinusbot"
+        },
+        "file_denylist": [],
+        "startup": "./sinusbot --override-password=\"${OVERRIDE_PASSWORD}\"",
+        "config": {
+          "files": "{\"config.ini\": {\"parser\": \"file\", \"find\": {\"ListenPort\": \"ListenPort = {{server.build.default.port}}\", \"ListenHost\": \"ListenHost = \\\"0.0.0.0\\\"\"}}}",
+          "startup": "{\"done\": \"Initialization complete\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Sinusbot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt -y update\r\napt -y --no-install-recommends install ca-certificates bzip2 wget tar curl jq\r\napt -q clean all\r\n\r\n#Create needed directories\r\nmkdir -p /mnt/server/TeamSpeak3-Client-linux_amd64/plugins\r\nmkdir /mnt/server/youtube-dlp\r\n\r\ncd /mnt/server\r\n\r\n#Download Sinusbot\r\nwget -qO - https://www.sinusbot.com/dl/sinusbot.current.tar.bz2 | tar xj\r\n\r\n\r\n#Download Latest TeamSpeak Client\r\n#TS_VERSION=$(curl https://teamspeak.com/versions/client.json | jq -r '.linux.x86_64.version')\r\n#TS_DL_LINK=$(curl https://teamspeak.com/versions/client.json | jq -r '.linux.x86_64.mirrors.\"teamspeak.com\"')\r\n\r\n# Sinusbot is not yet updated...\r\nTS_VERSION=3.5.6\r\nTS_DL_LINK=https://files.teamspeak-services.com/releases/client/3.5.6/TeamSpeak3-Client-linux_amd64-3.5.6.run\r\n\r\necho -e \"downloading teamspeak version ${TS_VERSION}\"\r\necho -e \"running 'wget ${TS_DL_LINK}'\"\r\n\r\nwget ${TS_DL_LINK}\r\n\r\n# Install TeamSpeak Client\r\nchmod 0755 TeamSpeak3-Client-linux_amd64*.run\r\n./TeamSpeak3-Client-linux_amd64*.run --tar xfv -C TeamSpeak3-Client-linux_amd64\r\n\r\n## Cleaning up \r\n\r\nrm TeamSpeak3-Client-linux_amd64*.run\r\n# Remove glx-integration lib\r\nrm TeamSpeak3-Client-linux_amd64/xcbglintegrations/libqxcb-glx-integration.so\r\n\r\n#Install Sinusbot\r\nchmod +x sinusbot\r\ncp config.ini.dist config.ini\r\nsed -i \"s|^TS3Path.*|TS3Path = \\\"/home/container/TeamSpeak3-Client-linux_amd64/ts3client_linux_amd64\\\"|g\" config.ini\r\necho 'YoutubeDLPath = \"/home/container/youtube-dlp/youtube-dlp\"' >> config.ini\r\n\r\n#Install Sinusbot plugin\r\ncp plugin/libsoundbot_plugin.so TeamSpeak3-Client-linux_amd64/plugins\r\n\r\n#Download youtube-dlp\r\ncd /mnt/server/youtube-dlp\r\nwget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O youtube-dlp\r\nchmod a+rx youtube-dlp\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "Password for admin account.",
+            "env_variable": "OVERRIDE_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sinusbot-860cdb14df30",
+        "name": "Sinusbot",
+        "description": "Musicbot for Discord and Teamspeak.",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/sinusbot-860cdb14df30.json",
+        "sha256": "63a3ea0c7457f8bf06dee7507b8bfe8902f780958d2d18c65dedd81fb058f4c9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/sinusbot/egg-pterodactyl-sinusbot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "bots/discord/sinusbot/egg-sinusbot.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--chatbots/860cdb14df30.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:07+00:00",
+        "name": "Sinusbot",
+        "author": "support@pterodactyl.io",
+        "description": "Musicbot for Discord and Teamspeak.",
+        "features": null,
+        "docker_images": {
+          "sinusbot": "ghcr.io/parkervcp/yolks:bot_sinusbot"
+        },
+        "file_denylist": [],
+        "startup": "./sinusbot --override-password=\"${OVERRIDE_PASSWORD}\"",
+        "config": {
+          "files": "{\"config.ini\": {\"parser\": \"file\", \"find\": {\"ListenPort\": \"ListenPort = {{server.build.default.port}}\", \"ListenHost\": \"ListenHost = \\\"0.0.0.0\\\"\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Initialization complete\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Sinusbot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt -y update\r\napt -y --no-install-recommends install ca-certificates bzip2 wget tar curl jq\r\napt -q clean all\r\n\r\n#Create needed directories\r\nmkdir -p /mnt/server/TeamSpeak3-Client-linux_amd64/plugins\r\nmkdir /mnt/server/youtube-dlp\r\n\r\ncd /mnt/server\r\n\r\n#Download Sinusbot\r\nwget -qO - https://www.sinusbot.com/dl/sinusbot.current.tar.bz2 | tar xj\r\n\r\n\r\n#Download Latest TeamSpeak Client\r\n#TS_VERSION=$(curl https://teamspeak.com/versions/client.json | jq -r '.linux.x86_64.version')\r\n#TS_DL_LINK=$(curl https://teamspeak.com/versions/client.json | jq -r '.linux.x86_64.mirrors.\"teamspeak.com\"')\r\n\r\n# Sinusbot is not yet updated...\r\nTS_VERSION=3.5.6\r\nTS_DL_LINK=https://files.teamspeak-services.com/releases/client/3.5.6/TeamSpeak3-Client-linux_amd64-3.5.6.run\r\n\r\necho -e \"downloading teamspeak version ${TS_VERSION}\"\r\necho -e \"running 'wget ${TS_DL_LINK}'\"\r\n\r\nwget ${TS_DL_LINK}\r\n\r\n# Install TeamSpeak Client\r\nchmod 0755 TeamSpeak3-Client-linux_amd64*.run\r\n./TeamSpeak3-Client-linux_amd64*.run --tar xfv -C TeamSpeak3-Client-linux_amd64\r\n\r\n## Cleaning up \r\n\r\nrm TeamSpeak3-Client-linux_amd64*.run\r\n# Remove glx-integration lib\r\nrm TeamSpeak3-Client-linux_amd64/xcbglintegrations/libqxcb-glx-integration.so\r\n\r\n#Install Sinusbot\r\nchmod +x sinusbot\r\ncp config.ini.dist config.ini\r\nsed -i \"s|^TS3Path.*|TS3Path = \\\"/home/container/TeamSpeak3-Client-linux_amd64/ts3client_linux_amd64\\\"|g\" config.ini\r\necho 'YoutubeDLPath = \"/home/container/youtube-dlp/youtube-dlp\"' >> config.ini\r\n\r\n#Install Sinusbot plugin\r\ncp plugin/libsoundbot_plugin.so TeamSpeak3-Client-linux_amd64/plugins\r\n\r\n#Download youtube-dlp\r\ncd /mnt/server/youtube-dlp\r\nwget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O youtube-dlp\r\nchmod a+rx youtube-dlp\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "Password for admin account.",
+            "env_variable": "OVERRIDE_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sogebot-18e94adb79a3",
+        "name": "SogeBot",
+        "description": "sogeBot - Free Twitch Bot built on Node.js https://sogebot.xyz/",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/sogebot-18e94adb79a3.json",
+        "sha256": "ef7ef38e6251dfca9fc3670df96f9b5895856ef92e0d95a3248070047a8d49a8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "twitch/sogebot/egg-soge-bot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/18e94adb79a3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:08+00:00",
+        "name": "SogeBot",
+        "author": "eggs@goover.dev",
+        "uuid": "de0afcb1-1740-48c1-8580-bed4b1d9f3f0",
+        "description": "sogeBot - Free Twitch Bot built on Node.js https://sogebot.xyz/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "npm start",
+        "config": {
+          "files": "{\".env\": {\"parser\": \"properties\", \"find\": {\"PORT\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"WebPanel is available at\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#/bin/bash\r\n# Installscript for sogeBot | Author: eggs@goover.dev\r\n\r\nexport DEBIAN_FRONTEND=noninteractive\r\n\r\napt -y update\r\napt install -y curl unzip jq  python3 build-essential ca-certificates\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\nexport NODE_OPTIONS=--max-old-space-size=8192\r\nchown -R root:root /mnt\r\n\r\n#Backup database & config\r\nmkdir -p .backup\r\ncp -f .env /mnt/server/.backup\r\ncp -f sogebot.db /mnt/server/.backup\r\n\r\n#delete old dir's to prevent errors on update\r\nrm -fR dest\r\nrm -fR public\r\nrm -fR node-modules\r\nrm -fR tools\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/sogebot/sogeBot/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/sogebot/sogeBot/releases\")\r\nMATCH=sogeBot\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho -e \"Downloading from $DOWNLOAD_LINK\"\r\ncurl -sSL -o sogeBot.zip ${DOWNLOAD_LINK}\r\n\r\nunzip -o sogeBot.zip\r\nrm -rf sogeBot.zip\r\n\r\n\r\necho \"--------------------------------------------------------------------------\"\r\necho \"Installing dependencies, this will take some time so sit back and relax...\"\r\necho \"IGNORE WARNINGS. THESE ARE NOT ERRORS !!!\"\r\necho \"--------------------------------------------------------------------------\"\r\n\r\nnpm install -g npm@8\r\n\r\nnpm install --verbose --force\r\n\r\necho -e \"install completed\"\r\nexit 0",
+            "container": "node:18-bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Version to install. Latest will install the latest available version.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

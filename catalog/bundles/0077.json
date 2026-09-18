@@ -1,0 +1,978 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "tachyon-17e054f111c6",
+        "name": "Tachyon",
+        "description": "A multiplayer version of FTL.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tachyon-17e054f111c6.json",
+        "sha256": "b1457e9bb2c2e155340ecf76014bf594a5bc5bf29249a5ad01e1a11c80bdaa83",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "ftl_tachyon/egg-tachyon.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/17e054f111c6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-02-23T17:52:24+01:00",
+        "name": "Tachyon",
+        "author": "alex.chang-lam@protonmail.com",
+        "description": "A multiplayer version of FTL.",
+        "features": null,
+        "docker_images": {
+          "Java_11": "ghcr.io/pterodactyl/yolks:java_11"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar TachyonsCEServer.jar",
+        "config": {
+          "files": "{\"config.cfg\": {\"parser\": \"file\", \"find\": {\"SERVER_PORT=\": \"SERVER_PORT={{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"[Server] SERVER STARTED.\"}",
+          "logs": "{}",
+          "stop": "/exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y curl jq file unzip\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Dav-Edward/TachyonsCE/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Dav-Edward/TachyonsCE/releases\")\r\nMATCH=TachyonsCE\r\n\r\nif [ \"$(echo ${LATEST_JSON} | jq -r '.message')\" != \"Not Found\" ] && [[ -z \"${VERSION}\" || \"${VERSION}\" == \"latest\" ]]; then\r\n    echo -e \"grabbing latest version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelif [ \"$(echo ${LATEST_JSON} | jq -r '.message')\" == \"Not Found\" ]; then\r\n    ## emergency fallback if latest isn't found\r\n    ## grabs the latest release even it it's a pre-release\r\n    echo -e \"grabbing latest pre-release\"\r\n    DOWNLOAD_URL=$(echo ${RELEASES} | jq -r '.[0].assets[].browser_download_url' | grep -i ${MATCH})\r\nelse\r\n    echo -e \"grabbing version $VERSION\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl --progress-bar -sSL -o ${DOWNLOAD_URL##*/} ${DOWNLOAD_URL}\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exeting\"\r\n    exit 2 \r\nfi\r\n\r\n#move all server files out\r\nmv ./server/* ./\r\n\r\n#remove zip and unneeded client-side and dev files\r\nrm -rf server/ JRE/ client/ *.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tachyon-838cd26f711e",
+        "name": "Tachyon",
+        "description": "A multiplayer version of FTL.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tachyon-838cd26f711e.json",
+        "sha256": "809f6ce3fcf65a6ca2581099c85f27bff8d37d53b103ef2ef9552fe43fe60aad",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "ftl_tachyon/egg-pterodactyl-tachyon.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/ftl/tachyon/egg-tachyon.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/838cd26f711e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:11+00:00",
+        "name": "Tachyon",
+        "author": "alex.chang-lam@protonmail.com",
+        "description": "A multiplayer version of FTL.",
+        "features": null,
+        "docker_images": {
+          "Java_11": "ghcr.io/pterodactyl/yolks:java_11"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar TachyonsCEServer.jar",
+        "config": {
+          "files": "{\"config.cfg\": {\"parser\": \"file\", \"find\": {\"SERVER_PORT=\": \"SERVER_PORT={{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"[Server] SERVER STARTED.\"}",
+          "stop": "/exit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y curl jq file unzip\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Dav-Edward/TachyonsCE/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Dav-Edward/TachyonsCE/releases\")\r\nMATCH=TachyonsCE\r\n\r\nif [ \"$(echo ${LATEST_JSON} | jq -r '.message')\" != \"Not Found\" ] && [[ -z \"${VERSION}\" || \"${VERSION}\" == \"latest\" ]]; then\r\n    echo -e \"grabbing latest version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelif [ \"$(echo ${LATEST_JSON} | jq -r '.message')\" == \"Not Found\" ]; then\r\n    ## emergency fallback if latest isn't found\r\n    ## grabs the latest release even it it's a pre-release\r\n    echo -e \"grabbing latest pre-release\"\r\n    DOWNLOAD_URL=$(echo ${RELEASES} | jq -r '.[0].assets[].browser_download_url' | grep -i ${MATCH})\r\nelse\r\n    echo -e \"grabbing version $VERSION\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl --progress-bar -sSL -o ${DOWNLOAD_URL##*/} ${DOWNLOAD_URL}\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exeting\"\r\n    exit 2 \r\nfi\r\n\r\n#move all server files out\r\nmv ./server/* ./\r\n\r\n#remove zip and unneeded client-side and dev files\r\nrm -rf server/ JRE/ client/ *.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tachyon-b2abffd120eb",
+        "name": "Tachyon",
+        "description": "A multiplayer version of FTL.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tachyon-b2abffd120eb.json",
+        "sha256": "f0a51b5754c97d6d9c3f53e191740911d2a9ee4814c078bdb0168071e5676125",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "ftl_tachyon/egg-tachyon.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/b2abffd120eb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:11+00:00",
+        "name": "Tachyon",
+        "author": "alex.chang-lam@protonmail.com",
+        "uuid": "364ef8b3-7c0a-4fad-b51a-44c03a4f54c8",
+        "description": "A multiplayer version of FTL.",
+        "features": null,
+        "docker_images": {
+          "Java_11": "ghcr.io/pterodactyl/yolks:java_11"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar TachyonsCEServer.jar",
+        "config": {
+          "files": "{\"config.cfg\": {\"parser\": \"file\", \"find\": {\"SERVER_PORT=\": \"SERVER_PORT={{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"[Server] SERVER STARTED.\"}",
+          "logs": "{}",
+          "stop": "/exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y curl jq file unzip\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Dav-Edward/TachyonsCE/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Dav-Edward/TachyonsCE/releases\")\r\nMATCH=TachyonsCE\r\n\r\nif [ \"$(echo ${LATEST_JSON} | jq -r '.message')\" != \"Not Found\" ] && [[ -z \"${VERSION}\" || \"${VERSION}\" == \"latest\" ]]; then\r\n    echo -e \"grabbing latest version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelif [ \"$(echo ${LATEST_JSON} | jq -r '.message')\" == \"Not Found\" ]; then\r\n    ## emergency fallback if latest isn't found\r\n    ## grabs the latest release even it it's a pre-release\r\n    echo -e \"grabbing latest pre-release\"\r\n    DOWNLOAD_URL=$(echo ${RELEASES} | jq -r '.[0].assets[].browser_download_url' | grep -i ${MATCH})\r\nelse\r\n    echo -e \"grabbing version $VERSION\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl --progress-bar -sSL -o ${DOWNLOAD_URL##*/} ${DOWNLOAD_URL}\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exeting\"\r\n    exit 2 \r\nfi\r\n\r\n#move all server files out\r\nmv ./server/* ./\r\n\r\n#remove zip and unneeded client-side and dev files\r\nrm -rf server/ JRE/ client/ *.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "team-fortress-2-5f37ed0f858b",
+        "name": "Team Fortress 2",
+        "description": "Team Fortress 2 is a team-based multiplayer first-person shooter developed by Valve. Players join one of two teams and choose from nine character classes, each with distinct weapons and abilities, across game modes such as Capture the Flag, Control Point, Payload, and King of the Hill.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/team-fortress-2-5f37ed0f858b.json",
+        "sha256": "08af66ac657a06f3032743cf1fccb0b9603e53509ef8a3b40cbe6c3680c11d17",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "team_fortress_2/egg-team-fortress-2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5f37ed0f858b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-07-02T02:37:00+10:00",
+        "name": "Team Fortress 2",
+        "author": "mark@bytesizelabs.com.au",
+        "description": "Team Fortress 2 is a team-based multiplayer first-person shooter developed by Valve. Players join one of two teams and choose from nine character classes, each with distinct weapons and abilities, across game modes such as Capture the Flag, Control Point, Payload, and King of the Hill.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -strictportbind -ip 0.0.0.0 -port {{SERVER_PORT}} +clientport {{SRCDS_CPORT}} +tv_port {{SRCDS_STV}} +map {{SRCDS_MAP}} +servercfgfile server.cfg -maxplayers {{MAX_PLAYERS}} +sv_setsteamaccount {{STEAM_GSLT}}",
+        "config": {
+          "files": "{\"tf/cfg/server.cfg\": {\"parser\": \"file\", \"find\": {\"hostname\": \"hostname \\\"{{env.HOSTNAME}}\\\"\", \"sv_password\": \"sv_password \\\"{{env.SERVER_PASSWORD}}\\\"\", \"rcon_password\": \"rcon_password \\\"{{env.RCON_PASSWORD}}\\\"\"}}}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## seed server.cfg so hostname/passwords can be written in on every boot\r\nmkdir -p /mnt/server/tf/cfg\r\nif [ ! -f /mnt/server/tf/cfg/server.cfg ]; then\r\ncat <<EOF > /mnt/server/tf/cfg/server.cfg\r\nhostname \"A Pterodactyl Hosted TF2 Server\"\r\nsv_password \"\"\r\nrcon_password \"\"\r\nEOF\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name your server will show up as in the in-game server browser.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Pterodactyl Hosted TF2 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The map your server loads on startup. Popular choices: ctf_2fort, cp_dustbowl, pl_badwater, koth_harvest_event.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "ctf_2fort",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed to join your server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If set, players must enter this password to join your server. Leave blank to let anyone join.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin (RCON) Password",
+            "description": "Password used by remote admin tools to manage your server (change maps, kick players, etc). Leave blank to disable remote admin access.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Server Login Token (GSLT)",
+            "description": "A free token from Valve that makes your server show up in the public server browser. Get one at https://steamcommunity.com/dev/managegameservers (choose \"Team Fortress 2\"). Leave blank to run a private server that only people you directly invite can join.",
+            "env_variable": "STEAM_GSLT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Client Port",
+            "description": "A second network port the game uses alongside the main server port. Additional Allocation required - set this to match a secondary port you've allocated to this server.",
+            "env_variable": "SRCDS_CPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "SourceTV Port",
+            "description": "The port used for SourceTV, a feature that lets people spectate or record matches on your server. Additional Allocation required - set this to match a secondary port you've allocated to this server.",
+            "env_variable": "SRCDS_STV",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Automatically update the server to the latest version every time it restarts.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "Internal Steam identifier used to download and update the server. Do not change.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232250",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232250",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Folder",
+            "description": "Internal folder name the server software runs from. Do not change.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "tf",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "team-fortress-2-classic-16f906c16256",
+        "name": "Team Fortress 2 Classic",
+        "description": "Team Fortress 2 Classic is a free mod of the 2007 game Team Fortress 2, developed by Eminoma and utilizing the Source engine.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/team-fortress-2-classic-16f906c16256.json",
+        "sha256": "3aa746eef2203f7b68da07b2172262a6368b3368f25846bdbdcd783c365d38bb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "team_fortress_2_classic/egg-team-fortress-2-classic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/16f906c16256.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-24T15:11:44+00:00",
+        "name": "Team Fortress 2 Classic",
+        "author": "eggs@scattergun.io",
+        "description": "Team Fortress 2 Classic is a free mod of the 2007 game Team Fortress 2, developed by Eminoma and utilizing the Source engine.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:ubuntu2404": "ghcr.io/ptero-eggs/steamcmd:ubuntu_24.04"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart -debug +maxplayers {{MAXPLAYERS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y zstd\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## download TF2C from website\r\ncd /mnt/server\r\nwhich unzip\r\nL_V=$(curl -s https://wiki.tf2classic.com/kachemak/versions.json | jq -r '.versions | to_entries | max_by(.key | tonumber) | .value.file') # tf2classic-2.1.3.tar.zst\r\n\r\nif [ -z \"${GAMEVERSION}\" ] || [ \"${GAMEVERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/$L_V\"\r\nelse\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/tf2classic-${GAMEVERSION}.tar.zst\"\r\nfi\r\n\r\n\r\n# Check if the URL returns a 404 status code\r\nif curl -s --head \"$DOWNLOAD_URL\" | head -n 1 | grep \"404 Not Found\" > /dev/null; then\r\n    echo \"URL returned 404. Setting to alternative URL.\"\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/$L_V\"\r\nfi\r\n\r\necho \"Downloading tf2classic, This will take some time\" \r\necho \"Download URL is: ${DOWNLOAD_URL}\"\r\ncurl -sSL -o tf2classic.tar.zst ${DOWNLOAD_URL}\r\n\r\n#tar -xf tf2classic.tar.zst\r\n\r\ntar --use-compress-program=unzstd -xvf tf2classic.tar.zst\r\nrm -rf tf2classic.tar.zst\r\n## fix issue /w symlink\r\ncd /mnt/server/bin\r\nln -s vphysics_srv.so vphysics.so\r\nln -s studiorender_srv.so studiorender.so\r\nln -s soundemittersystem_srv.so soundemittersystem.so\r\nln -s shaderapiempty_srv.so shaderapiempty.so\r\nln -s scenefilecache_srv.so scenefilecache.so\r\nln -s replay_srv.so replay.so\r\nln -s materialsystem_srv.so materialsystem.so\r\n\r\ncd /mnt/server/tf2classic/bin\r\n## fix server as of 2.0.4 crashing on start\r\nrm -rf server_srv.so\r\nln -s server.so server_srv.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "244310",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:244310",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "tf2classic",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:tf2classic",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "ctf_2fort",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Version",
+            "description": "Version of TF2C to download.",
+            "env_variable": "GAMEVERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on the server.",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Beta ID",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "previous2021",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "team-fortress-2-classic-59b12d086007",
+        "name": "Team Fortress 2 Classic",
+        "description": "Team Fortress 2 Classic is a free mod of the 2007 game Team Fortress 2, developed by Eminoma and utilizing the Source engine.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/team-fortress-2-classic-59b12d086007.json",
+        "sha256": "745b427008c1d8b4039c56dd9a9e73094759a974277515f4080ba343190b5e83",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "team_fortress_2_classic/egg-pterodactyl-team-fortress2-classic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/team_fortress_2_classic/egg-team-fortress-2-classic.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/59b12d086007.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:56+00:00",
+        "name": "Team Fortress 2 Classic",
+        "author": "eggs@scattergun.io",
+        "description": "Team Fortress 2 Classic is a free mod of the 2007 game Team Fortress 2, developed by Eminoma and utilizing the Source engine.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart -debug +maxplayers {{MAXPLAYERS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y zstd\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## download TF2C from website\r\ncd /mnt/server\r\nwhich unzip\r\nL_V=$(curl -s https://wiki.tf2classic.com/kachemak/versions.json | jq -r '.versions | to_entries | max_by(.key | tonumber) | .value.file') # tf2classic-2.1.3.tar.zst\r\n\r\nif [ -z \"${GAMEVERSION}\" ] || [ \"${GAMEVERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/$L_V\"\r\nelse\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/tf2classic-${GAMEVERSION}.tar.zst\"\r\nfi\r\n\r\n\r\n# Check if the URL returns a 404 status code\r\nif curl -s --head \"$DOWNLOAD_URL\" | head -n 1 | grep \"404 Not Found\" > /dev/null; then\r\n    echo \"URL returned 404. Setting to alternative URL.\"\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/$L_V\"\r\nfi\r\n\r\necho \"Downloading tf2classic, This will take some time\" \r\necho \"Download URL is: ${DOWNLOAD_URL}\"\r\ncurl -sSL -o tf2classic.tar.zst ${DOWNLOAD_URL}\r\n\r\n#tar -xf tf2classic.tar.zst\r\n\r\ntar --use-compress-program=unzstd -xvf tf2classic.tar.zst\r\nrm -rf tf2classic.tar.zst\r\n## fix issue /w symlink\r\ncd /mnt/server/bin\r\nln -s vphysics_srv.so vphysics.so\r\nln -s studiorender_srv.so studiorender.so\r\nln -s soundemittersystem_srv.so soundemittersystem.so\r\nln -s shaderapiempty_srv.so shaderapiempty.so\r\nln -s scenefilecache_srv.so scenefilecache.so\r\nln -s replay_srv.so replay.so\r\nln -s materialsystem_srv.so materialsystem.so\r\n\r\ncd /mnt/server/tf2classic/bin\r\n## fix server as of 2.0.4 crashing on start\r\nrm -rf server_srv.so\r\nln -s server.so server_srv.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "244310",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:244310",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "tf2classic",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:tf2classic",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "ctf_2fort",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Version",
+            "description": "Version of TF2C to download.",
+            "env_variable": "GAMEVERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on the server.",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "team-fortress-2-classic-9c84a6743de2",
+        "name": "Team Fortress 2 Classic",
+        "description": "Team Fortress 2 Classic is a free mod of the 2007 game Team Fortress 2, developed by Eminoma and utilizing the Source engine.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/team-fortress-2-classic-9c84a6743de2.json",
+        "sha256": "e29f904be7d392347b77e806166388792ccb84488ffa9d34d5fb22edc4ab0f1b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "team_fortress_2_classic/egg-team-fortress2-classic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/9c84a6743de2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Team Fortress 2 Classic",
+        "author": "eggs@scattergun.io",
+        "uuid": "d080e7b0-bcb5-4e68-a13f-c21c1c95ba45",
+        "description": "Team Fortress 2 Classic is a free mod of the 2007 game Team Fortress 2, developed by Eminoma and utilizing the Source engine.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart -debug +maxplayers {{MAXPLAYERS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y zstd\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## download TF2C from website\r\ncd /mnt/server\r\nwhich unzip\r\nL_V=$(curl -s https://wiki.tf2classic.com/kachemak/versions.json | jq -r '.versions | to_entries | max_by(.key | tonumber) | .value.file') # tf2classic-2.1.3.tar.zst\r\n\r\nif [ -z \"${GAMEVERSION}\" ] || [ \"${GAMEVERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/$L_V\"\r\nelse\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/tf2classic-${GAMEVERSION}.tar.zst\"\r\nfi\r\n\r\n\r\n# Check if the URL returns a 404 status code\r\nif curl -s --head \"$DOWNLOAD_URL\" | head -n 1 | grep \"404 Not Found\" > /dev/null; then\r\n    echo \"URL returned 404. Setting to alternative URL.\"\r\n    DOWNLOAD_URL=\"https://wiki.tf2classic.com/kachemak/$L_V\"\r\nfi\r\n\r\necho \"Downloading tf2classic, This will take some time\" \r\necho \"Download URL is: ${DOWNLOAD_URL}\"\r\ncurl -sSL -o tf2classic.tar.zst ${DOWNLOAD_URL}\r\n\r\n#tar -xf tf2classic.tar.zst\r\n\r\ntar --use-compress-program=unzstd -xvf tf2classic.tar.zst\r\nrm -rf tf2classic.tar.zst\r\n## fix issue /w symlink\r\ncd /mnt/server/bin\r\nln -s vphysics_srv.so vphysics.so\r\nln -s studiorender_srv.so studiorender.so\r\nln -s soundemittersystem_srv.so soundemittersystem.so\r\nln -s shaderapiempty_srv.so shaderapiempty.so\r\nln -s scenefilecache_srv.so scenefilecache.so\r\nln -s replay_srv.so replay.so\r\nln -s materialsystem_srv.so materialsystem.so\r\n\r\ncd /mnt/server/tf2classic/bin\r\n## fix server as of 2.0.4 crashing on start\r\nrm -rf server_srv.so\r\nln -s server.so server_srv.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "244310",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:244310",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "tf2classic",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:tf2classic",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "ctf_2fort",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Version",
+            "description": "Version of TF2C to download.",
+            "env_variable": "GAMEVERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on the server.",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teeworlds-09756abd2ef0",
+        "name": "Teeworlds",
+        "description": "Teeworlds is a free online multiplayer game, available for all major operating systems. Battle with up to 16 players in a variety of game modes, including Team Deathmatch and Capture The Flag. You can even design your own maps!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/teeworlds-09756abd2ef0.json",
+        "sha256": "1cf189bf10d6a8e6609e0cd853abeb2e5fe7d36805cd8e25a3055ed79f111132",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "teeworlds/egg-teeworlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/09756abd2ef0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:13+00:00",
+        "name": "Teeworlds",
+        "author": "parker@parkervcp.com",
+        "uuid": "ff757050-ad3d-4016-ace0-3f4098b17845",
+        "description": "Teeworlds is a free online multiplayer game, available for all major operating systems. Battle with up to 16 players in a variety of game modes, including Team Deathmatch and Capture The Flag. You can even design your own maps!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./teeworlds_srv",
+        "config": {
+          "files": "{\"autoexec.cfg\": {\"parser\": \"file\", \"find\": {\"bindaddr\": \"bindaddr 0.0.0.0\", \"sv_port\": \"sv_port {{server.build.default.port}}\", \"sv_name\": \"sv_name {{server.build.env.SERVER_NAME}}\", \"sv_motd\": \"sv_motd {{server.build.env.SERVER_MOTD}}\"}}}",
+          "startup": "{\"done\": \"as master, sending heartbeats\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## teeworlds pterodactyl installer\r\napt update\r\napt upgrade -y\r\napt install -y curl jq file\r\n\r\nGITHUB_PACKAGE=\"teeworlds/teeworlds\"\r\nMATCH=\"linux_x86_64\"\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\"]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\n## setting variable names for later\r\nFILE_NAME=${DOWNLOAD_LINK##*/}\r\nFOLDER_NAME=${FILE_NAME%.tar.gz}\r\n\r\necho -e \"running 'curl -sSL ${DOWNLOAD_LINK} -o ${FILE_NAME}'\"\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${FILE_NAME}\r\n\r\nFILETYPE=$(file -F ',' ${FILE_NAME} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${FILE_NAME}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${FILE_NAME}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${FILE_NAME}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    # exit 2 \r\nfi\r\n\r\n## cleanup old files\r\nmv ${FOLDER_NAME}/* ./\r\n\r\nrm -rf ${FILE_NAME} ${FOLDER_NAME}\r\n\r\n## download default config\r\nif [ ! -f /mnt/server/autoexec.cfg ]; then\r\n    curl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/teeworlds/autoexec.cfg > /mnt/server/autoexec.cfg\r\nfi\r\n\r\n## download safe storage file\r\n## overwrites any that exists.\r\ncurl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/teeworlds/storage.cfg > /mnt/server/storage.cfg\r\n\r\necho -e \"Install complete.\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Display Name for the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Teeworlds Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server MotD",
+            "description": "Server Message of the Day displayed to all users.",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "A Pterodactyl Hosted Teeworlds Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teeworlds-0e5bdb28d69d",
+        "name": "Teeworlds",
+        "description": "Teeworlds is a free online multiplayer game, available for all major operating systems. Battle with up to 16 players in a variety of game modes, including Team Deathmatch and Capture The Flag. You can even design your own maps!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/teeworlds-0e5bdb28d69d.json",
+        "sha256": "1bf5c09d345de24d7c5f5dc2c08fa48408c4e88bdfb27a5f25b1a5f98d7c0b81",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "teeworlds/egg-teeworlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0e5bdb28d69d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:44:15+02:00",
+        "name": "Teeworlds",
+        "author": "parker@parkervcp.com",
+        "description": "Teeworlds is a free online multiplayer game, available for all major operating systems. Battle with up to 16 players in a variety of game modes, including Team Deathmatch and Capture The Flag. You can even design your own maps!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./teeworlds_srv",
+        "config": {
+          "files": "{\"autoexec.cfg\": {\"parser\": \"file\", \"find\": {\"bindaddr\": \"bindaddr 0.0.0.0\", \"sv_port\": \"sv_port {{server.build.default.port}}\", \"sv_name\": \"sv_name {{server.build.env.SERVER_NAME}}\", \"sv_motd\": \"sv_motd {{server.build.env.SERVER_MOTD}}\"}}}",
+          "startup": "{\"done\": \"as master, sending heartbeats\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## teeworlds pterodactyl installer\r\napt update\r\napt upgrade -y\r\napt install -y curl jq file\r\n\r\nGITHUB_PACKAGE=\"teeworlds/teeworlds\"\r\nMATCH=\"linux_x86_64\"\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\"]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\n## setting variable names for later\r\nFILE_NAME=${DOWNLOAD_LINK##*/}\r\nFOLDER_NAME=${FILE_NAME%.tar.gz}\r\n\r\necho -e \"running 'curl -sSL ${DOWNLOAD_LINK} -o ${FILE_NAME}'\"\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${FILE_NAME}\r\n\r\nFILETYPE=$(file -F ',' ${FILE_NAME} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${FILE_NAME}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${FILE_NAME}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${FILE_NAME}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    # exit 2 \r\nfi\r\n\r\n## cleanup old files\r\nmv ${FOLDER_NAME}/* ./\r\n\r\nrm -rf ${FILE_NAME} ${FOLDER_NAME}\r\n\r\n## download default config\r\nif [ ! -f /mnt/server/autoexec.cfg ]; then\r\n    curl -sSL https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/teeworlds/autoexec.cfg > /mnt/server/autoexec.cfg\r\nfi\r\n\r\n## download safe storage file\r\n## overwrites any that exists.\r\ncurl -sSL https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/teeworlds/storage.cfg > /mnt/server/storage.cfg\r\n\r\necho -e \"Install complete.\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Display Name for the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Teeworlds Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server MotD",
+            "description": "Server Message of the Day displayed to all users.",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "A Pterodactyl Hosted Teeworlds Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teeworlds-8b9d97daf9ed",
+        "name": "Teeworlds",
+        "description": "Teeworlds is a free online multiplayer game, available for all major operating systems. Battle with up to 16 players in a variety of game modes, including Team Deathmatch and Capture The Flag. You can even design your own maps!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/teeworlds-8b9d97daf9ed.json",
+        "sha256": "643722239db1185afb4398a6b8ba2d1823f923d12737d8e463e92ca656cd67ca",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "teeworlds/egg-pterodactyl-teeworlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/teeworlds/egg-teeworlds.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/8b9d97daf9ed.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:13+00:00",
+        "name": "Teeworlds",
+        "author": "parker@parkervcp.com",
+        "description": "Teeworlds is a free online multiplayer game, available for all major operating systems. Battle with up to 16 players in a variety of game modes, including Team Deathmatch and Capture The Flag. You can even design your own maps!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./teeworlds_srv",
+        "config": {
+          "files": "{\"autoexec.cfg\": {\"parser\": \"file\", \"find\": {\"bindaddr\": \"bindaddr 0.0.0.0\", \"sv_port\": \"sv_port {{server.build.default.port}}\", \"sv_name\": \"sv_name {{server.build.env.SERVER_NAME}}\", \"sv_motd\": \"sv_motd {{server.build.env.SERVER_MOTD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"as master, sending heartbeats\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "## teeworlds pterodactyl installer\r\napt update\r\napt upgrade -y\r\napt install -y curl jq file\r\n\r\nGITHUB_PACKAGE=\"teeworlds/teeworlds\"\r\nMATCH=\"linux_x86_64\"\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\"]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\n## setting variable names for later\r\nFILE_NAME=${DOWNLOAD_LINK##*/}\r\nFOLDER_NAME=${FILE_NAME%.tar.gz}\r\n\r\necho -e \"running 'curl -sSL ${DOWNLOAD_LINK} -o ${FILE_NAME}'\"\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${FILE_NAME}\r\n\r\nFILETYPE=$(file -F ',' ${FILE_NAME} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${FILE_NAME}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${FILE_NAME}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${FILE_NAME}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    # exit 2 \r\nfi\r\n\r\n## cleanup old files\r\nmv ${FOLDER_NAME}/* ./\r\n\r\nrm -rf ${FILE_NAME} ${FOLDER_NAME}\r\n\r\n## download default config\r\nif [ ! -f /mnt/server/autoexec.cfg ]; then\r\n    curl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/teeworlds/autoexec.cfg > /mnt/server/autoexec.cfg\r\nfi\r\n\r\n## download safe storage file\r\n## overwrites any that exists.\r\ncurl -sSL https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/teeworlds/storage.cfg > /mnt/server/storage.cfg\r\n\r\necho -e \"Install complete.\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Display Name for the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Teeworlds Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server MotD",
+            "description": "Server Message of the Day displayed to all users.",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "A Pterodactyl Hosted Teeworlds Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

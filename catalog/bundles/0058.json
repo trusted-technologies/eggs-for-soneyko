@@ -1,0 +1,1533 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "openra-075f0bf0bfaf",
+        "name": "OpenRA",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-075f0bf0bfaf.json",
+        "sha256": "aa03f8f8cfd60d10a9e52dae0623a04f0f1d4456d983edf5eeceaff481710b4e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openra/openra_red_alert/egg-open-r-a.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/075f0bf0bfaf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:59+00:00",
+        "name": "OpenRA",
+        "author": "patz.michael@gmail.com",
+        "uuid": "15491f70-ee65-41e8-9ee4-911c6057b40a",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Master server communication established.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases\")\r\nMATCH=OpenRA-Red-Alert-x86_64.AppImage\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nwget $DOWNLOAD_LINK\r\n\r\n#wget https://github.com/OpenRA/OpenRA/releases/download/release-20200503/OpenRA-Red-Alert-x86_64.AppImage\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm $MATCH\r\nrm *.zsync\r\ncd squashfs-root\r\nchmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-f489815231ea",
+        "name": "OpenRA",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-f489815231ea.json",
+        "sha256": "fe56fc93ddf1a424271b6bea75c2d624901587891121a9ca2e912ebf8c5d7fd2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openra/openra_red_alert/egg-pterodactyl-open-r-a.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/openra/openra_red_alert/egg-open-r-a.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/f489815231ea.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:59+00:00",
+        "name": "OpenRA",
+        "author": "patz.michael@gmail.com",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Master server communication established.\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases\")\r\nMATCH=OpenRA-Red-Alert-x86_64.AppImage\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nwget $DOWNLOAD_LINK\r\n\r\n#wget https://github.com/OpenRA/OpenRA/releases/download/release-20200503/OpenRA-Red-Alert-x86_64.AppImage\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm $MATCH\r\nrm *.zsync\r\ncd squashfs-root\r\nchmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-dune2000-9da8e8c8b725",
+        "name": "OpenRA - Dune2000",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-dune2000-9da8e8c8b725.json",
+        "sha256": "87c35bcda7e64dc0c43512da2469424d662006c5013cf274876494d218a4eeb7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "openra/openra_dune2000/egg-open-r-a--dune2000.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/9da8e8c8b725.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-27T15:45:15+00:00",
+        "name": "OpenRA - Dune2000",
+        "author": "patz.michael@gmail.com",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:debian": "ghcr.io/pterodactyl/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Starting dedicated server for mod\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\nMATCH=OpenRA-Dune-2000-x86_64.AppImage\r\n\r\ncd /mnt/server/ || { echo \"Failed to change into server directory\"; exit 1; }\r\n\r\n\r\n\r\n# If latest version requested, determine version\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    # Fetch latest version from OpenRA API\r\n    echo \"Finding latest version of OpenRA\"\r\n    VERSION=$(curl -s https://www.openra.net/versions.json | jq -r .release)\r\nfi\r\n\r\necho \"Installing version ${VERSION} of ${MATCH}\"\r\n\r\n# Configure GitHub authentication\r\nif [ -n \"${GITHUB_USER}\" ] && [ -n \"${GITHUB_OAUTH_TOKEN}\" ]; then\r\n    echo \"Using GitHub authentication\"\r\n    # shellcheck disable=SC2139\r\n    alias curl=\"curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN}\"\r\nelse\r\n    echo \"Using anonymous API calls\"\r\nfi\r\n\r\n\r\n# Fetch release information from GitHub\r\nRELEASE_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/tags/${VERSION}\") || { echo \"Failed to get release info for ${VERSION}\"; exit 1; }\r\n\r\n# Find download link for requested artifact\r\nDOWNLOAD_LINK=$(echo \"${RELEASE_JSON}\" | jq -r --arg MATCH $MATCH '.assets[] | select(.name == $MATCH).browser_download_url')\r\nif [ -z \"${DOWNLOAD_LINK}\" ] || [ \"${DOWNLOAD_LINK}\" == \"null\" ] ; then\r\n    echo \"Failed to find download url for \"\r\n    exit 1\r\nfi\r\n\r\nwget \"${DOWNLOAD_LINK}\" || { echo \"Failed to download ${DOWNLOAD_LINK}\"; exit 1; }\r\n\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm -f $MATCH\r\nrm -f ./*.zsync\r\ncd squashfs-root && chmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-dune2000-b756871271fe",
+        "name": "OpenRA - Dune2000",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-dune2000-b756871271fe.json",
+        "sha256": "2e79e11e07c4c4bfdd5968008d68b53b4fa33bd38b4eea316ed04ff811d09bb9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openra/openra_dune2000/egg-pterodactyl-open-r-a--dune2000.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/openra/openra_dune2000/egg-open-r-a--dune2000.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/b756871271fe.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:00+00:00",
+        "name": "OpenRA - Dune2000",
+        "author": "patz.michael@gmail.com",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Master server communication established.\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases\")\r\nMATCH=OpenRA-Dune-2000-x86_64.AppImage\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nwget $DOWNLOAD_LINK\r\n\r\n#wget https://github.com/OpenRA/OpenRA/releases/download/release-20200503/OpenRA-Red-Alert-x86_64.AppImage\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm $MATCH\r\nrm *.zsync\r\ncd squashfs-root\r\nchmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-dune2000-c2af148002fc",
+        "name": "OpenRA - Dune2000",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-dune2000-c2af148002fc.json",
+        "sha256": "c179742ed43c2d5b51134a5a2bdaec968d57820ce0905da15b665f1a27db73fb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openra/openra_dune2000/egg-open-r-a--dune2000.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/c2af148002fc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:00+00:00",
+        "name": "OpenRA - Dune2000",
+        "author": "patz.michael@gmail.com",
+        "uuid": "4eedb620-03a8-4764-a728-67f600facb1c",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Master server communication established.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases\")\r\nMATCH=OpenRA-Dune-2000-x86_64.AppImage\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nwget $DOWNLOAD_LINK\r\n\r\n#wget https://github.com/OpenRA/OpenRA/releases/download/release-20200503/OpenRA-Red-Alert-x86_64.AppImage\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm $MATCH\r\nrm *.zsync\r\ncd squashfs-root\r\nchmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-red-alert-72f2b83f7338",
+        "name": "OpenRA - Red Alert",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-red-alert-72f2b83f7338.json",
+        "sha256": "e8ef1e92bd3f696c6bbea00e7e7febdf805c725e19557cce55969ddebbf50672",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "openra/openra_red_alert/egg-open-r-a.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/72f2b83f7338.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-27T15:40:57+00:00",
+        "name": "OpenRA - Red Alert",
+        "author": "patz.michael@gmail.com",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:debian": "ghcr.io/pterodactyl/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Starting dedicated server for mod\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\nMATCH=OpenRA-Red-Alert-x86_64.AppImage\r\n\r\ncd /mnt/server/ || { echo \"Failed to change into server directory\"; exit 1; }\r\n\r\n\r\n\r\n# If latest version requested, determine version\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    # Fetch latest version from OpenRA API\r\n    echo \"Finding latest version of OpenRA\"\r\n    VERSION=$(curl -s https://www.openra.net/versions.json | jq -r .release)\r\nfi\r\n\r\necho \"Installing version ${VERSION} of ${MATCH}\"\r\n\r\n# Configure GitHub authentication\r\nif [ -n \"${GITHUB_USER}\" ] && [ -n \"${GITHUB_OAUTH_TOKEN}\" ]; then\r\n    echo \"Using GitHub authentication\"\r\n    # shellcheck disable=SC2139\r\n    alias curl=\"curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN}\"\r\nelse\r\n    echo \"Using anonymous API calls\"\r\nfi\r\n\r\n\r\n# Fetch release information from GitHub\r\nRELEASE_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/tags/${VERSION}\") || { echo \"Failed to get release info for ${VERSION}\"; exit 1; }\r\n\r\n# Find download link for requested artifact\r\nDOWNLOAD_LINK=$(echo \"${RELEASE_JSON}\" | jq -r --arg MATCH $MATCH '.assets[] | select(.name == $MATCH).browser_download_url')\r\nif [ -z \"${DOWNLOAD_LINK}\" ] || [ \"${DOWNLOAD_LINK}\" == \"null\" ] ; then\r\n    echo \"Failed to find download url for \"\r\n    exit 1\r\nfi\r\n\r\nwget \"${DOWNLOAD_LINK}\" || { echo \"Failed to download ${DOWNLOAD_LINK}\"; exit 1; }\r\n\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm -f $MATCH\r\nrm -f ./*.zsync\r\ncd squashfs-root && chmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-tiberian-dawn-0d46276ca880",
+        "name": "OpenRA - Tiberian Dawn",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-tiberian-dawn-0d46276ca880.json",
+        "sha256": "5cada0b5e0695d26801c6354866085bf3ac213e6f032499226525071694a14d4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openra/openra_tiberian_dawn/egg-pterodactyl-open-r-a--tiberian-dawn.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/openra/openra_tiberian_dawn/egg-open-r-a--tiberian-dawn.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/0d46276ca880.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:00+00:00",
+        "name": "OpenRA - Tiberian Dawn",
+        "author": "patz.michael@gmail.com",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Master server communication established.\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases\")\r\nMATCH=OpenRA-Tiberian-Dawn-x86_64.AppImage\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nwget $DOWNLOAD_LINK\r\n\r\n#wget https://github.com/OpenRA/OpenRA/releases/download/release-20200503/OpenRA-Red-Alert-x86_64.AppImage\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm $MATCH\r\nrm *.zsync\r\ncd squashfs-root\r\nchmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-tiberian-dawn-4decf6cdce16",
+        "name": "OpenRA - Tiberian Dawn",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-tiberian-dawn-4decf6cdce16.json",
+        "sha256": "77c3f3e37e620ca4d82764e24e6ad053437b2dc98eef3690784b46fdcaee79a4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "openra/openra_tiberian_dawn/egg-open-r-a--tiberian-dawn.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/4decf6cdce16.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-27T15:44:17+00:00",
+        "name": "OpenRA - Tiberian Dawn",
+        "author": "patz.michael@gmail.com",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:debian": "ghcr.io/pterodactyl/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Starting dedicated server for mod\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\nMATCH=OpenRA-Tiberian-Dawn-x86_64.AppImage\r\n\r\ncd /mnt/server/ || { echo \"Failed to change into server directory\"; exit 1; }\r\n\r\n\r\n\r\n# If latest version requested, determine version\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    # Fetch latest version from OpenRA API\r\n    echo \"Finding latest version of OpenRA\"\r\n    VERSION=$(curl -s https://www.openra.net/versions.json | jq -r .release)\r\nfi\r\n\r\necho \"Installing version ${VERSION} of ${MATCH}\"\r\n\r\n# Configure GitHub authentication\r\nif [ -n \"${GITHUB_USER}\" ] && [ -n \"${GITHUB_OAUTH_TOKEN}\" ]; then\r\n    echo \"Using GitHub authentication\"\r\n    # shellcheck disable=SC2139\r\n    alias curl=\"curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN}\"\r\nelse\r\n    echo \"Using anonymous API calls\"\r\nfi\r\n\r\n\r\n# Fetch release information from GitHub\r\nRELEASE_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/tags/${VERSION}\") || { echo \"Failed to get release info for ${VERSION}\"; exit 1; }\r\n\r\n# Find download link for requested artifact\r\nDOWNLOAD_LINK=$(echo \"${RELEASE_JSON}\" | jq -r --arg MATCH $MATCH '.assets[] | select(.name == $MATCH).browser_download_url')\r\nif [ -z \"${DOWNLOAD_LINK}\" ] || [ \"${DOWNLOAD_LINK}\" == \"null\" ] ; then\r\n    echo \"Failed to find download url for \"\r\n    exit 1\r\nfi\r\n\r\nwget \"${DOWNLOAD_LINK}\" || { echo \"Failed to download ${DOWNLOAD_LINK}\"; exit 1; }\r\n\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm -f $MATCH\r\nrm -f ./*.zsync\r\ncd squashfs-root && chmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openra-tiberian-dawn-a8afbcfeb761",
+        "name": "OpenRA - Tiberian Dawn",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openra-tiberian-dawn-a8afbcfeb761.json",
+        "sha256": "490200894d598bff835a928127bda8cdb7734c7336972a1097147485e8f14031",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openra/openra_tiberian_dawn/egg-open-r-a--tiberian-dawn.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/a8afbcfeb761.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:00+00:00",
+        "name": "OpenRA - Tiberian Dawn",
+        "author": "patz.michael@gmail.com",
+        "uuid": "36b0e5a5-62db-49f9-b5c6-aab38b20003d",
+        "description": "OpenRA is a project that recreates and modernizes the classic Command & Conquer real time strategy games. We have developed a flexible open source game engine (the OpenRA engine) that provides a common platform for rebuilding and reimagining classic 2D and 2.5D RTS games (the OpenRA mods).",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./squashfs-root/AppRun --server Server.Name=\"{{SERVER_NAME}}\" Server.ListenPort={{SERVER_PORT}} Server.AdvertiseOnline={{PUBLIC}} Server.EnableSingleplayer={{SINGLEPLAYER}} Server.Password=\"{{PASSWORD}}\" Server.EnableGeoIP={{GEOIP}} Server.ShareAnonymizedIPs={{ANONYMOUS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Master server communication established.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget file jq\r\n\r\ncd /mnt/server/\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/OpenRA/OpenRA/releases\")\r\nMATCH=OpenRA-Tiberian-Dawn-x86_64.AppImage\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nwget $DOWNLOAD_LINK\r\n\r\n#wget https://github.com/OpenRA/OpenRA/releases/download/release-20200503/OpenRA-Red-Alert-x86_64.AppImage\r\nchmod +x $MATCH\r\n./$MATCH --appimage-extract\r\nrm $MATCH\r\nrm *.zsync\r\ncd squashfs-root\r\nchmod +x AppRun\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The Name of the Server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "OpenRAServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "Shall this server be public",
+            "env_variable": "PUBLIC",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Singleplayer",
+            "description": "Enable Singleplayer ?",
+            "env_variable": "SINGLEPLAYER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Require Authentification",
+            "description": "Enable Authentification",
+            "env_variable": "AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "PASSWORD",
+            "description": "Server Password",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable:string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "GEOIP",
+            "description": "Enable GEOIP",
+            "env_variable": "GEOIP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Anonymized IPs",
+            "description": "Hide IPs",
+            "env_variable": "ANONYMOUS",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "VERSION",
+            "description": "VERSION",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openrct2-18fa2acfa7bc",
+        "name": "OpenRCT2",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openrct2-18fa2acfa7bc.json",
+        "sha256": "fe09cd9d4f20142c755bd622a713eea65fc6befdc5a9b2ece1fa359babf7cf73",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openrct2/egg-pterodactyl-open-r-c-t2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/18fa2acfa7bc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-13T17:10:38-08:00",
+        "name": "OpenRCT2",
+        "author": "red_thirten@yahoo.com",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./OpenRCT2/openrct2-cli --version && ./OpenRCT2/openrct2-cli host $(if {{LOAD_AUTOSAVE}} && [ -d ServerData/save/autosave/ ]; then find ServerData/save/autosave/ | sort -r | head -1; else echo \"{{SAVE_URI}}\"; fi) --port {{SERVER_PORT}} --user-data-path /home/container/ServerData/",
+        "config": {
+          "files": "{\"ServerData/config.ini\": {\"parser\": \"ini\", \"find\": {\"general.autosave\": \"{{server.build.env.AUTOSAVE_INTERVAL}}\", \"general.autosave_amount\": \"{{server.build.env.AUTOSAVE_AMOUNT}}\", \"network.player_name\": \"\\\"{{server.build.env.SERVER_PLAYER_NAME}}\\\"\", \"network.default_port\": \"{{server.build.default.port}}\", \"network.default_password\": \"\\\"{{server.build.env.SERVER_PASSWORD}}\\\"\", \"network.advertise\": \"{{server.build.env.SERVER_ADVERTISE}}\", \"network.maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"network.server_name\": \"\\\"{{server.build.env.SERVER_NAME}}\\\"\", \"network.server_description\": \"\\\"{{server.build.env.SERVER_DESCRIPTION}}\\\"\", \"network.server_greeting\": \"\\\"{{server.build.env.SERVER_GREETING}}\\\"\", \"network.provider_name\": \"\\\"{{server.build.env.PROVIDER_NAME}}\\\"\", \"network.provider_email\": \"\\\"{{server.build.env.PROVIDER_EMAIL}}\\\"\", \"network.provider_website\": \"\\\"{{server.build.env.PROVIDER_WEBSITE}}\\\"\", \"network.log_chat\": \"{{server.build.env.LOG_CHAT}}\", \"network.log_server_actions\": \"{{server.build.env.LOG_SERVER_ACTIONS}}\", \"network.pause_server_if_no_clients\": \"{{server.build.env.PAUSE_NO_CLIENTS}}\"}}}",
+          "startup": "{\"done\": \"Listening for clients on\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl OpenRCT2 Egg - egg-pterodactyl-open-r-c-t2.json\r\n## Authors: David Wolfe (Red-Thirten), parkervcp\r\n## Date: 2025/12/13\r\n## License: MIT License\r\n\r\nexport HOME=/mnt/server\r\n\r\nGITHUB_PACKAGE=\"OpenRCT2/OpenRCT2\"\r\nMATCH=\"Linux-bookworm-x86_64.tar.gz\"\r\nDEFAULT_SAVE=\"https://raw.githubusercontent.com/pelican-eggs/games-standalone/master/openrct2/save.park\"\r\n\r\n## OpenRCT2 Install\r\n[ ! -d $HOME ] && mkdir $HOME\r\ncd $HOME\r\n# Remove existing installation if present\r\n[ -d OpenRCT2 ] && rm -rf OpenRCT2\r\n# Setup temp directory for downloading/building and move to it\r\n[ -d temp ] && rm -rf temp\r\nmkdir temp && cd temp\r\n\r\n# Determine if installing from source or from release\r\nif [ \"${VERSION}\" == \"develop\" ]; then\r\n    # Get required packages\r\n    apt -y update\r\n    apt -y install --no-install-recommends \\\r\n        git \\\r\n        make \\\r\n        cmake \\\r\n        gcc \\\r\n        build-essential \\\r\n        libicu-dev \\\r\n        pkg-config \\\r\n        libcurl4-openssl-dev \\\r\n        libcrypto++-dev \\\r\n        libpng-dev \\\r\n        libssl-dev \\\r\n        libzip-dev \\\r\n        duktape-dev \\\r\n        nlohmann-json3-dev \\\r\n        libzstd-dev \\\r\n        libsdl2-dev \\\r\n        libspeexdsp-dev \\\r\n        libflac-dev \\\r\n        libvorbis-dev\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from source...\\n\"\r\n    \r\n    # Clone the branch and check if successful\r\n    git clone --branch \"${VERSION}\" https://github.com/${GITHUB_PACKAGE}\r\n    if [ ! -d OpenRCT2 ]; then\r\n        echo -e \"\\nFailed to clone \\\"${VERSION}\\\" branch from https://github.com/${GITHUB_PACKAGE}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    cd OpenRCT2\r\n    mkdir build && cd build\r\n    # Prepare CMake files for a lightweight and CLI-only build of OpenRCT2, using the appropriate flags\r\n    # (The `-DDISABLE_GUI=ON` flag is currently broken & has been temp. removed. This requires 4 addl. UI packages to be installed.)\r\n    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DPORTABLE=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_CXX_FLAGS=\"-g -gz\" -DDISABLE_TTF=ON -DDISABLE_GOOGLE_BENCHMARK=ON -DDISABLE_DISCORD_RPC=ON\r\n    echo -e \"\\nBuilding OpenRCT2 package from source...\\n\\tThis process can take quite some time. Grab a coffee :)\\n\"\r\n    # Build OpenRCT2\r\n    DESTDIR=. make install\r\n    # Check if build was successful\r\n    if [ ! -f usr/local/bin/openrct2-cli ]; then\r\n        echo -e \"\\nFailed to successfully build OpenRCT2!\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Make executable-ready package by moving compiled files to the correct locations\r\n    mkdir -p $HOME/OpenRCT2/{data,lib}\r\n    cd usr/local\r\n    mv bin/openrct2-cli $HOME/OpenRCT2/\r\n    mv bin/*.so $HOME/OpenRCT2/lib\r\n    mv share/openrct2/* $HOME/OpenRCT2/data/\r\n    # mv share/openrct2-cli/* $HOME/OpenRCT2/data/\r\n    mv share/doc $HOME/OpenRCT2/\r\n    echo -e \"\\nBuild of OpenRCT2 package complete!\"\r\nelse\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from release tag \\\"${VERSION}\\\"...\\n\"\r\n    \r\n    # This is a simple script to use the GitHub API for release versions.\r\n    # This requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (MATCH is to match the filename in some way).\r\n    # Get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\n    # Download the release and check if successful\r\n    curl -L ${DOWNLOAD_URL} -o OpenRCT2.tar.gz\r\n    if [ ! -f OpenRCT2.tar.gz ]; then\r\n        echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Extract archive\r\n    tar -xvf OpenRCT2.tar.gz -C $HOME\r\n\r\n    echo -e \"\\nDownload/Update of OpenRCT2 release successful!\"\r\nfi\r\n\r\ncd $HOME\r\nrm -rf temp # Clean up temp building directory\r\n\r\n## OpenRCT2 Setup\r\n# Setup ServerData/save directory\r\n[ ! -d ServerData/save ] && mkdir -p ServerData/save\r\ncd ServerData/save\r\n# Download default save.park if missing\r\nif [ ! -f save.park ]; then\r\n    echo -e \"Downloading default save.park file from ${DEFAULT_SAVE}\"\r\n    curl -sSLO ${DEFAULT_SAVE}\r\nfi\r\n\r\necho -e \"\\nOpenRCT2 Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Save File",
+            "description": "Save file (.sv4 / .sv6 / .park) to load. Can be a file path or can be a webhosted file URL. An existing save file must be specified; the server cannot generate a new scenario/save from scratch.",
+            "env_variable": "SAVE_URI",
+            "default_value": "ServerData/save/save.park",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:4",
+            "field_type": "text"
+          },
+          {
+            "name": "Load Latest Autosave",
+            "description": "Will load the latest autosave (assuming one is present) *instead* of the Save File when the server is started. Useful for loading the latest progress of a park after a reboot. Set to \"false\" to \"lock\" progress of the park, and always load the original Save File on start up.",
+            "env_variable": "LOAD_AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "0 = Every 1 min, 1 = Every 5 min, 2 = Every 15 min, 3 = Every 30 min, 4 = Every hour, 5 = Never",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2,3,4,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosaves To Keep",
+            "description": "Number of autosaves to keep before rolling over and deleting the oldest one. Set to 0 to disable autosaving.",
+            "env_variable": "AUTOSAVE_AMOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password requested by the server for clients to connect. Admins do not have to enter password to join. Leave empty for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertise Server",
+            "description": "If set to \"false\", the server will not be advertised in the master server list, and clients must manually connect.",
+            "env_variable": "SERVER_ADVERTISE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Pause Server If No Clients",
+            "description": "Set to \"true\" to have the server pause simulation if no clients are on the server.",
+            "env_variable": "PAUSE_NO_CLIENTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server that appears in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the server that appears when hovering over the server in the server list.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Player Name",
+            "description": "The server appears as a player in the player list. This is the name it will have.",
+            "env_variable": "SERVER_PLAYER_NAME",
+            "default_value": "Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Greeting",
+            "description": "The \"Message of the Day\" that gets sent to all clients who join.",
+            "env_variable": "SERVER_GREETING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Provider Name",
+            "description": "Server provider name that appears in server information window.",
+            "env_variable": "PROVIDER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Provider E-Mail",
+            "description": "Server provider e-mail that appears in server information window.",
+            "env_variable": "PROVIDER_EMAIL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Provider Website",
+            "description": "Server provider website that appears in server information window.",
+            "env_variable": "PROVIDER_WEBSITE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Chat",
+            "description": "Set to \"true\" if you would like in-game chat logged to file in `~/ServerData/chatlogs`.",
+            "env_variable": "LOG_CHAT",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Server Actions",
+            "description": "Set to \"true\" if you would like in-game actions logged to file in `~/ServerData/serverlogs`.",
+            "env_variable": "LOG_SERVER_ACTIONS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenRCT2 Version",
+            "description": "The release tag (version) of OpenRCT2 to download and install from their official Github (ie. \"v0.4.15\"). Use \"latest\" to download the latest release, or \"develop\" to build from the latest source (takes longer to install but is the most up to date).",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Library Path",
+            "description": "What path to load libraries from for release binaries. Rarely needs to be changed.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./OpenRCT2/lib",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1703 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "portal-knights-ff7ffd65f0e6",
+        "name": "Portal Knights",
+        "description": "The world of Elysia needs YOU! Join this cooperative, 3D sandbox action RPG to level up your character, craft epic weapons, conquer enemies in real-time, and build almost anything! Craft your adventure. Forge your hero. Become the ultimate Portal Knight!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/portal-knights-ff7ffd65f0e6.json",
+        "sha256": "ec705d42debd7e6f922c1c9bb0dc5465c74ff40f5dc1665fb352c9cc2fd5b231",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "portal_knights/egg-portal-knights.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/ff7ffd65f0e6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Portal Knights",
+        "author": "josdekurk@gmail.com",
+        "uuid": "faa03e33-c16b-484d-b247-37e22bf95c8a",
+        "description": "The world of Elysia needs YOU! Join this cooperative, 3D sandbox action RPG to level up your character, craft epic weapons, conquer enemies in real-time, and build almost anything! Craft your adventure. Forge your hero. Become the ultimate Portal Knight!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "cd /home/container/dedicated_server; xvfb-run --auto-servernum wine pk_dedicated_server.exe -config server_config.json -log server.log",
+        "config": {
+          "files": "{\"dedicated_server/server_config.json\": {\"parser\": \"json\", \"find\": {\"basicServerData.name\": \"{{server.build.env.SERVER_NAME}}\", \"basicServerData.ipv4\": \"0.0.0.0\", \"basicServerData.port\": \"{{server.build.default.port}}\", \"basicServerData.saveFolderPath\": \"./savedata\", \"admins.credentials.password\": \"{{server.build.env.ADMIN_PASS}}\", \"users.credentials.password\": \"{{server.build.env.USER_PASS}}\", \"guests.credentials.password\": \"{{server.build.env.GUEST_PASS}}\", \"gameplayMode\": \"{{server.build.env.GAMEMODE}}\", \"universeSize\": \"{{server.build.env.UNIVERSE_SIZE}}\", \"hideConsoleWindow\": \"true\"}}}",
+          "startup": "{\"done\": [\"Listening on\", \"ReadyToServe\", \"has started\"]}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\ndir=/mnt/server/dedicated_server\r\nif [[ ! -e $dir ]]; then\r\n    mkdir -p $dir\r\nfi\r\n\r\ncd /mnt/server/dedicated_server\r\nunzip -o ../dedicated_server.zip\r\ncurl -sSL -o server_config.json https://pteropaste.com/f8p6yx0yj07d\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam user",
+            "description": "",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam password",
+            "description": "",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Install windows version",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "App id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "374040",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:374040",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win32,win64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name off the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Servername",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin password",
+            "description": "",
+            "env_variable": "ADMIN_PASS",
+            "default_value": "admin_password_please_change",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "User password",
+            "description": "",
+            "env_variable": "USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Guest password",
+            "description": "",
+            "env_variable": "GUEST_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game mode",
+            "description": "The game play mode for the dedicated server.",
+            "env_variable": "GAMEMODE",
+            "default_value": "Adventure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Adventure,Creative",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Universe size",
+            "description": "The universe size for the dedicated server.",
+            "env_variable": "UNIVERSE_SIZE",
+            "default_value": "Normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Small,Normal,Large",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "post-scriptum-aee0c049fa99",
+        "name": "Post Scriptum",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/post-scriptum-aee0c049fa99.json",
+        "sha256": "1d67f60cf4fe298e4d61974ada3cb27972aa52bd3ea0f20f30b62400863cc5b9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "post_scriptum/egg-post-scriptum.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/aee0c049fa99.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:02:57+02:00",
+        "name": "Post Scriptum",
+        "author": "admin@softwarenoob.com",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "PostScriptum/Binaries/Linux/PostScriptumServer Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -RCONPORT={{RCON_PORT}} -RCONPASSWORD={{RCON_PASSWORD}} -fullcrashdump -log",
+        "config": {
+          "files": "{\"PostScriptum/ServerConfig/Server.cfg\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.hostname}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.maxplayers}}\", \"AllowTeamChanges\": \"AllowTeamChanges={{server.build.env.allowteamchange}}\", \"ShouldAdvertise\": \"ShouldAdvertise={{server.build.env.advertise}}\", \"NumReservedSlots\": \"NumReservedSlots={{server.build.env.reservedslots}}\", \"PreventTeamChangeIfUnbalanced\": \"PreventTeamChangeIfUnbalanced={{server.build.env.team_change}}\", \"EnforceTeamBalance\": \"EnforceTeamBalance={{server.build.env.teambalance}}\", \"RecordDemos\": \"RecordDemos={{server.build.env.demo_recording}}\"}}}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Port",
+            "description": "Server Query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10037",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port used for RCON connections",
+            "env_variable": "RCON_PORT",
+            "default_value": "21114",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "Password for RCON connections, leave empty to disable.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^[a-zA-Z0-9]*$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto-update the game each time server is started, enter value 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name that will be displayed in the server browser list",
+            "env_variable": "hostname",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the maximum number of players.",
+            "env_variable": "maxplayers",
+            "default_value": "80",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Team Change",
+            "description": "Allow players to change teams  (true/false)",
+            "env_variable": "allowteamchange",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertise Server",
+            "description": "Display the server in the public server browser list (true/false)",
+            "env_variable": "advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Reserved Slots",
+            "description": "The number of reserved slots",
+            "env_variable": "reservedslots",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Prevent team change",
+            "description": "This will prevent players from changing teams when teams are not balanced (true/false)",
+            "env_variable": "team_change",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Team Balance",
+            "description": "This will force team balance if the teams are uneven, by default 3 player difference. (true/false)",
+            "env_variable": "teambalance",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Record Demos",
+            "description": "This will record demos of the players (true/false)",
+            "env_variable": "demo_recording",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is required, do not touch it",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "746200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:746200",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "post-scriptum-af25bd63ce85",
+        "name": "Post Scriptum",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/post-scriptum-af25bd63ce85.json",
+        "sha256": "620384eb79c6108d36ec40de38d654f8e97bc54441f0a9cea1570da62c5d080e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/post_scriptum/egg-post-scriptum.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/af25bd63ce85.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:02:57+02:00",
+        "name": "Post Scriptum",
+        "author": "admin@softwarenoob.com",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "PostScriptum/Binaries/Linux/PostScriptumServer Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -RCONPORT={{RCON_PORT}} -RCONPASSWORD={{RCON_PASSWORD}} -fullcrashdump -log",
+        "config": {
+          "files": "{\"PostScriptum/ServerConfig/Server.cfg\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.hostname}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.maxplayers}}\", \"AllowTeamChanges\": \"AllowTeamChanges={{server.build.env.allowteamchange}}\", \"ShouldAdvertise\": \"ShouldAdvertise={{server.build.env.advertise}}\", \"NumReservedSlots\": \"NumReservedSlots={{server.build.env.reservedslots}}\", \"PreventTeamChangeIfUnbalanced\": \"PreventTeamChangeIfUnbalanced={{server.build.env.team_change}}\", \"EnforceTeamBalance\": \"EnforceTeamBalance={{server.build.env.teambalance}}\", \"RecordDemos\": \"RecordDemos={{server.build.env.demo_recording}}\"}}}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Port",
+            "description": "Server Query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10037",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port used for RCON connections",
+            "env_variable": "RCON_PORT",
+            "default_value": "21114",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "Password for RCON connections, leave empty to disable.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^[a-zA-Z0-9]*$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto-update the game each time server is started, enter value 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name that will be displayed in the server browser list",
+            "env_variable": "hostname",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the maximum number of players.",
+            "env_variable": "maxplayers",
+            "default_value": "80",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Team Change",
+            "description": "Allow players to change teams  (true/false)",
+            "env_variable": "allowteamchange",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertise Server",
+            "description": "Display the server in the public server browser list (true/false)",
+            "env_variable": "advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Reserved Slots",
+            "description": "The number of reserved slots",
+            "env_variable": "reservedslots",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Prevent team change",
+            "description": "This will prevent players from changing teams when teams are not balanced (true/false)",
+            "env_variable": "team_change",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Team Balance",
+            "description": "This will force team balance if the teams are uneven, by default 3 player difference. (true/false)",
+            "env_variable": "teambalance",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Record Demos",
+            "description": "This will record demos of the players (true/false)",
+            "env_variable": "demo_recording",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is required, do not touch it",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "746200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:746200",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "post-scriptum-cfe64700ae44",
+        "name": "Post Scriptum",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/post-scriptum-cfe64700ae44.json",
+        "sha256": "15da1092c51fb95028ef6b9c0f1314240d1fbac9125d07eb2ed03f767eaabb99",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "post_scriptum/egg-pterodactyl-post-scriptum.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/cfe64700ae44.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:36+00:00",
+        "name": "Post Scriptum",
+        "author": "admin@softwarenoob.com",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "PostScriptum/Binaries/Linux/PostScriptumServer Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -RCONPORT={{RCON_PORT}} -RCONPASSWORD={{RCON_PASSWORD}} -fullcrashdump -log",
+        "config": {
+          "files": "{\"PostScriptum/ServerConfig/Server.cfg\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.hostname}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.maxplayers}}\", \"AllowTeamChanges\": \"AllowTeamChanges={{server.build.env.allowteamchange}}\", \"ShouldAdvertise\": \"ShouldAdvertise={{server.build.env.advertise}}\", \"NumReservedSlots\": \"NumReservedSlots={{server.build.env.reservedslots}}\", \"PreventTeamChangeIfUnbalanced\": \"PreventTeamChangeIfUnbalanced={{server.build.env.team_change}}\", \"EnforceTeamBalance\": \"EnforceTeamBalance={{server.build.env.teambalance}}\", \"RecordDemos\": \"RecordDemos={{server.build.env.demo_recording}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Port",
+            "description": "Server Query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10037",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port used for RCON connections",
+            "env_variable": "RCON_PORT",
+            "default_value": "21114",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "Password for RCON connections, leave empty to disable.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^[a-zA-Z0-9]*$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto-update the game each time server is started, enter value 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name that will be displayed in the server browser list",
+            "env_variable": "hostname",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the maximum number of players.",
+            "env_variable": "maxplayers",
+            "default_value": "80",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Team Change",
+            "description": "Allow players to change teams  (true/false)",
+            "env_variable": "allowteamchange",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertise Server",
+            "description": "Display the server in the public server browser list (true/false)",
+            "env_variable": "advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Reserved Slots",
+            "description": "The number of reserved slots",
+            "env_variable": "reservedslots",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Prevent team change",
+            "description": "This will prevent players from changing teams when teams are not balanced (true/false)",
+            "env_variable": "team_change",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Team Balance",
+            "description": "This will force team balance if the teams are uneven, by default 3 player difference. (true/false)",
+            "env_variable": "teambalance",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Record Demos",
+            "description": "This will record demos of the players (true/false)",
+            "env_variable": "demo_recording",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is required, do not touch it",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "746200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:746200",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "post-scriptum-ef22c827a4dc",
+        "name": "Post Scriptum",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/post-scriptum-ef22c827a4dc.json",
+        "sha256": "d6e91a3381a12a8828e3d72ade792a19d109bd27c9fddf11132f6c3d263f4aab",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "post_scriptum/egg-post-scriptum.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/ef22c827a4dc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Post Scriptum",
+        "author": "admin@softwarenoob.com",
+        "uuid": "42f2d0b2-26ea-4612-8a72-7eca5d151df0",
+        "description": "Post Scriptum is a WW2-themed first-person tactical shooter that provides an authentic WWII combat experience. Focusing on historical accuracy, large-scale battles, and a challenging battlefield demands an intense need for cohesion, communication, and teamwork.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "PostScriptum/Binaries/Linux/PostScriptumServer Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -RCONPORT={{RCON_PORT}} -RCONPASSWORD={{RCON_PASSWORD}} -fullcrashdump -log",
+        "config": {
+          "files": "{\"PostScriptum/ServerConfig/Server.cfg\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.hostname}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.maxplayers}}\", \"AllowTeamChanges\": \"AllowTeamChanges={{server.build.env.allowteamchange}}\", \"ShouldAdvertise\": \"ShouldAdvertise={{server.build.env.advertise}}\", \"NumReservedSlots\": \"NumReservedSlots={{server.build.env.reservedslots}}\", \"PreventTeamChangeIfUnbalanced\": \"PreventTeamChangeIfUnbalanced={{server.build.env.team_change}}\", \"EnforceTeamBalance\": \"EnforceTeamBalance={{server.build.env.teambalance}}\", \"RecordDemos\": \"RecordDemos={{server.build.env.demo_recording}}\"}}}",
+          "startup": "{\"done\": \"Engine Initialization\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Port",
+            "description": "Server Query port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10037",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port used for RCON connections",
+            "env_variable": "RCON_PORT",
+            "default_value": "21114",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "Password for RCON connections, leave empty to disable.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^[a-zA-Z0-9]*$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto-update the game each time server is started, enter value 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name that will be displayed in the server browser list",
+            "env_variable": "hostname",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the maximum number of players.",
+            "env_variable": "maxplayers",
+            "default_value": "80",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Team Change",
+            "description": "Allow players to change teams  (true/false)",
+            "env_variable": "allowteamchange",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Advertise Server",
+            "description": "Display the server in the public server browser list (true/false)",
+            "env_variable": "advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Reserved Slots",
+            "description": "The number of reserved slots",
+            "env_variable": "reservedslots",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:80",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Prevent team change",
+            "description": "This will prevent players from changing teams when teams are not balanced (true/false)",
+            "env_variable": "team_change",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Team Balance",
+            "description": "This will force team balance if the teams are uneven, by default 3 player difference. (true/false)",
+            "env_variable": "teambalance",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Record Demos",
+            "description": "This will record demos of the players (true/false)",
+            "env_variable": "demo_recording",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is required, do not touch it",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "746200",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:746200",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "project-zomboid-215c43fdc497",
+        "name": "Project Zomboid",
+        "description": "Project Zomboid is an open world survival horror video game in alpha stage development by British and Canadian independent developer, The Indie Stone. The game is set in a post apocalyptic, zombie infested world where the player is challenged to survive for as long as possible before inevitably dying.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/project-zomboid-215c43fdc497.json",
+        "sha256": "f30dd5bb15e74a22f8867a61bd8fcc9fa1759d10859f12f2bb6f86e0877bb533",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "project_zomboid/egg-project-zomboid.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/215c43fdc497.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-12T20:12:08+02:00",
+        "name": "Project Zomboid",
+        "author": "iamkubi@gmail.com",
+        "description": "Project Zomboid is an open world survival horror video game in alpha stage development by British and Canadian independent developer, The Indie Stone. The game is set in a post apocalyptic, zombie infested world where the player is challenged to survive for as long as possible before inevitably dying.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export PATH=\"./jre64/bin:$PATH\" ; export LD_LIBRARY_PATH=\"./linux64:./natives:.:./jre64/lib/amd64:${LD_LIBRARY_PATH}\" ; JSIG=\"libjsig.so\" ; LD_PRELOAD=\"${LD_PRELOAD}:${JSIG}\" ./ProjectZomboid64  -port {{SERVER_PORT}} -udpport {{STEAM_PORT}} -cachedir=/home/container/.cache -servername \"{{SERVER_NAME}}\" -adminusername {{ADMIN_USER}} -adminpassword \"{{ADMIN_PASSWORD}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"SERVER STARTED\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\ncd /mnt/server\r\nrm start-server.sh\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The internal server name used for save/ config files.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Username",
+            "description": "Username for the admin account",
+            "env_variable": "ADMIN_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Password for the admin account",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SteamPort",
+            "description": "Sets the UDPPort option",
+            "env_variable": "STEAM_PORT",
+            "default_value": "16262",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "PZ Steam App ID",
+            "description": "PZ Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "380870",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Beta Branch [requires reinstall]",
+            "description": "Beta branch to install, such as b41multiplayer. Leave blank to install normal branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auto Update",
+            "description": "Enable or disable auto-update on startup. 0 to disable and 1 to enable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "project-zomboid-7442b1dd8118",
+        "name": "Project Zomboid",
+        "description": "Project Zomboid is an open world survival horror video game in alpha stage development by British and Canadian independent developer, The Indie Stone. The game is set in a post apocalyptic, zombie infested world where the player is challenged to survive for as long as possible before inevitably dying.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/project-zomboid-7442b1dd8118.json",
+        "sha256": "8df0c2ce38b2c460c4eb7d18e7112b8f141879c89533c9ee586e2dbc7c78e69f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "project_zomboid/egg-project-zomboid.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/7442b1dd8118.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Project Zomboid",
+        "author": "iamkubi@gmail.com",
+        "uuid": "b2c6d19f-3d24-41e3-802d-c2bfbe63b519",
+        "description": "Project Zomboid is an open world survival horror video game in alpha stage development by British and Canadian independent developer, The Indie Stone. The game is set in a post apocalyptic, zombie infested world where the player is challenged to survive for as long as possible before inevitably dying.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export PATH=\"./jre64/bin:$PATH\" ; export LD_LIBRARY_PATH=\"./linux64:./natives:.:./jre64/lib/amd64:${LD_LIBRARY_PATH}\" ; JSIG=\"libjsig.so\" ; LD_PRELOAD=\"${LD_PRELOAD}:${JSIG}\" ./ProjectZomboid64  -port {{SERVER_PORT}} -udpport {{STEAM_PORT}} -cachedir=/home/container/.cache -servername \"{{SERVER_NAME}}\" -adminusername {{ADMIN_USER}} -adminpassword \"{{ADMIN_PASSWORD}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"SERVER STARTED\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\ncd /mnt/server\r\nrm start-server.sh\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Server Name",
+            "description": "The internal server name used for save/ config files.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pelican",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|max:64"
+          },
+          {
+            "sort": 2,
+            "name": "Admin Username",
+            "description": "Username for the admin account",
+            "env_variable": "ADMIN_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": 3,
+            "name": "Admin Password",
+            "description": "Password for the admin account",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32"
+          },
+          {
+            "sort": 4,
+            "name": "SteamPort",
+            "description": "Sets the UDPPort option",
+            "env_variable": "STEAM_PORT",
+            "default_value": "16262",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": 5,
+            "name": "Max Players",
+            "description": "Maximum players to allow",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": 6,
+            "name": "PZ Steam App ID",
+            "description": "PZ Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "380870",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": 7,
+            "name": "Steam Beta Branch [requires reinstall]",
+            "description": "Beta branch to install, such as b41multiplayer. Leave blank to install normal branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64"
+          },
+          {
+            "sort": 8,
+            "name": "Steam Auto Update",
+            "description": "Enable or disable auto-update on startup. 0 to disable and 1 to enable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "project-zomboid-acbdda5e2824",
+        "name": "Project Zomboid",
+        "description": "Project Zomboid is an open world survival horror video game in alpha stage development by British and Canadian independent developer, The Indie Stone. The game is set in a post apocalyptic, zombie infested world where the player is challenged to survive for as long as possible before inevitably dying.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/project-zomboid-acbdda5e2824.json",
+        "sha256": "eedbd45f3976730ba42d591da3af20150fe45427eaeaa707112f260c04780ff7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "project_zomboid/egg-pterodactyl-project-zomboid.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/project_zomboid/egg-project-zomboid.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/acbdda5e2824.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:36+00:00",
+        "name": "Project Zomboid",
+        "author": "iamkubi@gmail.com",
+        "description": "Project Zomboid is an open world survival horror video game in alpha stage development by British and Canadian independent developer, The Indie Stone. The game is set in a post apocalyptic, zombie infested world where the player is challenged to survive for as long as possible before inevitably dying.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export PATH=\"./jre64/bin:$PATH\" ; export LD_LIBRARY_PATH=\"./linux64:./natives:.:./jre64/lib/amd64:${LD_LIBRARY_PATH}\" ; JSIG=\"libjsig.so\" ; LD_PRELOAD=\"${LD_PRELOAD}:${JSIG}\" ./ProjectZomboid64  -port {{SERVER_PORT}} -udpport {{STEAM_PORT}} -cachedir=/home/container/.cache -servername \"{{SERVER_NAME}}\" -adminusername {{ADMIN_USER}} -adminpassword \"{{ADMIN_PASSWORD}}\"",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"SERVER STARTED\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\ncd /mnt/server\r\nrm start-server.sh\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The internal server name used for save/ config files.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Username",
+            "description": "Username for the admin account",
+            "env_variable": "ADMIN_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Password for the admin account",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SteamPort",
+            "description": "Sets the UDPPort option",
+            "env_variable": "STEAM_PORT",
+            "default_value": "16262",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum players to allow",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "PZ Steam App ID",
+            "description": "PZ Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "380870",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Beta Branch [requires reinstall]",
+            "description": "Beta branch to install, such as b41multiplayer. Leave blank to install normal branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auto Update",
+            "description": "Enable or disable auto-update on startup. 0 to disable and 1 to enable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "puck-70b69080306e",
+        "name": "Puck",
+        "description": "Hop on your skates and jump into a physics based hockey game. No rules, no timeouts, just get the puck in the goal. May the best team win!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/puck-70b69080306e.json",
+        "sha256": "ba4e59c326a2f3403044205a6630184f31dced1b75a7c83880a06a95771374a3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "puck/egg-puck.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/70b69080306e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-05T12:44:17+10:00",
+        "name": "Puck",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Hop on your skates and jump into a physics based hockey game. No rules, no timeouts, just get the puck in the goal. May the best team win!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Puck.x86_64",
+        "config": {
+          "files": "{\"server_configuration.json\": {\"parser\": \"json\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"pingPort\": \"{{server.build.env.QUERY_PORT}}\", \"maxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"password\": \"{{server.build.env.SRV_PASSWORD}}\", \"kickTimeout\": \"{{server.build.env.KICK_TIMEOUT}}\", \"targetFrameRate\": \"{{server.build.env.FRAME_RATE}}\", \"serverTickRate\": \"{{server.build.env.SERVER_TICK_RATE}}\", \"clientTickRate\": \"{{server.build.env.CLIENT_TICK_RATE}}\"}}}",
+          "startup": "{\"done\": [\"Server authenticated\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## CUSTOM\r\n## Create default config\r\nprintf \"{\\r\\n  \\\"port\\\": 7777,\\r\\n  \\\"pingPort\\\": 7778,\\r\\n  \\\"name\\\": \\\"Pterodactyl Puck Server\\\",\\r\\n  \\\"maxPlayers\\\": 10,\\r\\n  \\\"password\\\": \\\"\\\",\\r\\n  \\\"voip\\\": false,\\r\\n  \\\"isPublic\\\": true,\\r\\n  \\\"adminSteamIds\\\": [],\\r\\n  \\\"reloadBannedSteamIds\\\": false,\\r\\n  \\\"usePuckBannedSteamIds\\\": true,\\r\\n  \\\"printMetrics\\\": true,\\r\\n  \\\"kickTimeout\\\": 300,\\r\\n  \\\"sleepTimeout\\\": 60,\\r\\n  \\\"joinMidMatchDelay\\\": 10,\\r\\n  \\\"targetFrameRate\\\": 120,\\r\\n  \\\"serverTickRate\\\": 100,\\r\\n  \\\"clientTickRate\\\": 200,\\r\\n  \\\"startPaused\\\": false,\\r\\n  \\\"allowVoting\\\": true,\\r\\n  \\\"phaseDurationMap\\\": {\\r\\n    \\\"Warmup\\\": 600,\\r\\n    \\\"FaceOff\\\": 3,\\r\\n    \\\"Playing\\\": 300,\\r\\n    \\\"BlueScore\\\": 5,\\r\\n    \\\"RedScore\\\": 5,\\r\\n    \\\"Replay\\\": 10,\\r\\n    \\\"PeriodOver\\\": 15,\\r\\n    \\\"GameOver\\\": 15\\r\\n  },\\r\\n  \\\"mods\\\": [\\r\\n    {\\r\\n      \\\"id\\\": 3493628417,\\r\\n      \\\"enabled\\\": false,\\r\\n      \\\"clientRequired\\\": false\\r\\n    }\\r\\n  ]\\r\\n}\\r\\n\" > /mnt/server/server_configuration.json\r\n\r\n## End of installation\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"\r\necho -e \"${GREEN}Installation completed...${NC}\"\r\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query Port of the server, Additional Allocation required.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7778",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] Steam App ID",
+            "description": "Steam App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3481440",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3481440",
+            "field_type": "text"
+          },
+          {
+            "name": "[SYSTEM] Auto Update",
+            "description": "Auto Update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "The password required to join the server.",
+            "env_variable": "SRV_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Kick Timeout",
+            "description": "Time before player is kicked for AFK",
+            "env_variable": "KICK_TIMEOUT",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|",
+            "field_type": "text"
+          },
+          {
+            "name": "Target Framerate",
+            "description": "Framerate of server, Should be 10-20 Above Tick Rate!",
+            "env_variable": "FRAME_RATE",
+            "default_value": "120",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:380",
+            "field_type": "text"
+          },
+          {
+            "name": "Target Tick rate",
+            "description": "Tick rate of Server",
+            "env_variable": "SERVER_TICK_RATE",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:360",
+            "field_type": "text"
+          },
+          {
+            "name": "Client Tick Rate",
+            "description": "This value should be at least double the servers tick rate, but too high may cause instabilities in some clients. Do not go above 360 even if double the Server Tick is above. Unless you understand what you are doing.",
+            "env_variable": "CLIENT_TICK_RATE",
+            "default_value": "360",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:720",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "puck-e9d7a25ee313",
+        "name": "Puck",
+        "description": "Fast-paced physics-based hockey simulation where precision, strategy, and chaos collide. Control every move, pass, and shot with realistic puck physics, dynamic player movement, and thrilling gameplay. Master the rink with friends or team up with other Puck players for ultimate hockey dominance!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/puck-e9d7a25ee313.json",
+        "sha256": "28d903caa62298200b1b7858a6803b51e1eebbe20789eb79e9a0e9530e0f5ea9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "puck/egg-puck.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e9d7a25ee313.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Puck",
+        "author": "pelican@stather.me",
+        "uuid": "7bdd6305-dbb9-49ee-b71d-8f424ae130cb",
+        "description": "Fast-paced physics-based hockey simulation where precision, strategy, and chaos collide. Control every move, pass, and shot with realistic puck physics, dynamic player movement, and thrilling gameplay. Master the rink with friends or team up with other Puck players for ultimate hockey dominance!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Puck.x86_64",
+        "config": {
+          "files": "{\"server_configuration.json\": {\"parser\": \"json\", \"find\": {\"name\": \"{{server.environment.SERVER_NAME}}\", \"password\": \"{{server.environment.SERVER_PASSWORD}}\", \"maxPlayers\": \"{{server.environment.MAX_PLAYERS}}\", \"port\": \"{{server.allocations.default.port}}\", \"pingPort\": \"{{server.environment.PING_PORT}}\"}}}",
+          "startup": "{\"done\": \"UDP socket started on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\ncd /mnt/server/\r\necho '\r\n{\r\n    \"port\":7777,\r\n    \"pingPort\":7778,\r\n    \"name\":\"Puck Dedicated Server\",\r\n    \"maxPlayers\":12,\r\n    \"password\":\"\",\r\n    \"voip\":false,\r\n    \"isPublic\":true,\r\n    \"adminSteamIds\":[],\r\n    \"reloadBannedSteamIds\":false,\r\n    \"usePuckBannedSteamIds\":true,\r\n    \"printMetrics\":true,\r\n    \"kickTimeout\":300,\r\n    \"targetFrameRate\":120,\r\n    \"tickRate\":100,\r\n    \"phaseDurationMap\":\r\n    {\r\n        \"Warmup\":600,\r\n        \"FaceOff\":3,\r\n        \"Playing\":300,\r\n        \"BlueScore\":5,\r\n        \"RedScore\":5,\r\n        \"Replay\":10,\r\n        \"PeriodOver\":15,\r\n        \"GameOver\":15\r\n    }\r\n}\r\n' > server_configuration.json",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "AppID",
+            "description": "Required for auto update, don't change this",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3481440",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": 5
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed to connect to the server",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer|required",
+            "sort": 3
+          },
+          {
+            "name": "Ping Port",
+            "description": "The port on which the server is queried in the server browser.",
+            "env_variable": "PING_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": 4
+          },
+          {
+            "name": "Server Name",
+            "description": "The server name in the server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Puck Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|required",
+            "sort": 1
+          },
+          {
+            "name": "Server Password",
+            "description": "Password required to join the server. Leave blank to have no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "sort": 2
+          }
+        ]
+      }
+    }
+  ]
+}

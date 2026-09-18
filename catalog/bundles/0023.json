@@ -1,0 +1,1894 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "archean-50f84f11b779",
+        "name": "Archean",
+        "description": "Archean invites you to unleash your creativity alone or with friends in a creative sandbox mode.Design and build vehicles, bases, rockets, space stations and much more using customizable modular blocks.Create unique configurations using components, program their behavior and explore an environment free of constraints.\\nTest your builds, refine your designs and defy the laws of physics.Archean is a game in development focused on engineering and build.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/archean-50f84f11b779.json",
+        "sha256": "3c91ad428812d1c67c6ad77be49d506e40b1d383d01ed1440dc00d7576dfa7ad",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "archean/egg-archean.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/50f84f11b779.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-02T08:25:16+00:00",
+        "name": "Archean",
+        "author": "tueem@tomatentum.net",
+        "uuid": "01555bd3-155f-4ab6-b63d-c8bed0a3585f",
+        "description": "Archean invites you to unleash your creativity alone or with friends in a creative sandbox mode.Design and build vehicles, bases, rockets, space stations and much more using customizable modular blocks.Create unique configurations using components, program their behavior and explore an environment free of constraints.\\nTest your builds, refine your designs and defy the laws of physics.Archean is a game in development focused on engineering and build.",
+        "features": [],
+        "docker_images": {
+          "Ubuntu": "ghcr.io/pelican-eggs/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "echo \"$ADMINS\" > \"archean-data/server/admins.txt\"; cd /home/container/archean-server/; ./Archean server",
+        "config": {
+          "files": "{\"archean-data/server/server.ini\": {\"parser\": \"ini\", \"find\": {\"server.server_public_name\": \"{{server.environment.SERVER_NAME}}\", \"server.game_mode\": \"{{server.environment.GAME_MODE}}\", \"server.server_online\": \"{{server.environment.ONLINE_MODE}}\", \"server.max_simultaneous_players\": \"{{server.environment.MAX_PLAYERS}}\", \"server.password\": \"{{server.environment.PASSWORD}}\", \"networking.listen_port\": \"{{server.allocations.default.port}}\", \"game.spawn\": \"{{server.environment.SPAWN_PLANET}}\", \"game.world\": \"{{server.environment.WORLD_NAME}}\", \"game.auto_save_interval_seconds\": \"{{server.environment.AUTOSAVE_INTERVAL}}\", \"game.updates_per_second\": \"{{server.environment.UPDATES_PER_SECOND}}\", \"game.physics_steps_per_update\": \"{{server.environment.PHYSICS_UPDATES_PER_UPDATE}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\ncd /mnt/server\n\n## add git ending if it's not on the address\nif [[ ${GIT_ADDRESS} != *.git ]]; then\n    GIT_ADDRESS=${GIT_ADDRESS}.git\nfi\n\n## pull git bot repo with update functionality\nif [ \"$(ls -A /mnt/server/archean-server)\" ]; then\n    echo -e \"/mnt/server/archean-server directory is not empty.\"\n    cd archean-server/\n    if [ -d .git ]; then\n        echo -e \".git directory exists\"\n        if [ -f .git/config ]; then\n            echo -e \"loading info from git config\"\n            ORIGIN=$(git config --get remote.origin.url)\n        else\n            echo -e \"files found with no git config\"\n            echo -e \"closing out without touching things to not break anything\"\n            exit 10\n        fi\n    fi\n\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\n        echo \"pulling latest from github\"\n        git pull\n    fi\nelse\n    echo -e \"/mnt/server/archean-server is empty.\\ncloning files into repo\"\n    if [ -z ${BRANCH} ]; then\n        echo -e \"cloning default branch\"\n        git clone --single-branch ${GIT_ADDRESS} archean-server/\n    else\n        echo -e \"cloning ${BRANCH}'\"\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} archean-server/\n    fi\nfi\n\ncurl -o \"archean-data/server/server.ini\" --create-dirs https://raw.githubusercontent.com/pelican-eggs/games-standalone/refs/heads/main/archean/server.ini\n\necho ******************************************\necho Installation Completed\necho ******************************************",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Server Name",
+            "description": "The servers name that is, among others, displayed on the public server page.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string"
+          },
+          {
+            "sort": 2,
+            "name": "Game Mode",
+            "description": "Changes the servers game mode between adventure and creative.\n0 = creative\n1 = adventure",
+            "env_variable": "GAME_MODE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1"
+          },
+          {
+            "sort": 3,
+            "name": "Online Mode",
+            "description": "Whether the server is publicly discoverable or not.",
+            "env_variable": "ONLINE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean"
+          },
+          {
+            "sort": 4,
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join the server at one time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer"
+          },
+          {
+            "sort": 5,
+            "name": "Password",
+            "description": "The Password players need to enter to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable"
+          },
+          {
+            "sort": 6,
+            "name": "Spawn Planet",
+            "description": "The Planet players will initially spawn on.",
+            "env_variable": "SPAWN_PLANET",
+            "default_value": "earth",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:earth,moon"
+          },
+          {
+            "sort": 7,
+            "name": "Autosave Interval",
+            "description": "Time between automatic server saves",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer"
+          },
+          {
+            "sort": 10,
+            "name": "[ADVANCED] Updates per Second",
+            "description": "This setting should only be changed by advanced users.\nChanges the amount of times the server updates per second.",
+            "env_variable": "UPDATES_PER_SECOND",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer"
+          },
+          {
+            "sort": 11,
+            "name": "[ADVANCED] Physics steps per update",
+            "description": "This setting should only be changed by advanced users.\nChanges the amount of times the physics get calculated per game update.",
+            "env_variable": "PHYSICS_UPDATES_PER_UPDATE",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer"
+          },
+          {
+            "sort": 9,
+            "name": "Admins",
+            "description": "A line-seperated list of steamids from users that should get admin privileges.\nVisit https://steamid.io to get a steamid.",
+            "env_variable": "ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable"
+          },
+          {
+            "sort": 8,
+            "name": "World name",
+            "description": "The name of the world directory to use.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable"
+          },
+          {
+            "sort": 12,
+            "name": "Git Address",
+            "description": "",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "https://github.com/batcholi/Archean_game_linux.git",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string"
+          },
+          {
+            "sort": 13,
+            "name": "Branch",
+            "description": "",
+            "env_variable": "BRANCH",
+            "default_value": "alpha",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string|required"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "archean-6b1b89621b77",
+        "name": "Archean",
+        "description": "Archean invites you to unleash your creativity alone or with friends in a creative sandbox mode. Design and build vehicles, bases, rockets, space stations and much more using customizable modular blocks. Create unique configurations using components, program their behavior and explore an environment free of constraints.Test your builds, refine your designs and defy the laws of physics. Archean is a game in development focused on engineering and build.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/archean-6b1b89621b77.json",
+        "sha256": "cfe7cd243a0bb4712186c9ec21cd8f806b4f0e2a5baebd4f40eee75cf76d69ae",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "Archean/egg-archean.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/6b1b89621b77.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-05-27T09:12:18+00:00",
+        "name": "Archean",
+        "author": "willinghamnottell@gmail.com",
+        "description": "Archean invites you to unleash your creativity alone or with friends in a creative sandbox mode. Design and build vehicles, bases, rockets, space stations and much more using customizable modular blocks. Create unique configurations using components, program their behavior and explore an environment free of constraints.Test your builds, refine your designs and defy the laws of physics. Archean is a game in development focused on engineering and build.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:ubuntu": "ghcr.io/ptero-eggs/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "cd /home/container/Archean-game; ./Archean_server",
+        "config": {
+          "files": "{\"Archean-data/server/server.ini\": {\"parser\": \"ini\", \"find\": {\"server.server_public_name\": \"{{env.SERVER_NAME}}\", \"server.game_mode\": \"{{env.GAME_MODE}}\", \"server.server_online\": \"{{env.ONLINE_MODE}}\", \"server.max_simultaneous_players\": \"{{env.MAX_PLAYERS}}\", \"server.password\": \"{{env.PASSWORD}}\", \"server.accept_remote_connections\": \"yes\", \"networking.listen_port\": \"{{server.build.default.port}}\", \"game.spawn\": \"{{env.SPAWN_PLANET}}\", \"game.world\": \"{{env.WORLD_NAME}}\", \"game.auto_save_interval_seconds\": \"{{env.AUTOSAVE_INTERVAL}}\", \"game.updates_per_second\": \"{{env.UPDATES_PER_SECOND}}\", \"game.physics_steps_per_update\": \"{{env.PHYSICS_UPDATES_PER_UPDATE}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join the server at one time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "The Password players need to enter to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The servers name that is, among others, displayed on the public server page.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|required",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Changes the servers game mode between adventure and creative.\r\nOFF = creative\r\nON = adventure",
+            "env_variable": "GAME_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Online Mode",
+            "description": "Whether the server is publicly discoverable or not.",
+            "env_variable": "ONLINE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Spawn Planet",
+            "description": "The Planet players will initially spawn on.",
+            "env_variable": "SPAWN_PLANET",
+            "default_value": "earth",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:earth,moon",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "Time between automatic server saves",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "[ADVANCED] Updates per Second",
+            "description": "This setting should only be changed by advanced users.\nChanges the amount of times the server updates per second.",
+            "env_variable": "UPDATES_PER_SECOND",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "[ADVANCED] Physics steps per update",
+            "description": "This setting should only be changed by advanced users.\nChanges the amount of times the physics get calculated per game update.",
+            "env_variable": "PHYSICS_UPDATES_PER_UPDATE",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World name",
+            "description": "The name of the world directory to use.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "AppID",
+            "description": "SteamCMD App ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3557220",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "This is to auto update the server on start.\r\n\r\nOptions are 0 or 1\r\nDefault is 1",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "archean-6db7f6f8eccd",
+        "name": "Archean",
+        "description": "Archean invites you to unleash your creativity alone or with friends in a creative sandbox mode.Design and build vehicles, bases, rockets, space stations and much more using customizable modular blocks.Create unique configurations using components, program their behavior and explore an environment free of constraints.\\nTest your builds, refine your designs and defy the laws of physics.Archean is a game in development focused on engineering and build.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/archean-6db7f6f8eccd.json",
+        "sha256": "e290a7f0d3882fff59fd02f46f3e904a8759402009a5c8fa208d83deb5d24fa8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "archean/egg-pterodactyl-archean.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/6db7f6f8eccd.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-19T20:25:53+00:00",
+        "name": "Archean",
+        "author": "tueem@tomatentum.net",
+        "description": "Archean invites you to unleash your creativity alone or with friends in a creative sandbox mode.Design and build vehicles, bases, rockets, space stations and much more using customizable modular blocks.Create unique configurations using components, program their behavior and explore an environment free of constraints.\\nTest your builds, refine your designs and defy the laws of physics.Archean is a game in development focused on engineering and build.",
+        "features": [],
+        "docker_images": {
+          "Ubuntu": "ghcr.io/pelican-eggs/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "echo \"$ADMINS\" > \"archean-data/server/admins.txt\"; cd /home/container/archean-server/; ./Archean server",
+        "config": {
+          "files": "{\"archean-data/server/server.ini\": {\"parser\": \"ini\", \"find\": {\"server.server_public_name\": \"{{env.SERVER_NAME}}\", \"server.game_mode\": \"{{env.GAME_MODE}}\", \"server.server_online\": \"{{env.ONLINE_MODE}}\", \"server.max_simultaneous_players\": \"{{env.MAX_PLAYERS}}\", \"server.password\": \"{{env.PASSWORD}}\", \"networking.listen_port\": \"{{server.build.default.port}}\", \"game.spawn\": \"{{env.SPAWN_PLANET}}\", \"game.world\": \"{{env.WORLD_NAME}}\", \"game.auto_save_interval_seconds\": \"{{env.AUTOSAVE_INTERVAL}}\", \"game.updates_per_second\": \"{{env.UPDATES_PER_SECOND}}\", \"game.physics_steps_per_update\": \"{{env.PHYSICS_UPDATES_PER_UPDATE}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\ncd /mnt/server\n\n## add git ending if it's not on the address\nif [[ ${GIT_ADDRESS} != *.git ]]; then\n    GIT_ADDRESS=${GIT_ADDRESS}.git\nfi\n\n## pull git bot repo with update functionality\nif [ \"$(ls -A /mnt/server/archean-server)\" ]; then\n    echo -e \"/mnt/server/archean-server directory is not empty.\"\n    cd archean-server/\n    if [ -d .git ]; then\n        echo -e \".git directory exists\"\n        if [ -f .git/config ]; then\n            echo -e \"loading info from git config\"\n            ORIGIN=$(git config --get remote.origin.url)\n        else\n            echo -e \"files found with no git config\"\n            echo -e \"closing out without touching things to not break anything\"\n            exit 10\n        fi\n    fi\n\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\n        echo \"pulling latest from github\"\n        git pull\n    fi\nelse\n    echo -e \"/mnt/server/archean-server is empty.\\ncloning files into repo\"\n    if [ -z ${BRANCH} ]; then\n        echo -e \"cloning default branch\"\n        git clone --single-branch ${GIT_ADDRESS} archean-server/\n    else\n        echo -e \"cloning ${BRANCH}'\"\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} archean-server/\n    fi\nfi\n\ncurl -o \"archean-data/server/server.ini\" --create-dirs https://raw.githubusercontent.com/pelican-eggs/games-standalone/refs/heads/main/archean/server.ini\n\necho ******************************************\necho Installation Completed\necho ******************************************",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The servers name that is, among others, displayed on the public server page.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|required",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Mode",
+            "description": "Changes the servers game mode between adventure and creative.\n0 = creative\n1 = adventure",
+            "env_variable": "GAME_MODE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Online Mode",
+            "description": "Whether the server is publicly discoverable or not.",
+            "env_variable": "ONLINE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join the server at one time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "The Password players need to enter to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Spawn Planet",
+            "description": "The Planet players will initially spawn on.",
+            "env_variable": "SPAWN_PLANET",
+            "default_value": "earth",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:earth,moon",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "Time between automatic server saves",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "[ADVANCED] Updates per Second",
+            "description": "This setting should only be changed by advanced users.\nChanges the amount of times the server updates per second.",
+            "env_variable": "UPDATES_PER_SECOND",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "[ADVANCED] Physics steps per update",
+            "description": "This setting should only be changed by advanced users.\nChanges the amount of times the physics get calculated per game update.",
+            "env_variable": "PHYSICS_UPDATES_PER_UPDATE",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Admins",
+            "description": "A line-seperated list of steamids from users that should get admin privileges.\nVisit https://steamid.io to get a steamid.",
+            "env_variable": "ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "World name",
+            "description": "The name of the world directory to use.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Address",
+            "description": "",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "https://github.com/batcholi/Archean_game_linux.git",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string|required",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "",
+            "env_variable": "BRANCH",
+            "default_value": "alpha",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string|required",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ark-survival-ascended-1e2216f871fa",
+        "name": "ARK: Survival Ascended",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ark-survival-ascended-1e2216f871fa.json",
+        "sha256": "d8e5bc1f526da86d3cc1b9b42c04cbae3dbfd829076f6c86a5dff8f034a2b027",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "ark_survival_ascended/egg-pterodactyl-a-r-k--survival-ascended.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/1e2216f871fa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-17T07:20:00+00:00",
+        "name": "ARK: Survival Ascended",
+        "author": "blood@darkartsgaming.com",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rmv() { echo \"stopping server\"; rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} KeepAlive && rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} DoExit && wait ${ARK_PID}; echo \"Server Closed\"; exit; }; trap rmv 15 2; proton run ./ShooterGame/Binaries/Win64/ArkAscendedServer.exe {{SERVER_MAP}}?listen?MaxPlayers={{MAX_PLAYERS}}?SessionName=\\\"{{SESSION_NAME}}\\\"?Port={{SERVER_PORT}}?RCONPort={{RCON_PORT}}?RCONEnabled=True$( [  \"$SERVER_PVE\" == \"0\" ] || printf %s '?ServerPVE=True' )?ServerPassword=\"{{SERVER_PASSWORD}}\"{{ARGS_PARAMS}}?ServerAdminPassword=\"{{ARK_ADMIN_PASSWORD}}\" -WinLiveMaxPlayers={{MAX_PLAYERS}} -oldconsole -servergamelog $( [ -z \"$MOD_IDS\" ] || printf %s ' -mods=' $MOD_IDS )$( [ \"$BATTLE_EYE\" == \"1\" ] || printf %s ' -NoBattlEye' ) -Port={{SERVER_PORT}} {{ARGS_FLAGS}} & ARK_PID=$! ; tail -c0 -F ./ShooterGame/Saved/Logs/ShooterGame.log --pid=$ARK_PID & until echo \"waiting for rcon connection...\"; (rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD})<&0 & wait $!; do sleep 5; done",
+        "config": {
+          "files": "{\"ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers=\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerAdminPassword=\": \"ServerAdminPassword={{server.build.env.ARK_ADMIN_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Waiting commands for 127.0.0.1:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## cleanup movies?\r\nrm -rf /mnt/server/ShooterGame/Content/Movies\r\n\r\n## touch log file\r\nmkdir -p /mnt/server/ShooterGame/Saved/Logs\r\necho \"--fresh install--\" >> /mnt/server/ShooterGame/Saved/Logs/ShooterGame.log\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Additional Arguments (FLAGS)",
+            "description": "flags (-UseBattleEye) are supported here without them touching. (i.e): -crossplay -mods=1234,1235,1236",
+            "env_variable": "ARGS_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments (PARAMS)",
+            "description": "params (?ServerPassword=...) are supported here but params need to be touching. (i.e): ?ServerPassword=MyP4SsWoRd?ServerAdminPassword=sUpRp4ssW0rd",
+            "env_variable": "ARGS_PARAMS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2430930",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2430930",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers on restart/re-install.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Battle Eye",
+            "description": "Enable BattleEye / Anti-Cheat",
+            "env_variable": "BATTLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "MOD IDs",
+            "description": "https://www.curseforge.com/ark-survival-ascended ; ProjectID is is the MOD_ID on the right-side of the mod-view page ; leave blank to disable mods ; separate only by comma ( , ) without spaces! (i.e.) 1234,1235,1236",
+            "env_variable": "MOD_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "70",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "required for console commands and proper server shutdown (saveworld/exit), doesn't have to be open to the public",
+            "env_variable": "RCON_PORT",
+            "default_value": "37015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:1025|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin Password",
+            "description": "Used for RCON (remote and in-browser console) as well as in-game EnableCheats",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Map",
+            "description": "Available Maps: TheIsland_WP",
+            "env_variable": "SERVER_MAP",
+            "default_value": "TheIsland_WP",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "\"Unofficial\" dedicated server name",
+            "env_variable": "SESSION_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server PvE",
+            "description": "ON = Player-vs-Environment (PvE), OFF = Player-vs-Player (PvP); Default is ON",
+            "env_variable": "SERVER_PVE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ark-survival-ascended-568d35edb4b5",
+        "name": "ARK: Survival Ascended",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ark-survival-ascended-568d35edb4b5.json",
+        "sha256": "f6790226f6b4e93d78a1993642a8c19584447b8d24b7e4ccc2fbe4e198d00473",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/ark_survival_ascended/egg-ark--survival-ascended.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/568d35edb4b5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-12T11:57:56+01:00",
+        "name": "ARK: Survival Ascended",
+        "author": "blood@darkartsgaming.com",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rmv() { echo \"stopping server\"; rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} KeepAlive && rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} DoExit && wait ${ARK_PID}; echo \"Server Closed\"; exit; }; trap rmv 15 2; proton run ./ShooterGame/Binaries/Win64/ArkAscendedServer.exe {{SERVER_MAP}}?listen?MaxPlayers={{MAX_PLAYERS}}?SessionName=\\\"{{SESSION_NAME}}\\\"?Port={{SERVER_PORT}}?QueryPort={{QUERY_PORT}}?RCONPort={{RCON_PORT}}?RCONEnabled=True$( [  \"$SERVER_PVE\" == \"0\" ] || printf %s '?ServerPVE=True' )?ServerPassword=\"{{SERVER_PASSWORD}}\"{{ARGS_PARAMS}}?ServerAdminPassword=\"{{ARK_ADMIN_PASSWORD}}\" -WinLiveMaxPlayers={{MAX_PLAYERS}} -oldconsole -servergamelog$( [ -z \"$MOD_IDS\" ] || printf %s ' -mods=' $MOD_IDS )$( [ \"$BATTLE_EYE\" == \"1\" ] || printf %s ' -NoBattlEye' ) -Port={{SERVER_PORT}} {{ARGS_FLAGS}} & ARK_PID=$! ; tail -c0 -F ./ShooterGame/Saved/Logs/ShooterGame.log --pid=$ARK_PID & until echo \"waiting for rcon connection...\"; (rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD})<&0 & wait $!; do sleep 5; done",
+        "config": {
+          "files": "{\"ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers=\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerAdminPassword=\": \"ServerAdminPassword={{server.build.env.ARK_ADMIN_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Waiting commands for 127.0.0.1:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## cleanup movies?\r\nrm -rf /mnt/server/ShooterGame/Content/Movies\r\n\r\n## touch log file\r\nmkdir -p /mnt/server/ShooterGame/Saved/Logs\r\necho \"--fresh install--\" >> /mnt/server/ShooterGame/Saved/Logs/ShooterGame.log\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Map",
+            "description": "Available Maps: TheIsland_WP",
+            "env_variable": "SERVER_MAP",
+            "default_value": "TheIsland_WP",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "\"Unofficial\" dedicated server name",
+            "env_variable": "SESSION_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers on restart/re-install.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Battle Eye",
+            "description": "Enable BattleEye / Anti-Cheat",
+            "env_variable": "BATTLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2430930",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2430930",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments (PARAMS)",
+            "description": "params (?ServerPassword=...) are supported here but params need to be touching. (i.e): ?ServerPassword=MyP4SsWoRd?ServerAdminPassword=sUpRp4ssW0rd",
+            "env_variable": "ARGS_PARAMS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "70",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin Password",
+            "description": "Used for RCON (remote and in-browser console) as well as in-game EnableCheats",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "ARK query port used by steam server browser and ark client server browser.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:1025|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments (FLAGS)",
+            "description": "flags (-UseBattleEye) are supported here without them touching. (i.e): -crossplay -mods=1234,1235,1236",
+            "env_variable": "ARGS_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "Server PvE",
+            "description": "ON = Player-vs-Environment (PvE), OFF = Player-vs-Player (PvP); Default is ON",
+            "env_variable": "SERVER_PVE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "required for console commands and proper server shutdown (saveworld/exit), doesn't have to be open to the public",
+            "env_variable": "RCON_PORT",
+            "default_value": "37015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:1025|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "MOD IDs",
+            "description": "https://www.curseforge.com/ark-survival-ascended ; ProjectID is is the MOD_ID on the right-side of the mod-view page ; leave blank to disable mods ; separate only by comma ( , ) without spaces! (i.e.) 1234,1235,1236",
+            "env_variable": "MOD_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ark-survival-ascended-acd0c378c246",
+        "name": "ARK: Survival Ascended",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ark-survival-ascended-acd0c378c246.json",
+        "sha256": "aa7f95d68daccf3e323e3cfeeaa6ffc12ece4e64f257a26b3f36539dfc6b8ca5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "ark_survival_ascended/egg-a-r-k--survival-ascended.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/acd0c378c246.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "ARK: Survival Ascended",
+        "author": "blood@darkartsgaming.com",
+        "uuid": "e9a600eb-3f06-44bf-bcbc-47fe70fa774e",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rmv() { echo \"stopping server\"; rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} KeepAlive && rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} DoExit && wait ${ARK_PID}; echo \"Server Closed\"; exit; }; trap rmv 15 2; proton run ./ShooterGame/Binaries/Win64/ArkAscendedServer.exe {{SERVER_MAP}}?listen?MaxPlayers={{MAX_PLAYERS}}?SessionName=\\\"{{SESSION_NAME}}\\\"?Port={{SERVER_PORT}}?RCONPort={{RCON_PORT}}?RCONEnabled=True$( [  \"$SERVER_PVE\" == \"0\" ] || printf %s '?ServerPVE=True' )?ServerPassword=\"{{SERVER_PASSWORD}}\"{{ARGS_PARAMS}}?ServerAdminPassword=\"{{ARK_ADMIN_PASSWORD}}\" -WinLiveMaxPlayers={{MAX_PLAYERS}} -oldconsole -servergamelog $( [ -z \"$MOD_IDS\" ] || printf %s ' -mods=' $MOD_IDS )$( [ \"$BATTLE_EYE\" == \"1\" ] || printf %s ' -NoBattlEye' ) -Port={{SERVER_PORT}} {{ARGS_FLAGS}} & ARK_PID=$! ; tail -c0 -F ./ShooterGame/Saved/Logs/ShooterGame.log --pid=$ARK_PID & until echo \"waiting for rcon connection...\"; (rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD})<&0 & wait $!; do sleep 5; done",
+        "config": {
+          "files": "{\"ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers=\": \"MaxPlayers={{server.environment.MAX_PLAYERS}}\", \"ServerAdminPassword=\": \"ServerAdminPassword={{server.environment.ARK_ADMIN_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Waiting commands for 127.0.0.1:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## cleanup movies?\r\nrm -rf /mnt/server/ShooterGame/Content/Movies\r\n\r\n## touch log file\r\nmkdir -p /mnt/server/ShooterGame/Saved/Logs\r\necho \"--fresh install--\" >> /mnt/server/ShooterGame/Saved/Logs/ShooterGame.log\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Additional Arguments (FLAGS)",
+            "description": "flags (-UseBattleEye) are supported here without them touching. (i.e): -crossplay -mods=1234,1235,1236",
+            "env_variable": "ARGS_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "sort": 9
+          },
+          {
+            "name": "Additional Arguments (PARAMS)",
+            "description": "params (?ServerPassword=...) are supported here but params need to be touching. (i.e): ?ServerPassword=MyP4SsWoRd?ServerAdminPassword=sUpRp4ssW0rd",
+            "env_variable": "ARGS_PARAMS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "sort": 6
+          },
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2430930",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2430930",
+            "sort": 5
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers on restart/re-install.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 3
+          },
+          {
+            "name": "Battle Eye",
+            "description": "Enable BattleEye / Anti-Cheat",
+            "env_variable": "BATTLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 4
+          },
+          {
+            "name": "MOD IDs",
+            "description": "https://www.curseforge.com/ark-survival-ascended ; ProjectID is is the MOD_ID on the right-side of the mod-view page ; leave blank to disable mods ; separate only by comma ( , ) without spaces! (i.e.) 1234,1235,1236",
+            "env_variable": "MOD_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "sort": 13
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "70",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:200",
+            "sort": 7
+          },
+          {
+            "name": "RCON Port",
+            "description": "required for console commands and proper server shutdown (saveworld/exit), doesn't have to be open to the public",
+            "env_variable": "RCON_PORT",
+            "default_value": "37015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:1025|max:65535",
+            "sort": 12
+          },
+          {
+            "name": "Server Admin Password",
+            "description": "Used for RCON (remote and in-browser console) as well as in-game EnableCheats",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:128",
+            "sort": 8
+          },
+          {
+            "name": "Server Map",
+            "description": "Available Maps: TheIsland_WP",
+            "env_variable": "SERVER_MAP",
+            "default_value": "TheIsland_WP",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 1
+          },
+          {
+            "name": "Server Name",
+            "description": "\"Unofficial\" dedicated server name",
+            "env_variable": "SESSION_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:256",
+            "sort": 2
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "sort": 11
+          },
+          {
+            "name": "Server PvE",
+            "description": "ON = Player-vs-Environment (PvE), OFF = Player-vs-Player (PvP); Default is ON",
+            "env_variable": "SERVER_PVE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": 10
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ark-survival-ascended-baa87de370d5",
+        "name": "ARK: Survival Ascended",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ark-survival-ascended-baa87de370d5.json",
+        "sha256": "30752fff2d4097eaf78d55ea2ffe295fb94b4af3e835dff80b518e82082e35b7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "ark_survival_ascended/egg-ark-survival-ascended.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/baa87de370d5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-19T11:42:05+02:00",
+        "name": "ARK: Survival Ascended",
+        "author": "blood@darkartsgaming.com",
+        "description": "ARK is reimagined from the ground-up into the next-generation of video game technology with Unreal Engine 5! Form a tribe, tame & breed hundreds of unique dinosaurs and primeval creatures, explore, craft, build, and fight your way to the top of the food-chain. Your new world awaits!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "rmv() { echo \"stopping server\"; rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} KeepAlive && rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} DoExit && wait ${ARK_PID}; echo \"Server Closed\"; exit; }; trap rmv 15 2; proton run ./ShooterGame/Binaries/Win64/ArkAscendedServer.exe {{SERVER_MAP}}?listen?MaxPlayers={{MAX_PLAYERS}}?SessionName=\\\"{{SESSION_NAME}}\\\"?Port={{SERVER_PORT}}?RCONPort={{RCON_PORT}}?RCONEnabled=True$( [  \"$SERVER_PVE\" == \"0\" ] || printf %s '?ServerPVE=True' )?ServerPassword=\"{{SERVER_PASSWORD}}\"{{ARGS_PARAMS}}?ServerAdminPassword=\"{{ARK_ADMIN_PASSWORD}}\" -WinLiveMaxPlayers={{MAX_PLAYERS}} -oldconsole -servergamelog $( [ -z \"$MOD_IDS\" ] || printf %s ' -mods=' $MOD_IDS )$( [ \"$BATTLE_EYE\" == \"1\" ] || printf %s ' -NoBattlEye' ) -Port={{SERVER_PORT}} {{ARGS_FLAGS}} & ARK_PID=$! ; tail -c0 -F ./ShooterGame/Saved/Logs/ShooterGame.log --pid=$ARK_PID & until echo \"waiting for rcon connection...\"; (rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD})<&0 & wait $!; do sleep 5; done",
+        "config": {
+          "files": "{\"ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini\": {\"parser\": \"file\", \"find\": {\"MaxPlayers=\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerAdminPassword=\": \"ServerAdminPassword={{server.build.env.ARK_ADMIN_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Waiting commands for 127.0.0.1:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## cleanup movies?\r\nrm -rf /mnt/server/ShooterGame/Content/Movies\r\n\r\n## touch log file\r\nmkdir -p /mnt/server/ShooterGame/Saved/Logs\r\necho \"--fresh install--\" >> /mnt/server/ShooterGame/Saved/Logs/ShooterGame.log\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Map",
+            "description": "Available Maps: TheIsland_WP",
+            "env_variable": "SERVER_MAP",
+            "default_value": "TheIsland_WP",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "\"Unofficial\" dedicated server name",
+            "env_variable": "SESSION_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers on restart/re-install.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Battle Eye",
+            "description": "Enable BattleEye / Anti-Cheat",
+            "env_variable": "BATTLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "app id required for server download/updates. end users should not see this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2430930",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:2430930",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments (PARAMS)",
+            "description": "params (?ServerPassword=...) are supported here but params need to be touching. (i.e): ?ServerPassword=MyP4SsWoRd?ServerAdminPassword=sUpRp4ssW0rd",
+            "env_variable": "ARGS_PARAMS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "70",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin Password",
+            "description": "Used for RCON (remote and in-browser console) as well as in-game EnableCheats",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments (FLAGS)",
+            "description": "flags (-UseBattleEye) are supported here without them touching. (i.e): -crossplay -mods=1234,1235,1236",
+            "env_variable": "ARGS_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:1024",
+            "field_type": "text"
+          },
+          {
+            "name": "Server PvE",
+            "description": "ON = Player-vs-Environment (PvE), OFF = Player-vs-Player (PvP); Default is ON",
+            "env_variable": "SERVER_PVE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "required password to enter the server, leave blank for public server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "required for console commands and proper server shutdown (saveworld/exit), doesn't have to be open to the public",
+            "env_variable": "RCON_PORT",
+            "default_value": "37015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|min:1025|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "MOD IDs",
+            "description": "https://www.curseforge.com/ark-survival-ascended ; ProjectID is is the MOD_ID on the right-side of the mod-view page ; leave blank to disable mods ; separate only by comma ( , ) without spaces! (i.e.) 1234,1235,1236",
+            "env_variable": "MOD_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ark-survival-evolved-04361daf3d99",
+        "name": "Ark: Survival Evolved",
+        "description": "As a man or woman stranded, naked, freezing, and starving on the unforgiving shores of a mysterious island called ARK, use your skill and cunning to kill or tame and ride the plethora of leviathan dinosaurs and other primeval creatures roaming the land. Hunt, harvest resources, craft items, grow crops, research technologies, and build shelters to withstand the elements and store valuables, all while teaming up with (or preying upon) hundreds of other players to survive, dominate... and escape! — Gamepedia: ARK",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ark-survival-evolved-04361daf3d99.json",
+        "sha256": "f5434756ecbd86eb9c3c4e899468306f9a385736aca1d74bf538ea6a3dac020f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/ark_survival_evolved/egg-ark--survival-evolved.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/04361daf3d99.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-23T15:07:41+02:00",
+        "name": "Ark: Survival Evolved",
+        "author": "dev@shepper.fr",
+        "description": "As a man or woman stranded, naked, freezing, and starving on the unforgiving shores of a mysterious island called ARK, use your skill and cunning to kill or tame and ride the plethora of leviathan dinosaurs and other primeval creatures roaming the land. Hunt, harvest resources, craft items, grow crops, research technologies, and build shelters to withstand the elements and store valuables, all while teaming up with (or preying upon) hundreds of other players to survive, dominate... and escape! — Gamepedia: ARK",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "rmv() { echo  \"stopping server\"; rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} saveworld &&rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} DoExit && wait ${ARK_PID}; echo \"Server Closed\"; exit; }; trap rmv 15 2; cd ShooterGame/Binaries/Linux && ./ShooterGameServer {{SERVER_MAP}}?listen?SessionName=\"{{SESSION_NAME}}\"?ServerPassword={{ARK_PASSWORD}}?ServerAdminPassword={{ARK_ADMIN_PASSWORD}}?Port={{SERVER_PORT}}?RCONPort={{RCON_PORT}}?QueryPort={{QUERY_PORT}}?RCONEnabled=True?MaxPlayers={{MAX_PLAYERS}}?GameModIds={{MOD_ID}}$( [ \"$BATTLE_EYE\" == \"1\" ] || printf %s ' -NoBattlEye' ) -server -automanagedmods {{ARGS}} -log & ARK_PID=$! ; until echo \"waiting for rcon connection...\"; (rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD})<&0 & wait $!; do sleep 5; done",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Waiting commands for 127.0.0.1:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ubuntu:18.04'\r\napt -y update\r\napt -y --no-install-recommends --no-install-suggests install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\n\r\nmkdir -p /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +force_install_dir /mnt/server +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## create a symbolic link for loading mods\r\ncd /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\nln -sf ../../../../../Steam/steamapps steamapps\r\ncd /mnt/server",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "ARK_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server.",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "PleaseChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Map",
+            "description": "Available Maps: TheIsland, TheCenter, Ragnarok, ScorchedEarth_P, Aberration_P, Extinction, Valguero_P, Genesis, CrystalIsles, Gen2, Fjordur",
+            "env_variable": "SERVER_MAP",
+            "default_value": "TheIsland",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "ARK server name",
+            "env_variable": "SESSION_NAME",
+            "default_value": "A Pterodactyl Hosted ARK Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "ARK rcon port used by rcon tools.",
+            "env_variable": "RCON_PORT",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "ARK query port used by steam server browser and ark client server browser.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Battle Eye",
+            "description": "Enable BattleEye\r\n\r\n0 to disable\r\n1 to enable\r\n\r\ndefault=\"1\"",
+            "env_variable": "BATTLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "ARK steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "376030",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments",
+            "description": "Specify additional launch parameters such as -crossplay. You must include a dash - and separate each parameter with space: -crossplay -exclusivejoin",
+            "env_variable": "ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mods",
+            "description": "Specifies the order and which mods are loaded. ModIDs need to be comma-separated such as: ModID1,ModID2",
+            "env_variable": "MOD_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ark-survival-evolved-1ba7745726e5",
+        "name": "Ark: Survival Evolved",
+        "description": "As a man or woman stranded, naked, freezing, and starving on the unforgiving shores of a mysterious island called ARK, use your skill and cunning to kill or tame and ride the plethora of leviathan dinosaurs and other primeval creatures roaming the land. Hunt, harvest resources, craft items, grow crops, research technologies, and build shelters to withstand the elements and store valuables, all while teaming up with (or preying upon) hundreds of other players to survive, dominate... and escape! — Gamepedia: ARK",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ark-survival-evolved-1ba7745726e5.json",
+        "sha256": "21ab64a45c64ddda214ea1abd4cbef47f622a9d765a81886034bc29fe86ddbaf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "ark_survival_evolved/egg-ark--survival-evolved.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/1ba7745726e5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-07-16T10:03:10+00:00",
+        "name": "Ark: Survival Evolved",
+        "author": "dev@shepper.fr",
+        "description": "As a man or woman stranded, naked, freezing, and starving on the unforgiving shores of a mysterious island called ARK, use your skill and cunning to kill or tame and ride the plethora of leviathan dinosaurs and other primeval creatures roaming the land. Hunt, harvest resources, craft items, grow crops, research technologies, and build shelters to withstand the elements and store valuables, all while teaming up with (or preying upon) hundreds of other players to survive, dominate... and escape! — Gamepedia: ARK",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "rmv() { echo  \"stopping server\"; rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} saveworld &&rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} DoExit && wait ${ARK_PID}; echo \"Server Closed\"; exit; }; trap rmv 15 2; cd ShooterGame/Binaries/Linux && ./ShooterGameServer {{SERVER_MAP}}?listen?SessionName=\"{{SESSION_NAME}}\"?ServerPassword={{ARK_PASSWORD}}?ServerAdminPassword={{ARK_ADMIN_PASSWORD}}?Port={{SERVER_PORT}}?RCONPort={{RCON_PORT}}?QueryPort={{QUERY_PORT}}?RCONEnabled=True?MaxPlayers={{MAX_PLAYERS}}?GameModIds=\\\"{{MOD_ID}}\\\"$( [ \"$BATTLE_EYE\" == \"1\" ] || printf %s ' -NoBattlEye' ) -server -automanagedmods {{ARGS}} -log & ARK_PID=$! ; until echo \"waiting for rcon connection...\"; (rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD})<&0 & wait $!; do sleep 5; done",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Waiting commands for 127.0.0.1:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/serve\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n\r\n# Install SteamCMD into server folder\r\nmkdir -p /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\ntar -xzvf /tmp/steamcmd.tar.gz -C /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\n\r\n## create a symbolic link for loading mods\r\ncd /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\nln -sf ../../../../../Steam/steamapps steamapps",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "ARK_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server.",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "PleaseChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Map",
+            "description": "Available Maps: TheIsland, TheCenter, Ragnarok, ScorchedEarth_P, Aberration_P, Extinction, Valguero_P, Genesis, CrystalIsles, Gen2, Fjordur",
+            "env_variable": "SERVER_MAP",
+            "default_value": "TheIsland",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "ARK server name",
+            "env_variable": "SESSION_NAME",
+            "default_value": "A Pterodactyl Hosted ARK Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "ARK rcon port used by rcon tools.",
+            "env_variable": "RCON_PORT",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "ARK query port used by steam server browser and ark client server browser.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "Enable auto-updating from steam",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Battle Eye",
+            "description": "Enable BattleEye",
+            "env_variable": "BATTLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "ARK steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "376030",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments",
+            "description": "Specify additional launch parameters such as -crossplay. You must include a dash - and separate each parameter with space: -crossplay -exclusivejoin",
+            "env_variable": "ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mods",
+            "description": "Specifies the order and which mods are loaded. ModIDs need to be comma-separated such as: ModID1,ModID2",
+            "env_variable": "MOD_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^[0-9,]+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "Installs beta branch if specified.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ark-survival-evolved-77c473175af4",
+        "name": "Ark: Survival Evolved",
+        "description": "As a man or woman stranded, naked, freezing, and starving on the unforgiving shores of a mysterious island called ARK, use your skill and cunning to kill or tame and ride the plethora of leviathan dinosaurs and other primeval creatures roaming the land. Hunt, harvest resources, craft items, grow crops, research technologies, and build shelters to withstand the elements and store valuables, all while teaming up with (or preying upon) hundreds of other players to survive, dominate... and escape! — Gamepedia: ARK",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ark-survival-evolved-77c473175af4.json",
+        "sha256": "8063da5ff0c14bfefdfe36d9a512ac37e681c6bdb46412cd9097767c4ed28fd0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "ark_survival_evolved/egg-pterodactyl-ark--survival-evolved.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/77c473175af4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-25T09:52:07+00:00",
+        "name": "Ark: Survival Evolved",
+        "author": "dev@shepper.fr",
+        "description": "As a man or woman stranded, naked, freezing, and starving on the unforgiving shores of a mysterious island called ARK, use your skill and cunning to kill or tame and ride the plethora of leviathan dinosaurs and other primeval creatures roaming the land. Hunt, harvest resources, craft items, grow crops, research technologies, and build shelters to withstand the elements and store valuables, all while teaming up with (or preying upon) hundreds of other players to survive, dominate... and escape! — Gamepedia: ARK",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd Debian": "ghcr.io/pelican-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "rmv() { echo  \"stopping server\"; rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} saveworld &&rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD} DoExit && wait ${ARK_PID}; echo \"Server Closed\"; exit; }; trap rmv 15 2; cd ShooterGame/Binaries/Linux && ./ShooterGameServer {{SERVER_MAP}}?listen?SessionName=\"{{SESSION_NAME}}\"?ServerPassword={{ARK_PASSWORD}}?ServerAdminPassword={{ARK_ADMIN_PASSWORD}}?Port={{SERVER_PORT}}?RCONPort={{RCON_PORT}}?QueryPort={{QUERY_PORT}}?RCONEnabled=True?MaxPlayers={{MAX_PLAYERS}}?GameModIds={{MOD_ID}}$( [ \"$BATTLE_EYE\" == \"1\" ] || printf %s ' -NoBattlEye' ) -server -automanagedmods {{ARGS}} -log & ARK_PID=$! ; until echo \"waiting for rcon connection...\"; (rcon -t rcon -a 127.0.0.1:${RCON_PORT} -p ${ARK_ADMIN_PASSWORD})<&0 & wait $!; do sleep 5; done",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Waiting commands for 127.0.0.1:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ubuntu:18.04'\r\n#apt -y update\r\n#apt -y --no-install-recommends --no-install-suggests install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\n\r\nmkdir -p /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## create a symbolic link for loading mods\r\ncd /mnt/server/Engine/Binaries/ThirdParty/SteamCMD/Linux\r\nln -sf ../../../../../Steam/steamapps steamapps\r\ncd /mnt/server\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "ARK_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If specified, players must provide this password (via the in-game console) to gain access to administrator commands on the server.",
+            "env_variable": "ARK_ADMIN_PASSWORD",
+            "default_value": "PleaseChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Map",
+            "description": "Available Maps: TheIsland, TheCenter, Ragnarok, ScorchedEarth_P, Aberration_P, Extinction, Valguero_P, Genesis, CrystalIsles, Gen2, Fjordur",
+            "env_variable": "SERVER_MAP",
+            "default_value": "TheIsland",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "ARK server name",
+            "env_variable": "SESSION_NAME",
+            "default_value": "A Pterodactyl Hosted ARK Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "ARK rcon port used by rcon tools.",
+            "env_variable": "RCON_PORT",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "ARK query port used by steam server browser and ark client server browser.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable auto-updating for servers.\r\n\r\nDefault is 0. Set to 1 to update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Battle Eye",
+            "description": "Enable BattleEye\r\n\r\n0 to disable\r\n1 to enable\r\n\r\ndefault=\"1\"",
+            "env_variable": "BATTLE_EYE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "ARK steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "376030",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "numeric|in:376030",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments",
+            "description": "Specify additional launch parameters such as -crossplay. You must include a dash - and separate each parameter with space: -crossplay -exclusivejoin",
+            "env_variable": "ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mods",
+            "description": "Specifies the order and which mods are loaded. ModIDs need to be comma-separated such as: ModID1,ModID2",
+            "env_variable": "MOD_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta ID",
+            "description": "beta branch of a steam app. Leave blank to install normal branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Password",
+            "description": "Password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

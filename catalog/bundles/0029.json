@@ -1,0 +1,1282 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "bettercrewlink-server-0a1678f57554",
+        "name": "BetterCrewlink Server",
+        "description": "An egg designed to allow support for Proximity Chat in Among Us using BetterCrewLink Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/bettercrewlink-server-0a1678f57554.json",
+        "sha256": "e127f411bf232436394987fc4ecb13c0da47e434286998a489db17258c42f03f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "among_us/bettercrewlink_server/egg-better-crewlink-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/0a1678f57554.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:29+00:00",
+        "name": "BetterCrewlink Server",
+        "author": "tobiornotto@gmail.com",
+        "uuid": "428c7123-93b6-4b4c-b3b9-71328862ab3e",
+        "description": "An egg designed to allow support for Proximity Chat in Among Us using BetterCrewLink Server",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_16": "ghcr.io/parkervcp/yolks:nodejs_16"
+        },
+        "file_denylist": [],
+        "startup": "yarn start",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"<info> BetterCrewLink Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git python3 python3-pip build-essential\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nINSTALL_REPO=\"https://github.com/OhMyGuus/BetterCrewLink-server.git\"\r\necho -e Install repo set to ${INSTALL_REPO}\r\necho -e \"/mnt/server is empty.\\ncloning files from repo\"\r\necho -e \"running 'git clone --single-branch --branch ${BRANCH} ${INSTALL_REPO} .'\"\r\ngit clone --single-branch --branch ${BRANCH} ${INSTALL_REPO} .\r\n\r\nif [ -f /mnt/server/package.json ]; then\r\n    /usr/local/bin/yarn install\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "node:16-bookworm",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Github branch",
+            "description": "Select one of the available BetterCrewLink-server branches. Master per default.",
+            "env_variable": "BRANCH",
+            "default_value": "master",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Domain",
+            "description": "Domain of your server or ip of your server",
+            "env_variable": "HOSTNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "Specifiy the name of your BetterCrewLink server",
+            "env_variable": "NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:75",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Use HTTPS",
+            "description": "Enables https. You must place privkey.pem and fullchain.pem in your CWD.",
+            "env_variable": "HTTPS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Path to SSL",
+            "description": "Alternate path to SSL certificates.",
+            "env_variable": "SSLPATH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:250",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Port",
+            "description": "Choose the port your server should run on",
+            "env_variable": "PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "bettercrewlink-server-10c1ff7fedfd",
+        "name": "BetterCrewlink Server",
+        "description": "An egg designed to allow support for Proximity Chat in Among Us using BetterCrewLink Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/bettercrewlink-server-10c1ff7fedfd.json",
+        "sha256": "a6618077ec84849e62c5c1761eee1c6d0a077630e870bd8740edb3f787f09719",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "among_us/bettercrewlink_server/egg-better-crewlink-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/10c1ff7fedfd.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T13:58:58+02:00",
+        "name": "BetterCrewlink Server",
+        "author": "tobiornotto@gmail.com",
+        "description": "An egg designed to allow support for Proximity Chat in Among Us using BetterCrewLink Server",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:nodejs_16": "ghcr.io/ptero-eggs/yolks:nodejs_16"
+        },
+        "file_denylist": [],
+        "startup": "yarn start",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"<info> BetterCrewLink Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git python3 python3-pip build-essential\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nINSTALL_REPO=\"https://github.com/OhMyGuus/BetterCrewLink-server.git\"\r\necho -e Install repo set to ${INSTALL_REPO}\r\necho -e \"/mnt/server is empty.\\ncloning files from repo\"\r\necho -e \"running 'git clone --single-branch --branch ${BRANCH} ${INSTALL_REPO} .'\"\r\ngit clone --single-branch --branch ${BRANCH} ${INSTALL_REPO} .\r\n\r\nif [ -f /mnt/server/package.json ]; then\r\n    /usr/local/bin/yarn install\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "node:16-bookworm",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Github branch",
+            "description": "Select one of the available BetterCrewLink-server branches. Master per default.",
+            "env_variable": "BRANCH",
+            "default_value": "master",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Domain",
+            "description": "Domain of your server or ip of your server",
+            "env_variable": "HOSTNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "Specifiy the name of your BetterCrewLink server",
+            "env_variable": "NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:75",
+            "field_type": "text"
+          },
+          {
+            "name": "Use HTTPS",
+            "description": "Enables https. You must place privkey.pem and fullchain.pem in your CWD.",
+            "env_variable": "HTTPS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Path to SSL",
+            "description": "Alternate path to SSL certificates.",
+            "env_variable": "SSLPATH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:250",
+            "field_type": "text"
+          },
+          {
+            "name": "Port",
+            "description": "Choose the port your server should run on",
+            "env_variable": "PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "bettercrewlink-server-eb432acfa441",
+        "name": "BetterCrewlink Server",
+        "description": "An egg designed to allow support for Proximity Chat in Among Us using BetterCrewLink Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/bettercrewlink-server-eb432acfa441.json",
+        "sha256": "dd96790715470afbae1bec354687b232dc514e85fb7c033974d0dbabc793a943",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "among_us/bettercrewlink_server/egg-pterodactyl-better-crewlink-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/among_us/bettercrewlink_server/egg-better-crewlink-server.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/eb432acfa441.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:29+00:00",
+        "name": "BetterCrewlink Server",
+        "author": "tobiornotto@gmail.com",
+        "description": "An egg designed to allow support for Proximity Chat in Among Us using BetterCrewLink Server",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_16": "ghcr.io/parkervcp/yolks:nodejs_16"
+        },
+        "file_denylist": [],
+        "startup": "yarn start",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"<info> BetterCrewLink Server started\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "node:16-bookworm",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git python3 python3-pip build-essential\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nINSTALL_REPO=\"https://github.com/OhMyGuus/BetterCrewLink-server.git\"\r\necho -e Install repo set to ${INSTALL_REPO}\r\necho -e \"/mnt/server is empty.\\ncloning files from repo\"\r\necho -e \"running 'git clone --single-branch --branch ${BRANCH} ${INSTALL_REPO} .'\"\r\ngit clone --single-branch --branch ${BRANCH} ${INSTALL_REPO} .\r\n\r\nif [ -f /mnt/server/package.json ]; then\r\n    /usr/local/bin/yarn install\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0"
+          }
+        },
+        "variables": [
+          {
+            "name": "Github branch",
+            "description": "Select one of the available BetterCrewLink-server branches. Master per default.",
+            "env_variable": "BRANCH",
+            "default_value": "master",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Domain",
+            "description": "Domain of your server or ip of your server",
+            "env_variable": "HOSTNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "Specifiy the name of your BetterCrewLink server",
+            "env_variable": "NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:75",
+            "field_type": "text"
+          },
+          {
+            "name": "Use HTTPS",
+            "description": "Enables https. You must place privkey.pem and fullchain.pem in your CWD.",
+            "env_variable": "HTTPS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Path to SSL",
+            "description": "Alternate path to SSL certificates.",
+            "env_variable": "SSLPATH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:250",
+            "field_type": "text"
+          },
+          {
+            "name": "Port",
+            "description": "Choose the port your server should run on",
+            "env_variable": "PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "black-mesa-0c163e59ed77",
+        "name": "Black Mesa",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/black-mesa-0c163e59ed77.json",
+        "sha256": "9352bc788d0e947e1574c1cde07d92ab01c583cd467e60426ed2d5d79b574ed3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "black_mesa/egg-black-mesa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/0c163e59ed77.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Black Mesa",
+        "author": "avalongamecs@gmail.com",
+        "uuid": "56cb5b08-cc0c-4a82-9f55-e93012129a06",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -strictportbind -ip 0.0.0.0 -port {{SERVER_PORT}} +clientport {{SRCDS_CPORT}} +tv_port {{SRCDS_STV}} +map {{SRCDS_MAP}} +servercfgfile server.cfg -maxplayers {{MAX_PLAYERS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "nmrih id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "346680",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:346680",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "game name",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "bms",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "default map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dm_crossfire",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Client port",
+            "description": "client port",
+            "env_variable": "SRCDS_CPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Source TV",
+            "description": "source TV",
+            "env_variable": "SRCDS_STV",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on your game server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "black-mesa-273aced3bf46",
+        "name": "Black Mesa",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/black-mesa-273aced3bf46.json",
+        "sha256": "aae15d4d9c515f65f678dc00c6daf0dc1ec30584cfab7cc29f473eb7f29ade09",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "black_mesa/egg-pterodactyl-black-mesa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/273aced3bf46.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:43+00:00",
+        "name": "Black Mesa",
+        "author": "avalongamecs@gmail.com",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -strictportbind -ip 0.0.0.0 -port {{SERVER_PORT}} +clientport {{SRCDS_CPORT}} +tv_port {{SRCDS_STV}} +map {{SRCDS_MAP}} +servercfgfile server.cfg -maxplayers {{MAX_PLAYERS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "nmrih id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "346680",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:346680",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "game name",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "bms",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "default map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dm_crossfire",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "field_type": "text"
+          },
+          {
+            "name": "Client port",
+            "description": "client port",
+            "env_variable": "SRCDS_CPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Source TV",
+            "description": "source TV",
+            "env_variable": "SRCDS_STV",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on your game server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "black-mesa-288baa5838c5",
+        "name": "Black Mesa",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/black-mesa-288baa5838c5.json",
+        "sha256": "3c2c7b6c6dc8079dd3b026d1ca46f019fb9f2c5d4422e2fdb5d7309da6774409",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/black_mesa/egg-black-mesa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/288baa5838c5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:25:08+02:00",
+        "name": "Black Mesa",
+        "author": "avalongamecs@gmail.com",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -strictportbind -ip 0.0.0.0 -port {{SERVER_PORT}} +clientport {{SRCDS_CPORT}} +tv_port {{SRCDS_STV}} +map {{SRCDS_MAP}} +servercfgfile server.cfg -maxplayers {{MAX_PLAYERS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "nmrih id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "346680",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:346680",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "game name",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "bms",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "default map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dm_crossfire",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "field_type": "text"
+          },
+          {
+            "name": "Client port",
+            "description": "client port",
+            "env_variable": "SRCDS_CPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Source TV",
+            "description": "source TV",
+            "env_variable": "SRCDS_STV",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on your game server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "black-mesa-a4e93745bf3b",
+        "name": "Black Mesa",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/black-mesa-a4e93745bf3b.json",
+        "sha256": "3758da712e49b0f6255b1569253fc2248226edf4b204b07e6f41cba9807f2d5b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "black_mesa/egg-black-mesa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/a4e93745bf3b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:25:08+02:00",
+        "name": "Black Mesa",
+        "author": "avalongamecs@gmail.com",
+        "description": "Black Mesa is a 2020 first-person shooter game. It is a third-party remake of Half-Life (1998) made in the Source game engine.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -strictportbind -ip 0.0.0.0 -port {{SERVER_PORT}} +clientport {{SRCDS_CPORT}} +tv_port {{SRCDS_STV}} +map {{SRCDS_MAP}} +servercfgfile server.cfg -maxplayers {{MAX_PLAYERS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "nmrih id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "346680",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:346680",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "game name",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "bms",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "default map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dm_crossfire",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:25",
+            "field_type": "text"
+          },
+          {
+            "name": "Client port",
+            "description": "client port",
+            "env_variable": "SRCDS_CPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Source TV",
+            "description": "source TV",
+            "env_variable": "SRCDS_STV",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on your game server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "brickadia-0ce3e07e4f63",
+        "name": "Brickadia",
+        "description": "Brickadia is a next-generation sandbox game with immense flexibility. Every creative tool - building, scripting, and more - is used right in the game, in real-time multiplayer. Build massive worlds, intricate physics contraptions, and entirely new game modes together with your friends without ever leaving the action.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/brickadia-0ce3e07e4f63.json",
+        "sha256": "fac8c1e9fe3ef618f412286eb5fec25eec811e6173dcebb7ee9a8ae3b31a75ec",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "brickadia/egg-brickadia.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0ce3e07e4f63.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-07-16T16:54:26-04:00",
+        "name": "Brickadia",
+        "author": "odie.identity@gmail.com",
+        "description": "Brickadia is a next-generation sandbox game with immense flexibility. Every creative tool - building, scripting, and more - is used right in the game, in real-time multiplayer. Build massive worlds, intricate physics contraptions, and entirely new game modes together with your friends without ever leaving the action.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:mono_latest": "ghcr.io/ptero-eggs/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./Brickadia/Binaries/Linux/BrickadiaServer-Linux-Shipping -server -log -world=\"{{WORLD_NAME}}\" -port={{SERVER_PORT}} -token={{SERVER_HOSTING_TOKEN}}",
+        "config": {
+          "files": "{\".config/Epic/Brickadia/Saved/Config/LinuxServer/GameUserSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[Server__BP_ServerSettings_General_C BP_ServerSettings_General_C].ServerName\": \"{{env.SERVER_NAME}}\", \"[Server__BP_ServerSettings_General_C BP_ServerSettings_General_C].ServerPassword\": \"{{env.SERVER_PASSWORD}}\", \"[Server__BP_ServerSettings_General_C BP_ServerSettings_General_C].bPubliclyListed\": \"{{env.SERVER_LIST_PUBLIC}}\"}}}",
+          "startup": "{\"done\": \"LogBrickadia: Finished preloading primary assets\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p $HOME/.config\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3017590",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:3017590",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Dedicated Server Hosting Token",
+            "description": "Your Brickadia Dedicated Server Hosting Token. This comes from https://brickadia.com/account -> \"Create Server Hosting Token\"",
+            "env_variable": "SERVER_HOSTING_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World",
+            "description": "(Optional) Argument which will auto-load the world with the given name on server startup, as well as auto-saving to it. The world MUST exist in /home/container/.config/Epic/Brickadia/Saved/Worlds/ before this will work. The simplest way to add a new world to this directory is to run `br.world.saveas <world name>` in the console once the server is booted. You can then use `world name` for this variable.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server on the public server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "(Optional) Server password that players must enter to join. Leave blank for none.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "List Server Publicly",
+            "description": "Whether or not to include the server in the public server listing.",
+            "env_variable": "SERVER_LIST_PUBLIC",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "brickadia-6e10192f3aa2",
+        "name": "Brickadia",
+        "description": "Brickadia is a new multiplayer brick building sandbox game that gives you all the tools to create and play, your way. Build and invent with your friends, drive a car through space, create your own interactive experiences, or blow it all to smithereens!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/brickadia-6e10192f3aa2.json",
+        "sha256": "2bd507a0c68310883fe9962bf9ee049cf0bfec5bb1e48cb06e9f58b3856a19d4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "brickadia/pterodactyl-egg-brickadia.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/6e10192f3aa2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-08-16T22:43:10+00:00",
+        "name": "Brickadia",
+        "author": "felinusfish@gmail.com",
+        "description": "Brickadia is a new multiplayer brick building sandbox game that gives you all the tools to create and play, your way. Build and invent with your friends, drive a car through space, create your own interactive experiences, or blow it all to smithereens!",
+        "features": [],
+        "docker_images": {
+          "Mono": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./Brickadia/Binaries/Linux/BrickadiaServer-Linux-Shipping -token={{BRICKADIA_TOKEN}} -port={{SERVER_PORT}} $( [[ -z ${WORLD_NAME} ]] || printf %s \"-world ${WORLD_NAME}\" )",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Posting server.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Brickadia Dedicated Server Token",
+            "description": "This is the token generated on the Brickadia website. You won't be able to host without one. This token should be in Base64 encoded format.",
+            "env_variable": "BRICKADIA_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|ends_with:==|size:88",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3017590",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "in:3017590",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam will likely time out before ever reaching this point.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auto-Updates",
+            "description": "Disable or enable the auto-updates. By default, it's recommended that you leave this on, otherwise you may not be able to join your server if it is outdated.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Leave blank if you want to remain anonymous.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Leave blank if you want to remain anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Load a world upon startup.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "brickadia-70142e5089b0",
+        "name": "Brickadia",
+        "description": "Brickadia is a new multiplayer brick building sandbox game that gives you all the tools to create and play, your way. Build and invent with your friends, drive a car through space, create your own interactive experiences, or blow it all to smithereens!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/brickadia-70142e5089b0.json",
+        "sha256": "0200612ab4ca470881d677d8cba2d1ddc333d596a1c884866951f5872153a4ea",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "brickadia/egg-brickadia.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/70142e5089b0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Brickadia",
+        "author": "felinusfish@gmail.com",
+        "uuid": "3ee993b6-124a-4260-85fe-b622ebddded7",
+        "description": "Brickadia is a new multiplayer brick building sandbox game that gives you all the tools to create and play, your way. Build and invent with your friends, drive a car through space, create your own interactive experiences, or blow it all to smithereens!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [],
+        "docker_images": {
+          "Mono": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "./Brickadia/Binaries/Linux/BrickadiaServer-Linux-Shipping -token={{BRICKADIA_TOKEN}} -port={{SERVER_PORT}} $( [[ -z ${WORLD_NAME} ]] || printf %s \"-world ${WORLD_NAME}\" )",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Posting server.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Brickadia Dedicated Server Token",
+            "description": "This is the token generated on the Brickadia website. You won't be able to host without one. This token should be in Base64 encoded format.",
+            "env_variable": "BRICKADIA_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|ends_with:==|size:88",
+            "sort": 2
+          },
+          {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3017590",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "in:3017590",
+            "sort": 1
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam will likely time out before ever reaching this point.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "sort": 6
+          },
+          {
+            "name": "Steam Auto-Updates",
+            "description": "Disable or enable the auto-updates. By default, it's recommended that you leave this on, otherwise you may not be able to join your server if it is outdated.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 5
+          },
+          {
+            "name": "Steam Password",
+            "description": "Leave blank if you want to remain anonymous.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "sort": 4
+          },
+          {
+            "name": "Steam Username",
+            "description": "Leave blank if you want to remain anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "sort": 3
+          },
+          {
+            "name": "World Name",
+            "description": "Load a world upon startup.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "sort": 7
+          }
+        ]
+      }
+    }
+  ]
+}

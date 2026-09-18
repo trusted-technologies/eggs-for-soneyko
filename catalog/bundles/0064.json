@@ -1,0 +1,1222 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "ragecoop-99017f6fe453",
+        "name": "RageCOOP",
+        "description": "Drive around the interstate with your buddy, enjoy GTAs environment, make own missions and events or just chill in Grove Street! 🌐",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ragecoop-99017f6fe453.json",
+        "sha256": "57d53c8425e6a9141a6abc8d68c8e4b9dbfadb8e84e560bc2a1721d724a42a8a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/ragecoop/egg-pterodactyl-rage-c-o-o-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/gta/ragecoop/egg-rage-c-o-o-p.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/99017f6fe453.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:03+00:00",
+        "name": "RageCOOP",
+        "author": "josdekurk@gmail.com",
+        "description": "Drive around the interstate with your buddy, enjoy GTAs environment, make own missions and events or just chill in Grove Street! 🌐",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./RageCoop.Server",
+        "config": {
+          "files": "{\"Settings.xml\": {\"parser\": \"xml\", \"find\": {\"Settings.Port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Listening for clients\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl wget git zip unzip jq\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/RAGECOOP/RAGECOOP-V/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/RAGECOOP/RAGECOOP-V/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i RageCoop.Server-linux-x64.zip)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i RageCoop.Server-linux-x64.zip)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i RageCoop.Server-linux-x64.zip)\r\n    fi\r\nfi\r\n\r\necho ${DOWNLOAD_URL}\r\nwget ${DOWNLOAD_URL} -O RageCoop.Server-linux.zip\r\nRageCoop.Server-linux.zip\r\n\r\nunzip RageCoop.Server-linux.zip\r\n\r\nrm RageCoop.Server-linux.zip\r\n\r\nchmod +x RageCoop.Server\r\n\r\ncat <<EOF > Settings.xml\r\n<Settings xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n\t<Port>4499</Port>\r\n\t<MaxPlayers>32</MaxPlayers>\r\n\t<MaxLatency>500</MaxLatency>\r\n\t<Name>RAGECOOP server</Name>\r\n\t<Website>https://ragecoop.online/</Website>\r\n\t<Description>RAGECOOP server</Description>\r\n\t<GameMode>FreeRoam</GameMode>\r\n\t<Language>English</Language>\r\n\t<WelcomeMessage>Welcome on this server :)</WelcomeMessage>\r\n\t<AnnounceSelf>false</AnnounceSelf>\r\n\t<MasterServer>https://masterserver.ragecoop.online/</MasterServer>\r\n\t<LogLevel>0</LogLevel>\r\n\t<NpcStreamingDistance>500</NpcStreamingDistance>\r\n\t<PlayerStreamingDistance>-1</PlayerStreamingDistance>\r\n\t<WeatherTimeSync>true</WeatherTimeSync>\r\n\t<AllowedUsernameChars>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_</AllowedUsernameChars>\r\n\t<UseP2P>false</UseP2P>\r\n\t<UseZeroTier>false</UseZeroTier>\r\n\t<UseVoice>false</UseVoice>\r\n\t<ZeroTierNetworkID>8056c2e21c000001</ZeroTierNetworkID>\r\n\t<AutoUpdate>false</AutoUpdate>\r\n\t<KickGodMode>false</KickGodMode>\r\n\t<KickSpamming>true</KickSpamming>\r\n</Settings>\r\nEOF\r\n\r\necho \"done\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "The version you want of RAGECOOP-V\r\n\r\nExample: latest, nightly , 1.5.3",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ragecoop-c9782e297fa7",
+        "name": "RageCOOP",
+        "description": "Drive around the interstate with your buddy, enjoy GTAs environment, make own missions and events or just chill in Grove Street! 🌐",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ragecoop-c9782e297fa7.json",
+        "sha256": "7c774553390ff5228aaaf00e6b3b58c510836b60fd673972eecfa7f1435e7634",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/ragecoop/egg-rage-c-o-o-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/c9782e297fa7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:03+00:00",
+        "name": "RageCOOP",
+        "author": "josdekurk@gmail.com",
+        "uuid": "2ecf268b-f6d1-4cee-8d7e-8ace6e54bef2",
+        "description": "Drive around the interstate with your buddy, enjoy GTAs environment, make own missions and events or just chill in Grove Street! 🌐",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./RageCoop.Server",
+        "config": {
+          "files": "{\"Settings.xml\": {\"parser\": \"xml\", \"find\": {\"Settings.Port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Listening for clients\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl wget git zip unzip jq\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/RAGECOOP/RAGECOOP-V/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/RAGECOOP/RAGECOOP-V/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i RageCoop.Server-linux-x64.zip)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i RageCoop.Server-linux-x64.zip)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i RageCoop.Server-linux-x64.zip)\r\n    fi\r\nfi\r\n\r\necho ${DOWNLOAD_URL}\r\nwget ${DOWNLOAD_URL} -O RageCoop.Server-linux.zip\r\nRageCoop.Server-linux.zip\r\n\r\nunzip RageCoop.Server-linux.zip\r\n\r\nrm RageCoop.Server-linux.zip\r\n\r\nchmod +x RageCoop.Server\r\n\r\ncat <<EOF > Settings.xml\r\n<Settings xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n\t<Port>4499</Port>\r\n\t<MaxPlayers>32</MaxPlayers>\r\n\t<MaxLatency>500</MaxLatency>\r\n\t<Name>RAGECOOP server</Name>\r\n\t<Website>https://ragecoop.online/</Website>\r\n\t<Description>RAGECOOP server</Description>\r\n\t<GameMode>FreeRoam</GameMode>\r\n\t<Language>English</Language>\r\n\t<WelcomeMessage>Welcome on this server :)</WelcomeMessage>\r\n\t<AnnounceSelf>false</AnnounceSelf>\r\n\t<MasterServer>https://masterserver.ragecoop.online/</MasterServer>\r\n\t<LogLevel>0</LogLevel>\r\n\t<NpcStreamingDistance>500</NpcStreamingDistance>\r\n\t<PlayerStreamingDistance>-1</PlayerStreamingDistance>\r\n\t<WeatherTimeSync>true</WeatherTimeSync>\r\n\t<AllowedUsernameChars>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_</AllowedUsernameChars>\r\n\t<UseP2P>false</UseP2P>\r\n\t<UseZeroTier>false</UseZeroTier>\r\n\t<UseVoice>false</UseVoice>\r\n\t<ZeroTierNetworkID>8056c2e21c000001</ZeroTierNetworkID>\r\n\t<AutoUpdate>false</AutoUpdate>\r\n\t<KickGodMode>false</KickGodMode>\r\n\t<KickSpamming>true</KickSpamming>\r\n</Settings>\r\nEOF\r\n\r\necho \"done\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "The version you want of RAGECOOP-V\r\n\r\nExample: latest, nightly , 1.5.3",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ragecoop-c9ec826035f6",
+        "name": "RageCOOP",
+        "description": "Drive around the interstate with your buddy, enjoy GTAs environment, make own missions and events or just chill in Grove Street! 🌐",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ragecoop-c9ec826035f6.json",
+        "sha256": "8b9366da75be2faee4168f51291f319d577b750bd0d3660fd7901b4e71022c46",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/ragecoop/egg-rage-c-o-o-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c9ec826035f6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-09-23T20:11:15+02:00",
+        "name": "RageCOOP",
+        "author": "josdekurk@gmail.com",
+        "description": "Drive around the interstate with your buddy, enjoy GTAs environment, make own missions and events or just chill in Grove Street! 🌐",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./RageCoop.Server",
+        "config": {
+          "files": "{\"Settings.xml\": {\"parser\": \"xml\", \"find\": {\"Settings.Port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Listening for clients\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl wget git zip unzip jq\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/RAGECOOP/RAGECOOP-V/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/RAGECOOP/RAGECOOP-V/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i RageCoop.Server-linux-x64.zip)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i RageCoop.Server-linux-x64.zip)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i RageCoop.Server-linux-x64.zip)\r\n    fi\r\nfi\r\n\r\necho ${DOWNLOAD_URL}\r\nwget ${DOWNLOAD_URL} -O RageCoop.Server-linux.zip\r\nRageCoop.Server-linux.zip\r\n\r\nunzip RageCoop.Server-linux.zip\r\n\r\nrm RageCoop.Server-linux.zip\r\n\r\nchmod +x RageCoop.Server\r\n\r\ncat <<EOF > Settings.xml\r\n<Settings xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">\r\n\t<Port>4499</Port>\r\n\t<MaxPlayers>32</MaxPlayers>\r\n\t<MaxLatency>500</MaxLatency>\r\n\t<Name>RAGECOOP server</Name>\r\n\t<Website>https://ragecoop.online/</Website>\r\n\t<Description>RAGECOOP server</Description>\r\n\t<GameMode>FreeRoam</GameMode>\r\n\t<Language>English</Language>\r\n\t<WelcomeMessage>Welcome on this server :)</WelcomeMessage>\r\n\t<AnnounceSelf>false</AnnounceSelf>\r\n\t<MasterServer>https://masterserver.ragecoop.online/</MasterServer>\r\n\t<LogLevel>0</LogLevel>\r\n\t<NpcStreamingDistance>500</NpcStreamingDistance>\r\n\t<PlayerStreamingDistance>-1</PlayerStreamingDistance>\r\n\t<WeatherTimeSync>true</WeatherTimeSync>\r\n\t<AllowedUsernameChars>ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890-_</AllowedUsernameChars>\r\n\t<UseP2P>false</UseP2P>\r\n\t<UseZeroTier>false</UseZeroTier>\r\n\t<UseVoice>false</UseVoice>\r\n\t<ZeroTierNetworkID>8056c2e21c000001</ZeroTierNetworkID>\r\n\t<AutoUpdate>false</AutoUpdate>\r\n\t<KickGodMode>false</KickGodMode>\r\n\t<KickSpamming>true</KickSpamming>\r\n</Settings>\r\nEOF\r\n\r\necho \"done\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "The version you want of RAGECOOP-V\r\n\r\nExample: latest, nightly , 1.5.3",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redm-7ea2c1e22978",
+        "name": "RedM",
+        "description": "A new RedM egg for the latest builds due to recent changes in RedM",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/redm-7ea2c1e22978.json",
+        "sha256": "8f4b51fe7f9315055f1300da5a09ff2871d2530206eb0ce66334e8e2a52c0f60",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "rdr/redm/egg-red-m.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/7ea2c1e22978.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-06T01:51:39+00:00",
+        "name": "RedM",
+        "author": "parker@parkervcp.com",
+        "description": "A new RedM egg for the latest builds due to recent changes in RedM",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "$(pwd)/alpine/opt/cfx-server/ld-musl-x86_64.so.1 --library-path \"$(pwd)/alpine/usr/lib/v8/:$(pwd)/alpine/lib/:$(pwd)/alpine/usr/lib/\" -- $(pwd)/alpine/opt/cfx-server/FXServer +set citizen_dir $(pwd)/alpine/opt/cfx-server/citizen/ +set sv_licenseKey {{CFX_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} +exec server.cfg +set gamename rdr3",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\", \"sv_maxclients\": \"sv_maxclients {{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"succeeded. Welcome!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# CFx Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p /mnt/server/resources /mnt/server/logs/\r\n\r\ncd /mnt/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https://github.com/citizenfx/cfx-server-data.git /tmp\r\ncp -Rf /tmp/resources/* resources/\r\n\r\nRELEASE_PAGE=$(curl -sSL https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)\r\nCHANGELOGS_PAGE=$(curl -sSL https://changelogs-live.fivem.net/api/changelog/versions/linux/server)\r\n\r\nif [[ \"${CFX_VERSION}\" == \"recommended\" ]] || [[ -z ${CFX_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${CFX_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*/*.tar.xz\"' | grep -Po '(?<=href=\")[^\"]*' | sed 's/\\\"//g' | sed 's/\\.\\///1' | grep ${CFX_VERSION})\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"server config file exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/gta/fivem/server.cfg >>server.cfg\r\nfi\r\n\r\necho \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "CFX license",
+            "description": "Required to start the service. Get your keys at https://keymaster.fivem.net/",
+            "env_variable": "CFX_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the fivem max play count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name that shows up in the server browser",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "My new FXServer!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "CFX version",
+            "description": "The CFX Server version that is to be installed. Invalid versions will default to latest.\r\n\r\nan example is `1383-e5ea040353ce1b8bc86e37982bf5d888938e3096`\r\n\r\nYou can the latest version from here - https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/",
+            "env_variable": "CFX_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "This is the link to download redm from. This is only used in the install script.\r\n\r\nThe file you link to needs to be an fx.tar.zx file.\r\n\r\nExample:\r\nhttps://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/1626-8c06e8bc3ed7e6690c6c2d9e0b90e29df65b3ea6/fx.tar.xz",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Web Api Key",
+            "description": "Use your Steam WebApiKey or set to 'none'. Get your key at https://steamcommunity.com/dev/apikey/",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redm-976bb4be5b59",
+        "name": "RedM",
+        "description": "A new RedM egg for the latest builds due to recent changes in RedM",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/redm-976bb4be5b59.json",
+        "sha256": "aac9ded6a35581b2ba2442a2df832cc8ca65e69bfde4a0ada23633aba5099492",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "rdr/redm/egg-red-m.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/976bb4be5b59.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:04+00:00",
+        "name": "RedM",
+        "author": "parker@parkervcp.com",
+        "uuid": "6b9360e9-d24b-4d9b-bb58-ab05ca166cd4",
+        "description": "A new RedM egg for the latest builds due to recent changes in RedM",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "$(pwd)/alpine/opt/cfx-server/ld-musl-x86_64.so.1 --library-path \"$(pwd)/alpine/usr/lib/v8/:$(pwd)/alpine/lib/:$(pwd)/alpine/usr/lib/\" -- $(pwd)/alpine/opt/cfx-server/FXServer +set citizen_dir $(pwd)/alpine/opt/cfx-server/citizen/ +set sv_licenseKey {{CFX_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} +exec server.cfg +set gamename rdr3",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\", \"sv_maxclients\": \"sv_maxclients {{server.build.env.MAX_PLAYERS}}\"}}}",
+          "startup": "{\"done\": \"succeeded. Welcome!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# CFx Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p /mnt/server/resources /mnt/server/logs/\r\n\r\ncd /mnt/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https://github.com/citizenfx/cfx-server-data.git /tmp\r\ncp -Rf /tmp/resources/* resources/\r\n\r\nRELEASE_PAGE=$(curl -sSL https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)\r\nCHANGELOGS_PAGE=$(curl -sSL https://changelogs-live.fivem.net/api/changelog/versions/linux/server)\r\n\r\nif [[ \"${CFX_VERSION}\" == \"recommended\" ]] || [[ -z ${CFX_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${CFX_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*/*.tar.xz\"' | grep -Po '(?<=href=\")[^\"]*' | sed 's/\\\"//g' | sed 's/\\.\\///1' | grep ${CFX_VERSION})\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"server config file exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/fivem/server.cfg >>server.cfg\r\nfi\r\n\r\necho \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "CFX license",
+            "description": "Required to start the service. Get your keys at https://keymaster.fivem.net/",
+            "env_variable": "CFX_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the fivem max play count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name that shows up in the server browser",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "My new FXServer!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "CFX version",
+            "description": "The CFX Server version that is to be installed. Invalid versions will default to latest.\r\n\r\nan example is `1383-e5ea040353ce1b8bc86e37982bf5d888938e3096`\r\n\r\nYou can the latest version from here - https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/",
+            "env_variable": "CFX_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "This is the link to download redm from. This is only used in the install script.\r\n\r\nThe file you link to needs to be an fx.tar.zx file.\r\n\r\nExample:\r\nhttps://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/1626-8c06e8bc3ed7e6690c6c2d9e0b90e29df65b3ea6/fx.tar.xz",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Web Api Key",
+            "description": "Use your Steam WebApiKey or set to 'none'. Get your key at https://steamcommunity.com/dev/apikey/",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redm-ad0e70187d46",
+        "name": "RedM",
+        "description": "A new RedM egg for the latest builds due to recent changes in RedM",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/redm-ad0e70187d46.json",
+        "sha256": "a80462a8e94bc60b3b167e64d108d01ba31800e3ccf3f0a1bfb5e19ed6715660",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "rdr/redm/egg-pterodactyl-red-m.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/rdr/redm/egg-red-m.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/ad0e70187d46.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:04+00:00",
+        "name": "RedM",
+        "author": "parker@parkervcp.com",
+        "description": "A new RedM egg for the latest builds due to recent changes in RedM",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "$(pwd)/alpine/opt/cfx-server/ld-musl-x86_64.so.1 --library-path \"$(pwd)/alpine/usr/lib/v8/:$(pwd)/alpine/lib/:$(pwd)/alpine/usr/lib/\" -- $(pwd)/alpine/opt/cfx-server/FXServer +set citizen_dir $(pwd)/alpine/opt/cfx-server/citizen/ +set sv_licenseKey {{CFX_LICENSE}} +set steam_webApiKey {{STEAM_WEBAPIKEY}} +set sv_maxplayers {{MAX_PLAYERS}} +exec server.cfg +set gamename rdr3",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"endpoint_add_tcp\": \"endpoint_add_tcp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"endpoint_add_udp\": \"endpoint_add_udp \\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\", \"sv_maxclients\": \"sv_maxclients {{server.build.env.MAX_PLAYERS}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"succeeded. Welcome!\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/ash\r\n# CFx Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update -y\r\napt install -y tar xz-utils file jq\r\n\r\nmkdir -p /mnt/server/resources /mnt/server/logs/\r\n\r\ncd /mnt/server\r\n\r\necho \"updating citizenfx resource files\"\r\ngit clone https://github.com/citizenfx/cfx-server-data.git /tmp\r\ncp -Rf /tmp/resources/* resources/\r\n\r\nRELEASE_PAGE=$(curl -sSL https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/)\r\nCHANGELOGS_PAGE=$(curl -sSL https://changelogs-live.fivem.net/api/changelog/versions/linux/server)\r\n\r\nif [[ \"${CFX_VERSION}\" == \"recommended\" ]] || [[ -z ${CFX_VERSION} ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\nelif [[ \"${CFX_VERSION}\" == \"latest\" ]]; then\r\n  DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.latest_download')\r\nelse\r\n  VERSION_LINK=$(echo -e \"${RELEASE_PAGE}\" | grep -Eo '\".*/*.tar.xz\"' | grep -Po '(?<=href=\")[^\"]*' | sed 's/\\\"//g' | sed 's/\\.\\///1' | grep ${CFX_VERSION})\r\n  if [[ \"${VERSION_LINK}\" == \"\" ]]; then\r\n    echo -e \"defaulting to recommedned as the version requested was invalid.\"\r\n    DOWNLOAD_LINK=$(echo $CHANGELOGS_PAGE | jq -r '.recommended_download')\r\n  else\r\n    DOWNLOAD_LINK=$(echo https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/${VERSION_LINK})\r\n  fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then\r\n  if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n    echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n    DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n  else\r\n    echo -e \"link is invalid closing out\"\r\n    exit 2\r\n  fi\r\nfi\r\n\r\necho -e \"Running curl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\"\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\necho \"Extracting fivem files\"\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n  tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n  unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n  tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n  echo -e \"unknown filetype. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nrm -rf ${DOWNLOAD_LINK##*/} run.sh\r\n\r\nif [ -e server.cfg ]; then\r\n  echo \"server config file exists\"\r\nelse\r\n  echo \"Downloading default fivem config\"\r\n  curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/fivem/server.cfg >>server.cfg\r\nfi\r\n\r\necho \"install complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "CFX license",
+            "description": "Required to start the service. Get your keys at https://keymaster.fivem.net/",
+            "env_variable": "CFX_LICENSE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the fivem max play count",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "The name that shows up in the server browser",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "My new FXServer!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "CFX version",
+            "description": "The CFX Server version that is to be installed. Invalid versions will default to latest.\r\n\r\nan example is `1383-e5ea040353ce1b8bc86e37982bf5d888938e3096`\r\n\r\nYou can the latest version from here - https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/",
+            "env_variable": "CFX_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "This is the link to download redm from. This is only used in the install script.\r\n\r\nThe file you link to needs to be an fx.tar.zx file.\r\n\r\nExample:\r\nhttps://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/1626-8c06e8bc3ed7e6690c6c2d9e0b90e29df65b3ea6/fx.tar.xz",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Web Api Key",
+            "description": "Use your Steam WebApiKey or set to 'none'. Get your key at https://steamcommunity.com/dev/apikey/",
+            "env_variable": "STEAM_WEBAPIKEY",
+            "default_value": "none",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "renown-2e5f9bdda2e0",
+        "name": "Renown",
+        "description": "Renown is an intense medieval multiplayer survival experience set in a vast, ever-evolving world. Whether alone or rallying allies, gather resources, build powerful strongholds, and engage in brutal battles for dominance.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/renown-2e5f9bdda2e0.json",
+        "sha256": "29a13682ab5302f9d841a6b770fe6233a94f7cc91278cd0925809290b8db4443",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "renown/egg-renown.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/2e5f9bdda2e0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-06T22:43:39+02:00",
+        "name": "Renown",
+        "author": "info@emeraldhost.de",
+        "description": "Renown is an intense medieval multiplayer survival experience set in a vast, ever-evolving world. Whether alone or rallying allies, gather resources, build powerful strongholds, and engage in brutal battles for dominance.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "SteamAppId=1512690 ./Renown_Combat/Binaries/Linux/Renown_CombatServer-Linux-Shipping Renown_Combat -PORT={{SERVER_PORT}} -QUERYPORT={{QUERY_PORT}} -BeaconPort={{BEACON_PORT}} -RCONPort={{RCON_PORT}} -LOG=Server.log -ini:Engine:[EpicOnlineServices]:DedicatedServerClientId=xyza78917DzEE5Ey0isciVt66QDm5IzM -ini:Engine:[EpicOnlineServices]:DedicatedServerClientSecret=m/mrnywFCdeA1mW3ZSvv3qcVlQlfwi1a+7Z63Q44EGU",
+        "config": {
+          "files": "{\"Renown_Combat/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"ini\", \"find\": {\"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].ServerName\": \"{{server.build.env.SERVER_NAME}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].ServerPassword\": \"{{server.build.env.SERVER_PASSWORD}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].EnableRCON\": \"{{server.build.env.ENABLE_RCON}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].RCONPort\": \"{{server.build.env.RCON_PORT}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].RCONPassword\": \"{{server.build.env.RCON_PASSWORD}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].MapRotation\": \"{{server.build.env.MAP_ROTATION}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].GameSaveName\": \"{{server.build.env.SAVE_NAME}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].UseFirstMap\": \"{{server.build.env.USE_FIRST_MAP}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].Public\": \"{{server.build.env.PUBLIC}}\", \"[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C].PrivateSession\": \"{{server.build.env.SERVER_LIST}}\"}}, \"Renown_Combat/Saved/Config/LinuxServer/Engine.ini\": {\"parser\": \"ini\", \"find\": {\"[Server].FirstPersonOnly\": \"{{server.build.env.FIRST_PERSON_ONLY}}\"}}}",
+          "startup": "{\"done\": \"Playercount = 0\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Renown Combat Server Installation Script\r\n# Server Files: /mnt/server\r\n\r\n#apt update\r\n#apt -y install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nCONFIG_DIR=\"$HOME/Renown_Combat/Saved/Config/LinuxServer\"\r\nGAME_INI=\"$CONFIG_DIR/Game.ini\"\r\nENGINE_INI=\"$CONFIG_DIR/Engine.ini\"\r\n\r\n# Folder check\r\nif [ -d \"$CONFIG_DIR\" ]; then\r\n    echo \"Config directory exists, skipping\"\r\nelse\r\n    mkdir -p \"$CONFIG_DIR\"\r\nfi\r\n\r\nmkdir -p \"$CONFIG_DIR\"\r\n\r\n# Generate Game.ini\r\ncat <<EOF > \"$GAME_INI\"\r\n[/Game/Core/Blueprints/Renown_GameInstance.Renown_GameInstance_C]\r\nEnableRCON=${ENABLE_RCON}\r\nRCONPort=${RCON_PORT}\r\nRCONChatMessagesLimit=50\r\nRCONPassword=${RCON_PASSWORD}\r\nRCON_ServerMaxUptime=1800\r\nServerPassword=${SERVER_PASSWORD}\r\nServerName=${SERVER_NAME}\r\nMaxPlayers=${MAX_PLAYERS}\r\nbLAN=False\r\nbAntiCheat=False\r\nGameSaveName=${SAVE_NAME}\r\nGameDescription=Renown\r\nAdminPassword=${ADMIN_PASSWORD}\r\nAdminWhitelist=\r\nUseFirstMap=${USE_FIRST_MAP}\r\nPublic=${PUBLIC}\r\nMapRotation=${MAP_ROTATION}\r\nBanList=\r\nPrivateSession=${SERVER_LIST}\r\nMaxPing=195\r\nMOTD=\"NSLOCTEXT(\\\"[2CF2D1E04F419B14490A65BF06750767]\\\", \\\"F67B0BE94A3C4A2665B05284056D0757\\\", \\\"Welcome to this Pterodactyl Renown server!\\\")\"\r\nRegion=\r\nMaxServerUptime=28800\r\nDebugRCON=True\r\n\r\n[/Game/Core/Blueprints/GameModes/Renown_Base_GameMode.Renown_Base_GameMode_C]\r\nTimeLimit=0\r\nAutoBalance=0\r\nMaintenanceRate=(X=0.500000,Y=1.000000)\r\nResourceGainMultiplier=1\r\nGoldCoinGainMultiplier=1\r\nGlobalCraftingMultiplier=1\r\nGlobalSmeltingMultiplier=1\r\nGlobalResourceRespawnTimeMultiplier=1\r\nGlobalMaintenanceCostMultiplier=1\r\nGlobalDecayDamageMultiplier=1\r\nKickIdlePlayers=True\r\nIdleTimeOutTime=300\r\nMaxPlayersPerBanner=0\r\n\r\n[/Game/Core/Blueprints/GameModes/Renown_FFA_GameMode.Renown_FFA_GameMode_C]\r\n[/Game/Core/Blueprints/GameModes/Renown_TDM_GameMode.Renown_TDM_GameMode_C]\r\n[/Game/Core/Blueprints/GameModes/Renown_LTS_GameMode.Renown_LTS_GameMode_C]\r\n[/Game/Core/Blueprints/GameModes/Renown_Raid_GameMode.Renown_Raid_GameMode_C]\r\n[/Game/Core/Blueprints/GameModes/Renown_Survival_GameMode.Renown_Survival_GameMode_C]\r\nServerRebootTimeMinutes=120\r\n[/Game/Core/Blueprints/GameModes/Renown_Horde_GameMode.Renown_Horde_GameMode_C]\r\n[/Game/Core/Blueprints/GameModes/Renown_Duels_GameMode.Renown_Duels_GameMode_C]\r\n\r\n[/Script/Renown_Combat.RenownDeveloperSettings]\r\nbEnableServerQueue=True\r\nbRunOnLan=False\r\nbIsServerClientRunningOnSameMachine=False\r\nReconnectionGracePeriodSeconds=90\r\nServerQueueMaxJoinDuration=300\r\nPurgePendingPlayerConnections=60\r\nPlayerSlotsToConsume=0\r\nMaxClientReconnectAttempts=0\r\n\r\n[/Script/Party.Party]\r\nDefaultMaxPartySize=5\r\n\r\n[/Script/Lobby.LobbyBeaconState]\r\nWaitForPlayersTimeRemaining=20.0\r\n\r\n[/Script/Engine.GameSession]\r\nMaxSpectators=2\r\nbRequiresPushToTalk=true\r\n\r\n[/Script/Engine.GameNetworkManager]\r\nTotalNetBandwidth=4000000\r\nMaxDynamicBandwidth=100000\r\nMinDynamicBandwidth=40000\r\nEOF\r\n\r\n# Generate Engine.ini\r\ncat <<EOF > \"$ENGINE_INI\"\r\n[Server]\r\nFirstPersonOnly=${FIRST_PERSON_ONLY}\r\nEOF\r\n\r\necho \"----------------------------------------\"\r\necho \"Installation completed successfully!\"\r\necho \"----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of the server, as shown in the server list",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password used to access to the server, this can also be empty",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Password used for admin access",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "The maximum amount of allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Public Server",
+            "description": "When Public Server is True, set Private Session to False",
+            "env_variable": "PUBLIC",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Private Session",
+            "description": "When Private Session is False, set Public Server to True",
+            "env_variable": "SERVER_LIST",
+            "default_value": "False",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Rotation",
+            "description": "Defines which maps will rotate during gameplay",
+            "env_variable": "MAP_ROTATION",
+            "default_value": "RSurv-AlgaraIsle_p",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "The name of the save file used by the server",
+            "env_variable": "SAVE_NAME",
+            "default_value": "Save_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "First Person Only",
+            "description": "Forces players to use first-person view only",
+            "env_variable": "FIRST_PERSON_ONLY",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Use First Map",
+            "description": "If set to True, the server loads the first map in rotation on startup",
+            "env_variable": "USE_FIRST_MAP",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Port used for server query and visibility in the server list",
+            "env_variable": "QUERY_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Beacon Port",
+            "description": "The server Beacon Port",
+            "env_variable": "BEACON_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port used for remote console (RCON) connections",
+            "env_variable": "RCON_PORT",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Enable or disable RCON remote console access",
+            "env_variable": "ENABLE_RCON",
+            "default_value": "True",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:True,False",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "Password used to log in to the server via RCON",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "RconPassword",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "If set to 1, the server will automatically update on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "The Steam App ID used for updates and validation",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1512690",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:1512690",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "resonite-111c265b44d8",
+        "name": "Resonite",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/resonite-111c265b44d8.json",
+        "sha256": "da6c99408841ab215bd6536fcc36ee67aa3436c48d86f7ae4e48fb9f92927333",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "resonite/egg-resonite.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/111c265b44d8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Resonite",
+        "author": "espeon@espeon.dev",
+        "uuid": "3e156e2f-9046-4eba-8da2-8968e6045294",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [],
+        "docker_images": {
+          "dotnet": "ghcr.io/pelican-eggs/steamcmd:dotnet"
+        },
+        "file_denylist": [],
+        "startup": "dotnet Headless/Resonite.dll -HeadlessConfig Headless/Config/Config.json -Logs Headless/Logs $(if {{ENABLE_MODLOADER}}; then echo \"-LoadAssembly \"Libraries/ResoniteModLoader.dll\"\"; fi)",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World running...\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) -betapassword ${SRCDS_BETAPASS} ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## check if config file exists\r\necho \"Looking for existing config file...\"\r\nif ! [ -f \"/mnt/server/Headless/Config/Config.json\" ]; then\r\necho \"Config does not exist, creating new config.\"\r\n## create default config\r\nmkdir -p /mnt/server/Headless/Config\r\ncurl -sSL -o /mnt/server/Headless/Config/Config.json https://raw.githubusercontent.com/pelican-eggs/games-steamcmd/refs/heads/main/resonite/Config.json\r\nelse\r\n## leave existing config\r\necho \"Config already exists, leaving it as is.\"\r\nfi\r\n## check if mod loader is enabled\r\necho \"Checking if mod loader needs to be installed...\"\r\nif [ \"$ENABLE_MODLOADER\" = true ]; then\r\necho \"Installing/Updating mod loader as its enabled.\"\r\nmkdir -p /mnt/server/Libraries\r\nmkdir -p /mnt/server/rml_libs\r\nmkdir -p /mnt/server/rml_mods\r\ncurl -sSL -o /mnt/server/Libraries/ResoniteModLoader.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/ResoniteModLoader.dll\r\ncurl -sSL -o /mnt/server/rml_libs/0Harmony-Net9.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/0Harmony-Net9.dll\r\nelse\r\necho \"Skipping installing mod loader as its not enabled.\"\r\nfi\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Account User",
+            "description": "The username for your Steam account.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "sort": 1
+          },
+          {
+            "name": "Steam Account Password",
+            "description": "The password for your Steam account.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "sort": 2
+          },
+          {
+            "name": "Steam Account Token/Code",
+            "description": "The Steam Guard code or Login Token emailed to you.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "sort": 3
+          },
+          {
+            "name": "Enable Mod Loader",
+            "description": "See: https://github.com/resonite-modding-group/ResoniteModLoader for more information on Resonite Mod Loader.",
+            "env_variable": "ENABLE_MODLOADER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 4
+          },
+          {
+            "name": "Beta Password",
+            "description": "This is the \"Beta Password\" that is only acquired by going to the Resonite Patreon, subscribing to the tier with Headless access, and then after your Resonite account shows \"Patreon Supporter\", message the Resonite bot in game with /headlessCode, and paste that code here.",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:30",
+            "sort": 5
+          },
+          {
+            "name": "Beta branch name",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "headless",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "sort": 6
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 7
+          },
+          {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2519830",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 8
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "resonite-5a2de6ae8ab9",
+        "name": "Resonite",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/resonite-5a2de6ae8ab9.json",
+        "sha256": "e8d0c1636ae0d0dd0af7ffd7f57161ca629505639e11aa397a6472524a202691",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "resonite/egg-pterodactyl-resonite.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/5a2de6ae8ab9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-07T20:18:20+11:00",
+        "name": "Resonite",
+        "author": "espeon@espeon.dev",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "features": null,
+        "docker_images": {
+          "dotnet": "ghcr.io/pelican-eggs/steamcmd:dotnet"
+        },
+        "file_denylist": [],
+        "startup": "dotnet Headless/Resonite.dll -HeadlessConfig Headless/Config/Config.json -Logs Headless/Logs $(if {{ENABLE_MODLOADER}}; then echo \"-LoadAssembly \"Libraries/ResoniteModLoader.dll\"\"; fi)",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World running...\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) -betapassword ${SRCDS_BETAPASS} ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## check if config file exists\r\necho \"Looking for existing config file...\"\r\nif ! [ -f \"/mnt/server/Headless/Config/Config.json\" ]; then\r\necho \"Config does not exist, creating new config.\"\r\n## create default config\r\nmkdir -p /mnt/server/Headless/Config\r\ncurl -sSL -o /mnt/server/Headless/Config/Config.json https://raw.githubusercontent.com/pelican-eggs/games-steamcmd/refs/heads/main/resonite/Config.json\r\nelse\r\n## leave existing config\r\necho \"Config already exists, leaving it as is.\"\r\nfi\r\n## check if mod loader is enabled\r\necho \"Checking if mod loader needs to be installed...\"\r\nif [ \"$ENABLE_MODLOADER\" = true ]; then\r\necho \"Installing/Updating mod loader as its enabled.\"\r\nmkdir -p /mnt/server/Libraries\r\nmkdir -p /mnt/server/rml_libs\r\nmkdir -p /mnt/server/rml_mods\r\ncurl -sSL -o /mnt/server/Libraries/ResoniteModLoader.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/ResoniteModLoader.dll\r\ncurl -sSL -o /mnt/server/rml_libs/0Harmony-Net9.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/0Harmony-Net9.dll\r\nelse\r\necho \"Skipping installing mod loader as its not enabled.\"\r\nfi\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Account User",
+            "description": "The username for your Steam account.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Password",
+            "description": "The password for your Steam account.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Token/Code",
+            "description": "The Steam Guard code or Login Token emailed to you.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Mod Loader",
+            "description": "See: https://github.com/resonite-modding-group/ResoniteModLoader for more information on Resonite Mod Loader.",
+            "env_variable": "ENABLE_MODLOADER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Password",
+            "description": "This is the \"Beta Password\" that is only acquired by going to the Resonite Patreon, subscribing to the tier with Headless access, and then after your Resonite account shows \"Patreon Supporter\", message the Resonite bot in game with /headlessCode, and paste that code here.",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch name",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "headless",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2519830",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "resonite-d570741c19ce",
+        "name": "Resonite",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/resonite-d570741c19ce.json",
+        "sha256": "8c3dff3b4ddb79d7160fafc36a805eca566d0eacc902f2efd09346080705ad8c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "resonite/egg-resonite.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d570741c19ce.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T09:52:45+00:00",
+        "name": "Resonite",
+        "author": "espeon@espeon.dev",
+        "description": "Enter a novel digital universe with infinite possibilities. Whether you resonate with people around the world in a casual conversation, playing games and socializing or you riff off each other when creating anything from art to programming complex games, you'll find your place here.",
+        "features": null,
+        "docker_images": {
+          "Mono": "ghcr.io/ptero-eggs/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono Headless/Resonite.exe -HeadlessConfig Headless/Config/Config.json -Logs Headless/Logs $(if {{ENABLE_MODLOADER}}; then echo \"-LoadAssembly \"Libraries/ResoniteModLoader.dll\"\"; fi)",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World running...\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\necho -e \"steam user is not set.\\n\"\r\necho -e \"Using anonymous user.\\n\"\r\nSTEAM_USER=anonymous\r\nSTEAM_PASS=\"\"\r\nSTEAM_AUTH=\"\"\r\nelse\r\necho -e \"user set to ${STEAM_USER}\"\r\nfi\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) -betapassword ${SRCDS_BETAPASS} ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n## check if config file exists\r\necho \"Looking for existing config file...\"\r\nif ! [ -f \"/mnt/server/Headless/Config/Config.json\" ]; then\r\necho \"Config does not exist, creating new config.\"\r\n## create default config\r\nmkdir -p /mnt/server/Headless/Config\r\ncurl -sSL -o /mnt/server/Headless/Config/Config.json https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/resonite/Config.json\r\nelse\r\n## leave existing config\r\necho \"Config already exists, leaving it as is.\"\r\nfi\r\n## check if mod loader is enabled\r\necho \"Checking if mod loader needs to be installed...\"\r\nif [ \"$ENABLE_MODLOADER\" = true ]; then\r\necho \"Installing/Updating mod loader as its enabled.\"\r\nmkdir -p /mnt/server/Libraries\r\nmkdir -p /mnt/server/rml_libs\r\nmkdir -p /mnt/server/rml_mods\r\ncurl -sSL -o /mnt/server/Libraries/ResoniteModLoader.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/ResoniteModLoader.dll\r\ncurl -sSL -o /mnt/server/rml_libs/0Harmony.dll https://github.com/resonite-modding-group/ResoniteModLoader/releases/latest/download/0Harmony.dll\r\nelse\r\necho \"Skipping installing mod loader as its not enabled.\"\r\nfi\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Account User",
+            "description": "The username for your Steam account.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Password",
+            "description": "The password for your Steam account.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Account Token/Code",
+            "description": "The Steam Guard code or Login Token emailed to you.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Mod Loader",
+            "description": "See: https://github.com/resonite-modding-group/ResoniteModLoader for more information on Resonite Mod Loader.",
+            "env_variable": "ENABLE_MODLOADER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Password",
+            "description": "This is the \"Beta Password\" that is only acquired by going to the Resonite Patreon, subscribing to the tier with Headless access, and then after your Resonite account shows \"Patreon Supporter\", message the Resonite bot in game with /headlessCode, and paste that code here.",
+            "env_variable": "SRCDS_BETAPASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch name",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "headless",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2519830",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

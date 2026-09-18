@@ -1,0 +1,1727 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "stationeers-2ac565a2c9d8",
+        "name": "Stationeers",
+        "description": "Stationeers Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-2ac565a2c9d8.json",
+        "sha256": "e173c76b4b98e7f724514c37b65cbeafa134081d3e00a1eba2d1ae2794acbd72",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "stationeers/stationeers_vanilla/egg-stationeers.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/2ac565a2c9d8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-05T01:19:24+02:00",
+        "name": "Stationeers",
+        "author": "eggs@goover.dev",
+        "description": "Stationeers Server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:ubuntu": "ghcr.io/ptero-eggs/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64  -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} ;2>&1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World load complete\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "env_variable": "WORLD_NAME",
+            "default_value": "moon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "stationeers_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Port",
+            "description": "",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27014",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stationeers-3455d2040e3c",
+        "name": "Stationeers",
+        "description": "Stationeers Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-3455d2040e3c.json",
+        "sha256": "605ca30e16ebf01b2b27d03577acc3ec4fc534ccc5e6be4a5cb04d00ebc2b676",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "stationeers/stationeers_vanilla/egg-stationeers.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3455d2040e3c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Stationeers",
+        "author": "eggs@goover.dev",
+        "uuid": "25563afc-89db-4e03-8dc2-cfd6571e6fb6",
+        "description": "Stationeers Server",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Host override address provided:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto Pause Server",
+            "description": "Weather the server should auto pause or not if no players are connected",
+            "env_variable": "AUTO_PAUSE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in:true,false",
+            "sort": 9
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 1
+          },
+          {
+            "name": "AutoSave",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 5
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": 2
+          },
+          {
+            "name": "Difficulty",
+            "description": "Creative, Easy, Normal, Stationeer",
+            "env_variable": "DIFFICULTY",
+            "default_value": "Normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in:Creative,Easy,Normal,Stationeer",
+            "sort": 11
+          },
+          {
+            "name": "Map",
+            "description": "Available Maps: Lunar, Mars2, Europa3, MimasHerschel, Vulcan, Venus",
+            "env_variable": "WORLD_ID",
+            "default_value": "Mars2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:Lunar,Mars2,Europa3,MimasHerschel,Vulcan,Venus",
+            "sort": 10
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "sort": 3
+          },
+          {
+            "name": "Save Interval",
+            "description": "Time in seconds between each autosave. Shouldn't be below 60 sec.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:60,604800",
+            "sort": 6
+          },
+          {
+            "name": "Server Auth Secret",
+            "description": "",
+            "env_variable": "SERVER_AUTH_SECRET",
+            "default_value": "changechange",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string|max:128",
+            "sort": 8
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "change",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": 7
+          },
+          {
+            "name": "Start Condition",
+            "description": "DefaultStart, DefaultStartCommunity, Brutal, BrutalCommunity",
+            "env_variable": "START_CONDITION",
+            "default_value": "DefaultStart",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|in: DefaultStart,DefaultStartCommunity,Brutal,BrutalCommunity",
+            "sort": 12
+          },
+          {
+            "name": "Start Location",
+            "description": "Highly depend on Map! Search trough https://stationeers-wiki.com/Dedicated_Server_Guide World types to get exact Location IDs",
+            "env_variable": "START_LOCATION",
+            "default_value": "MarsSpawnButchersFlat",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:100",
+            "sort": 13
+          },
+          {
+            "name": "Station Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "STATION_NAME",
+            "default_value": "Pelican Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "sort": 4
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "integer",
+            "sort": 16
+          },
+          {
+            "name": "UPNP",
+            "description": " Enable or disable UniversalPlugAndPlay (Auto port forwarding, your router must support)",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 14
+          },
+          {
+            "name": "Update Port",
+            "description": "Steam update port. Unclear if this is actually used by the game at the moment.",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:5",
+            "sort": 15
+          },
+          {
+            "name": "UseSteamP2P",
+            "description": "Weather the server should allow SteamP2P connections. Keep this disabled. ",
+            "env_variable": "USE_STEAM_P2_P",
+            "default_value": "false",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|in:true,false",
+            "sort": 17
+          }
+        ],
+        "startup": "stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64 -file start \"{{STATION_NAME}}\" {{WORLD_ID}} {{DIFFICULTY}} {{START_CONDITION}} {{START_LOCATION}} -settings StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UPNPEnabled {{UPNP}} ServerName \"{{STATION_NAME}}\" ServerPassword \"{{SERVER_PASSWD}}\" ServerMaxPlayers {{MAX_PLAYERS}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerAuthSecret \"{{SERVER_AUTH_SECRET}}\" UpdatePort {{UPDATE_PORT}} AutoPauseServer {{AUTO_PAUSE}} UseSteamP2P {{USE_STEAM_P2_P}} LocalIpAddress 0.0.0.0 ;2>&1"
+      }
+    },
+    {
+      "entry": {
+        "id": "stationeers-92a6071330db",
+        "name": "Stationeers",
+        "description": "Stationeers Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-92a6071330db.json",
+        "sha256": "b67f6ab9699b0acdd553efdcec04c0dc2de17bc0005e01bca2eef737c6ebaff4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/stationeers/stationeers_vanilla/egg-stationeers.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/92a6071330db.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-05T01:19:24+02:00",
+        "name": "Stationeers",
+        "author": "eggs@goover.dev",
+        "description": "Stationeers Server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64  -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} ;2>&1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World load complete\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "env_variable": "WORLD_NAME",
+            "default_value": "moon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "stationeers_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Port",
+            "description": "",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27014",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stationeers-eefd88c50031",
+        "name": "Stationeers",
+        "description": "Stationeers Server",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-eefd88c50031.json",
+        "sha256": "ae4dfb67b5329aaf633c65774854cf6c27c3e2eab609a6c2498048938a1563e3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "stationeers/stationeers_vanilla/egg-pterodactyl-stationeers.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/eefd88c50031.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:05:09+00:00",
+        "name": "Stationeers",
+        "author": "eggs@goover.dev",
+        "description": "Stationeers Server",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64  -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} ;2>&1",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"World load complete\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "env_variable": "WORLD_NAME",
+            "default_value": "moon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "stationeers_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Port",
+            "description": "",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27014",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stationeers-bepinex-35a1ee4a57da",
+        "name": "Stationeers (BepInEx)",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-bepinex-35a1ee4a57da.json",
+        "sha256": "23d155c330c639bb331128a0922c47b0cc2ccf32fa927c45094873cb720b3270",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "stationeers/stationeers_bepinex/egg-pterodactyl-stationeers--bep-in-ex.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/35a1ee4a57da.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:05:09+00:00",
+        "name": "Stationeers (BepInEx)",
+        "author": "eggs@goover.dev",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "export DOORSTOP_ENABLE=TRUE; export DOORSTOP_INVOKE_DLL_PATH=./BepInEx/core/BepInEx.Preloader.dll; export LD_LIBRARY_PATH=\"./doorstop_libs:$LD_LIBRARY_PATH\"; export LD_PRELOAD=\"libdoorstop_x64.so:$LD_PRELOAD\"; stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64 -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} 2>&1",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"World load complete\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installing BepInEx from the official GitHub repository...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of BepInEx from GitHub releases\r\nLATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/BepInEx/BepInEx/releases/latest | jq -r \".assets[] | select(.name | contains(\\\"unix\\\")) | .browser_download_url\")\r\nif [ -z \"$LATEST_RELEASE_URL\" ]; then\r\n    echo \"Failed to fetch the latest BepInEx release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Create a quick /tmp folder\r\nmkdir -p /mnt/server/tmp\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading latest BepInEx release\"\r\necho \"-------------------------------------------------------\"\r\n# Download and extract BepInEx to the server directory\r\nwget \"$LATEST_RELEASE_URL\" -O /mnt/server/tmp/bepinex.zip\r\nunzip -o /mnt/server/tmp/bepinex.zip\r\nrm /mnt/server/tmp/bepinex.zip\r\n\r\n# Create the plugins directory inside BepInEx\r\nmkdir -p /mnt/server/BepInEx/plugins\r\n\r\n## BepInEx installation completed\r\necho \"-------------------------------------------------------\"\r\necho \"BepInEx installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading and installing the latest StationeersMods...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of StationeersMods from GitHub releases\r\nSTATIONEERSMODS_URL=$(curl -s https://api.github.com/repos/jixxed/StationeersMods/releases/latest | jq -r \".assets[] | select(.name == \\\"StationeersMods.zip\\\") | .browser_download_url\")\r\nif [ -z \"$STATIONEERSMODS_URL\" ]; then\r\n    echo \"Failed to fetch the latest StationeersMods release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\n# Download and unzip StationeersMods.zip to the plugins directory\r\nwget \"$STATIONEERSMODS_URL\" -O /mnt/server/tmp/StationeersMods.zip\r\nunzip -o /mnt/server/tmp/StationeersMods.zip -d /mnt/server/BepInEx/plugins\r\nrm /mnt/server/tmp/StationeersMods.zip\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"StationeersMods installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Deleting leftover /tmp folder\"\r\necho \"-------------------------------------------------------\"\r\n# Delete the /tmp folder\r\nrm -rf /mnt/server/tmp\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Stationeers installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "env_variable": "WORLD_NAME",
+            "default_value": "moon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "stationeers_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Port",
+            "description": "",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27014",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stationeers-bepinex-ba002eff8f6e",
+        "name": "Stationeers (BepInEx)",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-bepinex-ba002eff8f6e.json",
+        "sha256": "1ef5eddb5a0b1a122d19bc69933a08c017c122c9482e1dbce43105966295045f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/stationeers/stationeers_bepinex/egg-stationeers--bep-in-ex.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/ba002eff8f6e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-05T01:20:18+02:00",
+        "name": "Stationeers (BepInEx)",
+        "author": "eggs@goover.dev",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "export DOORSTOP_ENABLE=TRUE; export DOORSTOP_INVOKE_DLL_PATH=./BepInEx/core/BepInEx.Preloader.dll; export LD_LIBRARY_PATH=\"./doorstop_libs:$LD_LIBRARY_PATH\"; export LD_PRELOAD=\"libdoorstop_x64.so:$LD_PRELOAD\"; stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64 -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} 2>&1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World load complete\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installing BepInEx from the official GitHub repository...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of BepInEx from GitHub releases\r\nLATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/BepInEx/BepInEx/releases/latest | jq -r \".assets[] | select(.name | contains(\\\"unix\\\")) | .browser_download_url\")\r\nif [ -z \"$LATEST_RELEASE_URL\" ]; then\r\n    echo \"Failed to fetch the latest BepInEx release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Create a quick /tmp folder\r\nmkdir -p /mnt/server/tmp\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading latest BepInEx release\"\r\necho \"-------------------------------------------------------\"\r\n# Download and extract BepInEx to the server directory\r\nwget \"$LATEST_RELEASE_URL\" -O /mnt/server/tmp/bepinex.zip\r\nunzip -o /mnt/server/tmp/bepinex.zip\r\nrm /mnt/server/tmp/bepinex.zip\r\n\r\n# Create the plugins directory inside BepInEx\r\nmkdir -p /mnt/server/BepInEx/plugins\r\n\r\n## BepInEx installation completed\r\necho \"-------------------------------------------------------\"\r\necho \"BepInEx installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading and installing the latest StationeersMods...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of StationeersMods from GitHub releases\r\nSTATIONEERSMODS_URL=$(curl -s https://api.github.com/repos/jixxed/StationeersMods/releases/latest | jq -r \".assets[] | select(.name == \\\"StationeersMods.zip\\\") | .browser_download_url\")\r\nif [ -z \"$STATIONEERSMODS_URL\" ]; then\r\n    echo \"Failed to fetch the latest StationeersMods release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\n# Download and unzip StationeersMods.zip to the plugins directory\r\nwget \"$STATIONEERSMODS_URL\" -O /mnt/server/tmp/StationeersMods.zip\r\nunzip -o /mnt/server/tmp/StationeersMods.zip -d /mnt/server/BepInEx/plugins\r\nrm /mnt/server/tmp/StationeersMods.zip\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"StationeersMods installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Deleting leftover /tmp folder\"\r\necho \"-------------------------------------------------------\"\r\n# Delete the /tmp folder\r\nrm -rf /mnt/server/tmp\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Stationeers installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "env_variable": "WORLD_NAME",
+            "default_value": "moon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "stationeers_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Port",
+            "description": "",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27014",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stationeers-bepinex-c141ba36db47",
+        "name": "Stationeers (BepInEx)",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-bepinex-c141ba36db47.json",
+        "sha256": "55afc74c89a7dd130ccba89d1fdb2456a4d2ec600bf7899ce01deb741c30cf76",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "stationeers/stationeers_bepinex/egg-stationeers--bep-in-ex.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c141ba36db47.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-05T01:20:18+02:00",
+        "name": "Stationeers (BepInEx)",
+        "author": "eggs@goover.dev",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:ubuntu": "ghcr.io/ptero-eggs/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "export DOORSTOP_ENABLE=TRUE; export DOORSTOP_INVOKE_DLL_PATH=./BepInEx/core/BepInEx.Preloader.dll; export LD_LIBRARY_PATH=\"./doorstop_libs:$LD_LIBRARY_PATH\"; export LD_PRELOAD=\"libdoorstop_x64.so:$LD_PRELOAD\"; stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64 -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} 2>&1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World load complete\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installing BepInEx from the official GitHub repository...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of BepInEx from GitHub releases\r\nLATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/BepInEx/BepInEx/releases/latest | jq -r \".assets[] | select(.name | contains(\\\"unix\\\")) | .browser_download_url\")\r\nif [ -z \"$LATEST_RELEASE_URL\" ]; then\r\n    echo \"Failed to fetch the latest BepInEx release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Create a quick /tmp folder\r\nmkdir -p /mnt/server/tmp\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading latest BepInEx release\"\r\necho \"-------------------------------------------------------\"\r\n# Download and extract BepInEx to the server directory\r\nwget \"$LATEST_RELEASE_URL\" -O /mnt/server/tmp/bepinex.zip\r\nunzip -o /mnt/server/tmp/bepinex.zip\r\nrm /mnt/server/tmp/bepinex.zip\r\n\r\n# Create the plugins directory inside BepInEx\r\nmkdir -p /mnt/server/BepInEx/plugins\r\n\r\n## BepInEx installation completed\r\necho \"-------------------------------------------------------\"\r\necho \"BepInEx installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading and installing the latest StationeersMods...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of StationeersMods from GitHub releases\r\nSTATIONEERSMODS_URL=$(curl -s https://api.github.com/repos/jixxed/StationeersMods/releases/latest | jq -r \".assets[] | select(.name == \\\"StationeersMods.zip\\\") | .browser_download_url\")\r\nif [ -z \"$STATIONEERSMODS_URL\" ]; then\r\n    echo \"Failed to fetch the latest StationeersMods release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\n# Download and unzip StationeersMods.zip to the plugins directory\r\nwget \"$STATIONEERSMODS_URL\" -O /mnt/server/tmp/StationeersMods.zip\r\nunzip -o /mnt/server/tmp/StationeersMods.zip -d /mnt/server/BepInEx/plugins\r\nrm /mnt/server/tmp/StationeersMods.zip\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"StationeersMods installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Deleting leftover /tmp folder\"\r\necho \"-------------------------------------------------------\"\r\n# Delete the /tmp folder\r\nrm -rf /mnt/server/tmp\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Stationeers installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "env_variable": "WORLD_NAME",
+            "default_value": "moon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "stationeers_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Update Port",
+            "description": "",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27014",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stationeers-bepinex-d358ccfc6ed1",
+        "name": "Stationeers (BepInEx)",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stationeers-bepinex-d358ccfc6ed1.json",
+        "sha256": "2013d4f2aae37793cb82235cc75584171ccfc623af8188ac576f3c9fbbed0591",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "stationeers/stationeers_bepinex/egg-stationeers--bep-in-ex.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/d358ccfc6ed1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Stationeers (BepInEx)",
+        "author": "eggs@goover.dev",
+        "uuid": "948f1577-6568-4edd-8fd8-d63155a0bf96",
+        "description": "Stationeers Server with very basic BepInEx support",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "export DOORSTOP_ENABLE=TRUE; export DOORSTOP_INVOKE_DLL_PATH=./BepInEx/core/BepInEx.Preloader.dll; export LD_LIBRARY_PATH=\"./doorstop_libs:$LD_LIBRARY_PATH\"; export LD_PRELOAD=\"libdoorstop_x64.so:$LD_PRELOAD\"; stty cols 80 rows 24; ./rocketstation_DedicatedServer.x86_64 -loadlatest \"{{SAVE_NAME}}\" {{WORLD_NAME}} -settings ServerName \"{{SERVER_NAME}}\" StartLocalHost true ServerVisible true GamePort {{SERVER_PORT}} UpdatePort {{UPDATE_PORT}} AutoSave {{AUTOSAVE}} SaveInterval {{SAVE_INTERVAL}} ServerPassword {{SERVER_PASSWD}} ServerMaxPlayers {{MAX_PLAYERS}} UPNPEnabled {{UPNP}} 2>&1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"World load complete\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Installing BepInEx from the official GitHub repository...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of BepInEx from GitHub releases\r\nLATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/BepInEx/BepInEx/releases/latest | jq -r \".assets[] | select(.name | contains(\\\"unix\\\")) | .browser_download_url\")\r\nif [ -z \"$LATEST_RELEASE_URL\" ]; then\r\n    echo \"Failed to fetch the latest BepInEx release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Create a quick /tmp folder\r\nmkdir -p /mnt/server/tmp\r\n\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading latest BepInEx release\"\r\necho \"-------------------------------------------------------\"\r\n# Download and extract BepInEx to the server directory\r\nwget \"$LATEST_RELEASE_URL\" -O /mnt/server/tmp/bepinex.zip\r\nunzip -o /mnt/server/tmp/bepinex.zip\r\nrm /mnt/server/tmp/bepinex.zip\r\n\r\n# Create the plugins directory inside BepInEx\r\nmkdir -p /mnt/server/BepInEx/plugins\r\n\r\n## BepInEx installation completed\r\necho \"-------------------------------------------------------\"\r\necho \"BepInEx installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Downloading and installing the latest StationeersMods...\"\r\necho \"-------------------------------------------------------\"\r\n\r\n# Fetch the latest release URL of StationeersMods from GitHub releases\r\nSTATIONEERSMODS_URL=$(curl -s https://api.github.com/repos/jixxed/StationeersMods/releases/latest | jq -r \".assets[] | select(.name == \\\"StationeersMods.zip\\\") | .browser_download_url\")\r\nif [ -z \"$STATIONEERSMODS_URL\" ]; then\r\n    echo \"Failed to fetch the latest StationeersMods release URL. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\n# Download and unzip StationeersMods.zip to the plugins directory\r\nwget \"$STATIONEERSMODS_URL\" -O /mnt/server/tmp/StationeersMods.zip\r\nunzip -o /mnt/server/tmp/StationeersMods.zip -d /mnt/server/BepInEx/plugins\r\nrm /mnt/server/tmp/StationeersMods.zip\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"StationeersMods installation completed\"\r\necho \"-------------------------------------------------------\"\r\n\r\necho \"-------------------------------------------------------\"\r\necho \"Deleting leftover /tmp folder\"\r\necho \"-------------------------------------------------------\"\r\n# Delete the /tmp folder\r\nrm -rf /mnt/server/tmp\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Stationeers installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "Available Maps: Moon, Mars, Europa, Europa2, Mimas, Vulcan, Vulcan2, Space, Loulan, Venus",
+            "env_variable": "WORLD_NAME",
+            "default_value": "moon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,Moon,Mars,Europa,Europa2,Mimas,Vulcan,Vulcan2,Space,Loulan,Venus",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,30",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Name of the save of your world.\r\nAuto save & auto load worlds on server startup.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "stationeers_1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save",
+            "description": "Turn Autosave on and off",
+            "env_variable": "AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVE_INTERVAL",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "UPNP",
+            "description": "",
+            "env_variable": "UPNP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Required for automatic updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "600760",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Update Port",
+            "description": "",
+            "env_variable": "UPDATE_PORT",
+            "default_value": "27014",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Beta Branch",
+            "description": "",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stay-in-tarkov-07507b4fdf86",
+        "name": "Stay In Tarkov",
+        "description": "The Stay in Tarkov project was born due to Battlestate Games' (BSG) reluctance to create the pure PvE version of Escape from Tarkov. The project's aim is simple, create a Cooperation PvE experience that retains progression.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stay-in-tarkov-07507b4fdf86.json",
+        "sha256": "ad0a985008c1b686d879231942db55b2e7b92a16b6fc808952ace73b3e795a91",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "eft/egg-pterodactyl-stay-in-tarkov.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/07507b4fdf86.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:10+00:00",
+        "name": "Stay In Tarkov",
+        "author": "dino@papertots.page",
+        "description": "The Stay in Tarkov project was born due to Battlestate Games' (BSG) reluctance to create the pure PvE version of Escape from Tarkov. The project's aim is simple, create a Cooperation PvE experience that retains progression.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Aki.Server.exe",
+        "config": {
+          "files": "{\"Aki_Data/Server/configs/http.json\": {\"parser\": \"json\", \"find\": {\"ip\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server is running, do not close while playing SPT, Happy playing!!\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Stay In Tarkov Server Installation Script\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Install git-lfs python3\r\napt update && apt install -yq git-lfs python3 jq tar\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## Get SIT coop mod release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${SIT_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${SIT_PACKAGE}/releases\")\r\n\r\nif [ -z \"${SIT_VERSION}\" ] || [ \"${SIT_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i linux)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${SIT_VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${SIT_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${SIT_VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i linux)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\nwget ${DOWNLOAD_URL} -O ${SIT_NAME}\r\ntar -xvzf ${SIT_NAME}\r\nrm ${SIT_NAME}"
+          }
+        },
+        "variables": [
+          {
+            "name": "SITCoop Version",
+            "description": "Version of the SIT co-op mod for the server. Use \"latest\" for latest release, or the github release/tag/hash.\r\n\r\nSITCoop: https://github.com/stayintarkov/SIT.Aki-Server-Mod",
+            "env_variable": "SIT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "SIT Mod Github Package",
+            "description": "Github package for the SIT Aki server co-op mod. \r\n\r\nSITCoop: https://github.com/stayintarkov/SIT.Aki-Server-Mod",
+            "env_variable": "SIT_PACKAGE",
+            "default_value": "stayintarkov/SIT.Aki-Server-Mod",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "SIT Mod asset name",
+            "description": "SIT mod release file's asset name.",
+            "env_variable": "SIT_NAME",
+            "default_value": "SITCoop.tar.gz",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Github Username",
+            "description": "Optional, a github username to use to avoid Github API rate limit",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "present",
+            "field_type": "text"
+          },
+          {
+            "name": "Github OAuth token",
+            "description": "Optional, A Github OAuth token to use to avoid API rate limit.",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "present",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "stay-in-tarkov-d567c16c779f",
+        "name": "Stay In Tarkov",
+        "description": "The Stay in Tarkov project was born due to Battlestate Games' (BSG) reluctance to create the pure PvE version of Escape from Tarkov. The project's aim is simple, create a Cooperation PvE experience that retains progression.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/stay-in-tarkov-d567c16c779f.json",
+        "sha256": "0dfec65ede8ac4b16d139a3458dae062a87624c69f31ef50ec49ad403c3aad28",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "eft/egg-stay-in-tarkov.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/d567c16c779f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:10+00:00",
+        "name": "Stay In Tarkov",
+        "author": "dino@papertots.page",
+        "uuid": "93912e5a-c87a-49ab-be70-5a73b3422749",
+        "description": "The Stay in Tarkov project was born due to Battlestate Games' (BSG) reluctance to create the pure PvE version of Escape from Tarkov. The project's aim is simple, create a Cooperation PvE experience that retains progression.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Aki.Server.exe",
+        "config": {
+          "files": "{\"Aki_Data/Server/configs/http.json\": {\"parser\": \"json\", \"find\": {\"ip\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server is running, do not close while playing SPT, Happy playing!!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Stay In Tarkov Server Installation Script\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Install git-lfs python3\r\napt update && apt install -yq git-lfs python3 jq tar\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## Get SIT coop mod release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${SIT_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${SIT_PACKAGE}/releases\")\r\n\r\nif [ -z \"${SIT_VERSION}\" ] || [ \"${SIT_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i linux)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${SIT_VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${SIT_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${SIT_VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i linux)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\nwget ${DOWNLOAD_URL} -O ${SIT_NAME}\r\ntar -xvzf ${SIT_NAME}\r\nrm ${SIT_NAME}",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SITCoop Version",
+            "description": "Version of the SIT co-op mod for the server. Use \"latest\" for latest release, or the github release/tag/hash.\r\n\r\nSITCoop: https://github.com/stayintarkov/SIT.Aki-Server-Mod",
+            "env_variable": "SIT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SIT Mod Github Package",
+            "description": "Github package for the SIT Aki server co-op mod. \r\n\r\nSITCoop: https://github.com/stayintarkov/SIT.Aki-Server-Mod",
+            "env_variable": "SIT_PACKAGE",
+            "default_value": "stayintarkov/SIT.Aki-Server-Mod",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SIT Mod asset name",
+            "description": "SIT mod release file's asset name.",
+            "env_variable": "SIT_NAME",
+            "default_value": "SITCoop.tar.gz",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Github Username",
+            "description": "Optional, a github username to use to avoid Github API rate limit",
+            "env_variable": "GITHUB_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "present",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Github OAuth token",
+            "description": "Optional, A Github OAuth token to use to avoid API rate limit.",
+            "env_variable": "GITHUB_OAUTH_TOKEN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": true,
+            "rules": "present",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,824 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "paper-3f656fe69f28",
+        "name": "Paper",
+        "description": "High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/paper-3f656fe69f28.json",
+        "sha256": "d211a094f582e45573026b41a725a0ff970979ecb815891451ea1907f37f379e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/paper/egg-paper.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/3f656fe69f28.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-03-27T14:32:59+01:00",
+        "name": "Paper",
+        "author": "parker@pterodactyl.io",
+        "description": "High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25",
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=paper\r\nUSER_AGENT=\"Pterodactyl (https://Pterodactyl.io)\"\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl --user-agent \"${USER_AGENT}\"  -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions | any(.[]; index($VERSION))' | grep -m1 true`\r\n\tLATEST_VERSION=`curl --user-agent \"${USER_AGENT}\"  -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r '.versions | to_entries | .[0].value[0]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\r\n\tBUILD_EXISTS=`curl --user-agent \"${USER_AGENT}\"  -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\r\n\tLATEST_BUILD=`curl --user-agent \"${USER_AGENT}\"  -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[0]'`\r\n\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"Project: ${PROJECT}\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\tDOWNLOAD_URL=`curl --user-agent \"${USER_AGENT}\"  -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER} | jq -r '.downloads.\"server:default\".url'`\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl --user-agent \\\"${USER_AGENT}\\\"  -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl --user-agent \"${USER_AGENT}\"  -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl --user-agent \"${USER_AGENT}\"  -o server.properties https://raw.githubusercontent.com/pterodactyl/game-eggs/main/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the paper release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "paper-acd4642d4225",
+        "name": "Paper",
+        "description": "High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/paper-acd4642d4225.json",
+        "sha256": "541308823fcfe8353637591fb3cfa5182b7544f9394c3fa806e66b92924a9153",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/paper/egg-paper.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/acd4642d4225.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-13T17:26:13+0000",
+        "name": "Paper",
+        "author": "parker@pterodactyl.io",
+        "description": "High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18",
+          "Java 21": "ghcr.io/pterodactyl/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Paper Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=paper\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep -m1 true`\r\n\tLATEST_VERSION=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\r\n\tBUILD_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\r\n\tLATEST_BUILD=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/minecraft/java/server.properties\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the paper release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "paper-f93262b7cead",
+        "name": "Paper",
+        "description": "High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/paper-f93262b7cead.json",
+        "sha256": "4c67d2be4ea06d86b3c8f7bd55e1b2c2011c052a4da942cef28a04bc27c880be",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/paper/pterodactyl-egg-paper.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/f93262b7cead.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-31T13:01:49+00:00",
+        "name": "Paper",
+        "author": "parker@example.com",
+        "description": "High performance Spigot fork that aims to fix gameplay and mechanics inconsistencies.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "[]",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\n# Paper Installation Script\n#\n# Server Files: /mnt/server\nPROJECT=paper\n\nif [ -n \"${DL_PATH}\" ]; then\n\techo -e \"Using supplied download url: ${DL_PATH}\"\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\nelse\n\tVER_EXISTS=`curl -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions | any(.[]; index($VERSION))' | grep -m1 true`\n\tLATEST_VERSION=`curl -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r '.versions | to_entries | .[0].value[0]'`\n\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\n\telse\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\n\tfi\n\n\tBUILD_EXISTS=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\n\tLATEST_BUILD=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[0]'`\n\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\n\telse\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\n\t\tBUILD_NUMBER=${LATEST_BUILD}\n\tfi\n\n\techo \"Version being downloaded\"\n\techo -e \"Project: ${PROJECT}\"\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\n\techo -e \"Build: ${BUILD_NUMBER}\"\n\tDOWNLOAD_URL=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER} | jq -r '.downloads.\"server:default\".url'`\nfi\n\ncd /mnt/server\n\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\n\nif [ -f ${SERVER_JARFILE} ]; then\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\nfi\n\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\n\nif [ ! -f server.properties ]; then\n    echo -e \"Downloading MC server.properties\"\n    curl -o server.properties https://raw.githubusercontent.com/pelican-eggs/minecraft/refs/heads/main/java/server.properties\nfi",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Build Number",
+            "description": "The build number for the paper release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user\nviewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "The version of minecraft to download. \r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "pocketminemp-0b98a446f322",
+        "name": "PocketmineMP",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pterodactyl-Discord :)",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/pocketminemp-0b98a446f322.json",
+        "sha256": "8967766e8f4f5d615485c9a26e0b9cca5bae3721948fd7ce0cfd8a3cae002684",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/bedrock/pocketmine_mp/egg-pocketmine-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/0b98a446f322.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-06-02T19:34:57+02:00",
+        "name": "PocketmineMP",
+        "author": "info@swisscrafting.ch",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pterodactyl-Discord :)",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/php7/bin/php ./PocketMine-MP.phar --no-wizard --disable-ansi",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt-get update\r\napt-get install -y git curl wget jq file tar unzip zip\r\n\r\nmkdir -p /mnt/server/ # Not required. Only here for parkervcp's local test setup\r\n\r\ncd /mnt/server || exit 1\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && printf \"amd64\" || printf \"arm64\")\r\n\r\n# Shouldn't be possible to be empty, but default to PM5 if it is and convert to uppercase\r\nVERSION=\"${VERSION:-PM5}\"\r\nVERSION=\"${VERSION^^}\"\r\n\r\n# Helper functions\r\n\r\ndownload_php_binary() {\r\n  printf \"Downloading latest PHP %s binary for %s\\n\" \"$REQUIRED_PHP_VERSION\" \"$VERSION\"\r\n  curl --location --progress-bar https://github.com/pmmp/PHP-Binaries/releases/download/php-\"$REQUIRED_PHP_VERSION\"-latest/PHP-Linux-x86_64-\"$VERSION\".tar.gz | tar -xzv\r\n}\r\n\r\nset_php_extension_dir() {\r\n  printf \"Configuring php.ini\\n\"\r\n  EXTENSION_DIR=$(find \"bin\" -name '*debug-zts*')\r\n  grep -q '^extension_dir' bin/php7/bin/php.ini && sed -i'bak' \"s{^extension_dir=.*{extension_dir=\\\"$EXTENSION_DIR\\\"{\" bin/php7/bin/php.ini || echo \"extension_dir=\\\"$EXTENSION_DIR\\\"\" >>bin/php7/bin/php.ini\r\n}\r\n\r\ndownload_pmmp() {\r\n  DOWNLOAD_LINK=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.download_url')\r\n  printf \"Downloading %s from %s\\n\" \"$VERSION\" \"${DOWNLOAD_LINK}\"\r\n  curl --location --progress-bar \"${DOWNLOAD_LINK}\" --output PocketMine-MP.phar\r\n}\r\n\r\n# We have to convert VERSION into an API channel\r\nif [[ \"${VERSION}\" == \"PM4\" ]]; then\r\n  API_CHANNEL=\"4\"\r\n\r\nelif [[ \"${VERSION}\" == \"PM5\" ]]; then\r\n   API_CHANNEL=\"stable\"\r\nelse\r\n  printf \"Unsupported version: %s\" \"${VERSION}\"\r\n  exit 1\r\nfi\r\n\r\nREQUIRED_PHP_VERSION=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.php_version')\r\n\r\nif [[ \"${ARCH}\" == \"amd64\" ]]; then\r\n  download_php_binary\r\n\r\n# There are no ARM64 PHP binaries yet, so we have to compile them\r\nelse\r\n  apt install -y make autoconf automake m4 bzip2 bison g++ cmake pkg-config re2c libtool-bin\r\n  \r\n  mkdir -p /mnt/server/build_cache/archives\r\n  mkdir -p /mnt/server/build_cache/compilation\r\n  \r\n  # Each PHP version has its own compile script, so we have to download the correct one\r\n  echo \"running curl --location --progress-bar --remote-name https://raw.githubusercontent.com/pmmp/PHP-Binaries/php/\"$REQUIRED_PHP_VERSION\"/compile.sh\"\r\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/pmmp/PHP-Binaries/php/\"$REQUIRED_PHP_VERSION\"/compile.sh\r\n  chmod +x compile.sh\r\n\r\n  cat <<EOF\r\n----------------------------------------\r\n|                                      |\r\n|   Compiling PHP Binary for ARM64     |\r\n|                                      |\r\n|  This is a time consuming process    |\r\n----------------------------------------\r\nEOF\r\n\r\n  printf \"\\n\\nCompiling PHP binary, this is a slow process and will take time\\n\"\r\n  THREADS=$(grep -c ^processor /proc/cpuinfo) || THREADS=1\r\n  ./compile.sh -j \"${THREADS}\" -c /mnt/server/build_cache/archives -l /mnt/server/build_cache/compilation -P ${VERSION:2}\r\n  rm compile.sh\r\n  rm -rf install_data/\r\n\r\nfi\r\n\r\n# Steps below are the same for both architectures\r\ndownload_pmmp\r\nset_php_extension_dir || exit 1\r\n\r\nif [[ ! -f server.properties ]]; then\r\n  printf \"Downloading default server.properties template\\n\"\r\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/bedrock/pocketmine_mp/server.properties\r\nfi\r\n\r\nprintf \"Creating default file and folder structure\\n\"\r\ntouch banned-ips.txt banned-players.txt ops.txt white-list.txt server.log\r\nmkdir -p players worlds plugins resource_packs\r\n\r\ncat <<EOF\r\n----------------------------------------\r\n|                                      |\r\n|   PocketMine-MP Installation Done    |\r\n|                                      |\r\n----------------------------------------\r\nEOF",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version to install",
+            "description": "Latest PocketMine version to install.",
+            "env_variable": "VERSION",
+            "default_value": "PM5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:PM5,PM4",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "pocketminemp-56d90776593d",
+        "name": "PocketmineMP",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pelican Discord :)",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/pocketminemp-56d90776593d.json",
+        "sha256": "0e5846e5fb9e4a7b5aaea506db5680a52bd5db9b0193a19758bdbdf77f604530",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/pocketmine_mp/egg-pocketmine-m-p.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/56d90776593d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "PocketmineMP",
+        "author": "info@swisscrafting.ch",
+        "uuid": "4c3baab1-67ad-48c7-8acd-eb3deaa0a462",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pelican Discord :)",
+        "image": null,
+        "tags": [
+          "minecraft"
+        ],
+        "features": [],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.allocations.default.port}}\", \"query.port\": \"{{server.allocations.default.port}}\"}}}",
+          "startup": "{\"done\": \")! \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\napt-get update\napt-get install -y git curl wget jq file tar unzip zip\n\nmkdir -p /mnt/server/ # Not required. Only here for parkervcp's local test setup\n\ncd /mnt/server || exit 1\n\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && printf \"x86_64\" || printf \"arm64\")\n\n# Shouldn't be possible to be empty, but default to PM5 if it is and convert to uppercase\nVERSION=\"${VERSION:-PM5}\"\nVERSION=\"${VERSION^^}\"\n\n# Helper functions\n\ndownload_php_binary() {\n  local php_binary_url\n  if [[ \"$VERSION\" == \"PM5\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm5-latest/PHP-8.2-Linux-${ARCH}-PM5.tar.gz\"\n  elif [[ \"$VERSION\" == \"PM5PHP83\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm5-php-8.3-latest/PHP-8.3-Linux-${ARCH}-PM5.tar.gz\"\n  elif [[ \"$VERSION\" == \"PM5PHP84\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm5-php-8.4-latest/PHP-8.4-Linux-${ARCH}-PM5.tar.gz\"\n  elif [[ \"$VERSION\" == \"PM4\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm4-latest/PHP-8.1-Linux-${ARCH}-PM4.tar.gz\"\n  else\n    printf \"Unsupported version: %s\\n\" \"${VERSION}\"\n    exit 1\n  fi\n\n  printf \"Downloading PHP binary for %s from %s\\n\" \"$VERSION\" \"$php_binary_url\"\n  curl --location --progress-bar \"$php_binary_url\" | tar -xzv\n}\n\nset_php_extension_dir() {\n  printf \"Configuring php.ini\\n\"\n  EXTENSION_DIR=$(find \"bin\" -name '*debug-zts*')\n  grep -q '^extension_dir' bin/php7/bin/php.ini && \\\n  sed -i'bak' \"s{^extension_dir=.*{extension_dir=\\\"$EXTENSION_DIR\\\"{\" bin/php7/bin/php.ini || \\\n  echo \"extension_dir=\\\"$EXTENSION_DIR\\\"\" >>bin/php7/bin/php.ini\n}\n\ndownload_pmmp() {\n  DOWNLOAD_LINK=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.download_url')\n  printf \"Downloading %s from %s\\n\" \"$VERSION\" \"${DOWNLOAD_LINK}\"\n  curl --location --progress-bar \"${DOWNLOAD_LINK}\" --output PocketMine-MP.phar\n}\n\n# We have to convert VERSION into an API channel\nif [[ \"${VERSION}\" == \"PM4\" ]]; then\n  API_CHANNEL=\"4\"\nelif [[ \"$VERSION\" == \"PM5\" ]] || [[ \"$VERSION\" == \"PM5PHP83\" ]] || [[ \"$VERSION\" == \"PM5PHP84\" ]]; then\n  API_CHANNEL=\"stable\"\nelse\n  printf \"Unsupported version: %s\\n\" \"${VERSION}\"\n  exit 1\nfi\n\nREQUIRED_PHP_VERSION=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.php_version')\n\nif [[ \"${ARCH}\" == \"x86_64\" ]]; then\n  download_php_binary\n\n# There are no ARM64 PHP binaries yet, so we have to compile them\nelse\n  apt-get install -y make autoconf automake m4 bzip2 bison g++ cmake pkg-config re2c libtool-bin\n  \n  mkdir -p /mnt/server/build_cache/archives\n  mkdir -p /mnt/server/build_cache/compilation\n  \n  # Each PHP version has its own compile script, so we have to download the correct one\n  echo \"Running curl to download compile.sh for PHP version $REQUIRED_PHP_VERSION\"\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/pmmp/PHP-Binaries/latest/compile.sh\n  chmod +x compile.sh\n\n  cat <<EOF\n----------------------------------------\n|                                      |\n|   Compiling PHP Binary for ARM64     |\n|                                      |\n|  This is a time consuming process    |\n----------------------------------------\nEOF\n\n  printf \"\\n\\nCompiling PHP binary, this is a slow process and will take time\\n\"\n  THREADS=$(grep -c ^processor /proc/cpuinfo) || THREADS=1\n  ./compile.sh -j \"${THREADS}\" -c /mnt/server/build_cache/archives -l /mnt/server/build_cache/compilation -z \"${REQUIRED_PHP_VERSION}\"\n  rm compile.sh\n  rm -rf install_data/\n\nfi\n\n# Steps below are the same for both architectures\ndownload_pmmp\nset_php_extension_dir || exit 1\n\nif [[ ! -f server.properties ]]; then\n  printf \"Downloading default server.properties template\\n\"\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/bedrock/pocketmine_mp/server.properties\nfi\n\nprintf \"Creating default file and folder structure\\n\"\ntouch banned-ips.txt banned-players.txt ops.txt white-list.txt server.log\nmkdir -p players worlds plugins resource_packs\n\ncat <<EOF\n----------------------------------------\n|                                      |\n|   PocketMine-MP Installation Done    |\n|                                      |\n----------------------------------------\nEOF",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Version to install",
+            "description": "PocketMine version and PHP version to install.",
+            "env_variable": "VERSION",
+            "default_value": "PM5PHP83",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:PM5,PM5PHP83,PM5PHP84,PM4"
+          }
+        ],
+        "startup": "./bin/php7/bin/php ./PocketMine-MP.phar --no-wizard"
+      }
+    },
+    {
+      "entry": {
+        "id": "pocketminemp-abd9307bb59c",
+        "name": "PocketmineMP",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pelican Discord :)",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/pocketminemp-abd9307bb59c.json",
+        "sha256": "01c05004a54ed72367fd6e00e2f5b1c30cfb311c50fcf422f701e12d6356735e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/pocketmine_mp/egg-pterodactyl-pocketmine-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/abd9307bb59c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-06T14:24:50+00:00",
+        "name": "PocketmineMP",
+        "author": "info@swisscrafting.ch",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pelican Discord :)",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/php7/bin/php ./PocketMine-MP.phar --no-wizard",
+        "image": null,
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\napt-get update\napt-get install -y git curl wget jq file tar unzip zip\n\nmkdir -p /mnt/server/ # Not required. Only here for parkervcp's local test setup\n\ncd /mnt/server || exit 1\n\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && printf \"x86_64\" || printf \"arm64\")\n\n# Shouldn't be possible to be empty, but default to PM5 if it is and convert to uppercase\nVERSION=\"${VERSION:-PM5}\"\nVERSION=\"${VERSION^^}\"\n\n# Helper functions\n\ndownload_php_binary() {\n  local php_binary_url\n  if [[ \"$VERSION\" == \"PM5\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm5-latest/PHP-8.2-Linux-${ARCH}-PM5.tar.gz\"\n  elif [[ \"$VERSION\" == \"PM5PHP83\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm5-php-8.3-latest/PHP-8.3-Linux-${ARCH}-PM5.tar.gz\"\n  elif [[ \"$VERSION\" == \"PM5PHP84\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm5-php-8.4-latest/PHP-8.4-Linux-${ARCH}-PM5.tar.gz\"  \n  elif [[ \"$VERSION\" == \"PM4\" ]]; then\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm4-latest/PHP-8.1-Linux-${ARCH}-PM4.tar.gz\"\n  else\n    printf \"Unsupported version: %s\\n\" \"${VERSION}\"\n    exit 1\n  fi\n\n  printf \"Downloading PHP binary for %s from %s\\n\" \"$VERSION\" \"$php_binary_url\"\n  curl --location --progress-bar \"$php_binary_url\" | tar -xzv\n}\n\nset_php_extension_dir() {\n  printf \"Configuring php.ini\\n\"\n  EXTENSION_DIR=$(find \"bin\" -name '*debug-zts*')\n  grep -q '^extension_dir' bin/php7/bin/php.ini && \\\n  sed -i'bak' \"s{^extension_dir=.*{extension_dir=\\\"$EXTENSION_DIR\\\"{\" bin/php7/bin/php.ini || \\\n  echo \"extension_dir=\\\"$EXTENSION_DIR\\\"\" >>bin/php7/bin/php.ini\n}\n\ndownload_pmmp() {\n  DOWNLOAD_LINK=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.download_url')\n  printf \"Downloading %s from %s\\n\" \"$VERSION\" \"${DOWNLOAD_LINK}\"\n  curl --location --progress-bar \"${DOWNLOAD_LINK}\" --output PocketMine-MP.phar\n}\n\n# We have to convert VERSION into an API channel\nif [[ \"${VERSION}\" == \"PM4\" ]]; then\n  API_CHANNEL=\"4\"\nelif [[ \"${VERSION}\" == \"PM5\" ]] || [[ \"${VERSION}\" == \"PM5PHP83\" ]] || [[ \"${VERSION}\" == \"PM5PHP84\" ]]; then\n  API_CHANNEL=\"stable\"\nelse\n  printf \"Unsupported version: %s\\n\" \"${VERSION}\"\n  exit 1\nfi\n\nREQUIRED_PHP_VERSION=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.php_version')\n\nif [[ \"${ARCH}\" == \"x86_64\" ]]; then\n  download_php_binary\n\n# There are no ARM64 PHP binaries yet, so we have to compile them\nelse\n  apt-get install -y make autoconf automake m4 bzip2 bison g++ cmake pkg-config re2c libtool-bin\n  \n  mkdir -p /mnt/server/build_cache/archives\n  mkdir -p /mnt/server/build_cache/compilation\n  \n  # Each PHP version has its own compile script, so we have to download the correct one\n  echo \"Running curl to download compile.sh for PHP version $REQUIRED_PHP_VERSION\"\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/pmmp/PHP-Binaries/latest/compile.sh\n  chmod +x compile.sh\n\n  cat <<EOF\n----------------------------------------\n|                                      |\n|   Compiling PHP Binary for ARM64     |\n|                                      |\n|  This is a time consuming process    |\n----------------------------------------\nEOF\n\n  printf \"\\n\\nCompiling PHP binary, this is a slow process and will take time\\n\"\n  THREADS=$(grep -c ^processor /proc/cpuinfo) || THREADS=1\n  ./compile.sh -j \"${THREADS}\" -c /mnt/server/build_cache/archives -l /mnt/server/build_cache/compilation -z \"${REQUIRED_PHP_VERSION}\"\n  rm compile.sh\n  rm -rf install_data/\n\nfi\n\n# Steps below are the same for both architectures\ndownload_pmmp\nset_php_extension_dir || exit 1\n\nif [[ ! -f server.properties ]]; then\n  printf \"Downloading default server.properties template\\n\"\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/bedrock/pocketmine_mp/server.properties\nfi\n\nprintf \"Creating default file and folder structure\\n\"\ntouch banned-ips.txt banned-players.txt ops.txt white-list.txt server.log\nmkdir -p players worlds plugins resource_packs\n\ncat <<EOF\n----------------------------------------\n|                                      |\n|   PocketMine-MP Installation Done    |\n|                                      |\n----------------------------------------\nEOF",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version to install",
+            "description": "Latest PocketMine version to install.",
+            "env_variable": "VERSION",
+            "default_value": "PM5PHP83",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:PM5,PM5PHP83,PM5PHP84,PM4",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "pocketminemp-d85c80e9e1c3",
+        "name": "PocketmineMP",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pterodactyl-Discord :)",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/pocketminemp-d85c80e9e1c3.json",
+        "sha256": "3c3d618ef7edc283284ea2c9b528406319085c030f7a9abcdfe3b77b336048d9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/bedrock/pocketmine_mp/egg-pocketmine-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d85c80e9e1c3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-20T21:46:27+00:00",
+        "name": "PocketmineMP",
+        "author": "info@swisscrafting.ch",
+        "description": "Pocketmine Egg\r\nby onekintaro from swisscrafting.ch\r\nwith the nice help from #eggs Channel on Pterodactyl-Discord :)",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/php7/bin/php ./PocketMine-MP.phar --no-wizard",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt-get update\r\napt-get install -y git curl wget jq file tar unzip zip\r\n\r\nmkdir -p /mnt/server/ # Not required. Only here for parkervcp's local test setup\r\n\r\ncd /mnt/server || exit 1\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && printf \"x86_64\" || printf \"arm64\")\r\n\r\n# Shouldn't be possible to be empty, but default to PM5 if it is and convert to uppercase\r\nVERSION=\"${VERSION:-PM5}\"\r\nVERSION=\"${VERSION^^}\"\r\n\r\n# Helper functions\r\n\r\ndownload_php_binary() {\r\n  local php_binary_url\r\n  if [[ \"$VERSION\" == \"PM5\" ]]; then\r\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm5-latest/PHP-8.2-Linux-${ARCH}-PM5.tar.gz\"\r\n  elif [[ \"$VERSION\" == \"PM4\" ]]; then\r\n    php_binary_url=\"https://github.com/pmmp/PHP-Binaries/releases/download/pm4-latest/PHP-8.1-Linux-${ARCH}-PM4.tar.gz\"\r\n  else\r\n    printf \"Unsupported version: %s\\n\" \"${VERSION}\"\r\n    exit 1\r\n  fi\r\n\r\n  printf \"Downloading PHP binary for %s from %s\\n\" \"$VERSION\" \"$php_binary_url\"\r\n  curl --location --progress-bar \"$php_binary_url\" | tar -xzv\r\n}\r\n\r\nset_php_extension_dir() {\r\n  printf \"Configuring php.ini\\n\"\r\n  EXTENSION_DIR=$(find \"bin\" -name '*debug-zts*')\r\n  grep -q '^extension_dir' bin/php7/bin/php.ini && \\\r\n  sed -i'bak' \"s{^extension_dir=.*{extension_dir=\\\"$EXTENSION_DIR\\\"{\" bin/php7/bin/php.ini || \\\r\n  echo \"extension_dir=\\\"$EXTENSION_DIR\\\"\" >>bin/php7/bin/php.ini\r\n}\r\n\r\ndownload_pmmp() {\r\n  DOWNLOAD_LINK=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.download_url')\r\n  printf \"Downloading %s from %s\\n\" \"$VERSION\" \"${DOWNLOAD_LINK}\"\r\n  curl --location --progress-bar \"${DOWNLOAD_LINK}\" --output PocketMine-MP.phar\r\n}\r\n\r\n# We have to convert VERSION into an API channel\r\nif [[ \"${VERSION}\" == \"PM4\" ]]; then\r\n  API_CHANNEL=\"4\"\r\n\r\nelif [[ \"${VERSION}\" == \"PM5\" ]]; then\r\n  API_CHANNEL=\"stable\"\r\nelse\r\n  printf \"Unsupported version: %s\\n\" \"${VERSION}\"\r\n  exit 1\r\nfi\r\n\r\nREQUIRED_PHP_VERSION=$(curl -sSL https://update.pmmp.io/api?channel=\"$API_CHANNEL\" | jq -r '.php_version')\r\n\r\nif [[ \"${ARCH}\" == \"x86_64\" ]]; then\r\n  download_php_binary\r\n\r\n# There are no ARM64 PHP binaries yet, so we have to compile them\r\nelse\r\n  apt-get install -y make autoconf automake m4 bzip2 bison g++ cmake pkg-config re2c libtool-bin\r\n  \r\n  mkdir -p /mnt/server/build_cache/archives\r\n  mkdir -p /mnt/server/build_cache/compilation\r\n  \r\n  # Each PHP version has its own compile script, so we have to download the correct one\r\n  echo \"Running curl to download compile.sh for PHP version $REQUIRED_PHP_VERSION\"\r\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/pmmp/PHP-Binaries/latest/compile.sh\r\n  chmod +x compile.sh\r\n\r\n  cat <<EOF\r\n----------------------------------------\r\n|                                      |\r\n|   Compiling PHP Binary for ARM64     |\r\n|                                      |\r\n|  This is a time consuming process    |\r\n----------------------------------------\r\nEOF\r\n\r\n  printf \"\\n\\nCompiling PHP binary, this is a slow process and will take time\\n\"\r\n  THREADS=$(grep -c ^processor /proc/cpuinfo) || THREADS=1\r\n  ./compile.sh -j \"${THREADS}\" -c /mnt/server/build_cache/archives -l /mnt/server/build_cache/compilation -z \"${REQUIRED_PHP_VERSION}\"\r\n  rm compile.sh\r\n  rm -rf install_data/\r\n\r\nfi\r\n\r\n# Steps below are the same for both architectures\r\ndownload_pmmp\r\nset_php_extension_dir || exit 1\r\n\r\nif [[ ! -f server.properties ]]; then\r\n  printf \"Downloading default server.properties template\\n\"\r\n  curl --location --progress-bar --remote-name https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/bedrock/pocketmine_mp/server.properties\r\nfi\r\n\r\nprintf \"Creating default file and folder structure\\n\"\r\ntouch banned-ips.txt banned-players.txt ops.txt white-list.txt server.log\r\nmkdir -p players worlds plugins resource_packs\r\n\r\ncat <<EOF\r\n----------------------------------------\r\n|                                      |\r\n|   PocketMine-MP Installation Done    |\r\n|                                      |\r\n----------------------------------------\r\nEOF",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version to install",
+            "description": "Latest PocketMine version to install.",
+            "env_variable": "VERSION",
+            "default_value": "PM5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:PM5,PM4",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "powernukkitx-0b0a6e443865",
+        "name": "PowerNukkitX",
+        "description": "PowerNukkitX support for Pterodactyl",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/powernukkitx-0b0a6e443865.json",
+        "sha256": "c530d97e0465d9f6e9d6b42e21f648f9c10851cc176af14627db6e7f7a41e966",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/bedrock/PowerNukkitX/egg-powernukkitx.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0b0a6e443865.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-20T21:46:27+00:00",
+        "name": "PowerNukkitX",
+        "author": "powernukkitx@github.com",
+        "description": "PowerNukkitX support for Pterodactyl",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./pnx start {{AUTOREBOOT}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\napt-get update\r\napt-get install -y git curl wget jq file tar unzip zip openssl\r\nmkdir -p /mnt/server/ # Not required. Only here for ptero-eggs's local test setup\r\ncd /mnt/server || exit 1\r\nUPGRADE=\"no\"\r\nif [ -d \"./java\" ]; then\r\nUPGRADE=\"yes\"\r\nfi\r\nwget https://github.com/PowerNukkitX/PNX-CLI/releases/download/0.1.6/PNX-CLI-Linux-x86.zip -O pnx.zip\r\nwget https://raw.githubusercontent.com/PowerNukkitX/PowerNukkitX/master/src/main/resources/default-nukkit.yml -O nukkit.yml\r\nunzip pnx.zip\r\nrm -fr pnx.zip 2>&1 >/dev/null\r\nmv ./target/linux-x86/pnx ./ 2>&1 >/dev/null\r\nrm -fr target 2>&1 >/dev/null\r\nrm -fr java 2>&1 >/dev/null\r\nchmod +x pnx\r\n./pnx jvm install=GraalVM\r\nif [ \"$UPGRADE\" == \"no\" ]; then\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server install --latest\r\nelse\r\n./pnx server install --dev\r\nfi\r\nelse\r\nrm -fr libs 2>&1 >/dev/null\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server update --latest\r\nelse\r\n./pnx server update --dev\r\nfi\r\nfi\r\nrm -fr tmp-GraalVM.tar.gz 2>&1 >/dev/null\r\ncat <<EOF\r\n----------------------------------------\r\n| |\r\n| PowerNukkitX Installation Done |\r\n| |\r\n----------------------------------------\r\nEOF",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version to install",
+            "description": "Choose between latest or dev",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "AutoReboot mode",
+            "description": "to set auto reboot mode please enter -r",
+            "env_variable": "AUTOREBOOT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:2",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "powernukkitx-761d44825108",
+        "name": "PowerNukkitX",
+        "description": "PowerNukkitX support for Pterodactyl",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/powernukkitx-761d44825108.json",
+        "sha256": "082fc9db316b216102721cf2e194a2861c1d4684dc56e6e188f77b61bc391d0f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/bedrock/PowerNukkitX/egg-powernukkitx.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/761d44825108.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-07T02:29:39+02:00",
+        "name": "PowerNukkitX",
+        "author": "powernukkitx@github.com",
+        "description": "PowerNukkitX support for Pterodactyl",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./pnx start {{AUTOREBOOT}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\napt-get update\r\napt-get install -y git curl wget jq file tar unzip zip openssl\r\nmkdir -p /mnt/server/ # Not required. Only here for parkervcp's local test setup\r\ncd /mnt/server || exit 1\r\nUPGRADE=\"no\"\r\nif [ -d \"./java\" ]; then\r\nUPGRADE=\"yes\"\r\nfi\r\nwget https://github.com/PowerNukkitX/PNX-CLI/releases/download/0.1.6/PNX-CLI-Linux-x86.zip -O pnx.zip\r\nwget https://raw.githubusercontent.com/PowerNukkitX/PowerNukkitX/master/src/main/resources/default-nukkit.yml -O nukkit.yml\r\nunzip pnx.zip\r\nrm -fr pnx.zip 2>&1 >/dev/null\r\nmv ./target/linux-x86/pnx ./ 2>&1 >/dev/null\r\nrm -fr target 2>&1 >/dev/null\r\nrm -fr java 2>&1 >/dev/null\r\nchmod +x pnx\r\n./pnx jvm install=GraalVM\r\nif [ \"$UPGRADE\" == \"no\" ]; then\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server install --latest\r\nelse\r\n./pnx server install --dev\r\nfi\r\nelse\r\nrm -fr libs 2>&1 >/dev/null\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server update --latest\r\nelse\r\n./pnx server update --dev\r\nfi\r\nfi\r\nrm -fr tmp-GraalVM.tar.gz 2>&1 >/dev/null\r\ncat <<EOF\r\n----------------------------------------\r\n| |\r\n| PowerNukkitX Installation Done |\r\n| |\r\n----------------------------------------\r\nEOF",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version to install",
+            "description": "Choose between latest or dev",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "AutoReboot mode",
+            "description": "to set auto reboot mode please enter -r",
+            "env_variable": "AUTOREBOOT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:2",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "powernukkitx-b4b0ce6d7996",
+        "name": "PowerNukkitX",
+        "description": "PowerNukkitX support for Pterodactyl",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/powernukkitx-b4b0ce6d7996.json",
+        "sha256": "ec9085b0c02e65a6f27b89b2f333943cf80dc20c929119998fa11dd45ce464bf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/PowerNukkitX/egg-pterodactyl-power-nukkit-x.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/b4b0ce6d7996.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:39:55+00:00",
+        "name": "PowerNukkitX",
+        "author": "powernukkitx@github.com",
+        "description": "PowerNukkitX support for Pterodactyl",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./pnx start {{AUTOREBOOT}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\napt-get update\r\napt-get install -y git curl wget jq file tar unzip zip openssl\r\nmkdir -p /mnt/server/ # Not required. Only here for parkervcp's local test setup\r\ncd /mnt/server || exit 1\r\nUPGRADE=\"no\"\r\nif [ -d \"./java\" ]; then\r\nUPGRADE=\"yes\"\r\nfi\r\nwget https://github.com/PowerNukkitX/PNX-CLI/releases/download/0.1.6/PNX-CLI-Linux-x86.zip -O pnx.zip\r\nwget https://raw.githubusercontent.com/PowerNukkitX/PowerNukkitX/master/src/main/resources/default-nukkit.yml -O nukkit.yml\r\nunzip pnx.zip\r\nrm -fr pnx.zip 2>&1 >/dev/null\r\nmv ./target/linux-x86/pnx ./ 2>&1 >/dev/null\r\nrm -fr target 2>&1 >/dev/null\r\nrm -fr java 2>&1 >/dev/null\r\nchmod +x pnx\r\n./pnx jvm install=GraalVM\r\nif [ \"$UPGRADE\" == \"no\" ]; then\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server install --latest\r\nelse\r\n./pnx server install --dev\r\nfi\r\nelse\r\nrm -fr libs 2>&1 >/dev/null\r\nif [ \"$VERSION\" == \"latest\" ]; then\r\n./pnx server update --latest\r\nelse\r\n./pnx server update --dev\r\nfi\r\nfi\r\nrm -fr tmp-GraalVM.tar.gz 2>&1 >/dev/null\r\ncat <<EOF\r\n----------------------------------------\r\n| |\r\n| PowerNukkitX Installation Done |\r\n| |\r\n----------------------------------------\r\nEOF"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version to install",
+            "description": "Choose between latest or dev",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "AutoReboot mode",
+            "description": "to set auto reboot mode please enter -r",
+            "env_variable": "AUTOREBOOT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:2",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1021 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "nova-life-amboise-745dc479ee55",
+        "name": "Nova-Life: Amboise",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nova-life-amboise-745dc479ee55.json",
+        "sha256": "3e66ec50cdd5b24ac9fe9b194b0c5d87ed54d11173f8a6b1abcd5f689ed69982",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "novalife_amboise/egg-nova--life--amboise.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/745dc479ee55.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-09T10:08:19+01:00",
+        "name": "Nova-Life: Amboise",
+        "author": "josdekurk@gmail.com",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./nova-life.x86_64 -batchmode -nographics -startServer \"{{SERVER_NAME}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server launched in \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nmkdir -p /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\ncd /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\necho -n \"{\\\"serverName\\\":\\\"${SERVER_NAME}\\\",\\\"serverListName\\\":\\\"${SERVER_LIST_NAME}\\\",\\\"serverSlot\\\":${SERVER_SLOTS},\\\"serverPort\\\":${SERVER_PORT},\\\"isPublicServer\\\":false,\\\"useAdminPinAuth\\\":false,\\\"tabletUrl\\\":\\\"\\\",\\\"isWhitelisted\\\":false,\\\"useWhitelistProtection\\\":false,\\\"whitelist\\\":{\\\"intro\\\":\\\"\\\",\\\"questions\\\":[],\\\"date\\\":\\\"\\\"},\\\"autoSaveIntervalSeconds\\\":1800,\\\"disconnectClientsBeforeStop\\\":true,\\\"mapId\\\":0,\\\"serverFramerate\\\":60,\\\"hasShop\\\":false}\" | jq . > server.json\r\n\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1665030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1665030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update The server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server.\r\nMust match the one made in game and uploaded or a reinstallation is needed to auto make a new one.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join",
+            "env_variable": "SERVER_SLOTS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server List Name",
+            "description": "The name of the server in the Server List",
+            "env_variable": "SERVER_LIST_NAME",
+            "default_value": "A Pterodactyl server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nova-life-amboise-94511c323e01",
+        "name": "Nova-Life: Amboise",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nova-life-amboise-94511c323e01.json",
+        "sha256": "e6f870145577f3de3d698c290629fd15bcaffea5d016d6b5d0ed4a40ca82c50c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "novalife_amboise/egg-pterodactyl-nova--life--amboise.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/94511c323e01.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:31+00:00",
+        "name": "Nova-Life: Amboise",
+        "author": "josdekurk@gmail.com",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./nova-life.x86_64 -batchmode -nographics -startServer \"{{SERVER_NAME}}\"",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server launched in \"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nmkdir -p /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\ncd /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\necho -n \"{\\\"serverName\\\":\\\"${SERVER_NAME}\\\",\\\"serverListName\\\":\\\"${SERVER_LIST_NAME}\\\",\\\"serverSlot\\\":${SERVER_SLOTS},\\\"serverPort\\\":${SERVER_PORT},\\\"isPublicServer\\\":false,\\\"useAdminPinAuth\\\":false,\\\"tabletUrl\\\":\\\"\\\",\\\"isWhitelisted\\\":false,\\\"useWhitelistProtection\\\":false,\\\"whitelist\\\":{\\\"intro\\\":\\\"\\\",\\\"questions\\\":[],\\\"date\\\":\\\"\\\"},\\\"autoSaveIntervalSeconds\\\":1800,\\\"disconnectClientsBeforeStop\\\":true,\\\"mapId\\\":0,\\\"serverFramerate\\\":60,\\\"hasShop\\\":false}\" | jq . > server.json\r\n\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1665030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1665030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update The server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server.\r\nMust match the one made in game and uploaded or a reinstallation is needed to auto make a new one.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join",
+            "env_variable": "SERVER_SLOTS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server List Name",
+            "description": "The name of the server in the Server List",
+            "env_variable": "SERVER_LIST_NAME",
+            "default_value": "A Pterodactyl server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nova-life-amboise-c910949acd7f",
+        "name": "Nova-Life: Amboise",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nova-life-amboise-c910949acd7f.json",
+        "sha256": "539ace07d44aad2cd66e580ec6bbd68ecda1eb3b26580f5c9669cb2f7b3dd850",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/novalife_amboise/egg-nova--life--amboise.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/c910949acd7f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-09T10:08:19+01:00",
+        "name": "Nova-Life: Amboise",
+        "author": "josdekurk@gmail.com",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./nova-life.x86_64 -batchmode -nographics -startServer \"{{SERVER_NAME}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server launched in \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nmkdir -p /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\ncd /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\necho -n \"{\\\"serverName\\\":\\\"${SERVER_NAME}\\\",\\\"serverListName\\\":\\\"${SERVER_LIST_NAME}\\\",\\\"serverSlot\\\":${SERVER_SLOTS},\\\"serverPort\\\":${SERVER_PORT},\\\"isPublicServer\\\":false,\\\"useAdminPinAuth\\\":false,\\\"tabletUrl\\\":\\\"\\\",\\\"isWhitelisted\\\":false,\\\"useWhitelistProtection\\\":false,\\\"whitelist\\\":{\\\"intro\\\":\\\"\\\",\\\"questions\\\":[],\\\"date\\\":\\\"\\\"},\\\"autoSaveIntervalSeconds\\\":1800,\\\"disconnectClientsBeforeStop\\\":true,\\\"mapId\\\":0,\\\"serverFramerate\\\":60,\\\"hasShop\\\":false}\" | jq . > server.json\r\n\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1665030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1665030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update The server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server.\r\nMust match the one made in game and uploaded or a reinstallation is needed to auto make a new one.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join",
+            "env_variable": "SERVER_SLOTS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server List Name",
+            "description": "The name of the server in the Server List",
+            "env_variable": "SERVER_LIST_NAME",
+            "default_value": "A Pterodactyl server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nova-life-amboise-e96e3779728a",
+        "name": "Nova-Life: Amboise",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nova-life-amboise-e96e3779728a.json",
+        "sha256": "bef03a4f1e1fca4e9cab97630329efcdcadac13b6dfe8f4ad36230de85a83044",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "novalife_amboise/egg-nova--life--amboise.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e96e3779728a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Nova-Life: Amboise",
+        "author": "josdekurk@gmail.com",
+        "uuid": "11891380-2d66-4c25-a8fc-80a2379676c3",
+        "description": "Nova-Life: Amboise is a multiplayer role-play simulation video game. Create your character and start your second life!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./nova-life.x86_64 -batchmode -nographics -startServer \"{{SERVER_NAME}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server launched in \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nmkdir -p /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\ncd /mnt/server/Servers/${SERVER_NAME}/Config\r\n\r\necho -n \"{\\\"serverName\\\":\\\"${SERVER_NAME}\\\",\\\"serverListName\\\":\\\"${SERVER_LIST_NAME}\\\",\\\"serverSlot\\\":${SERVER_SLOTS},\\\"serverPort\\\":${SERVER_PORT},\\\"isPublicServer\\\":false,\\\"useAdminPinAuth\\\":false,\\\"tabletUrl\\\":\\\"\\\",\\\"isWhitelisted\\\":false,\\\"useWhitelistProtection\\\":false,\\\"whitelist\\\":{\\\"intro\\\":\\\"\\\",\\\"questions\\\":[],\\\"date\\\":\\\"\\\"},\\\"autoSaveIntervalSeconds\\\":1800,\\\"disconnectClientsBeforeStop\\\":true,\\\"mapId\\\":0,\\\"serverFramerate\\\":60,\\\"hasShop\\\":false}\" | jq . > server.json\r\n\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1665030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1665030",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update The server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server.\r\nMust match the one made in game and uploaded or a reinstallation is needed to auto make a new one.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join",
+            "env_variable": "SERVER_SLOTS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,50",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server List Name",
+            "description": "The name of the server in the Server List",
+            "env_variable": "SERVER_LIST_NAME",
+            "default_value": "A Pterodactyl server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nuclear-option-adf27f3ace49",
+        "name": "Nuclear Option",
+        "description": "Fly near-future aircraft with immersive physics on intense battlefields, facing land, air and sea threats. Wage war against AI or other players with an array of potent weapons. Wield tactical and strategic nuclear weapons, capable of annihilating anything in their path.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nuclear-option-adf27f3ace49.json",
+        "sha256": "65b8bb49ad676d9ae2e61681bcb9155adefb68d58547dfec8675185215d21663",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "nuclear_option/egg-nuclear-option.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/adf27f3ace49.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-30T14:46:30+01:00",
+        "name": "Nuclear Option",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Fly near-future aircraft with immersive physics on intense battlefields, facing land, air and sea threats. Wage war against AI or other players with an array of potent weapons. Wield tactical and strategic nuclear weapons, capable of annihilating anything in their path.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export LD_LIBRARY_PATH=\"$(pwd)/linux64:$LD_LIBRARY_PATH\"; ./NuclearOptionServer.x86_64",
+        "config": {
+          "files": "{\"DedicatedServerConfig.json\": {\"parser\": \"json\", \"find\": {\"ServerName\": \"{{server.build.env.SERVER_NAME}}\", \"Password\": \"{{server.build.env.SERVER_PASSWORD}}\", \"MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"ModdedServer\": \"{{server.build.env.MODDED_SERVER}}\", \"Port.Value\": \"{{server.build.default.port}}\", \"QueryPort.Value\": \"{{server.build.env.QUERY_PORT}}\", \"MissionDirectory\": \"/home/container/NuclearOption-Missions\"}}}",
+          "startup": "{\"done\": \"[DedicatedServerManager] Waiting for Players before loading next map\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\ncat > /mnt/server/DedicatedServerConfig.json <<EOF\r\n{\r\n  \"BanListPaths\": [ \"ban_list.txt\" ],\r\n  \"MaxPlayers\": 20,\r\n  \"MissionDirectory\": \"/home/steam/NuclearOption-Missions\",\r\n  \"MissionRotation\": [\r\n    {\r\n      \"Key\": { \"Group\": \"BuiltIn\", \"Name\": \"Escalation\" },\r\n      \"MaxTime\": 7200\r\n    },\r\n    {\r\n      \"Key\": { \"Group\": \"BuiltIn\", \"Name\": \"Terminal Control\" },\r\n      \"MaxTime\": 7200\r\n    }\r\n  ],\r\n  \"ModdedServer\": false,\r\n  \"NoPlayerStopTime\": 30,\r\n  \"Password\": \"ChangeMe\",\r\n  \"Port\": { \"IsOverride\": true, \"Value\": ${SERVER_PORT} },\r\n  \"QueryPort\": { \"IsOverride\": true, \"Value\": ${QUERY_PORT} },\r\n  \"RotationType\": 0,\r\n  \"ServerName\": \"Pterodactyl-server\"\r\n}\r\nEOF\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3930080",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3930080",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl-server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Modded Server",
+            "description": "Modded server, true or false",
+            "env_variable": "MODDED_SERVER",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password used to join the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "7777",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "one-hour-one-life-0e311eeadd16",
+        "name": "One Hour One Life",
+        "description": "Dedicated server for One Hour One Life\r\nhttp://onehouronelife.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/one-hour-one-life-0e311eeadd16.json",
+        "sha256": "813a203ff5ab21d13559acd73f9e4f0d7d277738dc43182c73445528094e999f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "OneHourOneLife/pelican-egg-one-hour-one-life.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/0e311eeadd16.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-25T10:17:06+00:00",
+        "name": "One Hour One Life",
+        "author": "peter.game.servers@gmail.com",
+        "uuid": "f3b89fc7-7e7d-4451-a26d-062ed4920103",
+        "description": "Dedicated server for One Hour One Life\r\nhttp://onehouronelife.com/",
+        "image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEBKwErAAD/2wBDAFA3PEY8MlBGQUZaVVBfeMiCeG5uePWvuZHI////////////////////////////////////////////////////2wBDAVVaWnhpeOuCguv/////////////////////////////////////////////////////////////////////////wAARCAExAi4DAREAAhEBAxEB/8QAGQAAAgMBAAAAAAAAAAAAAAAAAAECAwQF/8QAMRAAAgIBAwIFBAMBAQACAwEAAAECEQMEITESQRMUUWFxIjKBkTNCUqEjYrFywdHh/8QAFwEBAQEBAAAAAAAAAAAAAAAAAAECA//EABwRAQEBAAMBAQEAAAAAAAAAAAABEQISMSFBIv/aAAwDAQACEQMRAD8AxAAAAAAAAAMBAAAAAOgCgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANK+ACgEAAAAAAAAAANqmAgAAAAJPdJ/sCIAAAAAAAAAAAAAAAAAAAAAAAAABJxaq1yAdErrvVgHS3VICSxtvjYB+G06kv0BBxd0l3oCUcUnKgHLC02lewBPE4qNLlbgRjik2lXIE4YXJvkAenycpbAHlp2ltuALBNunGrfqBB45JtNNfID8KT43APBnX2u7AHhyL+rAPClSdfgB+XnVpL4sBrTzbpqmAngyK9rr0Ag1UqYCrv2AEm+ACn6ASjBuSTT39gLnpZX9DTAjLTZOyX7Ai9PkXZALwZrlASeCdWo+4EJY5x5XuA/DlKulbtXQB4U76a92Aljb4pgHhSuq3Ac8bS4e2wEXFqr7gEU3v29QEAVvQBT9ABprkCTg+ppK6AIwk3VAJwaV9gJLG3s9mAeFJc/j3AUovat/gAjjk/wCrAFjk+zAjW9cgFc+wAouXCsCbxtT6FTbQEXFqr7gNQbjdPmtkBGvXYBqEn2AnHG3yvZgOWCcU6jfugI+FOPKAg1QBwAgAAAAADZp8bnFKSTjyn6AaPBjwwHGEY8IBqEV2AOmPoBFYoxukA1BLsA3FPlADjF8oAUEnYDAewCoApPsANJ9gFGKjwgHS9AHSAg8cW064Al0pAHSgDb0Aqnp4zk2+GqAb08HX0rZVwAlghHtQE3ji1wubAagkqAaSQA0gEoR9AF0K9tqAlSATgmtwBQXoAdCAisUY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",
+        "tags": [],
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"OneLife/server/settings/port.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.allocations.default.port}}\"}}, \"OneLife/server/settings/clientPassword.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.environment.PASSWORD}}\"}}, \"OneLife/server/settings/requireClientPassword.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.environment.REQUIRE_PASSWORD}}\"}}, \"OneLife/server/settings/serverID.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.environment.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"Listening for connection on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "# Update\r\napt update\r\napt install -y build-essential git\r\n\r\n# Create Server folder\r\nmkdir -p /mnt/server/\r\ncd /mnt/server/\r\n\r\n# Clone the server builder\r\ncurl -o serverPullAndBuildLinux.sh https://raw.githubusercontent.com/jasonrohrer/OneLife/master/server/installYourOwnServer/serverPullAndBuildLinux.sh\r\n\r\n# Run it\r\nchmod +x serverPullAndBuildLinux.sh\r\n./serverPullAndBuildLinux.sh\r\n\r\necho -e \"Install Complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "",
+            "env_variable": "PASSWORD",
+            "default_value": "ohol",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 1
+          },
+          {
+            "name": "Require Password",
+            "description": "",
+            "env_variable": "REQUIRE_PASSWORD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "sort": 2
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "onehouronelife",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 3
+          }
+        ],
+        "startup": "cd OneLife/server && ./OneLifeServer"
+      }
+    },
+    {
+      "entry": {
+        "id": "one-hour-one-life-197a558a397a",
+        "name": "One Hour One Life",
+        "description": "Dedicated server for One Hour One Life\r\nhttp://onehouronelife.com/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/one-hour-one-life-197a558a397a.json",
+        "sha256": "00a3ca7cea5013bfe2b7d79bbd536157e758544df57f397074f7be42e41b5ad4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "OneHourOneLife/pterodactyl-egg-one-hour-one-life.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/197a558a397a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-25T10:17:06+00:00",
+        "name": "One Hour One Life",
+        "author": "peter.game.servers@gmail.com",
+        "description": "Dedicated server for One Hour One Life\r\nhttp://onehouronelife.com/",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "cd OneLife/server && ./OneLifeServer",
+        "config": {
+          "files": "{\"OneLife/server/settings/port.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.build.default.port}}\"}}, \"OneLife/server/settings/clientPassword.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.build.env.PASSWORD}}\"}}, \"OneLife/server/settings/requireClientPassword.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.build.env.REQUIRE_PASSWORD}}\"}}, \"OneLife/server/settings/serverID.ini\": {\"parser\": \"file\", \"find\": {\"\": \"{{server.build.env.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"Listening for connection on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "# Update\r\napt update\r\napt install -y build-essential git\r\n\r\n# Create Server folder\r\nmkdir -p /mnt/server/\r\ncd /mnt/server/\r\n\r\n# Clone the server builder\r\ncurl -o serverPullAndBuildLinux.sh https://raw.githubusercontent.com/jasonrohrer/OneLife/master/server/installYourOwnServer/serverPullAndBuildLinux.sh\r\n\r\n# Run it\r\nchmod +x serverPullAndBuildLinux.sh\r\n./serverPullAndBuildLinux.sh\r\n\r\necho -e \"Install Complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Password",
+            "description": "",
+            "env_variable": "PASSWORD",
+            "default_value": "ohol",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Require Password",
+            "description": "",
+            "env_variable": "REQUIRE_PASSWORD",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "onehouronelife",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "onset-b4601ce0c01e",
+        "name": "Onset",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/onset-b4601ce0c01e.json",
+        "sha256": "b18f4b41a6bd0e11b1dabfee69def0b74fa5b3cc8cda5d4e1de70a8970de41d4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/onset/egg-onset.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/b4601ce0c01e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:05:07+02:00",
+        "name": "Onset",
+        "author": "parker@parkervcp.com",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./OnsetServer --noinput",
+        "config": {
+          "files": "{\"server_config.json\": {\"parser\": \"json\", \"find\": {\"ipaddress\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\", \"servername\": \"{{server.build.env.SERVER_NAME}}\", \"password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Entering simulation\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "ARK steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1204170",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1204170",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "required to load server libraries.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This flag will auto update the server on restart. (default is 1) \r\n\r\nSet to 1 to update\r\nSet to 0 to no update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "onset-d94821cf32eb",
+        "name": "Onset",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/onset-d94821cf32eb.json",
+        "sha256": "7f7ff558d541987b7a45e93c59c4490f752b0dc276b3938f667519ce7b91af16",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "onset/egg-pterodactyl-onset.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/d94821cf32eb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:31+00:00",
+        "name": "Onset",
+        "author": "parker@parkervcp.com",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./OnsetServer --noinput",
+        "config": {
+          "files": "{\"server_config.json\": {\"parser\": \"json\", \"find\": {\"ipaddress\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\", \"servername\": \"{{server.build.env.SERVER_NAME}}\", \"password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Entering simulation\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "ARK steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1204170",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1204170",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "required to load server libraries.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This flag will auto update the server on restart. (default is 1) \r\n\r\nSet to 1 to update\r\nSet to 0 to no update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "onset-e185a63b2acc",
+        "name": "Onset",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/onset-e185a63b2acc.json",
+        "sha256": "4c1219b381371d73ea6fbdd70bc0c95220e74377871523c9a051c000d7d087ef",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "onset/egg-onset.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/e185a63b2acc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:05:07+02:00",
+        "name": "Onset",
+        "author": "parker@parkervcp.com",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./OnsetServer --noinput",
+        "config": {
+          "files": "{\"server_config.json\": {\"parser\": \"json\", \"find\": {\"ipaddress\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\", \"servername\": \"{{server.build.env.SERVER_NAME}}\", \"password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Entering simulation\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "ARK steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1204170",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1204170",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "required to load server libraries.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This flag will auto update the server on restart. (default is 1) \r\n\r\nSet to 1 to update\r\nSet to 0 to no update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

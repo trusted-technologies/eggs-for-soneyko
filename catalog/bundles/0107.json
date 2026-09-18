@@ -1,0 +1,579 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "waterdog-pe-7f57363a90ac",
+        "name": "Waterdog PE",
+        "description": "Brand new proxy server for Minecraft: Bedrock Edition",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/waterdog-pe-7f57363a90ac.json",
+        "sha256": "ba4615ae680c9c9cd2ee4860d617e09626746d024a2962959e27a459bb36478e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/proxy/bedrock/waterdog_pe/egg-waterdog-p-e.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/7f57363a90ac.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:21:58+02:00",
+        "name": "Waterdog PE",
+        "author": "parker@pterodactyl.io",
+        "description": "Brand new proxy server for Minecraft: Bedrock Edition",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17",
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Dterminal.ansi=true -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started query on \"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Adding '.jar' if it isn't part of the file name\r\nif [[ \"${SERVER_JARFILE}\" == \"*\\.jar\" ]]; then\r\n    echo -e \"adding.jar to server file name\"\r\n    SERVER_JARFILE=\"${SERVER_JARFILE}.jar\"\r\nfi\r\n\r\nif [ -z \"${WATERDOG_VERSION}\" ] || [ \"${WATERDOG_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"downloading latest waterdog pe build\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/lastSuccessfulBuild/artifact/target/Waterdog.jar\r\nelse \r\n    echo -e \"downloading waterdog pe build ${WATERDOG_VERSION}\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/${WATERDOG_VERSION}/artifact/target/Waterdog.jar\r\nfi\r\n\r\nif [ ! -f config.yml ]; then\r\n    echo -e \"Downloading waterdog pe config.yml\"\r\n   curl -o config.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/bedrock/waterdog_pe/config.yml\r\nelse\r\n    echo -e \"Waterfall config.yml exists. Will not pull a new file\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Waterdog PE Version",
+            "description": "The build to pull and install. (Ex. 23), or set to latest\r\n\r\nThis is the build number on https://jenkins.waterdog.dev/",
+            "env_variable": "WATERDOG_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The jar to run to",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "waterdog-pe-8e666070ca59",
+        "name": "Waterdog PE",
+        "description": "Brand new proxy server for Minecraft: Bedrock Edition",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/waterdog-pe-8e666070ca59.json",
+        "sha256": "3263fbd263d843232d339c3c4bf2bd114698d55e803d4eb702c2d6dca063e6cb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/proxy/bedrock/waterdog_pe/egg-waterdog-pe.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/8e666070ca59.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:21:58+02:00",
+        "name": "Waterdog PE",
+        "author": "parker@pterodactyl.io",
+        "description": "Brand new proxy server for Minecraft: Bedrock Edition",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Dterminal.ansi=true -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started query on \"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Adding '.jar' if it isn't part of the file name\r\nif [[ \"${SERVER_JARFILE}\" == \"*\\.jar\" ]]; then\r\n    echo -e \"adding.jar to server file name\"\r\n    SERVER_JARFILE=\"${SERVER_JARFILE}.jar\"\r\nfi\r\n\r\nif [ -z \"${WATERDOG_VERSION}\" ] || [ \"${WATERDOG_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"downloading latest waterdog pe build\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/lastSuccessfulBuild/artifact/target/Waterdog.jar\r\nelse \r\n    echo -e \"downloading waterdog pe build ${WATERDOG_VERSION}\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/${WATERDOG_VERSION}/artifact/target/Waterdog.jar\r\nfi\r\n\r\nif [ ! -f config.yml ]; then\r\n    echo -e \"Downloading waterdog pe config.yml\"\r\n   curl -o config.yml https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/proxy/bedrock/waterdog_pe/config.yml\r\nelse\r\n    echo -e \"Waterfall config.yml exists. Will not pull a new file\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Waterdog PE Version",
+            "description": "The build to pull and install. (Ex. 23), or set to latest\r\n\r\nThis is the build number on https://jenkins.waterdog.dev/",
+            "env_variable": "WATERDOG_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The jar to run to",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "waterdog-pe-ddede214edb1",
+        "name": "Waterdog PE",
+        "description": "Brand new proxy server for Minecraft: Bedrock Edition",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/waterdog-pe-ddede214edb1.json",
+        "sha256": "c50bb7dd93432d663bbcd2ccda472da014c83aaa20a2093e492e6faa7bf96fa9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "proxy/bedrock/waterdog_pe/egg-waterdog-p-e.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/ddede214edb1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Waterdog PE",
+        "author": "parker@pterodactyl.io",
+        "uuid": "793c40ea-b8df-4b88-90fe-b2b5a7103e43",
+        "description": "Brand new proxy server for Minecraft: Bedrock Edition",
+        "tags": [
+          "minecraft",
+          "proxy"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "ghcr.io/pelican-eggs/yolks:java_16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "ghcr.io/pelican-eggs/yolks:java_11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Dterminal.ansi=true -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started query on \"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Adding '.jar' if it isn't part of the file name\r\nif [[ \"${SERVER_JARFILE}\" == \"*\\.jar\" ]]; then\r\n    echo -e \"adding.jar to server file name\"\r\n    SERVER_JARFILE=\"${SERVER_JARFILE}.jar\"\r\nfi\r\n\r\nif [ -z \"${WATERDOG_VERSION}\" ] || [ \"${WATERDOG_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"downloading latest waterdog pe build\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/lastSuccessfulBuild/artifact/target/Waterdog.jar\r\nelse \r\n    echo -e \"downloading waterdog pe build ${WATERDOG_VERSION}\\n\"\r\n    curl -sSL -o ${SERVER_JARFILE} https://jenkins.waterdog.dev/job/Waterdog/job/WaterdogPE/job/release/${WATERDOG_VERSION}/artifact/target/Waterdog.jar\r\nfi\r\n\r\nif [ ! -f config.yml ]; then\r\n    echo -e \"Downloading waterdog pe config.yml\"\r\n   curl -o config.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/bedrock/waterdog_pe/config.yml\r\nelse\r\n    echo -e \"Waterfall config.yml exists. Will not pull a new file\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Waterdog PE Version",
+            "description": "The build to pull and install. (Ex. 23), or set to latest\r\n\r\nThis is the build number on https://jenkins.waterdog.dev/",
+            "env_variable": "WATERDOG_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The jar to run to",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "waterfall-745fa2e585f8",
+        "name": "Waterfall",
+        "description": "Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/waterfall-745fa2e585f8.json",
+        "sha256": "6b77d2ad9c8d506c1e1531cc86379a8f7933bd273f6db087079dd01f8993d512",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/proxy/java/waterfall/egg-waterfall.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/745fa2e585f8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-11T09:35:02+00:00",
+        "name": "Waterfall",
+        "author": "hostmaster@waterfallgaming.net",
+        "description": "Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"listeners[0].host\": \"0.0.0.0:{{server.build.default.port}}\", \"servers.*.address\": {\"127.0.0.1\": \"{{config.docker.interface}}\", \"localhost\": \"{{config.docker.interface}}\"}}}}",
+          "startup": "{\"done\": \"Listening on \"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Waterfall Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=waterfall\r\n\r\napt update\r\napt install -y curl jq\r\n\r\nif [ -n \"${DL_LINK}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_LINK}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_LINK} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f config.yml ]; then\r\n\techo -e \"Downloading ${PROJECT} config.yml\"\r\n\tcurl -o config.yml https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/proxy/java/waterfall/config.yml\r\nelse\r\n\techo -e \"${PROJECT} config.yml exists. Will not pull a new file\"\r\nfi",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft that Waterfall was built to support.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Waterfall Jar File",
+            "description": "The name of the jar file to use when running Waterfall.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "waterfall.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "A link to the server jar to download the Waterfall jar.",
+            "env_variable": "DL_LINK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Waterfall build number",
+            "description": "Default is latest.\r\n\r\nif set to latest or an invalid version will grab the latest build number.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "waterfall-75d5068a413d",
+        "name": "Waterfall",
+        "description": "Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/waterfall-75d5068a413d.json",
+        "sha256": "90cb6cc66e5996b6c047f262515730cc3f7016b35b093b0f364ab4845a51239d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/proxy/java/waterfall/egg-waterfall.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/75d5068a413d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-24T09:28:42-04:00",
+        "name": "Waterfall",
+        "author": "hostmaster@waterfallgaming.net",
+        "description": "Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17",
+          "ghcr.io/pterodactyl/yolks:java_16": "ghcr.io/pterodactyl/yolks:java_16",
+          "ghcr.io/pterodactyl/yolks:java_11": "ghcr.io/pterodactyl/yolks:java_11",
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"listeners[0].host\": \"0.0.0.0:{{server.build.default.port}}\", \"servers.*.address\": {\"127.0.0.1\": \"{{config.docker.interface}}\", \"localhost\": \"{{config.docker.interface}}\"}}}}",
+          "startup": "{\"done\": \"Listening on \"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Waterfall Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=waterfall\r\n\r\napt update\r\napt install -y curl jq\r\n\r\nif [ -n \"${DL_LINK}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_LINK}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_LINK} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://papermc.io/api/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://papermc.io/api/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://papermc.io/api/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://papermc.io/api/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://papermc.io/api/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f config.yml ]; then\r\n\techo -e \"Downloading ${PROJECT} config.yml\"\r\n\tcurl -o config.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/java/waterfall/config.yml\r\nelse\r\n\techo -e \"${PROJECT} config.yml exists. Will not pull a new file\"\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft that Waterfall was built to support.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Waterfall Jar File",
+            "description": "The name of the jar file to use when running Waterfall.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "waterfall.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "A link to the server jar to download the Waterfall jar.",
+            "env_variable": "DL_LINK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Waterfall build number",
+            "description": "Default is latest.\r\n\r\nif set to latest or an invalid version will grab the latest build number.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "waterfall-7e1dd924d5c1",
+        "name": "Waterfall",
+        "description": "Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/waterfall-7e1dd924d5c1.json",
+        "sha256": "e3ab8dc807a2481a4a742a02240bb70a99c7bfd8b040348a332d7ab19106f863",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "proxy/java/waterfall/egg-pterodactyl-waterfall.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/7e1dd924d5c1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:11+00:00",
+        "name": "Waterfall",
+        "author": "hostmaster@waterfallgaming.net",
+        "description": "Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "ghcr.io/pelican-eggs/yolks:java_11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "ghcr.io/pelican-eggs/yolks:java_16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"listeners[0].host\": \"0.0.0.0:{{server.build.default.port}}\", \"servers.*.address\": {\"127.0.0.1\": \"{{config.docker.interface}}\", \"localhost\": \"{{config.docker.interface}}\"}}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Listening on \"}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Waterfall Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=waterfall\r\n\r\napt update\r\napt install -y curl jq\r\n\r\nif [ -n \"${DL_LINK}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_LINK}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_LINK} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [ ! -f config.yml ]; then\r\n\techo -e \"Downloading ${PROJECT} config.yml\"\r\n\tcurl -o config.yml https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/java/waterfall/config.yml\r\nelse\r\n\techo -e \"${PROJECT} config.yml exists. Will not pull a new file\"\r\nfi"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft that Waterfall was built to support.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Waterfall Jar File",
+            "description": "The name of the jar file to use when running Waterfall.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "waterfall.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "A link to the server jar to download the Waterfall jar.",
+            "env_variable": "DL_LINK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Waterfall build number",
+            "description": "Default is latest.\r\n\r\nif set to latest or an invalid version will grab the latest build number.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

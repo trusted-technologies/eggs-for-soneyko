@@ -1,0 +1,926 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "alt-v-9059e04c1564",
+        "name": "alt:V",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/alt-v-9059e04c1564.json",
+        "sha256": "42b9493d9f4b0b380611a00279364ef4c4046a24dd874dbcab3068431165bd07",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/altv/egg-alt--v.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/9059e04c1564.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-08-25T08:48:50+00:00",
+        "name": "alt:V",
+        "author": "parker@parkervcp.com",
+        "uuid": "25408807-f3c9-47d0-bed1-1d3f071b869e",
+        "description": "alt:V Multiplayer a third-party multiplayer modification for Grand Theft Auto: V",
+        "features": [],
+        "docker_images": {
+          "ALT-V": "ghcr.io/parkervcp/games:altv"
+        },
+        "file_denylist": [],
+        "startup": "./altv-server",
+        "config": {
+          "files": "{\"server.toml\": {\"parser\": \"file\", \"find\": {\"host\": \"host = '0.0.0.0'\", \"port\": \"port = '{{server.build.default.port}}'\", \"password\": \"password = '{{server.build.env.PASSWORD}}'\", \"description\": \"description = '{{server.build.env.SERVER_DESC}}'\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n\r\napt update\r\napt install -y wget jq curl \r\n\r\ncd /mnt/server\r\nNEWVERSION=$(curl -sSL https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json | jq -r .version)\r\n\r\n\r\nif [ -f \"/mnt/server/altv-server\" ]; then\r\n    CURRENTVERSION=$(cat update.json | jq -r .version)\r\n    if [[ \"${CURRENTVERSION}\" == \"${NEWVERSION}\" ]]; then\r\n        echo \"No update found\"\r\n        exit 0\r\n    fi\r\n    echo \"Backing up version ${CURRENTVERSION}\"\r\n    mkdir -p /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv altv-server /mnt/server/backup/${CURRENTVERSION}/\r\n    cd /mnt/server/data\r\n    mv clothes.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv vehmods.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv pedmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv weaponmodels.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    mv rpfdata.bin /mnt/server/backup/${CURRENTVERSION}/data\r\n    rm /mnt/server/update.json\r\nfi\r\n\r\n\r\ncd /mnt/server\r\n\r\n\r\necho \"Installing version: ${NEWVERSION}\"\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/altv-server\r\nwget -q https://cdn.alt-mp.com/server/${BUILD}/x64_linux/update.json\r\nchmod +x ./altv-server\r\n\r\n\r\nmkdir -p /mnt/server/data\r\ncd /mnt/server/data\r\n\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/vehmods.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/clothes.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/pedmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/weaponmodels.bin\r\nwget -q https://cdn.alt-mp.com/data/${BUILD}/data/rpfdata.bin\r\n\r\n\r\n\r\n\r\ncd /mnt/server\r\nif [ ! -f \"/mnt/server/server.toml\" ]; then\r\ncat << EOF >> server.toml\r\nname = 'alt:V Server'\r\nhost = '0.0.0.0'\r\nport = ${SERVER_PORT}\r\nplayers = 128\r\npassword = '${PASSWORD}'\r\nannounce = false\r\ntoken = 'YOUR_TOKEN'\r\ngamemode = 'Freeroam'\r\nwebsite = 'example.com'\r\nlanguage = 'en'\r\ndescription = '${SERVER_DESC}'\r\nmodules = []\r\nresources = []\r\nEOF\r\nfi\r\n\r\nmkdir -p resources/\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "ld lib path",
+            "description": "Needed to load modules correctly. Best left at default.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": 2,
+            "name": "Release Branch",
+            "description": "The supported versions are release, rc, dev (default: release).\r\nIf you don't know what you are doing leave it on release",
+            "env_variable": "BUILD",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:release,rc,dev",
+            "field_type": "text"
+          },
+          {
+            "sort": 3,
+            "name": "Server Password",
+            "description": "The password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:6",
+            "field_type": "text"
+          },
+          {
+            "sort": 4,
+            "name": "Server Description",
+            "description": "Description for the server.",
+            "env_variable": "SERVER_DESC",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "america-s-army-proving-grounds-94e98d49c75a",
+        "name": "America's Army: Proving Grounds",
+        "description": "America’s Army: Proving Grounds is the official game of the U.S. Army and part of the highly acclaimed America’s Army game series. This free military game focuses on small unit tactical maneuvers and puts you to the test in a wide variety of new America’s Army maps and AA fan favorites.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/america-s-army-proving-grounds-94e98d49c75a.json",
+        "sha256": "8bf8ebd1db9d29e1512bfba6b40c5a92427fedc4e94b5f5613ade19d424c9445",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "americas_army/proving_grounds/egg-america-s-army--proving-grounds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/94e98d49c75a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-09T17:43:24+00:00",
+        "name": "America's Army: Proving Grounds",
+        "author": "eggs@purpleflaghosting.com",
+        "description": "America’s Army: Proving Grounds is the official game of the U.S. Army and part of the highly acclaimed America’s Army game series. This free military game focuses on small unit tactical maneuvers and puts you to the test in a wide variety of new America’s Army maps and AA fan favorites.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Binaries/Linux/AAPG -port={{SERVER_PORT}} -SAP={{AUTH_PORT}} -SQP={{QUERY_PORT}} -servername=\\\"{{SERVER_NAME}}\\\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Finished loading level\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Query",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Auth Port",
+            "description": "Steam authentication port",
+            "env_variable": "AUTH_PORT",
+            "default_value": "7780",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "The steam App ID to install",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "203300",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:203300",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "american-truck-simulator-dedicated-serve-335ca81b5eb2",
+        "name": "American Truck Simulator Dedicated Server",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/american-truck-simulator-dedicated-serve-335ca81b5eb2.json",
+        "sha256": "febcd20ae8f1bd440571acbf0b4f671eb2efcc4742f221277cf6032fd5d2208a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/truck-simulator/american-truck-simulator/egg-american-truck-simulator-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/335ca81b5eb2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-04-24T17:42:49+02:00",
+        "name": "American Truck Simulator Dedicated Server",
+        "author": "chase@cstmgames.com",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/linux_x64/amtrucks_server",
+        "config": {
+          "files": "{\"/.local/share/American Truck Simulator/server_config.sii\": {\"parser\": \"file\", \"find\": {\" connection_dedicated_port:\": \" connection_dedicated_port: {{server.build.default.port}}\", \" query_dedicated_port:\": \" query_dedicated_port: {{env.QUERY_PORT}}\", \" server_logon_token:\": \" server_logon_token: \\\"{{env.STEAM_TOKEN}}\\\"\", \" lobby_name:\": \" lobby_name: \\\"{{env.LOBBY_NAME}}\\\"\"}}}",
+          "startup": "{\"done\": \"[MP] Session running.\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/.local/share/\"American Truck Simulator\"/\r\n\r\nCONFIG_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_config.sii\r\nif [ ! -f \"$CONFIG_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a config file does not yet exist making one!\"\r\n    curl -sSL -o server_config.sii https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/server_config.sii\r\nfi\r\n\r\nPACKAGE_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.sii\r\nif [ ! -f \"$PACKAGE_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.sii file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.sii https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/american-truck-simulator/ats-files/server_packages.sii\r\nfi\r\n\r\nDATA_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.dat\r\nif [ ! -f \"$DATA_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.dat file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.dat https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/american-truck-simulator/ats-files/server_packages.dat\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2239530",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2239530",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "By there readme of the game the query port must be between 27015-27020, but from our testing this port can be any port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth token",
+            "description": "By default, whenever a dedicated server is launched it is using an anonymous account. For such an account non-persistent server id is generated (used for direct search). To avoid this you can acquire a logon token on https://steamcommunity.com/dev/managegameservers (game ownership is required)",
+            "env_variable": "STEAM_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Lobby name",
+            "description": "",
+            "env_variable": "LOBBY_NAME",
+            "default_value": "American Truck Simulator",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "american-truck-simulator-dedicated-serve-621f2f197542",
+        "name": "American Truck Simulator Dedicated Server",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/american-truck-simulator-dedicated-serve-621f2f197542.json",
+        "sha256": "1d9981fcdf806168f846709f66e38c2dcb75f41a7657277539bca6cf8f25b434",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "truck-simulator/american-truck-simulator/egg-pterodactyl-american-truck-simulator-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/621f2f197542.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:47+00:00",
+        "name": "American Truck Simulator Dedicated Server",
+        "author": "chase@cstmgames.com",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/linux_x64/amtrucks_server",
+        "config": {
+          "files": "{\"/.local/share/American Truck Simulator/server_config.sii\": {\"parser\": \"file\", \"find\": {\" connection_dedicated_port:\": \" connection_dedicated_port: {{server.build.default.port}}\", \" query_dedicated_port:\": \" query_dedicated_port: {{env.QUERY_PORT}}\", \" server_logon_token:\": \" server_logon_token: \\\"{{env.STEAM_TOKEN}}\\\"\", \" lobby_name:\": \" lobby_name: \\\"{{env.LOBBY_NAME}}\\\"\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"[MP] Session running.\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/.local/share/\"American Truck Simulator\"/\r\n\r\nCONFIG_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_config.sii\r\nif [ ! -f \"$CONFIG_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a config file does not yet exist making one!\"\r\n    curl -sSL -o server_config.sii https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/server_config.sii\r\nfi\r\n\r\nPACKAGE_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.sii\r\nif [ ! -f \"$PACKAGE_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.sii file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.sii https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/american-truck-simulator/ats-files/server_packages.sii\r\nfi\r\n\r\nDATA_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.dat\r\nif [ ! -f \"$DATA_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.dat file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.dat https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/american-truck-simulator/ats-files/server_packages.dat\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2239530",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2239530",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "By there readme of the game the query port must be between 27015-27020, but from our testing this port can be any port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth token",
+            "description": "By default, whenever a dedicated server is launched it is using an anonymous account. For such an account non-persistent server id is generated (used for direct search). To avoid this you can acquire a logon token on https://steamcommunity.com/dev/managegameservers (game ownership is required)",
+            "env_variable": "STEAM_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Lobby name",
+            "description": "",
+            "env_variable": "LOBBY_NAME",
+            "default_value": "American Truck Simulator",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "american-truck-simulator-dedicated-serve-97f4b416a088",
+        "name": "American Truck Simulator Dedicated Server",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/american-truck-simulator-dedicated-serve-97f4b416a088.json",
+        "sha256": "614f2dc9d6d52aea49bf6703515e8ac6d656cf07dcf021d72d768f2ea8dad4af",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "truck-simulator/american-truck-simulator/egg-american-truck-simulator-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/97f4b416a088.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "American Truck Simulator Dedicated Server",
+        "author": "chase@cstmgames.com",
+        "uuid": "a38a961b-6a02-41fd-ad6c-6ed7833d4e9d",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/linux_x64/amtrucks_server",
+        "config": {
+          "files": "{\"/.local/share/American Truck Simulator/server_config.sii\": {\"parser\": \"file\", \"find\": {\" connection_dedicated_port:\": \" connection_dedicated_port: {{server.build.default.port}}\", \" query_dedicated_port:\": \" query_dedicated_port: {{env.QUERY_PORT}}\", \" server_logon_token:\": \" server_logon_token: \\\"{{env.STEAM_TOKEN}}\\\"\", \" lobby_name:\": \" lobby_name: \\\"{{env.LOBBY_NAME}}\\\"\"}}}",
+          "startup": "{\"done\": \"[MP] Session running.\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/.local/share/\"American Truck Simulator\"/\r\n\r\nCONFIG_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_config.sii\r\nif [ ! -f \"$CONFIG_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a config file does not yet exist making one!\"\r\n    curl -sSL -o server_config.sii https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/server_config.sii\r\nfi\r\n\r\nPACKAGE_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.sii\r\nif [ ! -f \"$PACKAGE_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.sii file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.sii https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/american-truck-simulator/ats-files/server_packages.sii\r\nfi\r\n\r\nDATA_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.dat\r\nif [ ! -f \"$DATA_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.dat file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.dat https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/steamcmd_servers/truck-simulator/american-truck-simulator/ats-files/server_packages.dat\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2239530",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2239530",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "By there readme of the game the query port must be between 27015-27020, but from our testing this port can be any port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth token",
+            "description": "By default, whenever a dedicated server is launched it is using an anonymous account. For such an account non-persistent server id is generated (used for direct search). To avoid this you can acquire a logon token on https://steamcommunity.com/dev/managegameservers (game ownership is required)",
+            "env_variable": "STEAM_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Lobby name",
+            "description": "",
+            "env_variable": "LOBBY_NAME",
+            "default_value": "American Truck Simulator",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "american-truck-simulator-dedicated-serve-aa4b2d1a2256",
+        "name": "American Truck Simulator Dedicated Server",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/american-truck-simulator-dedicated-serve-aa4b2d1a2256.json",
+        "sha256": "6367d5c8173f02af8ae3600ecb5b7286cf385b4c0e8a927a5bc4a54674a28d2b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "truck-simulator/american-truck-simulator/egg-american-truck-simulator-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/aa4b2d1a2256.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-04-24T17:42:49+02:00",
+        "name": "American Truck Simulator Dedicated Server",
+        "author": "chase@cstmgames.com",
+        "description": "This will set up SteamCMD and all the required files for the newly released American Truck Simulator Dedicated server.  Simply placed the exported server config from your ATS instance to the .local/share/American Truck Simulator/ folder and select start.  Make sure that auto start is off on server creation to allow you to upload your config files.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/linux_x64/amtrucks_server",
+        "config": {
+          "files": "{\"/.local/share/American Truck Simulator/server_config.sii\": {\"parser\": \"file\", \"find\": {\" connection_dedicated_port:\": \" connection_dedicated_port: {{server.build.default.port}}\", \" query_dedicated_port:\": \" query_dedicated_port: {{env.QUERY_PORT}}\", \" server_logon_token:\": \" server_logon_token: \\\"{{env.STEAM_TOKEN}}\\\"\", \" lobby_name:\": \" lobby_name: \\\"{{env.LOBBY_NAME}}\\\"\"}}}",
+          "startup": "{\"done\": \"[MP] Session running.\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/.local/share/\"American Truck Simulator\"/\r\n\r\nCONFIG_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_config.sii\r\nif [ ! -f \"$CONFIG_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a config file does not yet exist making one!\"\r\n    curl -sSL -o server_config.sii https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/truck-simulator/server_config.sii\r\nfi\r\n\r\nPACKAGE_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.sii\r\nif [ ! -f \"$PACKAGE_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.sii file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.sii https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/truck-simulator/american-truck-simulator/ats-files/server_packages.sii\r\nfi\r\n\r\nDATA_FILE=/mnt/server/.local/share/\"American Truck Simulator\"/server_packages.dat\r\nif [ ! -f \"$DATA_FILE\" ]; then\r\n    cd /mnt/server/.local/share/\"American Truck Simulator\"/\r\n    echo \"a server_packages.dat file does not yet exist making one!\"\r\n    curl -sSL -o server_packages.dat https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/truck-simulator/american-truck-simulator/ats-files/server_packages.dat\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2239530",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2239530",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "By there readme of the game the query port must be between 27015-27020, but from our testing this port can be any port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth token",
+            "description": "By default, whenever a dedicated server is launched it is using an anonymous account. For such an account non-persistent server id is generated (used for direct search). To avoid this you can acquire a logon token on https://steamcommunity.com/dev/managegameservers (game ownership is required)",
+            "env_variable": "STEAM_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Lobby name",
+            "description": "",
+            "env_variable": "LOBBY_NAME",
+            "default_value": "American Truck Simulator",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "among-us-impostor-server-3d9abe0a5693",
+        "name": "Among Us - Impostor Server",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/among-us-impostor-server-3d9abe0a5693.json",
+        "sha256": "e1356c0c36e808fcf679cc727c97d05dfcea29a9f3f31a619d6854b74991b3b4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "among_us/impostor_server/egg-among-us--impostor-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/3d9abe0a5693.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-17T15:53:51+02:00",
+        "name": "Among Us - Impostor Server",
+        "author": "eggs@goover.dev",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/ptero-eggs/yolks:dotnet_8",
+          "Dotnet_7": "ghcr.io/ptero-eggs/yolks:dotnet_7",
+          "Dotnet_6": "ghcr.io/ptero-eggs/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./Impostor.Server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"Server.PublicPort\": \"{{server.build.default.port}}\", \"Server.ListenPort\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Matchmaker is listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl jq tar\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho -e \"\\nDownloading from $DOWNLOAD_URL\"\r\ncurl -sSL -o imposter-server.tar.gz $DOWNLOAD_URL\r\n\r\n\r\necho -e \"\\nUnpacking .tar.gz\"\r\ntar xvf imposter-server.tar.gz\r\n\r\nrm imposter-server.tar.gz\r\nchmod +x Impostor.Server\r\n\r\necho -e \"\\nInstall completed\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Download Version",
+            "description": "Version to Download. Leave latest for the latest release.\r\n\r\nFind all releases at https://github.com/Impostor/Impostor/releases\r\nNote: versions start with a v, example: v1.8.0",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "among-us-impostor-server-91aa42db54f5",
+        "name": "Among Us - Impostor Server",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/among-us-impostor-server-91aa42db54f5.json",
+        "sha256": "1e75cfe2c4e91764dcfcd839887ad93f8118d9f2d40ace9b37cd2cbf1f64ae26",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "among_us/impostor_server/egg-among-us--impostor-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/91aa42db54f5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-07-01T08:27:45+00:00",
+        "name": "Among Us - Impostor Server",
+        "author": "eggs@goover.dev",
+        "uuid": "0693efe8-b3a5-44ec-a3af-3c4d8a4aa431",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/parkervcp/yolks:dotnet_8",
+          "Dotnet_7": "ghcr.io/parkervcp/yolks:dotnet_7",
+          "Dotnet_6": "ghcr.io/parkervcp/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./Impostor.Server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"Server.PublicPort\": \"{{server.allocations.default.port}}\", \"Server.ListenPort\": \"{{server.allocations.default.port}}\"}}}",
+          "startup": "{\"done\": \"Matchmaker is listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl jq tar\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho -e \"\\nDownloading from $DOWNLOAD_URL\"\r\ncurl -sSL -o imposter-server.tar.gz $DOWNLOAD_URL\r\n\r\n\r\necho -e \"\\nUnpacking .tar.gz\"\r\ntar xvf imposter-server.tar.gz\r\n\r\nrm imposter-server.tar.gz\r\nchmod +x Impostor.Server\r\n\r\necho -e \"\\nInstall completed\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": null,
+            "name": "Download Version",
+            "description": "Version to Download. Leave latest for the latest release.\r\n\r\nFind all releases at https://github.com/Impostor/Impostor/releases\r\nNote: versions start with a v, example: v1.8.0",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "among-us-impostor-server-ae2667be805e",
+        "name": "Among Us - Impostor Server",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/among-us-impostor-server-ae2667be805e.json",
+        "sha256": "22f5b7e1c43cf06438acaa582b02d2e18c8ef0e97596cd86ead41f3c805446c4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/among_us/impostor_server/egg-among-us--impostor-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/ae2667be805e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-03-04T15:04:21+01:00",
+        "name": "Among Us - Impostor Server",
+        "author": "eggs@goover.dev",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "features": null,
+        "docker_images": {
+          "Dotnet_7": "ghcr.io/parkervcp/yolks:dotnet_7",
+          "Dotnet_6": "ghcr.io/parkervcp/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./Impostor.Server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"Server.PublicPort\": \"{{server.build.default.port}}\", \"Server.ListenPort\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Matchmaker is listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl jq tar\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho -e \"\\nDownloading from $DOWNLOAD_URL\"\r\ncurl -sSL -o imposter-server.tar.gz $DOWNLOAD_URL\r\n\r\n\r\necho -e \"\\nUnpacking .tar.gz\"\r\ntar xvf imposter-server.tar.gz\r\n\r\nrm imposter-server.tar.gz\r\nchmod +x Impostor.Server\r\n\r\necho -e \"\\nInstall completed\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Download Version",
+            "description": "Version to Download. Leave latest for the latest release.\r\n\r\nFind all releases at https://github.com/Impostor/Impostor/releases\r\nNote: versions start with a v, example: v1.8.0",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "among-us-impostor-server-e00d1a68ea46",
+        "name": "Among Us - Impostor Server",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/among-us-impostor-server-e00d1a68ea46.json",
+        "sha256": "13ef46340924003cc55bea7ca2608583350178bc48b67586e5812b5381ceea6e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "among_us/impostor_server/egg-pterodactyl-among-us--impostor-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/e00d1a68ea46.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-07-01T10:26:38+02:00",
+        "name": "Among Us - Impostor Server",
+        "author": "eggs@goover.dev",
+        "description": "Impostor is one of the first Among Us private servers, written in C#.\r\n\r\nThere are no special features at this moment, the goal is aiming to be as close as possible to the real server, for now. In a later stage, making modifications to game logic by modifying GameData packets can be looked at.",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/parkervcp/yolks:dotnet_8",
+          "Dotnet_7": "ghcr.io/parkervcp/yolks:dotnet_7",
+          "Dotnet_6": "ghcr.io/parkervcp/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./Impostor.Server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"Server.PublicPort\": \"{{server.build.default.port}}\", \"Server.ListenPort\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Matchmaker is listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl jq tar\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Impostor/Impostor/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho -e \"\\nDownloading from $DOWNLOAD_URL\"\r\ncurl -sSL -o imposter-server.tar.gz $DOWNLOAD_URL\r\n\r\n\r\necho -e \"\\nUnpacking .tar.gz\"\r\ntar xvf imposter-server.tar.gz\r\n\r\nrm imposter-server.tar.gz\r\nchmod +x Impostor.Server\r\n\r\necho -e \"\\nInstall completed\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Download Version",
+            "description": "Version to Download. Leave latest for the latest release.\r\n\r\nFind all releases at https://github.com/Impostor/Impostor/releases\r\nNote: versions start with a v, example: v1.8.0",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,784 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "mongodb-6-50023cfe0e1a",
+        "name": "MongoDB 6",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-6-50023cfe0e1a.json",
+        "sha256": "7bd8808cd5c5b9254944f82d8f8b1f615f9db1c1cd721c40ed9f5963db2478a1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "nosql/mongodb/egg-mongo-d-b6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/50023cfe0e1a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:34:24+00:00",
+        "name": "MongoDB 6",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers.",
+        "uuid": "e977e061-8320-4649-9910-6d3056950ef3",
+        "features": null,
+        "docker_images": {
+          "MongoDB_6": "ghcr.io/parkervcp/yolks:mongodb_6"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done; mongosh --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongosh --eval \"db.getSiblingDB('admin').shutdownServer()\" 127.0.0.1:${SERVER_PORT}",
+        "config": {
+          "files": "{\"mongod.conf\": {\"parser\": \"file\", \"find\": {\"#security:\": \"security: \\r\\n  authorization: \\\"enabled\\\"\"}}}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').shutdownServer()\"",
+            "container": "mongo:6-focal",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mongodb-7-0ecc0089e243",
+        "name": "MongoDB 7",
+        "description": "MongoDB Server is a general purpose, document-based, distributed database built for modern application developers and for the cloud era.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-7-0ecc0089e243.json",
+        "sha256": "49f6878cc02a2e7a8dee1cea8eeedb8887fa8d3e35d76f6d980b52d5e85e330d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/nosql/mongodb/egg-mongo-d-b7.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/0ecc0089e243.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-02T10:25:08+01:00",
+        "name": "MongoDB 7",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB Server is a general purpose, document-based, distributed database built for modern application developers and for the cloud era.",
+        "features": null,
+        "docker_images": {
+          "MongoDB_7": "ghcr.io/ptero-eggs/yolks:mongodb_7"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done; mongosh --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongosh --eval \"db.getSiblingDB('admin').shutdownServer()\" 127.0.0.1:${SERVER_PORT}",
+        "config": {
+          "files": "{\"mongod.conf\": {\"parser\": \"file\", \"find\": {\"#security:\": \"security: \\r\\n  authorization: \\\"enabled\\\"\"}}}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').shutdownServer()\"\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "mongo:7-jammy",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mongodb-7-43905ed04953",
+        "name": "MongoDB 7",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-7-43905ed04953.json",
+        "sha256": "e3b35a20a5b236bc73289f7fb73bf85474719726288caed6efbc5c0767778cd9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "nosql/mongodb/egg-mongo-d-b7.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/43905ed04953.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:34:26+00:00",
+        "name": "MongoDB 7",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers.",
+        "uuid": "dfbe8f8b-a06f-4033-ab21-ae0aab11abb7",
+        "features": null,
+        "docker_images": {
+          "MongoDB_7": "ghcr.io/parkervcp/yolks:mongodb_7"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done; mongosh --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongosh --eval \"db.getSiblingDB('admin').shutdownServer()\" 127.0.0.1:${SERVER_PORT}",
+        "config": {
+          "files": "{\"mongod.conf\": {\"parser\": \"file\", \"find\": {\"#security:\": \"security: \\r\\n  authorization: \\\"enabled\\\"\"}}}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').shutdownServer()\"\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "mongo:7-jammy",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mongodb-7-5eb0fc17e84e",
+        "name": "MongoDB 7",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers and for my butt era.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-7-5eb0fc17e84e.json",
+        "sha256": "b268886e51ec59bb8bd3acb96ca8851d33e92bb1d4a71715d3a7945e9bdb1d60",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/nosql/mongodb/egg-mongo-d-b7.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/5eb0fc17e84e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-02T10:25:08+01:00",
+        "name": "MongoDB 7",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers and for my butt era.",
+        "features": null,
+        "docker_images": {
+          "MongoDB_7": "ghcr.io/parkervcp/yolks:mongodb_7"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done; mongosh --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongosh --eval \"db.getSiblingDB('admin').shutdownServer()\" 127.0.0.1:${SERVER_PORT}",
+        "config": {
+          "files": "{\"mongod.conf\": {\"parser\": \"file\", \"find\": {\"#security:\": \"security: \\r\\n  authorization: \\\"enabled\\\"\"}}}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').shutdownServer()\"\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "mongo:7-jammy",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mongodb-8-348072ce4ca3",
+        "name": "MongoDB 8",
+        "description": "MongoDB Server is a general purpose, document-based, distributed database built for modern application developers and for the cloud era.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-8-348072ce4ca3.json",
+        "sha256": "8d98a3a3dc2883556522adab5dbf86c88ea559927c9919ab99c25e552352e37a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/nosql/mongodb/egg-mongo-d-b8.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/348072ce4ca3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-08-22T13:41:06+00:00",
+        "name": "MongoDB 8",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB Server is a general purpose, document-based, distributed database built for modern application developers and for the cloud era.",
+        "features": [],
+        "docker_images": {
+          "MongoDB_8": "ghcr.io/ptero-eggs/yolks:mongodb_8"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done; mongosh --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongosh --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT}  --eval \"db.getSiblingDB('admin').shutdownServer()\"",
+        "config": {
+          "files": "{\"mongod.conf\": {\"parser\": \"file\", \"find\": {\"#security:\": \"security: \\r\\n  authorization: \\\"enabled\\\"\"}}}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').shutdownServer()\"\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "mongo:8-noble",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-13-8340c4693b74",
+        "name": "Postgres 13",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-13-8340c4693b74.json",
+        "sha256": "0f0080c9d94741932356eb5fef81b82d677f794aed32725b3cf2e4957442b914",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/sql/postgres/egg-postgres13.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/8340c4693b74.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-26T01:12:12+00:00",
+        "name": "Postgres 13",
+        "author": "parker@parkervcp.com",
+        "description": "A default Postgres install that is not really editable.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:postgres_13": "ghcr.io/ptero-eggs/yolks:postgres_13"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/ & wait-port;  psql -h127.0.0.1 -p{{SERVER_PORT}} --dbname postgres",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "\\q"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:13-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-14-7ebdee30827c",
+        "name": "Postgres 14",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-14-7ebdee30827c.json",
+        "sha256": "9525b81117c7bf12b41a34586bcda5c17b0b9242db4bf168141d46c3f142b5bd",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/sql/postgres/egg-postgres14.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/7ebdee30827c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-12T15:32:12+01:00",
+        "name": "Postgres 14",
+        "author": "parker@parkervcp.com",
+        "description": "A default Postgres install that is not really editable.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:postgres_14": "ghcr.io/parkervcp/yolks:postgres_14"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:14-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-14-a34d6b8be10a",
+        "name": "Postgres 14",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-14-a34d6b8be10a.json",
+        "sha256": "bd60e242db23f78cd13a0d1b2aeb25e5f081894c76a9a2034a4d190d9d6d6c36",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "sql/postgres/egg-postgres14.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/a34d6b8be10a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:34:26+00:00",
+        "name": "Postgres 14",
+        "author": "parker@parkervcp.com",
+        "uuid": "ddd63c87-a5b4-4c29-8cdc-d285e879ce73",
+        "description": "A default Postgres install that is not really editable.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:postgres_14": "ghcr.io/parkervcp/yolks:postgres_14"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:14-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-14-c8b96d548f97",
+        "name": "Postgres 14",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-14-c8b96d548f97.json",
+        "sha256": "61f8be9be227ae2b5f80befe6d2bb9fd53853cd3d150959f5a406348db5d74f0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/sql/postgres/egg-postgres14.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/c8b96d548f97.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-26T01:12:12+00:00",
+        "name": "Postgres 14",
+        "author": "parker@parkervcp.com",
+        "description": "A default Postgres install that is not really editable.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:postgres_14": "ghcr.io/ptero-eggs/yolks:postgres_14"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/ & wait-port;  psql -h127.0.0.1 -p{{SERVER_PORT}} --dbname postgres",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "\\q"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:14-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-15-94d55a6deb03",
+        "name": "Postgres 15",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-15-94d55a6deb03.json",
+        "sha256": "68e6c739ae4210058a24823086897e3fb449e005abef4674d27e72d564e3bb6d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/sql/postgres/egg-postgres15.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/94d55a6deb03.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-26T01:12:12+00:00",
+        "name": "Postgres 15",
+        "author": "parker@parkervcp.com",
+        "description": "A default Postgres install that is not really editable.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:postgres_15": "ghcr.io/ptero-eggs/yolks:postgres_15"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/ & wait-port;  psql -h127.0.0.1 -p{{SERVER_PORT}} --dbname postgres",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "\\q"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:15-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

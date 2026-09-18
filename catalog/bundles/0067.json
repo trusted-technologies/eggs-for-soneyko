@@ -1,0 +1,1948 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "runescape-dragonwilds-df706bd67ca4",
+        "name": "RuneScape: Dragonwilds",
+        "description": "RuneScape: Dragonwilds is a co-op survival RPG set in the world of RuneScape. Up to 6 players can explore, craft, build, and battle together on a dedicated server. RAM recommendation is 2 GB base + 1 GB per player (8 GB for a full 6-player server).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/runescape-dragonwilds-df706bd67ca4.json",
+        "sha256": "f4244143f112e34216bdbc0affa4f883fb8849d74058a0f92fece7f26e2ca39d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "runescape_dragonwilds/egg-pterodactyl-runescape-dragonwilds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/df706bd67ca4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-23T23:56:48+00:00",
+        "name": "RuneScape: Dragonwilds",
+        "author": "red_thirten@yahoo.com",
+        "description": "RuneScape: Dragonwilds is a co-op survival RPG set in the world of RuneScape. Up to 6 players can explore, craft, build, and battle together on a dedicated server. RAM recommendation is 2 GB base + 1 GB per player (8 GB for a full 6-player server).",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/steamcmd:debian": "ghcr.io/pelican-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./RSDragonwilds/Binaries/Linux/RSDragonwildsServer-Linux-Shipping -log -port={{SERVER_PORT}} -ini:Game:[/Script/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}}",
+        "config": {
+          "files": "{\"RSDragonwilds/Saved/Config/LinuxServer/DedicatedServer.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/Dominion.DedicatedServerSettings].OwnerId\": \"{{server.build.env.OWNER_ID}}\", \"[/Script/Dominion.DedicatedServerSettings].ServerName\": \"{{server.build.env.SERVER_NAME}}\", \"[/Script/Dominion.DedicatedServerSettings].DefaultWorldName\": \"{{server.build.env.DEFAULT_WORLD_NAME}}\", \"[/Script/Dominion.DedicatedServerSettings].AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"[/Script/Dominion.DedicatedServerSettings].WorldPassword\": \"{{server.build.env.WORLD_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"CREATE SESSION - Advertise\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\n## File: RuneScape Dragonwilds Egg - egg-pterodactyl-runescape-dragonwilds.json\n## Authors: David Wolfe (Red-Thirten)\n## Date: 2026/04/23\n## License: MIT License\n## Image to install with is 'ghcr.io/pelican-eggs/installers:debian'\n\n# Download and install SteamCMD\nexport HOME=/mnt/server\ncd /tmp\nmkdir -p $HOME/steamcmd $HOME/steamapps\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C $HOME/steamcmd\ncd $HOME/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\n\n# Install/Verify game server using SteamCMD\n./steamcmd.sh +force_install_dir $HOME +login anonymous +app_update ${SRCDS_APPID} validate +quit\n\n# Set up 32 and 64 bit libraries\nmkdir -p $HOME/.steam/sdk{32,64}\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\n\n## RuneScape Dragonwilds Setup\n# Check for successful installation & ensure binary is executable\nBINARY_DIR=$HOME/RSDragonwilds/Binaries/Linux\nBINARY_NAME=RSDragonwildsServer-Linux-Shipping\nif [[ -f $BINARY_DIR/$BINARY_NAME ]]; then\n    chmod +x $BINARY_DIR/$BINARY_NAME\n    echo -e \"\\nRuneScape Dragonwilds Dedicated Server successfully installed!\\n\"\n    exit 0\nelse\n    echo -e \"\\n\\nSteamCMD failed to install the RuneScape Dragonwilds Dedicated Server!\"\n    echo -e \"\\tTry reinstalling the server again.\\n\"\n    exit 1\nfi",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 Enable | 0 Disable)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[Required] Owner ID",
+            "description": "Your RuneScape: Dragonwilds Player ID. It can be found in game at the bottom of the Settings Menu. Use the copy button to add it to your clipboard. The server will not start without your owner ID!",
+            "env_variable": "OWNER_ID",
+            "default_value": "CHANGEME000000000000000000000000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|size:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Default World Name",
+            "description": "The name of the world created on first startup. Players search for your server by this world name in the Public tab of the Worlds screen (case-sensitive). Uploaded worlds will ignore this setting and use their own name instead.",
+            "env_variable": "DEFAULT_WORLD_NAME",
+            "default_value": "Default World",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server. Displayed as \"Created By\" in the in-game server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Dragonwilds",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Anyone who knows this password can enter the Server Management tab in the Pause Menu > Settings menu. They will be considered as Admins until the Admin Password is changed again. You can see the list of people who have used the Admin Password to enter the Server Management screen by going to Files > RSDragonwilds > Saved > Config > Linux > DedicatedServer.ini.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "CHANGE ME TO A SECURE PASSWORD!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "World Password",
+            "description": "Optional password players must enter to join your server. Will supersede any password stored in the world. Can be left empty if you want anyone to be able to join your world.",
+            "env_variable": "WORLD_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players (1-6).",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "4019830",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer|in:4019830",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-e117d7dd2c7b",
+        "name": "Rust",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rust-e117d7dd2c7b.json",
+        "sha256": "98d0e65307b49deacb75afb76b3151bcbfb960af4542186dcc7ff3c99ebf8ebc",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "rust/vanilla/egg-pterodactyl-rust.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e117d7dd2c7b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-10T02:18:05+00:00",
+        "name": "Rust",
+        "author": "panel@example.com",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Rust": "ghcr.io/pelican-eggs/games:rust"
+        },
+        "file_denylist": [],
+        "startup": "./RustDedicated -batchmode +server.port {{SERVER_PORT}} +server.queryport {{QUERY_PORT}} +server.identity \"rust\" +rcon.port {{RCON_PORT}} +rcon.web true +server.maxplayers {{MAX_PLAYERS}} +rcon.password \"{{RCON_PASS}}\" +server.saveinterval {{SAVEINTERVAL}} +app.port {{APP_PORT}} {{ADDITIONAL_ARGS}}",
+        "config": {
+          "files": "{\"server/rust/cfg/server.cfg\": {\"parser\": \"file\", \"find\": {\"server.hostname \": \"server.hostname \\\"{{server.build.env.SERVER_HOSTNAME}}\\\"\", \"server.description \": \"server.description \\\"{{server.build.env.DESCRIPTION}}\\\"\", \"server.url \": \"server.url \\\"{{server.build.env.SERVER_URL}}\\\"\", \"server.headerimage \": \"server.headerimage \\\"{{server.build.env.SERVER_IMG}}\\\"\", \"server.logoimage \": \"server.logoimage \\\"{{server.build.env.SERVER_LOGO}}\\\"\", \"server.level \": \"server.level \\\"{{server.build.env.LEVEL}}\\\"\", \"server.worldsize \": \"server.worldsize {{server.build.env.WORLD_SIZE}}\", \"server.seed \": \"server.seed {{server.build.env.WORLD_SEED}}\", \"server.tags \": \"server.tags \\\"{{server.build.env.SERVER_TAGS}}\\\"\", \"server.levelurl \": \"server.levelurl \\\"{{server.build.env.MAP_URL}}\\\"\"}}}",
+          "startup": "{\"done\": \"Server startup complete\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n\n\n## just in case someone removed the defaults.\nif [ \"${STEAM_USER}\" == \"\" ]; then\n    echo -e \"steam user is not set.\n\"\n    echo -e \"Using anonymous user.\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## Pelican config.files parser için server.cfg seed satırları\n## Parser bulamadığı satırı SKIP ediyor; bu satırlar olmadan hostname/description Rust'a ulaşmaz.\nmkdir -p /mnt/server/server/rust/cfg\nCFG=/mnt/server/server/rust/cfg/server.cfg\nif [ ! -s \"$CFG\" ] || ! grep -q '^server.hostname ' \"$CFG\"; then\n  cat > \"$CFG\" <<'SEED_EOF'\nserver.hostname \"default\"\nserver.description \"default\"\nserver.url \"\"\nserver.headerimage \"\"\nserver.logoimage \"\"\nserver.level \"Procedural Map\"\nserver.worldsize 4500\nserver.seed 12345\nserver.tags \"\"\nserver.levelurl \"\"\nSEED_EOF\n  echo \"  [seed] server.cfg pre-populated for Pelican file parser\"\nelse\n  echo \"  [seed] server.cfg already has hostname line; skip\"\nfi\n\n",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "SERVER_HOSTNAME",
+            "default_value": "A Rust Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Modding Framework",
+            "description": "The modding framework to be used: carbon, oxide, vanilla. Defaults to \"vanilla\" for a non-modded server installation.",
+            "env_variable": "FRAMEWORK",
+            "default_value": "vanilla",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:vanilla,oxide,carbon",
+            "field_type": "text"
+          },
+          {
+            "name": "Level",
+            "description": "The world file for Rust to use.",
+            "env_variable": "LEVEL",
+            "default_value": "Procedural Map",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Description",
+            "description": "The description under your server title. Commonly used for rules & info. Use \\n for newlines.",
+            "env_variable": "DESCRIPTION",
+            "default_value": "Powered by Panel",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "URL",
+            "description": "The URL for your server. This is what comes up when clicking the \"Visit Website\" button.",
+            "env_variable": "SERVER_URL",
+            "default_value": "http://example.com",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "The world size for a procedural map.",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed for a procedural map.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed in the server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Image",
+            "description": "The header image for the top of your server listing.",
+            "env_variable": "SERVER_IMG",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Port. Can't be the same as Game's primary port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27017",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for RCON connections.",
+            "env_variable": "RCON_PORT",
+            "default_value": "28016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "RCON access password.",
+            "env_variable": "RCON_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^[\\w.-]*$/|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVEINTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments",
+            "description": "Add additional startup parameters to the server.",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App Port",
+            "description": "Port for the Rust+ App. -1 to disable.",
+            "env_variable": "APP_PORT",
+            "default_value": "28082",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Logo",
+            "description": "The circular server logo for the Rust+ app.",
+            "env_variable": "SERVER_LOGO",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Custom Map URL",
+            "description": "Overwrites the map with the one from the direct download URL. Invalid URLs will cause the server to crash.",
+            "env_variable": "MAP_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "258550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:258550",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Tags",
+            "description": "Steam server browser keywords (comma-separated, lowercase, max 4 shown). Categories: wipe schedule (monthly, biweekly, weekly), difficulty (vanilla, hardcore, softcore), gameplay (pve, roleplay, creative, minigame, training, battlefield, broyale, builds, tut), modding (modded, oxide, carbon), region (na, sa, eu, wa, ea, oc, af). Use one tag per category — see https://wiki.facepunch.com/rust/server-browser-tags",
+            "env_variable": "SERVER_TAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-autowipe-475918488245",
+        "name": "Rust Autowipe",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rust-autowipe-475918488245.json",
+        "sha256": "3f1ffd6a2f15e3e63ae9d37249ded0e77e6b0352b1712fdb7289ea7102917858",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/rust/rust_autowipe/egg-rust-autowipe.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/475918488245.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-02T22:25:49-05:00",
+        "name": "Rust Autowipe",
+        "author": "support@pterodactyl.io",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:rust": "ghcr.io/pterodactyl/games:rust"
+        },
+        "file_denylist": [],
+        "startup": "\"./RustDedicated -batchmode +server.port {{SERVER_PORT}} +server.queryport {{QUERY_PORT}} +server.identity \"rust\" +rcon.ip 0.0.0.0 +rcon.port {{RCON_PORT}} +rcon.web true +server.hostname \\\"{{HOSTNAME}}\\\" +server.level \\\"{{LEVEL}}\\\" +server.description \\\"{{DESCRIPTION}}\\\" +server.url \\\"{{SERVER_URL}}\\\" +server.headerimage \\\"{{SERVER_IMG}}\\\" +server.maxplayers {{MAX_PLAYERS}} +rcon.password \\\"{{RCON_PASS}}\\\" +app.port {{APP_PORT}} +server.saveinterval {{SAVEINTERVAL}} $( [ -z ${MAP_URL} ] && printf %s \"+server.worldsize \\\"{{WORLD_SIZE}}\\\" +server.seed \\\"$( if [ -f seed.txt ] && [[ ${WORLD_SEED} == \"0\" ]]; then printf %s $(cat seed.txt); else printf %s ${WORLD_SEED}; fi )\\\"\"|| printf %s \"+server.levelurl {{MAP_URL}}\" ) {{ADDITIONAL_ARGS}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server startup complete\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n\r\nif [ ${REGEN_SERVER} == \"1\" ]; then\r\n    cd /mnt/server/\r\n    rm -rf ${REMOVE_FILES}\r\nfi\r\n\r\nif [ $WORLD_SEED == \"0\" ]; then\r\n    if [ ! -f /mnt/server/seed.txt ]; then\r\n        rm -sf /mnt/server/seed.txt\r\n    fi\r\n    \r\n    cat /dev/urandom | tr -dc '1-9' | fold -w 5 | head -n 1 > /mnt/server/seed.txt\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "258550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed in the server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Rust Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Level",
+            "description": "The world file for Rust to use.",
+            "env_variable": "LEVEL",
+            "default_value": "Procedural Map",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Description",
+            "description": "The description under your server title. Commonly used for rules & info. Use \\n for newlines.",
+            "env_variable": "DESCRIPTION",
+            "default_value": "Powered by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "URL",
+            "description": "The URL for your server. This is what comes up when clicking the \"Visit Website\" button.",
+            "env_variable": "SERVER_URL",
+            "default_value": "http://pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "The world size for a procedural map.",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed for a procedural map.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Image",
+            "description": "The header image for the top of your server listing.",
+            "env_variable": "SERVER_IMG",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for RCON connections.",
+            "env_variable": "RCON_PORT",
+            "default_value": "28016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "RCON access password.",
+            "env_variable": "RCON_PASS",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^[\\w.-]*$/|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVEINTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments",
+            "description": "Add additional startup parameters to the server.",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Regen Server",
+            "description": "If the server should have its files removed and regenerate the server seed on reinstall.",
+            "env_variable": "REGEN_SERVER",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Files to remove",
+            "description": "A space-separated list of files to remove when regenerating the server on reinstall.",
+            "env_variable": "REMOVE_FILES",
+            "default_value": "server/rust/player.deaths.*.db server/rust/player.identities.*.db server/rust/player.states.*.db server/rust/player.tokens.db proceduralmap.*.*.*.map server/rust/proceduralmap.*.*.*.sav oxide/data/Kits_Data.json oxide/data/NTeleportationHome.json oxide/data/ServerRewards/player_data.json oxide/data/PTTracker/playtime_data.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "QUERY PORT",
+            "description": "Port for QUERY connections.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "28017",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "APP PORT",
+            "description": "Port for Rust+ applications. -1 to disable.",
+            "env_variable": "APP_PORT",
+            "default_value": "28082",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Custom Map URL",
+            "description": "Overwrites the map with the one from the direct download URL. Invalid URLs will cause the server to crash.",
+            "env_variable": "MAP_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Modding Framework",
+            "description": "The modding framework to be used: carbon, oxide, vanilla.\r\nDefaults to \"vanilla\" for a non-modded server installation.",
+            "env_variable": "FRAMEWORK",
+            "default_value": "vanilla",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:vanilla,carbon,oxide",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-autowipe-4cc54be4a34a",
+        "name": "Rust Autowipe",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rust-autowipe-4cc54be4a34a.json",
+        "sha256": "a4639d97261e9dbc554a3bef4c82ca7042ac14c1c1cb322336785ad89362ab9f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "rust/rust_autowipe/egg-pterodactyl-rust-autowipe.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4cc54be4a34a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-10T02:18:05+00:00",
+        "name": "Rust Autowipe",
+        "author": "support@pterodactyl.io",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:rust": "ghcr.io/pterodactyl/games:rust"
+        },
+        "file_denylist": [],
+        "startup": "./RustDedicated -batchmode +server.port {{SERVER_PORT}} +server.queryport {{QUERY_PORT}} +server.identity \"rust\" +rcon.port {{RCON_PORT}} +rcon.web true +server.maxplayers {{MAX_PLAYERS}} +rcon.password \"{{RCON_PASS}}\" +server.saveinterval {{SAVEINTERVAL}} +app.port {{APP_PORT}} {{ADDITIONAL_ARGS}}",
+        "config": {
+          "files": "{\"server/rust/cfg/server.cfg\": {\"parser\": \"file\", \"find\": {\"server.hostname \": \"server.hostname \\\"{{server.build.env.HOSTNAME}}\\\"\", \"server.description \": \"server.description \\\"{{server.build.env.DESCRIPTION}}\\\"\", \"server.url \": \"server.url \\\"{{server.build.env.SERVER_URL}}\\\"\", \"server.headerimage \": \"server.headerimage \\\"{{server.build.env.SERVER_IMG}}\\\"\", \"server.logoimage \": \"server.logoimage \\\"{{server.build.env.SERVER_LOGO}}\\\"\", \"server.level \": \"server.level \\\"{{server.build.env.LEVEL}}\\\"\", \"server.worldsize \": \"server.worldsize {{server.build.env.WORLD_SIZE}}\", \"server.seed \": \"server.seed {{server.build.env.WORLD_SEED}}\", \"server.tags \": \"server.tags \\\"{{server.build.env.SERVER_TAGS}}\\\"\", \"server.levelurl \": \"server.levelurl \\\"{{server.build.env.MAP_URL}}\\\"\"}}}",
+          "startup": "{\"done\": \"Server startup complete\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n##\n#\n# Variables\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\n#\n ##\n\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\n\n\nif [ ${REGEN_SERVER} == \"1\" ]; then\n    cd /mnt/server/\n    rm -rf ${REMOVE_FILES}\nfi\n\nif [ $WORLD_SEED == \"0\" ]; then\n    if [ ! -f /mnt/server/seed.txt ]; then\n        rm -sf /mnt/server/seed.txt\n    fi\n    \n    cat /dev/urandom | tr -dc '1-9' | fold -w 5 | head -n 1 > /mnt/server/seed.txt\nfi\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"\n\n## seed server.cfg for Pelican config.files parser.\n## the parser overrides existing lines but does NOT append missing ones,\n## so we have to seed placeholder lines on first install.\nmkdir -p /mnt/server/server/rust/cfg\nCFG=/mnt/server/server/rust/cfg/server.cfg\nif [ ! -s \"$CFG\" ] || ! grep -q '^server.hostname ' \"$CFG\"; then\n  cat > \"$CFG\" <<'SEED_EOF'\nserver.hostname \"default\"\nserver.description \"default\"\nserver.url \"\"\nserver.headerimage \"\"\nserver.logoimage \"\"\nserver.level \"Procedural Map\"\nserver.worldsize 4500\nserver.seed 12345\nserver.tags \"\"\nserver.levelurl \"\"\nSEED_EOF\n  echo \"  [seed] server.cfg pre-populated for Pelican file parser\"\nelse\n  echo \"  [seed] server.cfg already has hostname line; skip\"\nfi\n",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "258550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed in the server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Level",
+            "description": "The world file for Rust to use.",
+            "env_variable": "LEVEL",
+            "default_value": "Procedural Map",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Description",
+            "description": "The description under your server title. Commonly used for rules & info. Use \\n for newlines.",
+            "env_variable": "DESCRIPTION",
+            "default_value": "Powered by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "URL",
+            "description": "The URL for your server. This is what comes up when clicking the \"Visit Website\" button.",
+            "env_variable": "SERVER_URL",
+            "default_value": "http://pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "The world size for a procedural map.",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed for a procedural map.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Image",
+            "description": "The header image for the top of your server listing.",
+            "env_variable": "SERVER_IMG",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for RCON connections.",
+            "env_variable": "RCON_PORT",
+            "default_value": "28016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "RCON access password.",
+            "env_variable": "RCON_PASS",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^[\\w.-]*$/|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVEINTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments",
+            "description": "Add additional startup parameters to the server.",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Regen Server",
+            "description": "If the server should have its files removed and regenerate the server seed on reinstall.",
+            "env_variable": "REGEN_SERVER",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Files to remove",
+            "description": "A space-separated list of files to remove when regenerating the server on reinstall.",
+            "env_variable": "REMOVE_FILES",
+            "default_value": "server/rust/player.deaths.*.db server/rust/player.identities.*.db server/rust/player.states.*.db server/rust/player.tokens.db proceduralmap.*.*.*.map server/rust/proceduralmap.*.*.*.sav oxide/data/Kits_Data.json oxide/data/NTeleportationHome.json oxide/data/ServerRewards/player_data.json oxide/data/PTTracker/playtime_data.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "QUERY PORT",
+            "description": "Port for QUERY connections.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "28017",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "APP PORT",
+            "description": "Port for Rust+ applications. -1 to disable.",
+            "env_variable": "APP_PORT",
+            "default_value": "28082",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Custom Map URL",
+            "description": "Overwrites the map with the one from the direct download URL. Invalid URLs will cause the server to crash.",
+            "env_variable": "MAP_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Modding Framework",
+            "description": "The modding framework to be used: carbon, oxide, vanilla. Defaults to \"vanilla\" for a non-modded server installation.",
+            "env_variable": "FRAMEWORK",
+            "default_value": "vanilla",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:vanilla,carbon,oxide",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Rust Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Tags",
+            "description": "Steam server browser keywords (comma-separated, lowercase, max 4 shown). Categories: wipe schedule (monthly, biweekly, weekly), difficulty (vanilla, hardcore, softcore), gameplay (pve, roleplay, creative, minigame, training, battlefield, broyale, builds, tut), modding (modded, oxide, carbon), region (na, sa, eu, wa, ea, oc, af). Use one tag per category — see https://wiki.facepunch.com/rust/server-browser-tags",
+            "env_variable": "SERVER_TAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-autowipe-58cf2afb9499",
+        "name": "Rust Autowipe",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rust-autowipe-58cf2afb9499.json",
+        "sha256": "3b322db2edf3f9875ba645b99283a50c70069f70c73b909cd8f61291b8363856",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "rust/rust_autowipe/egg-rust-autowipe.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/58cf2afb9499.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-02T22:25:49-05:00",
+        "name": "Rust Autowipe",
+        "author": "support@pterodactyl.io",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:rust": "ghcr.io/pterodactyl/games:rust"
+        },
+        "file_denylist": [],
+        "startup": "\"./RustDedicated -batchmode +server.port {{SERVER_PORT}} +server.queryport {{QUERY_PORT}} +server.identity \"rust\" +rcon.ip 0.0.0.0 +rcon.port {{RCON_PORT}} +rcon.web true +server.hostname \\\"{{HOSTNAME}}\\\" +server.level \\\"{{LEVEL}}\\\" +server.description \\\"{{DESCRIPTION}}\\\" +server.url \\\"{{SERVER_URL}}\\\" +server.headerimage \\\"{{SERVER_IMG}}\\\" +server.maxplayers {{MAX_PLAYERS}} +rcon.password \\\"{{RCON_PASS}}\\\" +app.port {{APP_PORT}} +server.saveinterval {{SAVEINTERVAL}} $( [ -z ${MAP_URL} ] && printf %s \"+server.worldsize \\\"{{WORLD_SIZE}}\\\" +server.seed \\\"$( if [ -f seed.txt ] && [[ ${WORLD_SEED} == \"0\" ]]; then printf %s $(cat seed.txt); else printf %s ${WORLD_SEED}; fi )\\\"\"|| printf %s \"+server.levelurl {{MAP_URL}}\" ) {{ADDITIONAL_ARGS}}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server startup complete\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n\r\nif [ ${REGEN_SERVER} == \"1\" ]; then\r\n    cd /mnt/server/\r\n    rm -rf ${REMOVE_FILES}\r\nfi\r\n\r\nif [ $WORLD_SEED == \"0\" ]; then\r\n    if [ ! -f /mnt/server/seed.txt ]; then\r\n        rm -sf /mnt/server/seed.txt\r\n    fi\r\n    \r\n    cat /dev/urandom | tr -dc '1-9' | fold -w 5 | head -n 1 > /mnt/server/seed.txt\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "258550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed in the server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "40",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Rust Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Level",
+            "description": "The world file for Rust to use.",
+            "env_variable": "LEVEL",
+            "default_value": "Procedural Map",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Description",
+            "description": "The description under your server title. Commonly used for rules & info. Use \\n for newlines.",
+            "env_variable": "DESCRIPTION",
+            "default_value": "Powered by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "URL",
+            "description": "The URL for your server. This is what comes up when clicking the \"Visit Website\" button.",
+            "env_variable": "SERVER_URL",
+            "default_value": "http://pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "The world size for a procedural map.",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed for a procedural map.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Image",
+            "description": "The header image for the top of your server listing.",
+            "env_variable": "SERVER_IMG",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for RCON connections.",
+            "env_variable": "RCON_PORT",
+            "default_value": "28016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "RCON access password.",
+            "env_variable": "RCON_PASS",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^[\\w.-]*$/|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVEINTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Arguments",
+            "description": "Add additional startup parameters to the server.",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Regen Server",
+            "description": "If the server should have its files removed and regenerate the server seed on reinstall.",
+            "env_variable": "REGEN_SERVER",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Files to remove",
+            "description": "A space-separated list of files to remove when regenerating the server on reinstall.",
+            "env_variable": "REMOVE_FILES",
+            "default_value": "server/rust/player.deaths.*.db server/rust/player.identities.*.db server/rust/player.states.*.db server/rust/player.tokens.db proceduralmap.*.*.*.map server/rust/proceduralmap.*.*.*.sav oxide/data/Kits_Data.json oxide/data/NTeleportationHome.json oxide/data/ServerRewards/player_data.json oxide/data/PTTracker/playtime_data.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "QUERY PORT",
+            "description": "Port for QUERY connections.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "28017",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "APP PORT",
+            "description": "Port for Rust+ applications. -1 to disable.",
+            "env_variable": "APP_PORT",
+            "default_value": "28082",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Custom Map URL",
+            "description": "Overwrites the map with the one from the direct download URL. Invalid URLs will cause the server to crash.",
+            "env_variable": "MAP_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "Modding Framework",
+            "description": "The modding framework to be used: carbon, oxide, vanilla.\r\nDefaults to \"vanilla\" for a non-modded server installation.",
+            "env_variable": "FRAMEWORK",
+            "default_value": "vanilla",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:vanilla,carbon,oxide",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-staging-045db165ef0c",
+        "name": "Rust Staging",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rust-staging-045db165ef0c.json",
+        "sha256": "f69dd1c71be1cbbb4e1a1e43e243b41e6e39cfa74a9aba458f9ea5fd689fb647",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "rust/rust_staging/egg-rust-staging.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/045db165ef0c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-30T15:13:30+11:00",
+        "name": "Rust Staging",
+        "author": "root@smc.li",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:rust": "ghcr.io/pterodactyl/games:rust"
+        },
+        "file_denylist": [],
+        "startup": "./RustDedicated -batchmode +server.port {{SERVER_PORT}} +server.identity \"rust\" +rcon.port {{RCON_PORT}} +rcon.web true +server.hostname \\\"{{HOSTNAME}}\\\" +server.level \\\"{{LEVEL}}\\\" +server.description \\\"{{DESCRIPTION}}\\\" +server.url \\\"{{SERVER_URL}}\\\" +server.headerimage \\\"{{SERVER_IMG}}\\\" +server.worldsize \\\"{{WORLD_SIZE}}\\\" +server.seed \\\"{{WORLD_SEED}}\\\" +server.maxplayers {{MAX_PLAYERS}} +rcon.password \\\"{{RCON_PASS}}\\\" +server.saveinterval {{SAVEINTERVAL}} {{ADDITIONAL_ARGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server startup complete\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Rust Staging Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Level",
+            "description": "The world file for Rust to use.",
+            "env_variable": "LEVEL",
+            "default_value": "Procedural Map",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Description",
+            "description": "The description under your server title. Commonly used for rules & info. Use \\n for newlines.",
+            "env_variable": "DESCRIPTION",
+            "default_value": "Powered by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "URL",
+            "description": "The URL for your server. This is what comes up when clicking the \"Visit Website\" button.",
+            "env_variable": "SERVER_URL",
+            "default_value": "http://pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "The world size for a procedural map.",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed for a procedural map.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed in the server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Image",
+            "description": "The header image for the top of your server listing.",
+            "env_variable": "SERVER_IMG",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for RCON connections.",
+            "env_variable": "RCON_PORT",
+            "default_value": "28016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "RCON access password.",
+            "env_variable": "RCON_PASS",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^[\\w.-]*$/|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVEINTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Select the branch to install, such as staging or workcart",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "staging",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App Port",
+            "description": "Port for the Rust+ App. -1 to disable.",
+            "env_variable": "APP_PORT",
+            "default_value": "28082",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Logo",
+            "description": "The circular server logo for the Rust+ app.",
+            "env_variable": "SERVER_LOGO",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "258550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-staging-208849bbe90f",
+        "name": "Rust Staging",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rust-staging-208849bbe90f.json",
+        "sha256": "3fa95c93f5d3a16b8cc8c0d0dfb8e96d9d78f700772bb2719aa0f7c86dd3fc03",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "rust/rust_staging/egg-pterodactyl-rust-staging.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/208849bbe90f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-10T02:18:05+00:00",
+        "name": "Rust Staging",
+        "author": "root@smc.li",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:rust": "ghcr.io/pterodactyl/games:rust"
+        },
+        "file_denylist": [],
+        "startup": "./RustDedicated -batchmode +server.port {{SERVER_PORT}} +server.queryport {{QUERY_PORT}} +server.identity \"rust\" +rcon.port {{RCON_PORT}} +rcon.web true +server.maxplayers {{MAX_PLAYERS}} +rcon.password \"{{RCON_PASS}}\" +server.saveinterval {{SAVEINTERVAL}} +app.port {{APP_PORT}} {{ADDITIONAL_ARGS}}",
+        "config": {
+          "files": "{\"server/rust/cfg/server.cfg\": {\"parser\": \"file\", \"find\": {\"server.hostname \": \"server.hostname \\\"{{server.build.env.HOSTNAME}}\\\"\", \"server.description \": \"server.description \\\"{{server.build.env.DESCRIPTION}}\\\"\", \"server.url \": \"server.url \\\"{{server.build.env.SERVER_URL}}\\\"\", \"server.headerimage \": \"server.headerimage \\\"{{server.build.env.SERVER_IMG}}\\\"\", \"server.logoimage \": \"server.logoimage \\\"{{server.build.env.SERVER_LOGO}}\\\"\", \"server.level \": \"server.level \\\"{{server.build.env.LEVEL}}\\\"\", \"server.worldsize \": \"server.worldsize {{server.build.env.WORLD_SIZE}}\", \"server.seed \": \"server.seed {{server.build.env.WORLD_SEED}}\", \"server.tags \": \"server.tags \\\"{{server.build.env.SERVER_TAGS}}\\\"\", \"server.levelurl \": \"server.levelurl \\\"{{server.build.env.MAP_URL}}\\\"\"}}}",
+          "startup": "{\"done\": \"Server startup complete\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n##\n#\n# Variables\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\n#\n ##\n\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"\n\n## seed server.cfg for Pelican config.files parser.\n## the parser overrides existing lines but does NOT append missing ones,\n## so we have to seed placeholder lines on first install.\nmkdir -p /mnt/server/server/rust/cfg\nCFG=/mnt/server/server/rust/cfg/server.cfg\nif [ ! -s \"$CFG\" ] || ! grep -q '^server.hostname ' \"$CFG\"; then\n  cat > \"$CFG\" <<'SEED_EOF'\nserver.hostname \"default\"\nserver.description \"default\"\nserver.url \"\"\nserver.headerimage \"\"\nserver.logoimage \"\"\nserver.level \"Procedural Map\"\nserver.worldsize 4500\nserver.seed 12345\nserver.tags \"\"\nserver.levelurl \"\"\nSEED_EOF\n  echo \"  [seed] server.cfg pre-populated for Pelican file parser\"\nelse\n  echo \"  [seed] server.cfg already has hostname line; skip\"\nfi\n",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Level",
+            "description": "The world file for Rust to use.",
+            "env_variable": "LEVEL",
+            "default_value": "Procedural Map",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Description",
+            "description": "The description under your server title. Commonly used for rules & info. Use \\n for newlines.",
+            "env_variable": "DESCRIPTION",
+            "default_value": "Powered by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "URL",
+            "description": "The URL for your server. This is what comes up when clicking the \"Visit Website\" button.",
+            "env_variable": "SERVER_URL",
+            "default_value": "http://pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "The world size for a procedural map.",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed for a procedural map.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed in the server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Image",
+            "description": "The header image for the top of your server listing.",
+            "env_variable": "SERVER_IMG",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for RCON connections.",
+            "env_variable": "RCON_PORT",
+            "default_value": "28016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "RCON access password.",
+            "env_variable": "RCON_PASS",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^[\\w.-]*$/|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVEINTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Select the branch to install, such as staging or workcart",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "staging",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App Port",
+            "description": "Port for the Rust+ App. -1 to disable.",
+            "env_variable": "APP_PORT",
+            "default_value": "28082",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Logo",
+            "description": "The circular server logo for the Rust+ app.",
+            "env_variable": "SERVER_LOGO",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "258550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Rust Staging Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Tags",
+            "description": "Steam server browser keywords (comma-separated, lowercase, max 4 shown). Categories: wipe schedule (monthly, biweekly, weekly), difficulty (vanilla, hardcore, softcore), gameplay (pve, roleplay, creative, minigame, training, battlefield, broyale, builds, tut), modding (modded, oxide, carbon), region (na, sa, eu, wa, ea, oc, af). Use one tag per category — see https://wiki.facepunch.com/rust/server-browser-tags",
+            "env_variable": "SERVER_TAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-staging-61a29a54eaaf",
+        "name": "Rust Staging",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/rust-staging-61a29a54eaaf.json",
+        "sha256": "167be8f04a9a541c64e0f2a744257d65ae984ba6064fa18a8aa7e9196025c33d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/rust/rust_staging/egg-rust-staging.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/61a29a54eaaf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-30T15:13:30+11:00",
+        "name": "Rust Staging",
+        "author": "root@smc.li",
+        "description": "The only aim in Rust is to survive. To do this you will need to overcome struggles such as hunger, thirst and cold. Build a fire. Build a shelter. Kill animals for meat. Protect yourself from other players, and kill them for meat. Create alliances with other players and form a town. Do whatever it takes to survive.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:rust": "ghcr.io/pterodactyl/games:rust"
+        },
+        "file_denylist": [],
+        "startup": "./RustDedicated -batchmode +server.port {{SERVER_PORT}} +server.identity \"rust\" +rcon.port {{RCON_PORT}} +rcon.web true +server.hostname \\\"{{HOSTNAME}}\\\" +server.level \\\"{{LEVEL}}\\\" +server.description \\\"{{DESCRIPTION}}\\\" +server.url \\\"{{SERVER_URL}}\\\" +server.headerimage \\\"{{SERVER_IMG}}\\\" +server.worldsize \\\"{{WORLD_SIZE}}\\\" +server.seed \\\"{{WORLD_SEED}}\\\" +server.maxplayers {{MAX_PLAYERS}} +rcon.password \\\"{{RCON_PASS}}\\\" +server.saveinterval {{SAVEINTERVAL}} {{ADDITIONAL_ARGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server startup complete\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Rust Staging Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Level",
+            "description": "The world file for Rust to use.",
+            "env_variable": "LEVEL",
+            "default_value": "Procedural Map",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Description",
+            "description": "The description under your server title. Commonly used for rules & info. Use \\n for newlines.",
+            "env_variable": "DESCRIPTION",
+            "default_value": "Powered by Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "URL",
+            "description": "The URL for your server. This is what comes up when clicking the \"Visit Website\" button.",
+            "env_variable": "SERVER_URL",
+            "default_value": "http://pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "The world size for a procedural map.",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "3000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed for a procedural map.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed in the server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "50",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Image",
+            "description": "The header image for the top of your server listing.",
+            "env_variable": "SERVER_IMG",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "Port for RCON connections.",
+            "env_variable": "RCON_PORT",
+            "default_value": "28016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "RCON access password.",
+            "env_variable": "RCON_PASS",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^[\\w.-]*$/|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Interval",
+            "description": "Sets the server’s auto-save interval in seconds.",
+            "env_variable": "SAVEINTERVAL",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Branch",
+            "description": "Select the branch to install, such as staging or workcart",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "staging",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "App Port",
+            "description": "Port for the Rust+ App. -1 to disable.",
+            "env_variable": "APP_PORT",
+            "default_value": "28082",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Logo",
+            "description": "The circular server logo for the Rust+ app.",
+            "env_variable": "SERVER_LOGO",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|url",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "258550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sa-mp-34ba671e265c",
+        "name": "SA-MP",
+        "description": "SA-MP is a free Massively Multiplayer Online game mod for the PC version of Rockstar Games Grand Theft Auto: San Andreas (tm).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sa-mp-34ba671e265c.json",
+        "sha256": "86a10aad3ad16c2a65413226cbbd1a335ab1380b4479c71c6e917145155f9365",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/samp/egg-s-a--m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/34ba671e265c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-10-19T18:53:04+02:00",
+        "name": "SA-MP",
+        "author": "bl4ckspr4y@protonmail.com",
+        "description": "SA-MP is a free Massively Multiplayer Online game mod for the PC version of Rockstar Games Grand Theft Auto: San Andreas (tm).",
+        "features": null,
+        "docker_images": {
+          "Samp": "ghcr.io/ptero-eggs/games:samp"
+        },
+        "file_denylist": [],
+        "startup": "./samp03svr",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"port\": \"port {{server.build.default.port}}\", \"rcon_password\": \"rcon_password {{server.build.env.RCON_PASS}}\"}}}",
+          "startup": "{\"done\": \"Started server on \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# Check if VERSION is set and starts with an uppercase \"R\"\r\nif [[ -n \"$VERSION\" && \"$VERSION\" == R* ]]; then\r\n    VERSION=\"0.3.7\"\r\n    echo \"Updated VERSION: $VERSION\"\r\nfi\r\n\r\ncd /tmp || exit\r\necho \"running: curl -sSL -o samp.tar.gz https://sampcenter.com/download/server/linux/${VERSION}.tar.gz\"\r\ncurl -sSL -o samp.tar.gz https://sampcenter.com/download/server/linux/${VERSION}.tar.gz\r\n\r\nmkdir -p /mnt/server\r\ntar -xzvf samp.tar.gz --strip-components=1 -C /mnt/server/\r\n\r\ncd /mnt/server || exit\r\n\r\nsed -i '3d' /mnt/server/server.cfg\r\necho \"rcon_password ${RCON_PASS}\" >> /mnt/server/server.cfg\r\n\r\nchown -R root:root /mnt\r\n\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Example: if the download url is https://sampcenter.com/download/server/linux/0.3.7.tar.gz then the variable should be: `0.3.7`",
+            "env_variable": "Version",
+            "default_value": "0.3.7",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon password",
+            "description": "The password used for rcon",
+            "env_variable": "RCON_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sa-mp-6f19f5c5fd7b",
+        "name": "SA-MP",
+        "description": "SA-MP is a free Massively Multiplayer Online game mod for the PC version of Rockstar Games Grand Theft Auto: San Andreas (tm).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/sa-mp-6f19f5c5fd7b.json",
+        "sha256": "c9495cbf315bcf5ee58462786d22d0ac5ab23d57314083fd4c3f71cd5ebae064",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/samp/egg-pterodactyl-s-a--m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/gta/samp/egg-s-a--m-p.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/6f19f5c5fd7b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:08+00:00",
+        "name": "SA-MP",
+        "author": "bl4ckspr4y@protonmail.com",
+        "description": "SA-MP is a free Massively Multiplayer Online game mod for the PC version of Rockstar Games Grand Theft Auto: San Andreas (tm).",
+        "features": null,
+        "docker_images": {
+          "Samp": "ghcr.io/parkervcp/games:samp"
+        },
+        "file_denylist": [],
+        "startup": "./samp03svr",
+        "config": {
+          "files": "{\"server.cfg\": {\"parser\": \"file\", \"find\": {\"port\": \"port {{server.build.default.port}}\", \"rcon_password\": \"rcon_password {{server.build.env.RCON_PASS}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Started server on \"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n# Check if VERSION is set and starts with an uppercase \"R\"\r\nif [[ -n \"$VERSION\" && \"$VERSION\" == R* ]]; then\r\n    VERSION=\"0.3.7\"\r\n    echo \"Updated VERSION: $VERSION\"\r\nfi\r\n\r\ncd /tmp || exit\r\necho \"running: curl -sSL -o samp.tar.gz https://sampcenter.com/download/server/linux/${VERSION}.tar.gz\"\r\ncurl -sSL -o samp.tar.gz https://sampcenter.com/download/server/linux/${VERSION}.tar.gz\r\n\r\nmkdir -p /mnt/server\r\ntar -xzvf samp.tar.gz --strip-components=1 -C /mnt/server/\r\n\r\ncd /mnt/server || exit\r\n\r\nsed -i '3d' /mnt/server/server.cfg\r\necho \"rcon_password ${RCON_PASS}\" >> /mnt/server/server.cfg\r\n\r\nchown -R root:root /mnt\r\n\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Example: if the download url is https://sampcenter.com/download/server/linux/0.3.7.tar.gz then the variable should be: `0.3.7`",
+            "env_variable": "Version",
+            "default_value": "0.3.7",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon password",
+            "description": "The password used for rcon",
+            "env_variable": "RCON_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1658 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "conan-exiles-enhanced-84f165380cb6",
+        "name": "Conan Exiles Enhanced",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/conan-exiles-enhanced-84f165380cb6.json",
+        "sha256": "1852b30e344454666b68596a1983f66918de96f0b44b5c777c2f85b637bb9134",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "conan_exiles/pterodactyl-egg-conan-exiles-enhanced.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/84f165380cb6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-16T17:15:04+00:00",
+        "name": "Conan Exiles Enhanced",
+        "author": "mrbretzel@proton.me",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "SteamCMD": "ghcr.io/pelican-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./ConanSandbox/Binaries/Linux/ConanSandboxServer-Linux-Shipping ConanSandbox -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\\\"{{SRV_NAME}}\\\" -ServerPassword=\\\"{{SRV_PW}}\\\" -console -log",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started SourceServerQueries\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n##\n#\n# Variables\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\n#\n ##\n\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\nchmod +x /mnt/server/ConanSandbox/Binaries/Linux/ConanSandboxServer-Linux-Shipping\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App id",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:443030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Decide if you want to update your server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pelican hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon port",
+            "description": "Remote administrative access",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "conan-exiles-enhanced-c0648a5f2e63",
+        "name": "Conan Exiles Enhanced",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/conan-exiles-enhanced-c0648a5f2e63.json",
+        "sha256": "4ca1e8b2569b1ad178572fa52df58337cb5aacff94cee8a6fc70075145795643",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "conan_exiles/egg-conan-exiles-enhanced.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c0648a5f2e63.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-24T17:33:10+02:00",
+        "name": "Conan Exiles Enhanced",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:conan_exiles": "ghcr.io/pterodactyl/games:conan_exiles"
+        },
+        "file_denylist": [],
+        "startup": "ConanSandbox/Binaries/Linux/ConanSandboxServer-Linux-Shipping -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -MaxPlayers={{MAX_PLAYERS}} -ServerName=\"{{SERVER_NAME}}\" ${SERVER_PASSWORD:+-ServerPassword=\"$SERVER_PASSWORD\"} -Multihome=0.0.0.0 -console -log",
+        "config": {
+          "files": "{\"ConanSandbox/Saved/Config/LinuxServer/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"ServerSettings.AdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\"}}, \"ConanSandbox/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"ini\", \"find\": {\"RconPlugin.RconEnabled\": \"{{server.build.env.RCON_ENABLED}}\", \"RconPlugin.RconPassword\": \"{{server.build.env.RCON_PASSWORD}}\", \"RconPlugin.RconPort\": \"{{server.build.env.RCON_PORT}}\"}}}",
+          "startup": "{\"done\": \"Started SourceServerQueries\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/pterodactyl/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\ncd /mnt/server\r\n\r\nmkdir -p /mnt/server/ConanSandbox/Saved/Config/LinuxServer\r\n\r\ncat > /mnt/server/ConanSandbox/Saved/Config/LinuxServer/Game.ini <<EOF\r\n[RconPlugin]\r\nRconEnabled=${RCON_ENABLED}\r\nRconPassword=${RCON_PASSWORD}\r\nRconPort=${RCON_PORT}\r\nEOF\r\n\r\ncat > /mnt/server/ConanSandbox/Saved/Config/LinuxServer/ServerSettings.ini <<EOF\r\n[ServerSettings]\r\nAdminPassword=${ADMIN_PASSWORD}\r\nEOF\r\n\r\n## create the Mods folder and empty modlist.txt\r\nmkdir -p /mnt/server/ConanSandbox/Mods\r\ntouch /mnt/server/ConanSandbox/Mods/modlist.txt\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pterodactyl/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Query Port",
+            "description": "The server Query port used by the server",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed to connect to the server at the same time",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mod IDs",
+            "description": "The list of Mods you want installed on your server.\r\nFormat examples: 123456,234567 or 123456, 2345678\r\n\r\nYou can also drop unpacked mods directly into ConanSandbox/Mods/<modname> they will be auto-added to modlist.txt. Custom added mods are not removed by default, only mods downloaded via this variable are",
+            "env_variable": "MOD_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Mods",
+            "description": "Enable auto-updating of mods",
+            "env_variable": "UPDATE_MODS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "Auto-update the server during startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "The port for remote administrative access, this is optional",
+            "env_variable": "RCON_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "The ID corresponding to the game to download",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:443030",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable/Disable RCON",
+            "description": "Enable RCON",
+            "env_variable": "RCON_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name used by the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password used by the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "The admin password, used to change server settings in-game",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Password",
+            "description": "The RCON password used by the server, disabled when left empty",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "contagion-b79527c7a220",
+        "name": "Contagion",
+        "description": "Contagion isn't your average Zombie Shooter but instead takes a more realistic and different approach to the popular genre with unique characters, environments, weapons, items, and a built in system that makes every round completely unpredictable with resources, objectives, and paths ever changing.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/contagion-b79527c7a220.json",
+        "sha256": "485e614a8f54738d5e7245c0a571ef4d04d77837353869d0362d178a5061c883",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "contagion/egg-contagion.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/b79527c7a220.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-22T19:59:52+00:00",
+        "name": "Contagion",
+        "author": "Fashdey@fustarmy.net",
+        "description": "Contagion isn't your average Zombie Shooter but instead takes a more realistic and different approach to the popular genre with unique characters, environments, weapons, items, and a built in system that makes every round completely unpredictable with resources, objectives, and paths ever changing.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine contagionds.exe -console -steam -log -condebug -conclearlog -dedicated -game \".\\contagion\" +sv_lan 0 -port {{SERVER_PORT}} +map {{SRV_MAP}} +maxplayers {{SRV_MAXPLAYERS}} +servercfgfile \"{{SRV_CONFIG}}\"  -tickrate 128 -log & tail -F contagion/console.log -c0 --pid $!",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App id",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "293030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:293030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Decide if you want to update your server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Startup Map",
+            "description": "Which map server starts on boot",
+            "env_variable": "SRV_MAP",
+            "default_value": "ce_barlowe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "SRV_MAXPLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Config",
+            "description": "",
+            "env_variable": "SRV_CONFIG",
+            "default_value": "server.cfg",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2013 vcrun2015 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "WINEARCH=win32\r\nor\r\nWINEARCH=win64",
+            "env_variable": "WINEARCH",
+            "default_value": "win32",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "core-keeper-04638ab625d8",
+        "name": "Core Keeper",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/core-keeper-04638ab625d8.json",
+        "sha256": "aca247bcbd74ce9d1ec015547cfbc8b42499724d999ef59740931867171ecc93",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "core_keeper/egg-pterodactyl-core-keeper.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/04638ab625d8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:59+00:00",
+        "name": "Core Keeper",
+        "author": "karsten@fiedleronline.net",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export DISPLAY=:0; rm ./GameID.txt ./CoreKeeperServerLog.txt; touch ./CoreKeeperServerLog.txt; xvfb-run -s \"-screen 0 {{DISPLAY_WIDTH}}x{{DISPLAY_HEIGHT}}x{{DISPLAY_DEPTH}} -ac -nolisten tcp -nolisten unix\" ./CoreKeeperServer -batchmode -logfile CoreKeeperServerLog.txt -world {{WORLD_INDEX}} -worldname \"{{WORLD_NAME}}\" -worldseed {{WORLD_SEED}} $([[ \"{{GAME_ID}}\" != \"\" ]] && echo -n \" -gameid {{GAME_ID}}\") -maxplayers {{MAX_PLAYERS}} -worldmode {{WORLD_MODE}} -port {{SERVER_PORT}} & CKPID=$!; tail -f CoreKeeperServerLog.txt | grep -e '^\\[userid:[0-9]*\\] player' -e '^[^\\[]' & LOGPID=$!; trap \"kill ${CKPID}; wait ${CKPID}; kill ${LOGPID}; wait ${LOGPID}\" 15; wait $!",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Started session\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "World Index",
+            "description": "Which world index to use. Default: 0.",
+            "env_variable": "WORLD_INDEX",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name to use for the server. Defaul: Core Keeper Server.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Core Keeper Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100|min:3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed to use for a new world. Set to 0 to generate random seed. Default: 0.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "Game ID to use for the server. Needs to be at least 28 characters and alphanumeric, excluding Y,y,x,0,O. Empty or not valid means a new ID will be generated at start. Default: EMPTY.",
+            "env_variable": "GAME_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:28",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players that will be allowed to connect to server. Maximum is 100. Default: 100,",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Mode",
+            "description": "Whether to use normal (0) or hard (1) mode for world.",
+            "env_variable": "WORLD_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID of Core Keeper Dedicated Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1963720",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1963720",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_WIDTH",
+            "description": "Virtual display width. Fix:1.",
+            "env_variable": "DISPLAY_WIDTH",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_HEIGHT",
+            "description": "Virtual display height. Fix:1.",
+            "env_variable": "DISPLAY_HEIGHT",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_DEPTH",
+            "description": "Virtual display color depth. Fix: 24.",
+            "env_variable": "DISPLAY_DEPTH",
+            "default_value": "24",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "core-keeper-47677d376cfc",
+        "name": "Core Keeper",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/core-keeper-47677d376cfc.json",
+        "sha256": "8c7cfc50b0a8a9964e448d6f20fad3a60cab7e3b1c7124e19c0875d3d68e94f0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "core_keeper/egg-core-keeper.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/47677d376cfc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Core Keeper",
+        "author": "karsten@fiedleronline.net",
+        "uuid": "39588b7e-3ff5-474c-ba6a-969f34662b74",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export DISPLAY=:0; rm ./GameID.txt ./CoreKeeperServerLog.txt; touch ./CoreKeeperServerLog.txt; xvfb-run -s \"-screen 0 {{DISPLAY_WIDTH}}x{{DISPLAY_HEIGHT}}x{{DISPLAY_DEPTH}} -ac -nolisten tcp -nolisten unix\" ./CoreKeeperServer -batchmode -logfile CoreKeeperServerLog.txt -world {{WORLD_INDEX}} -worldname \"{{WORLD_NAME}}\" -worldseed {{WORLD_SEED}} $([[ \"{{GAME_ID}}\" != \"\" ]] && echo -n \" -gameid {{GAME_ID}}\") -maxplayers {{MAX_PLAYERS}} -worldmode {{WORLD_MODE}} -port {{SERVER_PORT}} & CKPID=$!; tail -f CoreKeeperServerLog.txt | grep -e '^\\[userid:[0-9]*\\] player' -e '^[^\\[]' & LOGPID=$!; trap \"kill ${CKPID}; wait ${CKPID}; kill ${LOGPID}; wait ${LOGPID}\" 15; wait $!",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started session\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "World Index",
+            "description": "Which world index to use. Default: 0.",
+            "env_variable": "WORLD_INDEX",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name to use for the server. Defaul: Core Keeper Server.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Core Keeper Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100|min:3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed to use for a new world. Set to 0 to generate random seed. Default: 0.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "Game ID to use for the server. Needs to be at least 28 characters and alphanumeric, excluding Y,y,x,0,O. Empty or not valid means a new ID will be generated at start. Default: EMPTY.",
+            "env_variable": "GAME_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:28",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players that will be allowed to connect to server. Maximum is 100. Default: 100,",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Mode",
+            "description": "Whether to use normal (0) or hard (1) mode for world.",
+            "env_variable": "WORLD_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID of Core Keeper Dedicated Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1963720",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1963720",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_WIDTH",
+            "description": "Virtual display width. Fix:1.",
+            "env_variable": "DISPLAY_WIDTH",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_HEIGHT",
+            "description": "Virtual display height. Fix:1.",
+            "env_variable": "DISPLAY_HEIGHT",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_DEPTH",
+            "description": "Virtual display color depth. Fix: 24.",
+            "env_variable": "DISPLAY_DEPTH",
+            "default_value": "24",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "core-keeper-72b1b733a519",
+        "name": "Core Keeper",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/core-keeper-72b1b733a519.json",
+        "sha256": "1c24d725e9e1fd9087193084031528fee5dff001036590bedbf0b47f037ef331",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "core_keeper/egg-core-keeper.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/72b1b733a519.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-03-28T22:32:36+02:00",
+        "name": "Core Keeper",
+        "author": "karsten@fiedleronline.net",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export DISPLAY=:0; rm ./GameID.txt ./CoreKeeperServerLog.txt; touch ./CoreKeeperServerLog.txt; xvfb-run -s \"-screen 0 {{DISPLAY_WIDTH}}x{{DISPLAY_HEIGHT}}x{{DISPLAY_DEPTH}} -ac -nolisten tcp -nolisten unix\" ./CoreKeeperServer -batchmode -logfile CoreKeeperServerLog.txt -world {{WORLD_INDEX}} -worldname \"{{WORLD_NAME}}\" -worldseed {{WORLD_SEED}} $([[ \"{{GAME_ID}}\" != \"\" ]] && echo -n \" -gameid {{GAME_ID}}\") -maxplayers {{MAX_PLAYERS}} -worldmode {{WORLD_MODE}} -port {{SERVER_PORT}} & CKPID=$!; tail -f CoreKeeperServerLog.txt | grep -e '^\\[userid:[0-9]*\\] player' -e '^[^\\[]' & LOGPID=$!; trap \"kill ${CKPID}; wait ${CKPID}; kill ${LOGPID}; wait ${LOGPID}\" 15; wait $!",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started session\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "World Index",
+            "description": "Which world index to use. Default: 0.",
+            "env_variable": "WORLD_INDEX",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name to use for the server. Defaul: Core Keeper Server.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Core Keeper Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100|min:3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed to use for a new world. Set to 0 to generate random seed. Default: 0.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "Game ID to use for the server. Needs to be at least 28 characters and alphanumeric, excluding Y,y,x,0,O. Empty or not valid means a new ID will be generated at start. Default: EMPTY.",
+            "env_variable": "GAME_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:28",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players that will be allowed to connect to server. Maximum is 100. Default: 100,",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Mode",
+            "description": "Whether to use normal (0) or hard (1) mode for world.",
+            "env_variable": "WORLD_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID of Core Keeper Dedicated Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1963720",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1963720",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_WIDTH",
+            "description": "Virtual display width. Fix:1.",
+            "env_variable": "DISPLAY_WIDTH",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_HEIGHT",
+            "description": "Virtual display height. Fix:1.",
+            "env_variable": "DISPLAY_HEIGHT",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_DEPTH",
+            "description": "Virtual display color depth. Fix: 24.",
+            "env_variable": "DISPLAY_DEPTH",
+            "default_value": "24",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "core-keeper-dcab463526aa",
+        "name": "Core Keeper",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/core-keeper-dcab463526aa.json",
+        "sha256": "5790728ca4cd7710b3bfb1c2ad3e418db4ed7a2b2ef88508c125b484f57439bd",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/core_keeper/egg-core-keeper.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/dcab463526aa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-03-28T22:32:36+02:00",
+        "name": "Core Keeper",
+        "author": "karsten@fiedleronline.net",
+        "description": "Core Keeper is a survival sandbox game for single or multiplayers.\r\n\r\n--- Drawn towards a mysterious relic, you are an explorer who awakens in an ancient cavern of creatures, resources and trinkets. Trapped deep underground will your survival skills be up to the task? Mine relics and resources to build your base, craft new equipment, survive, and power up the Core. ---",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "export DISPLAY=:0; rm ./GameID.txt ./CoreKeeperServerLog.txt; touch ./CoreKeeperServerLog.txt; xvfb-run -s \"-screen 0 {{DISPLAY_WIDTH}}x{{DISPLAY_HEIGHT}}x{{DISPLAY_DEPTH}} -ac -nolisten tcp -nolisten unix\" ./CoreKeeperServer -batchmode -logfile CoreKeeperServerLog.txt -world {{WORLD_INDEX}} -worldname \"{{WORLD_NAME}}\" -worldseed {{WORLD_SEED}} $([[ \"{{GAME_ID}}\" != \"\" ]] && echo -n \" -gameid {{GAME_ID}}\") -maxplayers {{MAX_PLAYERS}} -worldmode {{WORLD_MODE}} -port {{SERVER_PORT}} & CKPID=$!; tail -f CoreKeeperServerLog.txt | grep -e '^\\[userid:[0-9]*\\] player' -e '^[^\\[]' & LOGPID=$!; trap \"kill ${CKPID}; wait ${CKPID}; kill ${LOGPID}; wait ${LOGPID}\" 15; wait $!",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started session\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "World Index",
+            "description": "Which world index to use. Default: 0.",
+            "env_variable": "WORLD_INDEX",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name to use for the server. Defaul: Core Keeper Server.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Core Keeper Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100|min:3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Seed",
+            "description": "The seed to use for a new world. Set to 0 to generate random seed. Default: 0.",
+            "env_variable": "WORLD_SEED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "Game ID to use for the server. Needs to be at least 28 characters and alphanumeric, excluding Y,y,x,0,O. Empty or not valid means a new ID will be generated at start. Default: EMPTY.",
+            "env_variable": "GAME_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|min:28",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players that will be allowed to connect to server. Maximum is 100. Default: 100,",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "World Mode",
+            "description": "Whether to use normal (0) or hard (1) mode for world.",
+            "env_variable": "WORLD_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID of Core Keeper Dedicated Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1963720",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1963720",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Enable automatic updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_WIDTH",
+            "description": "Virtual display width. Fix:1.",
+            "env_variable": "DISPLAY_WIDTH",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_HEIGHT",
+            "description": "Virtual display height. Fix:1.",
+            "env_variable": "DISPLAY_HEIGHT",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "DISPLAY_DEPTH",
+            "description": "Virtual display color depth. Fix: 24.",
+            "env_variable": "DISPLAY_DEPTH",
+            "default_value": "24",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "counter-strike-1-6-rehlds-9639010b82d6",
+        "name": "Counter Strike 1.6 - ReHLDS",
+        "description": "CS 1.6 ReHLDS binaries egg.\r\n\r\nReHLDS is a reverse-engineered, optimized version of HLDS.\r\nDeveloped by third-party modders to improve stability, performance, and security.\r\nFully compatible with MetaMod, AMX Mod X, and other plugins.\r\n\r\nIncluded modules are rehlds, reunion, amxmodx, metamod-r, reapi and ReGameDLL_CS",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/counter-strike-1-6-rehlds-9639010b82d6.json",
+        "sha256": "0b366aa1d5649e865201bf701e60b5f1df707ceb2ab9addc573c9ac81afe4dc0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "counter_strike/counter_strike_1.6_rehlds/egg-cs 1.6-rehlds.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/9639010b82d6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-10T13:11:33+02:00",
+        "name": "Counter Strike 1.6 - ReHLDS",
+        "author": "ptero@redbananaofficial.com",
+        "description": "CS 1.6 ReHLDS binaries egg.\r\n\r\nReHLDS is a reverse-engineered, optimized version of HLDS.\r\nDeveloped by third-party modders to improve stability, performance, and security.\r\nFully compatible with MetaMod, AMX Mod X, and other plugins.\r\n\r\nIncluded modules are rehlds, reunion, amxmodx, metamod-r, reapi and ReGameDLL_CS",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart +maxplayers 32 +pingboost 2 +sys_ticrate 1200",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nif [[ -z \"${STEAM_USER}\" ]] || [[ -z \"${STEAM_PASS}\" ]]; then\r\n    echo -e \"Steam user is not set.\\nUsing anonymous user.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\n# Download and install SteamCMD\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps\r\ncd /mnt/server/steamcmd\r\n\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# Install game via SteamCMD\r\n./steamcmd.sh \\\r\n+force_install_dir /mnt/server \\\r\n+login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} \\\r\n+app_set_config 90 mod ${HLDS_GAME} \\\r\n$( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) \\\r\n+app_update ${SRCDS_APPID} \\\r\n$( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) \\\r\n$( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) \\\r\n${INSTALL_FLAGS} validate \\\r\n+quit\r\n\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\ncd /mnt/server\r\n\r\n# Download repo etc\r\nREPO_OWNER=\"Red-Banana-Official\"\r\nREPO_NAME=\"cstrike1.6_rehlds\"\r\nRELEASE_DATA=$(curl -s https://api.github.com/repos/$REPO_OWNER/$REPO_NAME/releases/latest)\r\n\r\nTAG_NAME=$(echo \"$RELEASE_DATA\" | jq -r '.tag_name')\r\n[[ \"$TAG_NAME\" == \"null\" ]] && TAG_NAME=\"1.0.0\"\r\n\r\nDOWNLOAD_URL=$(echo \"$RELEASE_DATA\" | jq -r '.zipball_url')\r\nOUTPUT_FILE=\"$REPO_NAME-$TAG_NAME.zip\"\r\n\r\nrm -rf ${REPO_OWNER}-*\r\necho \"Downloading release: $OUTPUT_FILE\"\r\ncurl -sSL -o \"$OUTPUT_FILE\" \"$DOWNLOAD_URL\" || { echo \"Failed to download $OUTPUT_FILE\"; exit 1; }\r\necho \"Downloaded: $OUTPUT_FILE\"\r\necho \"-----------------------------------------\"\r\n\r\nunzip -q -o \"$OUTPUT_FILE\"\r\nrm -f \"$OUTPUT_FILE\"\r\n\r\nEXTRACTED_DIR=$(find . -maxdepth 1 -type d -name \"${REPO_OWNER}-*\" | head -n 1)\r\ncd \"$EXTRACTED_DIR\"\r\n\r\n# Module install\r\ninstall_module() {\r\n    local NAME=$1\r\n    local DIR=$2\r\n    ZIP=$(find modules/$DIR/ -type f -name '*.zip' | sort -V | tail -n 1)\r\n    \r\n    if [[ -z \"$ZIP\" ]]; then\r\n        echo \"Error: ZIP file for module '$NAME' not found.\"\r\n        return 1\r\n    fi\r\n\r\n    echo \"Installing module: $NAME\"\r\n    \r\n    mkdir -p \"${NAME}-install\"\r\n    cp \"$ZIP\" \"${NAME}-install\"\r\n    cd \"${NAME}-install\"\r\n    unzip -q -o *.zip\r\n\r\n    case \"$NAME\" in\r\n        \"rehlds\"|\"ReGameDLL_CS\") \r\n            cp -r bin/linux32/* /mnt/server\r\n            ;;\r\n        \"amxmodx\"|\"reapi\") \r\n            cp -r addons /mnt/server/cstrike\r\n            ;;\r\n        \"metamod-r\")\r\n            cp -r addons /mnt/server/cstrike\r\n            mkdir -p /mnt/server/cstrike/addons/metamod\r\n            touch /mnt/server/cstrike/addons/metamod/plugins.ini\r\n            grep -qxF \"linux addons/amxmodx/dlls/amxmodx_mm_i386.so\" /mnt/server/cstrike/addons/metamod/plugins.ini || echo \"linux addons/amxmodx/dlls/amxmodx_mm_i386.so\" >> /mnt/server/cstrike/addons/metamod/plugins.ini\r\n            sed -i 's|^gamedll_linux.*|gamedll_linux \"addons/metamod/metamod_i386.so\"|' /mnt/server/cstrike/liblist.gam || echo 'gamedll_linux \"addons/metamod/metamod_i386.so\"' >> /mnt/server/cstrike/liblist.gam\r\n            ;;\r\n        \"reunion\")\r\n            mkdir -p /mnt/server/cstrike/addons/metamod/reunion/\r\n            cp -r bin/Linux/* /mnt/server/cstrike/addons/metamod/reunion/\r\n            touch /mnt/server/cstrike/addons/metamod/plugins.ini\r\n            grep -qxF \"linux addons/metamod/reunion/reunion_mm_i386.so\" /mnt/server/cstrike/addons/metamod/plugins.ini || echo \"linux addons/metamod/reunion/reunion_mm_i386.so\" >> /mnt/server/cstrike/addons/metamod/plugins.ini\r\n            cp reunion.cfg /mnt/server/cstrike/reunion.cfg\r\n            SALT=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 50)\r\n            sed -i \"s/^SteamIdHashSalt\\s*=.*/SteamIdHashSalt = $SALT/\" /mnt/server/cstrike/reunion.cfg\r\n            ;;\r\n    esac\r\n\r\n    cd ..\r\n    rm -rf \"${NAME}-install\"\r\n    echo \"Module '$NAME' installed successfully.\"\r\n}\r\n\r\ndeclare -A MODULES=(\r\n    [\"rehlds\"]=\"rehlds\"\r\n    [\"amxmodx\"]=\"amxmodx\"\r\n    [\"ReGameDLL_CS\"]=\"ReGameDLL_CS\"\r\n    [\"reapi\"]=\"reapi\"\r\n    [\"metamod-r\"]=\"metamod-r\"\r\n    [\"reunion\"]=\"reunion\"\r\n)\r\n\r\nIFS=',' read -r -a MODULE_LIST <<< \"${INSTALL_MODULES}\"\r\nfor mod in \"${MODULE_LIST[@]}\"; do\r\n    [[ -n \"${MODULES[$mod]}\" ]] && install_module \"$mod\" \"${MODULES[$mod]}\"\r\ndone\r\n\r\n# Ensure files exist\r\nmkdir -p /mnt/server/cstrike/addons/amxmodx/data\r\n[[ ! -f /mnt/server/cstrike/listip.cfg ]] && echo \"// Banned IPs\" > /mnt/server/cstrike/listip.cfg\r\n[[ ! -f /mnt/server/cstrike/banned.cfg ]] && echo \"// Banned IDs\" > /mnt/server/cstrike/banned.cfg\r\n[[ ! -f /mnt/server/cstrike/addons/amxmodx/data/csstats.dat ]] && touch /mnt/server/cstrike/addons/amxmodx/data/csstats.dat\r\n\r\nchmod -R 777 /mnt/server\r\nrm -rf /mnt/server/Red-Banana-Official-*\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation Complete!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "ReHLDS Version",
+            "description": "The version of ReHLDS to install, or 'latest' for the latest release.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Available Modules",
+            "description": "Available Modules: rehlds, reunion, amxmodx, metamod-r, reapi and ReGameDLL_CS",
+            "env_variable": "INSTALL_MODULES",
+            "default_value": "rehlds,reunion,amxmodx,metamod-r,reapi,ReGameDLL_CS",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Hostname",
+            "description": "This sets the hostname of the server. Example: \"My Custom CS 1.6 Server\"",
+            "env_variable": "HOSTNAME",
+            "default_value": "Counter-Strike 1.6 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS",
+            "env_variable": "HLDS_GAME",
+            "default_value": "cstrike",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "steam_legacy",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+          },
+          {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Validate",
+            "description": "Validate game files on update. Keep it disabled with ReHLDS due to SteamCMD overwriting its changes",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "counter-strike-1-6-vanilla-915771e388f6",
+        "name": "Counter Strike 1.6 - Vanilla",
+        "description": "Counter Strike 1.6 - Vanilla\r\n\r\nCounter-Strike: 1.6 is a multiplayer first-person shooter video game developed by Valve Corporation.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/counter-strike-1-6-vanilla-915771e388f6.json",
+        "sha256": "ea1b241448800dac5fef4a567615bf4527444391d63990c15570a9385be663cb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "counter_strike/counter_strike_1.6/egg-counter-strike1-6--vanilla.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/915771e388f6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-04T15:41:42+01:00",
+        "name": "Counter Strike 1.6 - Vanilla",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Counter Strike 1.6 - Vanilla\r\n\r\nCounter-Strike: 1.6 is a multiplayer first-person shooter video game developed by Valve Corporation.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console {{SERVER_PORT}} -game cstrike -{{SRV_SECURE}} +port {{SERVER_PORT}} +sv_lan 0 +maxplayers {{SRV_SLOTS}} +map {{SRV_STARTMAP}} +sys_ticrate 1200 -pingboost {{SRV_PINGBOOST}} -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{\"custom\": true, \"location\": \"logs/latest.log\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## download and install steamcmd\r\n# Ensure Steam credentials are set\r\nif [[ -z \"${STEAM_USER}\" ]] || [[ -z \"${STEAM_PASS}\" ]]; then\r\n    echo -e \"Steam user is not set.\"\r\n    echo -e \"Using anonymous login.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"User set to ${STEAM_USER}\"\r\nfi\r\n\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n# Needed for cs 1.6\r\n./steamcmd.sh +@sSteamCmdForcePlatformType windows +login anonymous +force_install_dir /mnt/server +app_update \"90 -beta Beta\" validate +quit ## looking at cs 1.6\r\n\r\n# Ensure listip.cfg exists\r\nif [[ ! -f \"/mnt/server/cstrike/listip.cfg\" ]]; then\r\n    echo \"// This file stores banned IPs\" > /mnt/server/cstrike/listip.cfg\r\n    echo \"Created listip.cfg...\"\r\nelse\r\n    echo \"listip.cfg already exists.\"\r\nfi\r\n\r\n# Ensure banned.cfg exists\r\nif [[ ! -f \"/mnt/server/cstrike/banned.cfg\" ]]; then\r\n    echo \"// This file stores banned Steam IDs and IPs\" > /mnt/server/cstrike/banned.cfg\r\n    echo \"Created banned.cfg...\"\r\nelse\r\n    echo \"banned.cfg already exists.\"\r\nfi\r\n\r\n# Ensure server.cfg hostname is up-to-date\r\nSERVER_CFG_PATH=\"/mnt/server/cstrike/server.cfg\"\r\nif [[ -f \"$SERVER_CFG_PATH\" ]]; then\r\n    sed -i \"s/^hostname .*/hostname \\\"${HOSTNAME}\\\"/\" \"$SERVER_CFG_PATH\"\r\nfi\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation Complete!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Hostname",
+            "description": "This sets the hostname of the server. Example: \"My Custom CS 1.6 Server\"",
+            "env_variable": "HOSTNAME",
+            "default_value": "Counter-Strike 1.6 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players (Slots)",
+            "description": "",
+            "env_variable": "SRV_SLOTS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Startmap",
+            "description": "",
+            "env_variable": "SRV_STARTMAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Pingboost",
+            "description": "",
+            "env_variable": "SRV_PINGBOOST",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Username associated wanted to be used. Not needed.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam Password for account. Not needed.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam authenticator code for the account. Not Needed.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Secure or Insecure",
+            "description": "",
+            "env_variable": "SRV_SECURE",
+            "default_value": "secure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "counter-strike-2-1666fecc4227",
+        "name": "Counter-Strike 2",
+        "description": "For over two decades, Counter-Strike has offered an elite competitive experience, one shaped by millions of players from across the globe. And now the next chapter in the CS story is about to begin. This is Counter-Strike 2.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/counter-strike-2-1666fecc4227.json",
+        "sha256": "1a830fe7178b45df3d522f5ac6340a015bb5b75532c9eaa9e2c09ee542c23060",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "counter_strike/counter_strike_2/egg-counter--strike2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/1666fecc4227.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-04T11:01:41+02:00",
+        "name": "Counter-Strike 2",
+        "author": "admin@ballaual.de",
+        "description": "For over two decades, Counter-Strike has offered an elite competitive experience, one shaped by millions of players from across the globe. And now the next chapter in the CS story is about to begin. This is Counter-Strike 2.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:sniper": "ghcr.io/ptero-eggs/steamcmd:sniper"
+        },
+        "file_denylist": [],
+        "startup": "LD_LIBRARY_PATH=\"$HOME/game/bin/linuxsteamrt64:$LD_LIBRARY_PATH\" ./game/bin/linuxsteamrt64/cs2 -dedicated $( [ \"$VAC_ENABLED\" == \"1\" ] || printf %s ' -insecure' ) -ip 0.0.0.0 -port {{SERVER_PORT}} -tv_port {{TV_PORT}} -maxplayers {{MAX_PLAYERS}} $( [ \"$RCON_ENABLED\" == \"0\" ] || printf %s ' -usercon' ) +game_mode {{GAME_MODE}} +game_type {{GAME_TYPE}} +map {{SRCDS_MAP}} +hostname \"{{SERVER_NAME}}\" +sv_password \"{{SERVER_PASSWORD}}\" +rcon_password \"{{RCON_PASSWORD}}\" +sv_setsteamaccount {{STEAM_GSLT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## Install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Map",
+            "description": "The default map for the server.\r\nExamples:\r\n\r\nBomb:\r\nde_dust2, de_mirage, de_nuke, de_overpass, de_inferno, de_ancient, de_vertigo, de_anubis\r\n\r\nHostage:\r\ncs_italy, cs_office\r\n\r\nArms Race:\r\nar_baggage, ar_shoots",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Source AppID",
+            "description": "Required for game to update on server restart. Do not modify this.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "730",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:730",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Specifies the maximum amount of players that are able to join the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "12",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,64",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto-update server",
+            "description": "This is to enable / disable auto-updating your server on restart.\r\n\r\nBy default this is set to enabled.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "SourceTV Port",
+            "description": "SourceTV port used for connections to spectates games on your server.",
+            "env_variable": "TV_PORT",
+            "default_value": "27020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Gameserver Login Token",
+            "description": "The Steam Account Token required for the server to be displayed public. The token can be acquired here: https://steamcommunity.com/dev/managegameservers",
+            "env_variable": "STEAM_GSLT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_num|size:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable VAC",
+            "description": "Enable / Disable VAC (Valve Anti Cheat) on your server. By default this will be enabled.",
+            "env_variable": "VAC_ENABLED",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable RCON",
+            "description": "Enable / Disable RCON for using RCON commands with external tools. By default this will be disabled.",
+            "env_variable": "RCON_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Sets the server name listed in the steam server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted CS2 Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If specified, players must provide this password to join the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "To gain access to administrator commands on the server.",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,30",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Defines the Gamemode and Gametype to be set at the start of the next round.\r\nExamples:\r\n\r\nCompetitive:\r\ngame_mode 1\r\ngame_type 0\r\n\r\nWingman:\r\ngame_mode 2\r\ngame_type 0\r\n\r\nCasual:\r\ngame_mode 0\r\ngame_type 0\r\n\r\nDeathmatch:\r\ngame_mode 2\r\ngame_type 1\r\n\r\nArms Race:\r\ngame_mode 0\r\ngame_type 1\r\n\r\nCustom:\r\ngame_mode 0\r\ngame_type 3",
+            "env_variable": "GAME_MODE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gametype",
+            "description": "Defines the Gamemode and Gametype to be set at the start of the next round.\r\nExamples:\r\n\r\nCompetitive:\r\ngame_mode 1\r\ngame_type 0\r\n\r\nWingman:\r\ngame_mode 2\r\ngame_type 0\r\n\r\nCasual:\r\ngame_mode 0\r\ngame_type 0\r\n\r\nDeathmatch:\r\ngame_mode 2\r\ngame_type 1\r\n\r\nArms Race:\r\ngame_mode 0\r\ngame_type 1\r\n\r\nCustom:\r\ngame_mode 0\r\ngame_type 3",
+            "env_variable": "GAME_TYPE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

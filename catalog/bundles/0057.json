@@ -1,0 +1,864 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "onset-ec38c553a5b1",
+        "name": "Onset",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/onset-ec38c553a5b1.json",
+        "sha256": "d7b957f00d446f4d4636f8594539160474c61bd78cf01dd5d32aa7ec0b59d2e9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "onset/egg-onset.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/ec38c553a5b1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Onset",
+        "author": "parker@parkervcp.com",
+        "uuid": "fcc63cec-034c-4a5b-893b-7e3d2ec558ff",
+        "description": "Onset is an open world multiplayer sandbox without predefined goals. Create and host your very own experience in Onset using scripting functions. Whether that is Roleplay, Cops and Robbers or classic Freeroam. Or just enjoy the different gamemodes created by other players.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./OnsetServer --noinput",
+        "config": {
+          "files": "{\"server_config.json\": {\"parser\": \"json\", \"find\": {\"ipaddress\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\", \"servername\": \"{{server.build.env.SERVER_NAME}}\", \"password\": \"{{server.build.env.SERVER_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Entering simulation\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "ARK steam app id for auto updates. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1204170",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1204170",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "required to load server libraries.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This flag will auto update the server on restart. (default is 1) \r\n\r\nSet to 1 to update\r\nSet to 0 to no update",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "open-fortress-1957275b92b0",
+        "name": "Open Fortress",
+        "description": "Open Fortress is a free Team Fortress 2 mod that introduces new gamemodes, weapons, characters, maps, and more to the world of TF2.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/open-fortress-1957275b92b0.json",
+        "sha256": "2f6ec2cb5fe2e8a71bd187f9a4234c8a69cd5436c49038582f1d102e065d6984",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "open_fortress/egg-pterodactyl-open-fortress.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/open_fortress/egg-open-fortress.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/1957275b92b0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:32+00:00",
+        "name": "Open Fortress",
+        "author": "espeon@espeon.dev",
+        "description": "Open Fortress is a free Team Fortress 2 mod that introduces new gamemodes, weapons, characters, maps, and more to the world of TF2.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:games_source": "ghcr.io/parkervcp/yolks:games_source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart -debug +maxplayers {{MAXPLAYERS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Beans need some extra packages?\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates p7zip-full libstdc++6 libstdc++6:i386 libncurses5:i386 libtinfo5:i386 libcurl4-gnutls-dev:i386 screen libsdl2-2.0-0:i386 file\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# SDK 2013\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit \r\n\r\n# OF\r\n./steamcmd.sh +force_install_dir /mnt/server/tf2 +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update 232250 ${EXTRA_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## download OpenFortress\r\ncd /mnt/server\r\nmv bin bin_dontdeleteme\r\n\r\n\r\ncurl -sSL -o beans https://beans.adastral.net/beans\r\nchmod +x beans\r\nif [ -d \"open_fortress\" ]; then\r\n  echo \"OF is installed. Updating.\"\r\n  ./beans --update ~\r\nelse\r\n  echo \"OF is not installed. Instaling.\"\r\n  mkdir -p /mnt/server/open_fortress\r\n  # Run beans for 15 seconds to generate some random needed .dat file\r\n  timeout 15s ./beans --install /mnt/server\r\n  # Re-run beans now to actualy download the files\r\n  echo \"Ignore the erorrs!, this can take a wile.\"\r\n  ./beans --install /mnt/server/\r\nfi\r\n\r\nmv bin_dontdeleteme bin\r\n## add fixed gameinfo\r\ncd /mnt/server/open_fortress\r\nrm -rf gameinfo.txt\r\ncat >> gameinfo.txt << EOF\r\n\"GameInfo\"\r\n{\r\ngame \"Open Fortress\"\r\ntitle \"\"\r\ntitle2 \"\"\r\ngamelogo \"1\"\r\ndeveloper \"https://github.com/AgitationSkeleton/open_fortress/blob/master/credits.txt\"\r\ndeveloper_url\t\"https://github.com/KaidemonLP/Open-Fortress-Source\"\r\nmanual \"\"\r\ntype \"multiplayer_only\"\r\nhasportals \"0\" // gameui.dll\r\nhashdcontent\t\"0\" // gameui.dll\r\nnomodels \"0\" // gameui.dll\r\nnohimodel \"0\" // gameui.dll\r\nnocrosshair \"0\" // gameui.dll\r\nadvcrosshair \"1\" // gameui.dll\r\nnodifficulty\t\"1\" // gameui.dll\r\nsupportsvr \"0\" // engine.dll + gameui.dll\r\nbots \"0\" // gameui.dll\r\nnodegraph \"1\" // engine.dll\r\nperfwizard \"0\" // unused\r\nSupportsDX8 \"0\" // unused\r\nSupportsDX9 \"1\" // unused\r\nSupportsDX10\t\"0\" // unused\r\nSupportsDX11\t\"0\" // unused\r\nSupportsXbox\t\"0\" // unused\r\nSupportsXbox360\t\"0\" // unused\r\nSupportsXboxOne\t\"0\" // unused\r\nSupportsPS3 \"0\" // unused\r\nSupportsPS4 \"0\" // unused\r\nicon \"resource/game\"\r\nGameData \"ofd_fic2.fgd\"\r\nInstancePath\t\"maps/instances/\"\r\nhidden_maps\r\n{\r\n\"test_speakers\" 1\r\n\"test_hardware\" 1\r\n\"background01\" 1\r\n\"background02\" 1\r\n\"background03\" 1\r\n\"background04\" 1\r\n\"background05\" 1\r\n\"background06\" 1\r\n\"background07\" 1\r\n\"background08\" 1\r\n\"background09\" 1\r\n\"background12\" 1\r\n\"background15\" 1\r\n\"ep1_c17_00\" 1\r\n\"ep1_c17_00a\" 1\r\n\"ep1_c17_01\" 1\r\n\"ep1_c17_01a\" 1\r\n\"ep1_c17_02\" 1\r\n\"ep1_c17_02a\" 1\r\n\"ep1_c17_02b\" 1\r\n\"ep1_c17_05\" 1\r\n\"ep1_c17_06\" 1\r\n\"ep1_citadel_00\"\t1\r\n\"ep1_citadel_00_demo\" 1\r\n\"ep1_citadel_01\"\t1\r\n\"ep1_citadel_02\"\t1\r\n\"ep1_citadel_02b\"\t1\r\n\"ep1_citadel_03\"\t1\r\n\"ep1_citadel_04\"\t1\r\n\"ep1_background01\"\t1\r\n\"ep1_background01a\"\t1\r\n\"ep1_background02\"\t1\r\n\"ep2_outland_01\"\t1\r\n\"ep2_outland_01a\"\t1\r\n\"ep2_outland_02\"\t1\r\n\"ep2_outland_03\"\t1\r\n\"ep2_outland_04\"\t1\r\n\"ep2_outland_05\"\t1\r\n\"ep2_outland_06\"\t1\r\n\"ep2_outland_06a\"\t1\r\n\"ep2_outland_07\"\t1\r\n\"ep2_outland_08\"\t1\r\n\"ep2_outland_09\"\t1\r\n\"ep2_outland_10\"\t1\r\n\"ep2_outland_10a\"\t1\r\n\"ep2_outland_11\"\t1\r\n\"ep2_outland_11a\"\t1\r\n\"ep2_outland_11b\"\t1\r\n\"ep2_outland_12\"\t1\r\n\"ep2_outland_12a\"\t1\r\n\"ep2_background01\"\t1\r\n\"ep2_background02\"\t1\r\n\"ep2_background02a\"\t1\r\n\"ep2_background03\"\t1\r\n\"credits\" 1\r\n\"vst_lostcoast\" 1\r\n\"test\" 1\r\n\"sdk_vehicles\" 1\r\n}\r\nFileSystem\r\n{\r\nSteamAppId 243750\r\nSearchPaths\r\n{\r\ngame+mod |gameinfo_path|custom/*\r\ngame+game_write+mod+mod_write+default_write_path |gameinfo_path|.\r\ngamebin |gameinfo_path|bin\r\n// The lines below until the BREAK comment are responsible for the game resources to work properly\r\n// in Hammer and other Source tools. The default setup assumes that you have everything (Steam, TF2,\r\n// Source SDK and OF) in the same drive letter/partition. If you have a different storage configuration,\r\n// feel free to modify the paths below between quotes (example: D:\\Steam\\steamapps\\common\\Team Fortress 2\\tf).\r\ngame \"/home/container/tf2/tf/tf2_misc.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_sound_misc.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_sound_vo_english.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_textures.vpk\"\r\ngame \"/home/container/tf2/tf\"\r\ngame \"/home/container/tf2/hl2/hl2_textures.vpk\"\r\ngame \"/home/container/tf2/hl2/hl2_sound_vo_english.vpk\"\r\ngame \"/home/container/tf2/hl2/hl2_sound_misc.vpk\"\r\n// The hl2 folder here is from Source SDK Base 2013 Multiplayer.\r\ngame \"|all_source_engine_paths|hl2\\hl2_misc.vpk\"\r\ngame \"|all_source_engine_paths|hl2\"\r\n// ========== BREAK ==========\r\nplatform |all_source_engine_paths|platform/platform_misc.vpk\r\nplatform |all_source_engine_paths|platform\r\ngame+download |gameinfo_path|download\r\n}\r\n}\r\n}\r\nEOF\r\n## fix issue /w symlink\r\ncd /mnt/server/bin\r\nln -s datacache_srv.so datacache.so\r\nln -s dedicated_srv.so dedicated.so\r\nln -s engine_srv.so engine.so\r\nln -s materialsystem_srv.so materialsystem.so\r\nln -s replay_srv.so replay.so\r\nln -s scenefilecache_srv.so scenefilecache.so\r\nln -s shaderapiempty_srv.so shaderapiempty.so\r\nln -s soundemittersystem_srv.so soundemittersystem.so\r\nln -s studiorender_srv.so studiorender.so\r\nln -s vphysics_srv.so vphysics.so\r\n## more symlink fixes\r\ncd /mnt/server/open_fortress/bin\r\nln -s server.so server_srv.so\r\n## fix issue with libstdc++.so\r\nrm -rf /mnt/server/bin/libstdc++.so.6\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "244310",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:244310",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "open_fortress",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(open_fortress)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dm_2fort",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on the server.",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "open-fortress-2e800d6a709b",
+        "name": "Open Fortress",
+        "description": "Open Fortress is a free Team Fortress 2 mod that introduces new gamemodes, weapons, characters, maps, and more to the world of TF2.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/open-fortress-2e800d6a709b.json",
+        "sha256": "7fa051ee5f488fe48eaebf007ad25a2a06ee6191bd36a24ec43b24905a927b18",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "open_fortress/egg-open-fortress.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/2e800d6a709b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Open Fortress",
+        "author": "espeon@espeon.dev",
+        "uuid": "f57ae673-2031-4283-b1fb-fb326c3df757",
+        "description": "Open Fortress is a free Team Fortress 2 mod that introduces new gamemodes, weapons, characters, maps, and more to the world of TF2.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:games_source": "ghcr.io/parkervcp/yolks:games_source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart -debug +maxplayers {{MAXPLAYERS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Beans need some extra packages?\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates p7zip-full libstdc++6 libstdc++6:i386 libncurses5:i386 libtinfo5:i386 libcurl4-gnutls-dev:i386 screen libsdl2-2.0-0:i386 file\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# SDK 2013\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit \r\n\r\n# OF\r\n./steamcmd.sh +force_install_dir /mnt/server/tf2 +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update 232250 ${EXTRA_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## download OpenFortress\r\ncd /mnt/server\r\nmv bin bin_dontdeleteme\r\n\r\n\r\ncurl -sSL -o beans https://beans.adastral.net/beans\r\nchmod +x beans\r\nif [ -d \"open_fortress\" ]; then\r\n  echo \"OF is installed. Updating.\"\r\n  ./beans --update ~\r\nelse\r\n  echo \"OF is not installed. Instaling.\"\r\n  mkdir -p /mnt/server/open_fortress\r\n  # Run beans for 15 seconds to generate some random needed .dat file\r\n  timeout 15s ./beans --install /mnt/server\r\n  # Re-run beans now to actualy download the files\r\n  echo \"Ignore the erorrs!, this can take a wile.\"\r\n  ./beans --install /mnt/server/\r\nfi\r\n\r\nmv bin_dontdeleteme bin\r\n## add fixed gameinfo\r\ncd /mnt/server/open_fortress\r\nrm -rf gameinfo.txt\r\ncat >> gameinfo.txt << EOF\r\n\"GameInfo\"\r\n{\r\ngame \"Open Fortress\"\r\ntitle \"\"\r\ntitle2 \"\"\r\ngamelogo \"1\"\r\ndeveloper \"https://github.com/AgitationSkeleton/open_fortress/blob/master/credits.txt\"\r\ndeveloper_url\t\"https://github.com/KaidemonLP/Open-Fortress-Source\"\r\nmanual \"\"\r\ntype \"multiplayer_only\"\r\nhasportals \"0\" // gameui.dll\r\nhashdcontent\t\"0\" // gameui.dll\r\nnomodels \"0\" // gameui.dll\r\nnohimodel \"0\" // gameui.dll\r\nnocrosshair \"0\" // gameui.dll\r\nadvcrosshair \"1\" // gameui.dll\r\nnodifficulty\t\"1\" // gameui.dll\r\nsupportsvr \"0\" // engine.dll + gameui.dll\r\nbots \"0\" // gameui.dll\r\nnodegraph \"1\" // engine.dll\r\nperfwizard \"0\" // unused\r\nSupportsDX8 \"0\" // unused\r\nSupportsDX9 \"1\" // unused\r\nSupportsDX10\t\"0\" // unused\r\nSupportsDX11\t\"0\" // unused\r\nSupportsXbox\t\"0\" // unused\r\nSupportsXbox360\t\"0\" // unused\r\nSupportsXboxOne\t\"0\" // unused\r\nSupportsPS3 \"0\" // unused\r\nSupportsPS4 \"0\" // unused\r\nicon \"resource/game\"\r\nGameData \"ofd_fic2.fgd\"\r\nInstancePath\t\"maps/instances/\"\r\nhidden_maps\r\n{\r\n\"test_speakers\" 1\r\n\"test_hardware\" 1\r\n\"background01\" 1\r\n\"background02\" 1\r\n\"background03\" 1\r\n\"background04\" 1\r\n\"background05\" 1\r\n\"background06\" 1\r\n\"background07\" 1\r\n\"background08\" 1\r\n\"background09\" 1\r\n\"background12\" 1\r\n\"background15\" 1\r\n\"ep1_c17_00\" 1\r\n\"ep1_c17_00a\" 1\r\n\"ep1_c17_01\" 1\r\n\"ep1_c17_01a\" 1\r\n\"ep1_c17_02\" 1\r\n\"ep1_c17_02a\" 1\r\n\"ep1_c17_02b\" 1\r\n\"ep1_c17_05\" 1\r\n\"ep1_c17_06\" 1\r\n\"ep1_citadel_00\"\t1\r\n\"ep1_citadel_00_demo\" 1\r\n\"ep1_citadel_01\"\t1\r\n\"ep1_citadel_02\"\t1\r\n\"ep1_citadel_02b\"\t1\r\n\"ep1_citadel_03\"\t1\r\n\"ep1_citadel_04\"\t1\r\n\"ep1_background01\"\t1\r\n\"ep1_background01a\"\t1\r\n\"ep1_background02\"\t1\r\n\"ep2_outland_01\"\t1\r\n\"ep2_outland_01a\"\t1\r\n\"ep2_outland_02\"\t1\r\n\"ep2_outland_03\"\t1\r\n\"ep2_outland_04\"\t1\r\n\"ep2_outland_05\"\t1\r\n\"ep2_outland_06\"\t1\r\n\"ep2_outland_06a\"\t1\r\n\"ep2_outland_07\"\t1\r\n\"ep2_outland_08\"\t1\r\n\"ep2_outland_09\"\t1\r\n\"ep2_outland_10\"\t1\r\n\"ep2_outland_10a\"\t1\r\n\"ep2_outland_11\"\t1\r\n\"ep2_outland_11a\"\t1\r\n\"ep2_outland_11b\"\t1\r\n\"ep2_outland_12\"\t1\r\n\"ep2_outland_12a\"\t1\r\n\"ep2_background01\"\t1\r\n\"ep2_background02\"\t1\r\n\"ep2_background02a\"\t1\r\n\"ep2_background03\"\t1\r\n\"credits\" 1\r\n\"vst_lostcoast\" 1\r\n\"test\" 1\r\n\"sdk_vehicles\" 1\r\n}\r\nFileSystem\r\n{\r\nSteamAppId 243750\r\nSearchPaths\r\n{\r\ngame+mod |gameinfo_path|custom/*\r\ngame+game_write+mod+mod_write+default_write_path |gameinfo_path|.\r\ngamebin |gameinfo_path|bin\r\n// The lines below until the BREAK comment are responsible for the game resources to work properly\r\n// in Hammer and other Source tools. The default setup assumes that you have everything (Steam, TF2,\r\n// Source SDK and OF) in the same drive letter/partition. If you have a different storage configuration,\r\n// feel free to modify the paths below between quotes (example: D:\\Steam\\steamapps\\common\\Team Fortress 2\\tf).\r\ngame \"/home/container/tf2/tf/tf2_misc.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_sound_misc.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_sound_vo_english.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_textures.vpk\"\r\ngame \"/home/container/tf2/tf\"\r\ngame \"/home/container/tf2/hl2/hl2_textures.vpk\"\r\ngame \"/home/container/tf2/hl2/hl2_sound_vo_english.vpk\"\r\ngame \"/home/container/tf2/hl2/hl2_sound_misc.vpk\"\r\n// The hl2 folder here is from Source SDK Base 2013 Multiplayer.\r\ngame \"|all_source_engine_paths|hl2\\hl2_misc.vpk\"\r\ngame \"|all_source_engine_paths|hl2\"\r\n// ========== BREAK ==========\r\nplatform |all_source_engine_paths|platform/platform_misc.vpk\r\nplatform |all_source_engine_paths|platform\r\ngame+download |gameinfo_path|download\r\n}\r\n}\r\n}\r\nEOF\r\n## fix issue /w symlink\r\ncd /mnt/server/bin\r\nln -s datacache_srv.so datacache.so\r\nln -s dedicated_srv.so dedicated.so\r\nln -s engine_srv.so engine.so\r\nln -s materialsystem_srv.so materialsystem.so\r\nln -s replay_srv.so replay.so\r\nln -s scenefilecache_srv.so scenefilecache.so\r\nln -s shaderapiempty_srv.so shaderapiempty.so\r\nln -s soundemittersystem_srv.so soundemittersystem.so\r\nln -s studiorender_srv.so studiorender.so\r\nln -s vphysics_srv.so vphysics.so\r\n## more symlink fixes\r\ncd /mnt/server/open_fortress/bin\r\nln -s server.so server_srv.so\r\n## fix issue with libstdc++.so\r\nrm -rf /mnt/server/bin/libstdc++.so.6\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "244310",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:244310",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "open_fortress",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(open_fortress)$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dm_2fort",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on the server.",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "open-fortress-4365509a131c",
+        "name": "Open Fortress",
+        "description": "Open Fortress is a free Team Fortress 2 mod that introduces new gamemodes, weapons, characters, maps, and more to the world of TF2.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/open-fortress-4365509a131c.json",
+        "sha256": "e9bcbaae6209a779c70fc6ce2f467d32f4a3b502f89a9ac723cd82faa43581d9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "open_fortress/egg-open-fortress.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/4365509a131c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-09T13:41:23+01:00",
+        "name": "Open Fortress",
+        "author": "espeon@espeon.dev",
+        "description": "Open Fortress is a free Team Fortress 2 mod that introduces new gamemodes, weapons, characters, maps, and more to the world of TF2.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "games_source": "ghcr.io/ptero-eggs/yolks:games_source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart -debug +maxplayers {{MAXPLAYERS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n# Beans need some extra packages?\r\napt -y update\r\napt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates p7zip-full libstdc++6 libstdc++6:i386 libncurses5:i386 libtinfo5:i386 libcurl4-gnutls-dev:i386 screen libsdl2-2.0-0:i386 file\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# SDK 2013\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit \r\n\r\n# OF\r\n./steamcmd.sh +force_install_dir /mnt/server/tf2 +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update 232250 ${EXTRA_FLAGS} validate +quit \r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## download OpenFortress\r\ncd /mnt/server\r\nmv bin bin_dontdeleteme\r\n\r\n\r\ncurl -sSL -o beans https://beans.adastral.net/beans\r\nchmod +x beans\r\nif [ -d \"open_fortress\" ]; then\r\n  echo \"OF is installed. Updating.\"\r\n  ./beans --update ~\r\nelse\r\n  echo \"OF is not installed. Instaling.\"\r\n  mkdir -p /mnt/server/open_fortress\r\n  # Run beans for 15 seconds to generate some random needed .dat file\r\n  timeout 15s ./beans --install /mnt/server\r\n  # Re-run beans now to actualy download the files\r\n  echo \"Ignore the erorrs!, this can take a wile.\"\r\n  ./beans --install /mnt/server/\r\nfi\r\n\r\nmv bin_dontdeleteme bin\r\n## add fixed gameinfo\r\ncd /mnt/server/open_fortress\r\nrm -rf gameinfo.txt\r\ncat >> gameinfo.txt << EOF\r\n\"GameInfo\"\r\n{\r\ngame \"Open Fortress\"\r\ntitle \"\"\r\ntitle2 \"\"\r\ngamelogo \"1\"\r\ndeveloper \"https://github.com/AgitationSkeleton/open_fortress/blob/master/credits.txt\"\r\ndeveloper_url\t\"https://github.com/KaidemonLP/Open-Fortress-Source\"\r\nmanual \"\"\r\ntype \"multiplayer_only\"\r\nhasportals \"0\" // gameui.dll\r\nhashdcontent\t\"0\" // gameui.dll\r\nnomodels \"0\" // gameui.dll\r\nnohimodel \"0\" // gameui.dll\r\nnocrosshair \"0\" // gameui.dll\r\nadvcrosshair \"1\" // gameui.dll\r\nnodifficulty\t\"1\" // gameui.dll\r\nsupportsvr \"0\" // engine.dll + gameui.dll\r\nbots \"0\" // gameui.dll\r\nnodegraph \"1\" // engine.dll\r\nperfwizard \"0\" // unused\r\nSupportsDX8 \"0\" // unused\r\nSupportsDX9 \"1\" // unused\r\nSupportsDX10\t\"0\" // unused\r\nSupportsDX11\t\"0\" // unused\r\nSupportsXbox\t\"0\" // unused\r\nSupportsXbox360\t\"0\" // unused\r\nSupportsXboxOne\t\"0\" // unused\r\nSupportsPS3 \"0\" // unused\r\nSupportsPS4 \"0\" // unused\r\nicon \"resource/game\"\r\nGameData \"ofd_fic2.fgd\"\r\nInstancePath\t\"maps/instances/\"\r\nhidden_maps\r\n{\r\n\"test_speakers\" 1\r\n\"test_hardware\" 1\r\n\"background01\" 1\r\n\"background02\" 1\r\n\"background03\" 1\r\n\"background04\" 1\r\n\"background05\" 1\r\n\"background06\" 1\r\n\"background07\" 1\r\n\"background08\" 1\r\n\"background09\" 1\r\n\"background12\" 1\r\n\"background15\" 1\r\n\"ep1_c17_00\" 1\r\n\"ep1_c17_00a\" 1\r\n\"ep1_c17_01\" 1\r\n\"ep1_c17_01a\" 1\r\n\"ep1_c17_02\" 1\r\n\"ep1_c17_02a\" 1\r\n\"ep1_c17_02b\" 1\r\n\"ep1_c17_05\" 1\r\n\"ep1_c17_06\" 1\r\n\"ep1_citadel_00\"\t1\r\n\"ep1_citadel_00_demo\" 1\r\n\"ep1_citadel_01\"\t1\r\n\"ep1_citadel_02\"\t1\r\n\"ep1_citadel_02b\"\t1\r\n\"ep1_citadel_03\"\t1\r\n\"ep1_citadel_04\"\t1\r\n\"ep1_background01\"\t1\r\n\"ep1_background01a\"\t1\r\n\"ep1_background02\"\t1\r\n\"ep2_outland_01\"\t1\r\n\"ep2_outland_01a\"\t1\r\n\"ep2_outland_02\"\t1\r\n\"ep2_outland_03\"\t1\r\n\"ep2_outland_04\"\t1\r\n\"ep2_outland_05\"\t1\r\n\"ep2_outland_06\"\t1\r\n\"ep2_outland_06a\"\t1\r\n\"ep2_outland_07\"\t1\r\n\"ep2_outland_08\"\t1\r\n\"ep2_outland_09\"\t1\r\n\"ep2_outland_10\"\t1\r\n\"ep2_outland_10a\"\t1\r\n\"ep2_outland_11\"\t1\r\n\"ep2_outland_11a\"\t1\r\n\"ep2_outland_11b\"\t1\r\n\"ep2_outland_12\"\t1\r\n\"ep2_outland_12a\"\t1\r\n\"ep2_background01\"\t1\r\n\"ep2_background02\"\t1\r\n\"ep2_background02a\"\t1\r\n\"ep2_background03\"\t1\r\n\"credits\" 1\r\n\"vst_lostcoast\" 1\r\n\"test\" 1\r\n\"sdk_vehicles\" 1\r\n}\r\nFileSystem\r\n{\r\nSteamAppId 243750\r\nSearchPaths\r\n{\r\ngame+mod |gameinfo_path|custom/*\r\ngame+game_write+mod+mod_write+default_write_path |gameinfo_path|.\r\ngamebin |gameinfo_path|bin\r\n// The lines below until the BREAK comment are responsible for the game resources to work properly\r\n// in Hammer and other Source tools. The default setup assumes that you have everything (Steam, TF2,\r\n// Source SDK and OF) in the same drive letter/partition. If you have a different storage configuration,\r\n// feel free to modify the paths below between quotes (example: D:\\Steam\\steamapps\\common\\Team Fortress 2\\tf).\r\ngame \"/home/container/tf2/tf/tf2_misc.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_sound_misc.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_sound_vo_english.vpk\"\r\ngame \"/home/container/tf2/tf/tf2_textures.vpk\"\r\ngame \"/home/container/tf2/tf\"\r\ngame \"/home/container/tf2/hl2/hl2_textures.vpk\"\r\ngame \"/home/container/tf2/hl2/hl2_sound_vo_english.vpk\"\r\ngame \"/home/container/tf2/hl2/hl2_sound_misc.vpk\"\r\n// The hl2 folder here is from Source SDK Base 2013 Multiplayer.\r\ngame \"|all_source_engine_paths|hl2\\hl2_misc.vpk\"\r\ngame \"|all_source_engine_paths|hl2\"\r\n// ========== BREAK ==========\r\nplatform |all_source_engine_paths|platform/platform_misc.vpk\r\nplatform |all_source_engine_paths|platform\r\ngame+download |gameinfo_path|download\r\n}\r\n}\r\n}\r\nEOF\r\n## fix issue /w symlink\r\ncd /mnt/server/bin\r\nln -s datacache_srv.so datacache.so\r\nln -s dedicated_srv.so dedicated.so\r\nln -s engine_srv.so engine.so\r\nln -s materialsystem_srv.so materialsystem.so\r\nln -s replay_srv.so replay.so\r\nln -s scenefilecache_srv.so scenefilecache.so\r\nln -s shaderapiempty_srv.so shaderapiempty.so\r\nln -s soundemittersystem_srv.so soundemittersystem.so\r\nln -s studiorender_srv.so studiorender.so\r\nln -s vphysics_srv.so vphysics.so\r\n## more symlink fixes\r\ncd /mnt/server/open_fortress/bin\r\nln -s server.so server_srv.so\r\n## fix issue with libstdc++.so\r\nrm -rf /mnt/server/bin/libstdc++.so.6\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "244310",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:244310",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "open_fortress",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(open_fortress)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "dm_2fort",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players allowed on the server.",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "24",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openarena-008b413a1a87",
+        "name": "OpenArena",
+        "description": "OpenArena is a community-produced deathmatch FPS based on GPL idTech3 technology.\r\n\r\nhttp://www.openarena.ws/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openarena-008b413a1a87.json",
+        "sha256": "7c0e35dbbf047e58dc1a46006a1848f879caacc8be7fcfe0d8e9978b9b246566",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openarena/egg-open-arena.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/008b413a1a87.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:55+00:00",
+        "name": "OpenArena",
+        "author": "parker@parkervcp.com",
+        "uuid": "d0d0ae0f-90ac-493e-a0f2-cbb7762c9028",
+        "description": "OpenArena is a community-produced deathmatch FPS based on GPL idTech3 technology.\r\n\r\nhttp://www.openarena.ws/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./oa_ded.x86_64 +set net_port {{SERVER_PORT}} +map {{GAME_MAP}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"AAS initialized\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# dirty install script for openarena\r\n# will get updated more later\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n\tmkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nwget http://www.openarena.ws/request.php?4 -O openarena.zip\r\n\r\nunzip -o openarena.zip openarena-*/oa_ded.x86_64 openarena-*/missionpack/* openarena-*/baseoa/*\r\n\r\nmv -f openarena-*/* /mnt/server/\r\n\r\nrm -rf openarena-*/ openarena.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game Map",
+            "description": "The map to load when the server starts.\r\nSee here for all maps available by default - https://openarena.fandom.com/wiki/Maps",
+            "env_variable": "GAME_MAP",
+            "default_value": "aggressor",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openarena-a101e6befeba",
+        "name": "OpenArena",
+        "description": "OpenArena is a community-produced deathmatch FPS based on GPL idTech3 technology.\r\n\r\nhttp://www.openarena.ws/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openarena-a101e6befeba.json",
+        "sha256": "e2608e11cc6d32188e1fbd8249b5c0cc50849d3bf480d12830e2d2e2126f3b7e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "openarena/egg-open-arena.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/a101e6befeba.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T13:16:40+02:00",
+        "name": "OpenArena",
+        "author": "parker@parkervcp.com",
+        "description": "OpenArena is a community-produced deathmatch FPS based on GPL idTech3 technology.\r\n\r\nhttp://www.openarena.ws/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./oa_ded.x86_64 +set net_port {{SERVER_PORT}} +map {{GAME_MAP}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"AAS initialized\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# dirty install script for openarena\r\n# will get updated more later\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n\tmkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nwget http://www.openarena.ws/request.php?4 -O openarena.zip\r\n\r\nunzip -o openarena.zip openarena-*/oa_ded.x86_64 openarena-*/missionpack/* openarena-*/baseoa/*\r\n\r\nmv -f openarena-*/* /mnt/server/\r\n\r\nrm -rf openarena-*/ openarena.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game Map",
+            "description": "The map to load when the server starts.\r\nSee here for all maps available by default - https://openarena.fandom.com/wiki/Maps",
+            "env_variable": "GAME_MAP",
+            "default_value": "aggressor",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openarena-a46090c32c9e",
+        "name": "OpenArena",
+        "description": "OpenArena is a community-produced deathmatch FPS based on GPL idTech3 technology.\r\n\r\nhttp://www.openarena.ws/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openarena-a46090c32c9e.json",
+        "sha256": "e40d66ae02fddde8c48f232b62f63bcd2c370a37948589b6f67b18000247e5f7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openarena/egg-pterodactyl-open-arena.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/openarena/egg-open-arena.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/a46090c32c9e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:55+00:00",
+        "name": "OpenArena",
+        "author": "parker@parkervcp.com",
+        "description": "OpenArena is a community-produced deathmatch FPS based on GPL idTech3 technology.\r\n\r\nhttp://www.openarena.ws/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./oa_ded.x86_64 +set net_port {{SERVER_PORT}} +map {{GAME_MAP}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"AAS initialized\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# dirty install script for openarena\r\n# will get updated more later\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n\tmkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nwget http://www.openarena.ws/request.php?4 -O openarena.zip\r\n\r\nunzip -o openarena.zip openarena-*/oa_ded.x86_64 openarena-*/missionpack/* openarena-*/baseoa/*\r\n\r\nmv -f openarena-*/* /mnt/server/\r\n\r\nrm -rf openarena-*/ openarena.zip\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game Map",
+            "description": "The map to load when the server starts.\r\nSee here for all maps available by default - https://openarena.fandom.com/wiki/Maps",
+            "env_variable": "GAME_MAP",
+            "default_value": "aggressor",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openmp-4a6c1531074d",
+        "name": "OpenMP",
+        "description": "A multiplayer mod for Grand Theft Auto: San Andreas that is fully backwards compatible with San Andreas Multiplayer.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openmp-4a6c1531074d.json",
+        "sha256": "b8b8128efdb6c188530dd6e835daa19acb5981f383d8fc00033f63b05269ea1e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/openmp/egg-pterodactyl-open-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/gta/openmp/egg-open-m-p.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/4a6c1531074d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:57+00:00",
+        "name": "OpenMP",
+        "author": "vedrancappone@gmail.com",
+        "description": "A multiplayer mod for Grand Theft Auto: San Andreas that is fully backwards compatible with San Andreas Multiplayer.",
+        "features": null,
+        "docker_images": {
+          "Samp": "ghcr.io/parkervcp/games:samp"
+        },
+        "file_denylist": [],
+        "startup": "./omp-server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"network.port\": \"{{server.build.default.port}}\", \"rcon.password\": \"{{server.build.env.RCON_PASSWORD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"started on port\"}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt -y install curl git jq tar\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/openmultiplayer/open.mp/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/openmultiplayer/open.mp/releases\")\r\nMATCH=open.mp-linux-x86-dynssl\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -linux-x86 | head -1)\r\n    fi\r\nfi\r\n\r\necho \"running: curl -sSL -o openmp.tar.gz ${DOWNLOAD_URL}\"\r\ncurl -sSL -o openmp.tar.gz ${DOWNLOAD_URL}\r\n\r\nmkdir -p /mnt/server\r\ntar -xzvf openmp.tar.gz --strip-components=1 -C /mnt/server/\r\n\r\ncd /mnt/server || exit\r\n\r\necho \"creating default config\"\r\n\r\nif [ -e config.json ]; then\r\n    echo \"server config file exists\"\r\nelse\r\n    echo \"Downloading default OpenMp config\"\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/openmp/config.json >> config.json\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "RCON Password",
+            "description": "The password for RCON",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version you want to install",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openmp-562b16981b1d",
+        "name": "OpenMP",
+        "description": "A multiplayer mod for Grand Theft Auto: San Andreas that is fully backwards compatible with San Andreas Multiplayer.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openmp-562b16981b1d.json",
+        "sha256": "c4e2b4ec555d2bc0e18bcdb74949701bd25bf15f0b5e9bccd0bfbf9cc30b71f0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/openmp/egg-open-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/562b16981b1d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-01T11:37:31+02:00",
+        "name": "OpenMP",
+        "author": "vedrancappone@gmail.com",
+        "description": "A multiplayer mod for Grand Theft Auto: San Andreas that is fully backwards compatible with San Andreas Multiplayer.",
+        "features": null,
+        "docker_images": {
+          "Samp": "ghcr.io/ptero-eggs/games:samp"
+        },
+        "file_denylist": [],
+        "startup": "./omp-server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"network.port\": \"{{server.build.default.port}}\", \"rcon.password\": \"{{server.build.env.RCON_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"started on port\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt -y install curl git jq tar\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/openmultiplayer/open.mp/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/openmultiplayer/open.mp/releases\")\r\nMATCH=open.mp-linux-x86-dynssl\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -linux-x86 | head -1)\r\n    fi\r\nfi\r\n\r\necho \"running: curl -sSL -o openmp.tar.gz ${DOWNLOAD_URL}\"\r\ncurl -sSL -o openmp.tar.gz ${DOWNLOAD_URL}\r\n\r\nmkdir -p /mnt/server\r\ntar -xzvf openmp.tar.gz --strip-components=1 -C /mnt/server/\r\n\r\ncd /mnt/server || exit\r\n\r\necho \"creating default config\"\r\n\r\nif [ -e config.json ]; then\r\n    echo \"server config file exists\"\r\nelse\r\n    echo \"Downloading default OpenMp config\"\r\n    curl https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/gta/openmp/config.json >> config.json\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "RCON Password",
+            "description": "The password for RCON",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version you want to install",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openmp-74e67d2fa552",
+        "name": "OpenMP",
+        "description": "A multiplayer mod for Grand Theft Auto: San Andreas that is fully backwards compatible with San Andreas Multiplayer.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openmp-74e67d2fa552.json",
+        "sha256": "040d0ec018209bb1b1e93331a85db9e37b34c7b4d6233f82aadb8736344a75f8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/openmp/egg-open-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/74e67d2fa552.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:57+00:00",
+        "name": "OpenMP",
+        "author": "vedrancappone@gmail.com",
+        "uuid": "c7cf92b3-1506-406d-93bf-6b3f4c5db899",
+        "description": "A multiplayer mod for Grand Theft Auto: San Andreas that is fully backwards compatible with San Andreas Multiplayer.",
+        "features": null,
+        "docker_images": {
+          "Samp": "ghcr.io/parkervcp/games:samp"
+        },
+        "file_denylist": [],
+        "startup": "./omp-server",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"network.port\": \"{{server.build.default.port}}\", \"rcon.password\": \"{{server.build.env.RCON_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"started on port\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt -y install curl git jq tar\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/openmultiplayer/open.mp/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/openmultiplayer/open.mp/releases\")\r\nMATCH=open.mp-linux-x86-dynssl\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -linux-x86 | head -1)\r\n    fi\r\nfi\r\n\r\necho \"running: curl -sSL -o openmp.tar.gz ${DOWNLOAD_URL}\"\r\ncurl -sSL -o openmp.tar.gz ${DOWNLOAD_URL}\r\n\r\nmkdir -p /mnt/server\r\ntar -xzvf openmp.tar.gz --strip-components=1 -C /mnt/server/\r\n\r\ncd /mnt/server || exit\r\n\r\necho \"creating default config\"\r\n\r\nif [ -e config.json ]; then\r\n    echo \"server config file exists\"\r\nelse\r\n    echo \"Downloading default OpenMp config\"\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/gta/openmp/config.json >> config.json\r\nfi\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "RCON Password",
+            "description": "The password for RCON",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version you want to install",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

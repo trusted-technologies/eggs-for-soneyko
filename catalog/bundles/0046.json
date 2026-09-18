@@ -1,0 +1,1579 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "insurgency-sandstorm-bb18fda4f6a7",
+        "name": "Insurgency: Sandstorm",
+        "description": "Insurgency: Sandstorm is a team-based, tactical FPS based on lethal close quarters combat and objective-oriented multiplayer gameplay. Experience the intensity of modern combat where skill is rewarded, and teamwork wins the fight.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/insurgency-sandstorm-bb18fda4f6a7.json",
+        "sha256": "e3eba67d432921c70957760900bcd79b6dcc31d5126af4845ee64c40d16fd9da",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "insurgency_sandstorm/egg-insurgency--sandstorm.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/games-steamcmd",
+            "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+            "path": "insurgency_sandstorm/egg-pterodactyl-insurgency--sandstorm.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/bb18fda4f6a7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Insurgency: Sandstorm",
+        "author": "brycea@terrahost.cloud",
+        "description": "Insurgency: Sandstorm is a team-based, tactical FPS based on lethal close quarters combat and objective-oriented multiplayer gameplay. Experience the intensity of modern combat where skill is rewarded, and teamwork wins the fight.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Insurgency/Binaries/Linux/InsurgencyServer-Linux-Shipping {{MAP_NAME}}?Scenario={{SCENARIO}}?MaxPlayers={{MAX_PLAYERS}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -log -hostname=\"{{HOSTNAME}}\" -GSLTToken={{GSLTT}} -GameStats -GameStatsToken={{GST}} {{ADDSWITCHES}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogGameState: Match State Changed from LoadingAssets to WaitingToStart\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\ncp -v /mnt/server/steam/linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\nchmod +x /mnt/server/Insurgency/Binaries/Linux/InsurgencyServer-Linux-Shipping\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "The ID corresponding to the game to download and run. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "581330",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name to appear in the server in the server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "My Insurgency Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query port for your Insurgency server.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27131",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the maximum number of players.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "28",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default map to run when starting the server. Scenario must be available with the provided map.",
+            "env_variable": "MAP_NAME",
+            "default_value": "Canyon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Scenario Name",
+            "description": "By default, a server will cycle through all Versus (PVP) scenarios available.",
+            "env_variable": "SCENARIO",
+            "default_value": "Scenario_Crossing_Checkpoint_Insurgents",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Switches",
+            "description": "Please see this guide for available switches https://mod.io/g/insurgencysandstorm/r/server-admin-guide",
+            "env_variable": "ADDSWITCHES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Stats Token",
+            "description": "Generate your token here https://gamestats.sandstorm.game/. This is required to have your server show up in the server browser.",
+            "env_variable": "GST",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GSLT Authentication",
+            "description": "Generate your token here https://steamcommunity.com/dev/managegameservers. This is required to have your server show up in the server browser.",
+            "env_variable": "GSLTT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "insurgency-sandstorm-c689c8e2231c",
+        "name": "Insurgency: Sandstorm",
+        "description": "Insurgency: Sandstorm is a team-based, tactical FPS based on lethal close quarters combat and objective-oriented multiplayer gameplay. Experience the intensity of modern combat where skill is rewarded, and teamwork wins the fight.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/insurgency-sandstorm-c689c8e2231c.json",
+        "sha256": "98989c706fdaeffeab590a5e1e5804072a29d742201d167ae2b3e1b572097a78",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "insurgency_sandstorm/egg-insurgency--sandstorm.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c689c8e2231c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-13T18:26:59+01:00",
+        "name": "Insurgency: Sandstorm",
+        "author": "brycea@terrahost.cloud",
+        "description": "Insurgency: Sandstorm is a team-based, tactical FPS based on lethal close quarters combat and objective-oriented multiplayer gameplay. Experience the intensity of modern combat where skill is rewarded, and teamwork wins the fight.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:ubuntu": "ghcr.io/ptero-eggs/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Insurgency/Binaries/Linux/InsurgencyServer-Linux-Shipping {{MAP_NAME}}?Scenario={{SCENARIO}}?MaxPlayers={{MAX_PLAYERS}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -log -hostname=\"{{HOSTNAME}}\" -GSLTToken={{GSLTT}} -GameStats -GameStatsToken={{GST}} {{ADDSWITCHES}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogGameState: Match State Changed from LoadingAssets to WaitingToStart\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\ncp -v /mnt/server/steam/linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\nchmod +x /mnt/server/Insurgency/Binaries/Linux/InsurgencyServer-Linux-Shipping\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "The ID corresponding to the game to download and run. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "581330",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name to appear in the server in the server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "My Insurgency Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query port for your Insurgency server.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27131",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the maximum number of players.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "28",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default map to run when starting the server. Scenario must be available with the provided map.",
+            "env_variable": "MAP_NAME",
+            "default_value": "Canyon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Scenario Name",
+            "description": "By default, a server will cycle through all Versus (PVP) scenarios available.",
+            "env_variable": "SCENARIO",
+            "default_value": "Scenario_Crossing_Checkpoint_Insurgents",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Switches",
+            "description": "Please see this guide for available switches https://mod.io/g/insurgencysandstorm/r/server-admin-guide",
+            "env_variable": "ADDSWITCHES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Stats Token",
+            "description": "Generate your token here https://gamestats.sandstorm.game/. This is required to have your server show up in the server browser.",
+            "env_variable": "GST",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GSLT Authentication",
+            "description": "Generate your token here https://steamcommunity.com/dev/managegameservers. This is required to have your server show up in the server browser.",
+            "env_variable": "GSLTT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "iosoccer-server-b81cb03aec34",
+        "name": "Iosoccer server",
+        "description": "SERVER IOSOCCER",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/iosoccer-server-b81cb03aec34.json",
+        "sha256": "94dc295d4bf5e72a0e822d62dcff9ee9096dfc556751e033774e2f44021054b4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "iosoccer/egg-iosoccer-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/b81cb03aec34.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Iosoccer server",
+        "author": "contact-hyperbeats@protonmail.com",
+        "uuid": "22d43eb3-37a5-403f-91c2-834ec37aa897",
+        "description": "SERVER IOSOCCER",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -console -game iosoccer -condebug -port {{SERVER_PORT}} +maxplayers {{SLOTS}} +fps_max {{MAX_FPS}} -tickrate {{TICKRATE}} +map {{MAP}} +rcon_password {{RCON}} +ip 0.0.0.0",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "Game ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "673990",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:673990",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "MAP",
+            "description": "",
+            "env_variable": "MAP",
+            "default_value": "8v8_vienna",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SLOTS",
+            "description": "",
+            "env_variable": "SLOTS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "TICKRATE",
+            "description": "",
+            "env_variable": "TICKRATE",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "MAX FPS",
+            "description": "",
+            "env_variable": "MAX_FPS",
+            "default_value": "500",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "RCON password",
+            "description": "",
+            "env_variable": "RCON",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "iosoccer-server-c5a3f37c09bc",
+        "name": "Iosoccer server",
+        "description": "SERVER IOSOCCER",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/iosoccer-server-c5a3f37c09bc.json",
+        "sha256": "e40f7a61293a1d8a49eb2f61861dac0b7b1664ea47d776e5b3bbe432b43fa28d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "iosoccer/eggs-iosoccer.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c5a3f37c09bc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-28T11:45:54+01:00",
+        "name": "Iosoccer server",
+        "author": "contact-hyperbeats@protonmail.com",
+        "description": "SERVER IOSOCCER",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -console -game iosoccer -condebug -port {{SERVER_PORT}} +maxplayers {{SLOTS}} +fps_max {{MAX_FPS}} -tickrate {{TICKRATE}} +map {{MAP}} +rcon_password {{RCON}} +ip 0.0.0.0",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "Game ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "673990",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:673990",
+            "field_type": "text"
+          },
+          {
+            "name": "MAP",
+            "description": "",
+            "env_variable": "MAP",
+            "default_value": "8v8_vienna",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SLOTS",
+            "description": "",
+            "env_variable": "SLOTS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "TICKRATE",
+            "description": "",
+            "env_variable": "TICKRATE",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "MAX FPS",
+            "description": "",
+            "env_variable": "MAX_FPS",
+            "default_value": "500",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON password",
+            "description": "",
+            "env_variable": "RCON",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "iosoccer-server-c81b0ebad57d",
+        "name": "Iosoccer server",
+        "description": "SERVER IOSOCCER",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/iosoccer-server-c81b0ebad57d.json",
+        "sha256": "c6a7a6fbbdf8a1533263b2e7cbc8f19d10f7956f0c7800bc37d251bf04be2ec1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/iosoccer/eggs-iosoccer.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/c81b0ebad57d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-28T11:45:54+01:00",
+        "name": "Iosoccer server",
+        "author": "hyperbeats@raptorhost.fr",
+        "description": "SERVER IOSOCCER",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -console -game iosoccer -condebug -port {{SERVER_PORT}} +maxplayers {{SLOTS}} +fps_max {{MAX_FPS}} -tickrate {{TICKRATE}} +map {{MAP}} +rcon_password {{RCON}} +ip 0.0.0.0",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "Game ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "673990",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:673990",
+            "field_type": "text"
+          },
+          {
+            "name": "MAP",
+            "description": "",
+            "env_variable": "MAP",
+            "default_value": "8v8_vienna",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SLOTS",
+            "description": "",
+            "env_variable": "SLOTS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "TICKRATE",
+            "description": "",
+            "env_variable": "TICKRATE",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "MAX FPS",
+            "description": "",
+            "env_variable": "MAX_FPS",
+            "default_value": "500",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON password",
+            "description": "",
+            "env_variable": "RCON",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "iosoccer-server-cd7c7e31f96b",
+        "name": "Iosoccer server",
+        "description": "SERVER IOSOCCER",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/iosoccer-server-cd7c7e31f96b.json",
+        "sha256": "2e9f4b80dc4cfd9872d99041d4305e12cc671dc29f7b184c2ea917070ea234e1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "iosoccer/egg-pterodactyl-iosoccer-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/cd7c7e31f96b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:46+00:00",
+        "name": "Iosoccer server",
+        "author": "contact-hyperbeats@protonmail.com",
+        "description": "SERVER IOSOCCER",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -console -game iosoccer -condebug -port {{SERVER_PORT}} +maxplayers {{SLOTS}} +fps_max {{MAX_FPS}} -tickrate {{TICKRATE}} +map {{MAP}} +rcon_password {{RCON}} +ip 0.0.0.0",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "Game ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "673990",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:673990",
+            "field_type": "text"
+          },
+          {
+            "name": "MAP",
+            "description": "",
+            "env_variable": "MAP",
+            "default_value": "8v8_vienna",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "SLOTS",
+            "description": "",
+            "env_variable": "SLOTS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "TICKRATE",
+            "description": "",
+            "env_variable": "TICKRATE",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "MAX FPS",
+            "description": "",
+            "env_variable": "MAX_FPS",
+            "default_value": "500",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON password",
+            "description": "",
+            "env_variable": "RCON",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "iw4x-69dc6fb56cee",
+        "name": "IW4x",
+        "description": "IW4x is a community-driven modification for Call of Duty Modern Warfare 2 (2009) that enhances the game with improved security, dedicated servers, and extensive modding capabilities.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/iw4x-69dc6fb56cee.json",
+        "sha256": "0c937f84bc7be43dcd4ec04189585dbc8c1ec1ecfce16f6995ab78fa13cf8206",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "cod/iw4x/egg-iw4x-mw2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/69dc6fb56cee.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-25T18:35:30+02:00",
+        "name": "IW4x",
+        "author": "brainshead@gmail.com",
+        "description": "IW4x is a community-driven modification for Call of Duty Modern Warfare 2 (2009) that enhances the game with improved security, dedicated servers, and extensive modding capabilities.",
+        "features": null,
+        "docker_images": {
+          "Wine Latest ": "ghcr.io/ptero-eggs/yolks:wine_latest",
+          "Wine Staging ": "ghcr.io/ptero-eggs/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "./iw4x-launcher --update && wine iw4x.exe -dedicated -stdout +set fs_game $MOD_DIR +set sv_lanonly 0 +set net_port $SERVER_PORT +exec server.cfg +set party_enable \"0\" +map_rotate",
+        "config": {
+          "files": "{\"userraw/server.cfg\": {\"parser\": \"file\", \"find\": {\"sv_hostname\": \"sv_hostname \\\"{{server.build.env.SERVER_NAME}}\\\"\", \"set g_password\": \"set g_password \\\"{{server.build.env.SERVER_PASSWORD}}\\\"\"}}}",
+          "startup": "{\"done\": \"Sending heartbeat to master\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login anonymous +app_update 1628350 validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n./steamcmd.sh +force_install_dir /mnt/server +login anonymous  +app_update 1493710 validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n\r\n#Install IW4X launcher\r\ncd /mnt/server\r\nwget https://github.com/iw4x/launcher/releases/latest/download/iw4x-launcher-x86_64-unknown-linux-gnu.tar.gz\r\ntar xfv iw4x-launcher-x86_64-unknown-linux-gnu.tar.gz\r\nrm  iw4x-launcher-x86_64-unknown-linux-gnu.tar.gz\r\nchmod +x iw4x-launcher\r\n\r\n#Getting server configs\r\ncd /mnt/server\r\nwget -q https://github.com/iw4x/iw4-server-configs/archive/main.zip\r\nunzip main.zip\r\nmv -f iw4-server-configs-main/* . \r\nrmdir iw4-server-configs-main\r\nrm main.zip\r\nrm LICENSE\r\nrm README.md\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "10190",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Winetricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine Debug",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Mod Dir",
+            "description": "Name of the Dir where the mod are.",
+            "env_variable": "MOD_DIR",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Sets the server hostname. \r\n SERVER  COLORS \r\n^1 = Red, ^2 = Green, ^3 = Yellow, ^4 = Blue, ^5 = Cyan, ^6 = Pink, ^7 = White, ^8 = Depends on the team colors playing.,  ^9 = Grey, ^0 = Black, ^: = Rainbow colors.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl IW4X",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password Protected Server. Leave blank if you want players to join or set password if you want to keep public out.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "just-cause-3-multiplayer-ae4847f01ce0",
+        "name": "Just Cause 3 Multiplayer",
+        "description": "Dedicated server for Just Cause 3 Multiplayer (JC3:MP)  Using the Just Cause™ 3: Multiplayer Mod.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/just-cause-3-multiplayer-ae4847f01ce0.json",
+        "sha256": "fccba42f5d123010f97ae964e63d5f0483a867b8a3c048e762d29b7b26c0b989",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "just_cause/just_cause_3/egg-j-c3-m-p.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/ae4847f01ce0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-28T17:10:03+01:00",
+        "name": "Just Cause 3 Multiplayer",
+        "author": "brainshead@gmail.com",
+        "description": "Dedicated server for Just Cause 3 Multiplayer (JC3:MP)  Using the Just Cause™ 3: Multiplayer Mod.",
+        "features": null,
+        "docker_images": {
+          "Ubuntu": "ghcr.io/ptero-eggs/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "./Server --maxPlayers={{MAX_PLAYER}} --password={{SERVER_PASSWORD}} --maxTickRate={{TICK_RATE}}",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"bind\": \"0.0.0.0\", \"port\": \"{{server.build.default.port}}\", \"queryPort\": \"{{server.build.env.QUERY_PORT}}\", \"httpPort\": \"{{server.build.env.HTTP_PORT}}\", \"steamPort\": \"{{server.build.env.STEAM_PORT}}\", \"description\": \"{{server.build.env.SERVER_DESCRIPTION}}\", \"name\": \"{{server.build.env.SERVER_NAME}}\", \"maxPlayers\": \"{{server.build.env.MAX_PLAYER}}\", \"maxTickRate\": \"{{server.build.env.TICK_RATE}}\"}}}",
+          "startup": "{\"done\": \"Server successfully started up\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# SteamCMD Base Installation Script for JC3:MP\r\n\r\n## Set default Steam user if empty\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"Steam user not set. Using anonymous.\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"Steam user: ${STEAM_USER}\"\r\nfi\r\n\r\n## Download and install SteamCMD\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd_linux.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd_linux.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\nexport HOME=/mnt/server\r\n\r\n## Install JC3:MP server\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update 619960 validate +quit\r\n\r\n# Make server executable\r\nchmod +x /mnt/server/Server\r\n\r\n#Make config.json \r\necho \"Generating config.json ...\"\r\ncat > /mnt/server/config.json <<EOF\r\n{\r\n    \"announce\": true,\r\n    \"description\": \"${SERVER_DESCRIPTION}\",\r\n    \"host\": \"0.0.0.0\",\r\n    \"httpPort\": ${HTTP_PORT},\r\n    \"logLevel\": 7,\r\n    \"logo\": \"\",\r\n    \"maxPlayers\": ${MAX_PLAYER},\r\n    \"maxTickRate\": 60,\r\n    \"name\": \"${SERVER_NAME}\",\r\n    \"password\": \"${SERVER_PASSWORD}\",\r\n    \"port\": ${SERVER_PORT},\r\n    \"queryPort\": ${QUERY_PORT},\r\n    \"requiredDLC\": [],\r\n    \"steamPort\": ${STEAM_PORT}\r\n}\r\nEOF\r\n\r\necho \"-----------------------------------------\"\r\necho \"JC3:MP installation completed\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam account auth code, required if 2FA is enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "Automatically update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "Maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYER",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Set server password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Port",
+            "description": "port used for Steam communication (default is 4202)",
+            "env_variable": "STEAM_PORT",
+            "default_value": "4202",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Tickrate",
+            "description": "maximum FPS for the server (default is 60)",
+            "env_variable": "TICK_RATE",
+            "default_value": "60",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "QUERY PORT",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTP_PORT",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Server name shown in the browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Server Description.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "killing-floor-2-05d2bc15b4c2",
+        "name": "Killing Floor 2",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/killing-floor-2-05d2bc15b4c2.json",
+        "sha256": "35dad4e87ed9fd5f0ddc48e5116d39f95d992a93b3e95753fb8256b1ffa0fe4c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "killing_floor_2/egg-pterodactyl-killing-floor2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/05d2bc15b4c2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:57+00:00",
+        "name": "Killing Floor 2",
+        "author": "parker@parkervcp.com",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Binaries/Win64/KFGameSteamServer.bin.x86_64 {{MAP_NAME}}?Port={{SERVER_PORT}}?QueryPort={{QUERY_PORT}}?AdminPassword={{ADMIN_PASS}}?Difficulty={{DIFFICULTY}}$( [ \"$WEB_ADMIN\" == \"true\" ] || printf %s '??WebAdminPort={{WEB_ADMIN_PORT}}' )",
+        "config": {
+          "files": "{\"KFGame/Config/KFWeb.ini\": {\"parser\": \"file\", \"find\": {\"bEnabled\": \"benabled={{server.build.env.WEB_ADMIN}}\", \"ListenPort\": \"ListenPort={{server.build.env.WEB_ADMIN_PORT}}\"}}, \"KFGame/Config/LinuxServer-KFGame.ini\": {\"parser\": \"file\", \"find\": {\"AdminPassword\": \"AdminPassword={{server.build.env.ADMIN_PASS}}\", \"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"DevOnline: Playfab server registered with lobby ID \"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username to use to install the server.\r\n\r\nOnly needed for games that need a user that owns the server",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for the Steam account to install a server.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Will most likely time out before it gets used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Server App ID",
+            "description": "The App ID for the Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232130",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232130",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Only needed for specific situations.",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "The map to load when the server starts\r\n\r\ndefault - 'kf-bioticslab'",
+            "env_variable": "MAP_NAME",
+            "default_value": "kf-bioticslab",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The port steam will use to query the server.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable WebAdmin (beta)",
+            "description": "",
+            "env_variable": "WEB_ADMIN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "An admin password for the server.",
+            "env_variable": "ADMIN_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "This is the displayed server name to all players in the server and the server browser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Difficulty",
+            "description": "0 = Normal, 1 = Hard, 2 = Suicidal, 3 = Hell on Earth",
+            "env_variable": "DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Web Admin Port",
+            "description": "The port the webadmin panel should use. This is a beta feature.",
+            "env_variable": "WEB_ADMIN_PORT",
+            "default_value": "8089",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "killing-floor-2-1d9019084046",
+        "name": "Killing Floor 2",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/killing-floor-2-1d9019084046.json",
+        "sha256": "55b0f6a28a20c78a5af57413400101d56aa0c7f9b6913af2a8c62b986b45a1e6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/killing_floor_2/egg-killing-floor2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/1d9019084046.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:20:07+02:00",
+        "name": "Killing Floor 2",
+        "author": "parker@parkervcp.com",
+        "description": "In KILLING FLOOR 2, players descend into continental Europe after it has been overrun by horrific, murderous clones called Zeds that were created by the corporation Horzine. The Zed outbreak caused by Horzine Biotech’s failed experiments has quickly spread with unstoppable momentum, paralyzing the European Union. Only a month ago, the first Zed outbreak from the original KILLING FLOOR ripped through London; now the specimen clones are everywhere.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Binaries/Win64/KFGameSteamServer.bin.x86_64 {{MAP_NAME}}?Port={{SERVER_PORT}}?QueryPort={{QUERY_PORT}}?AdminPassword={{ADMIN_PASS}}?Difficulty={{DIFFICULTY}}$( [ \"$WEB_ADMIN\" == \"true\" ] || printf %s '??WebAdminPort={{WEB_ADMIN_PORT}}' )",
+        "config": {
+          "files": "{\"KFGame/Config/KFWeb.ini\": {\"parser\": \"file\", \"find\": {\"bEnabled\": \"benabled={{server.build.env.WEB_ADMIN}}\", \"ListenPort\": \"ListenPort={{server.build.env.WEB_ADMIN_PORT}}\"}}, \"KFGame/Config/LinuxServer-KFGame.ini\": {\"parser\": \"file\", \"find\": {\"AdminPassword\": \"AdminPassword={{server.build.env.ADMIN_PASS}}\", \"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\"}}}",
+          "startup": "{\"done\": \"DevOnline: Playfab server registered with lobby ID \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username to use to install the server.\r\n\r\nOnly needed for games that need a user that owns the server",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for the Steam account to install a server.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Will most likely time out before it gets used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Server App ID",
+            "description": "The App ID for the Server",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232130",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232130",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Only needed for specific situations.",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "The map to load when the server starts\r\n\r\ndefault - 'kf-bioticslab'",
+            "env_variable": "MAP_NAME",
+            "default_value": "kf-bioticslab",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The port steam will use to query the server.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable WebAdmin (beta)",
+            "description": "",
+            "env_variable": "WEB_ADMIN",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "An admin password for the server.",
+            "env_variable": "ADMIN_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "This is the displayed server name to all players in the server and the server browser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Difficulty",
+            "description": "0 = Normal, 1 = Hard, 2 = Suicidal, 3 = Hell on Earth",
+            "env_variable": "DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2,3",
+            "field_type": "text"
+          },
+          {
+            "name": "Web Admin Port",
+            "description": "The port the webadmin panel should use. This is a beta feature.",
+            "env_variable": "WEB_ADMIN_PORT",
+            "default_value": "8089",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

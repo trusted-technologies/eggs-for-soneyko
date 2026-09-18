@@ -1,0 +1,1056 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "folding-home-8b64f59077c1",
+        "name": "Folding@Home",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/folding-home-8b64f59077c1.json",
+        "sha256": "314258fa1e8d203fcf2a50bdd51be6582458714eb7f929a344224e43a7f93401",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "software/foldingathome/egg-folding--home.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/8b64f59077c1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-04-30T12:31:28+02:00",
+        "name": "Folding@Home",
+        "author": "fuggschen@krk-gaming.de",
+        "description": "Folding@home is a distributed computing project aimed to help scientists develop new therapeutics for a variety of diseases by the means of simulating protein dynamics. This includes the process of protein folding and the movements of proteins, and is reliant on simulations run on volunteers' personal computers",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./FAHClient --user={{FAH_USERNAME}} --team={{FAH_TEAM}} --passkey={{FAH_PASSKEY}} $(if {{FAH_ANON}}; then echo \"--fold-anon=true\"; fi) --command-port={{SERVER_PORT}} --password={{FAH_PASSWORD}} --power={{FAH_POWER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started FahCore\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\n# Folding@Home install script\r\n#\r\n# Created by Fuggschen\r\n\r\nexport DEBIAN_FRONTEND=noninteractive\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"64bit\" || echo \"arm64\")\r\ncd /tmp\r\n\r\necho \"Removing previous Version\"\r\nmv /mnt/server/config.xml /tmp/config.xml\r\nrm -rf /mnt/server/*\r\n\r\necho \"Installing dependencies\"\r\napt update && apt upgrade -y && apt install curl bzip2 -y\r\n\r\necho \"Downloading FAHClient\"\r\ncurl -sSL -o fahclient.tar.bz2 https://download.foldingathome.org/releases/public/release/fahclient/debian-stable-${ARCH}/${FAH_VERSION}/latest.tar.bz2\r\n\r\necho \"Installing FAHClient\"\r\ntar -xjf fahclient.tar.bz2 -C /mnt/server --strip-components=1\r\n\r\necho \"Cleaning up..\"\r\nrm -f fahclient.tar.bz2\r\nrm -f /mnt/server/sample-config.xml\r\nmv /tmp/config.xml /mnt/server/config.xml\r\n\r\nFILE=/mnt/server/config.xml\r\nif [[ ! -f  $FILE ]]\r\nthen\r\necho \"Setting up config.xml\"\r\ncat > $FILE << EOF\r\n<config>\r\n  <!-- Folding Slots -->\r\n  <slot id='0' type='CPU'/>\r\n  <!-- Maximum CPU Cores to use. Can't be more than 64 -->\r\n  <cpus v='64'/>\r\n</config>\r\nEOF\r\nfi\r\n\r\necho \"Done!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "FaH Username",
+            "description": "Your Folding@Home Username",
+            "env_variable": "FAH_USERNAME",
+            "default_value": "Anonymous",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Team",
+            "description": "Your Folding@Home Team that you are folding for. For reference look here: https://stats.foldingathome.org/team",
+            "env_variable": "FAH_TEAM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Passkey",
+            "description": "Your Folding@Home Passkey for your Username, if not Anonymous. Get your Passkey here: https://apps.foldingathome.org/getpasskey",
+            "env_variable": "FAH_PASSKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Anonymous Mode",
+            "description": "Set to true if you are folding Anonymously",
+            "env_variable": "FAH_ANON",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Version",
+            "description": "Set to wanted major Folding@Home Version. Check here: https://download.foldingathome.org/releases/public/release/fahclient/debian-stable-64bit/",
+            "env_variable": "FAH_VERSION",
+            "default_value": "v7.6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "FaHControl Password",
+            "description": "Set a WebUI Password",
+            "env_variable": "FAH_PASSWORD",
+            "default_value": "SetPasswordHere",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "FaH Power",
+            "description": "The Powerlevel it should use:\r\n- light (only half the cpu power is used)\r\n- medium (full cpu power)\r\n- full (full cpu and gpu power but gpu is not supported)",
+            "env_variable": "FAH_POWER",
+            "default_value": "medium",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:light,medium,full",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "forgejo-0b1b11ccd9ee",
+        "name": "Forgejo",
+        "description": "Forgejo is a community managed lightweight code hosting solution written in Go. It is published under the MIT license, and is a fork of Gitea.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/forgejo-0b1b11ccd9ee.json",
+        "sha256": "b993f11a1ff9db63094767e363f48215e6fb30826aa80b6598f55dee843084c9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "forgejo/egg-pterodactyl-forgejo.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/forgejo/egg-forgejo.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/0b1b11ccd9ee.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:58+00:00",
+        "name": "Forgejo",
+        "author": "seaswimmerthefsh@gmail.com",
+        "description": "Forgejo is a community managed lightweight code hosting solution written in Go. It is published under the MIT license, and is a fork of Gitea.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [
+          "forgejo"
+        ],
+        "startup": "./forgejo web -p {{SERVER_PORT}} -c ./app.ini",
+        "config": {
+          "files": "{\"custom/app.ini\": {\"parser\": \"file\", \"find\": {\"DISABLE_SSH\": \"DISABLE_SSH: {{server.build.env.DISABLE_SSH}}\", \"SSH_PORT\": \"SSH_PORT: {{server.build.env.SSH_PORT}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Listen: \"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/yolks:debian",
+            "entrypoint": "bash",
+            "script": "## Forgejo Installscript\r\n## Modified version of the Gitea installscript, see https://github.com/parkervcp/eggs/blob/master/software/gitea/egg-gitea.json\r\n\r\n## update system\r\napt update\r\napt -y install --no-install-recommends jq curl ca-certificates dnsutils\r\n\r\n## Variables\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nLATEST=$(dig +short release.forgejo.org TXT | grep -oE '([0-9]+\\.){2}[0-9]+(-[a-zA-Z0-9]+)*')\r\n\r\n\r\ncd /mnt/server\r\n\r\n## install forgejo\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Downloading Forgejo $LATEST (latest)\"\r\n    URL=https://codeberg.org/forgejo/forgejo/releases/download/v${LATEST}/forgejo-${LATEST}-linux-${ARCH}\r\nelse\r\n    echo -e \"Downloading Forgejo $VERSION\"\r\n    URL=https://codeberg.org/forgejo/forgejo/releases/download/v${VERSION}/forgejo-${VERSION}-linux-${ARCH}\r\nfi\r\n\r\necho -e \"Download URL: $URL\"\r\n\r\ncurl -sSL -o forgejo $URL\r\n\r\nchmod +x forgejo\r\n\r\nmkdir -p custom\r\n\r\nif [ -f \"/mnt/server/custom/app.ini\" ]; then\r\n    echo \"Config file exists\"\r\nelse\r\n    echo \"[server]\r\n    LOCAL_ROOT_URL = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DOMAIN           = ${SERVER_IP}\r\n    HTTP_PORT        = ${SERVER_PORT}\r\n    ROOT_URL         = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DISABLE_SSH      = ${DISABLE_SSH}\r\n    SSH_PORT         = ${SSH_PORT}\" > /mnt/server/custom/app.ini\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Disable SSH",
+            "description": "Disable the SSH feature when it’s not available.",
+            "env_variable": "DISABLE_SSH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "SSH Port",
+            "description": "SSH port displayed in clone URL.",
+            "env_variable": "SSH_PORT",
+            "default_value": "2020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Use either `latest` or a specific version, such as `1.21.7-0`.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "forgejo-b861507927b9",
+        "name": "Forgejo",
+        "description": "Forgejo is a community managed lightweight code hosting solution written in Go. It is published under the MIT license, and is a fork of Gitea.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/forgejo-b861507927b9.json",
+        "sha256": "e08c8caa3e7602b2f719046fbfa4e0fbcb0e510f826069a7a32e9c4ffb044634",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "forgejo/egg-forgejo.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/b861507927b9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:58+00:00",
+        "name": "Forgejo",
+        "author": "seaswimmerthefsh@gmail.com",
+        "description": "Forgejo is a community managed lightweight code hosting solution written in Go. It is published under the MIT license, and is a fork of Gitea.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [
+          "forgejo"
+        ],
+        "startup": "./forgejo web -p {{SERVER_PORT}} -c ./app.ini",
+        "config": {
+          "files": "{\"custom/app.ini\": {\"parser\": \"file\", \"find\": {\"DISABLE_SSH\": \"DISABLE_SSH: {{server.build.env.DISABLE_SSH}}\", \"SSH_PORT\": \"SSH_PORT: {{server.build.env.SSH_PORT}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Listen: \"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/yolks:debian",
+            "entrypoint": "bash",
+            "script": "## Forgejo Installscript\r\n## Modified version of the Gitea installscript, see https://github.com/parkervcp/eggs/blob/master/software/gitea/egg-gitea.json\r\n\r\n## update system\r\napt update\r\napt -y install --no-install-recommends jq curl ca-certificates dnsutils\r\n\r\n## Variables\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nLATEST=$(dig +short release.forgejo.org TXT | grep -oE '([0-9]+\\.){2}[0-9]+(-[a-zA-Z0-9]+)*')\r\n\r\n\r\ncd /mnt/server\r\n\r\n## install forgejo\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Downloading Forgejo $LATEST (latest)\"\r\n    URL=https://codeberg.org/forgejo/forgejo/releases/download/v${LATEST}/forgejo-${LATEST}-linux-${ARCH}\r\nelse\r\n    echo -e \"Downloading Forgejo $VERSION\"\r\n    URL=https://codeberg.org/forgejo/forgejo/releases/download/v${VERSION}/forgejo-${VERSION}-linux-${ARCH}\r\nfi\r\n\r\necho -e \"Download URL: $URL\"\r\n\r\ncurl -sSL -o forgejo $URL\r\n\r\nchmod +x forgejo\r\n\r\nmkdir -p custom\r\n\r\nif [ -f \"/mnt/server/custom/app.ini\" ]; then\r\n    echo \"Config file exists\"\r\nelse\r\n    echo \"[server]\r\n    LOCAL_ROOT_URL = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DOMAIN           = ${SERVER_IP}\r\n    HTTP_PORT        = ${SERVER_PORT}\r\n    ROOT_URL         = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DISABLE_SSH      = ${DISABLE_SSH}\r\n    SSH_PORT         = ${SSH_PORT}\" > /mnt/server/custom/app.ini\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Disable SSH",
+            "description": "Disable the SSH feature when it’s not available.",
+            "env_variable": "DISABLE_SSH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "SSH Port",
+            "description": "SSH port displayed in clone URL.",
+            "env_variable": "SSH_PORT",
+            "default_value": "2020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Use either `latest` or a specific version, such as `1.21.7-0`.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "forgejo-f115c61e2fed",
+        "name": "Forgejo",
+        "description": "Forgejo is a community managed lightweight code hosting solution written in Go. It is published under the MIT license, and is a fork of Gitea.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/forgejo-f115c61e2fed.json",
+        "sha256": "a19dcf3e01ebace88568d896d412b1c7f9d69a037c8623c57262b04256b18487",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "forgejo/egg-forgejo.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/f115c61e2fed.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:58+00:00",
+        "name": "Forgejo",
+        "author": "seaswimmerthefsh@gmail.com",
+        "uuid": "5186ceff-ff39-4df8-aa87-d83dbd4b1a68",
+        "description": "Forgejo is a community managed lightweight code hosting solution written in Go. It is published under the MIT license, and is a fork of Gitea.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [
+          "forgejo"
+        ],
+        "startup": "./forgejo web -p {{SERVER_PORT}} -c ./app.ini",
+        "config": {
+          "files": "{\"custom/app.ini\": {\"parser\": \"file\", \"find\": {\"DISABLE_SSH\": \"DISABLE_SSH: {{server.build.env.DISABLE_SSH}}\", \"SSH_PORT\": \"SSH_PORT: {{server.build.env.SSH_PORT}}\"}}}",
+          "startup": "{\"done\": \"Listen: \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## Forgejo Installscript\r\n## Modified version of the Gitea installscript, see https://github.com/parkervcp/eggs/blob/master/software/gitea/egg-gitea.json\r\n\r\n## update system\r\napt update\r\napt -y install --no-install-recommends jq curl ca-certificates dnsutils\r\n\r\n## Variables\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nLATEST=$(dig +short release.forgejo.org TXT | grep -oE '([0-9]+\\.){2}[0-9]+(-[a-zA-Z0-9]+)*')\r\n\r\n\r\ncd /mnt/server\r\n\r\n## install forgejo\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Downloading Forgejo $LATEST (latest)\"\r\n    URL=https://codeberg.org/forgejo/forgejo/releases/download/v${LATEST}/forgejo-${LATEST}-linux-${ARCH}\r\nelse\r\n    echo -e \"Downloading Forgejo $VERSION\"\r\n    URL=https://codeberg.org/forgejo/forgejo/releases/download/v${VERSION}/forgejo-${VERSION}-linux-${ARCH}\r\nfi\r\n\r\necho -e \"Download URL: $URL\"\r\n\r\ncurl -sSL -o forgejo $URL\r\n\r\nchmod +x forgejo\r\n\r\nmkdir -p custom\r\n\r\nif [ -f \"/mnt/server/custom/app.ini\" ]; then\r\n    echo \"Config file exists\"\r\nelse\r\n    echo \"[server]\r\n    LOCAL_ROOT_URL = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DOMAIN           = ${SERVER_IP}\r\n    HTTP_PORT        = ${SERVER_PORT}\r\n    ROOT_URL         = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DISABLE_SSH      = ${DISABLE_SSH}\r\n    SSH_PORT         = ${SSH_PORT}\" > /mnt/server/custom/app.ini\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\"",
+            "container": "ghcr.io/parkervcp/yolks:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Disable SSH",
+            "description": "Disable the SSH feature when it’s not available.",
+            "env_variable": "DISABLE_SSH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SSH Port",
+            "description": "SSH port displayed in clone URL.",
+            "env_variable": "SSH_PORT",
+            "default_value": "2020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Use either `latest` or a specific version, such as `1.21.7-0`.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:15",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "generic-c-856c7f459c5d",
+        "name": "Generic C#",
+        "description": "A generic C# (dotnet) egg that runs your C# project.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/generic-c-856c7f459c5d.json",
+        "sha256": "2ecf235f696d9d9130a4ec5e40eadca062270d41c60d10ab1438b5bab7bb2719",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "c#/pterodactyl-egg-generic-c.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/856c7f459c5d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-06-14T08:33:15+00:00",
+        "name": "Generic C#",
+        "author": "josdekurk@gmail.com",
+        "description": "A generic C# (dotnet) egg that runs your C# project.",
+        "features": [],
+        "docker_images": {
+          "Dotnet_10": "ghcr.io/pelican-eggs/yolks:dotnet_10",
+          "Dotnet_9": "ghcr.io/pelican-eggs/yolks:dotnet_9",
+          "Dotnet_8": "ghcr.io/pelican-eggs/yolks:dotnet_8",
+          "Dotnet_7": "ghcr.io/pelican-eggs/yolks:dotnet_7",
+          "Dotnet_6": "ghcr.io/pelican-eggs/yolks:dotnet_6",
+          "Dotnet_5": "ghcr.io/pelican-eggs/yolks:dotnet_5",
+          "Dotnet_3.1": "ghcr.io/pelican-eggs/yolks:dotnet_3.1",
+          "Dotnet_2.1": "ghcr.io/pelican-eggs/yolks:dotnet_2.1"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; cd {{PROJECT_DIR}}; dotnet restore; dotnet run --project {{PROJECT_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"change this text 1\", \"change this text 2\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\napt update\napt install -y git curl jq file unzip\n\nmkdir -p /mnt/server\ncd /mnt/server\n\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\n    echo -e \"assuming user knows what they are doing have a good day.\"\n    exit 0\nfi\n\n## add git ending if it's not on the address\nif [[ ${GIT_ADDRESS} != *.git ]]; then\n    GIT_ADDRESS=${GIT_ADDRESS}.git\nfi\n\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\n    echo -e \"using anon api call\"\nelse\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\nfi\n\n## pull git js bot repo\nif [ \"$(ls -A /mnt/server)\" ]; then\n    echo -e \"/mnt/server directory is not empty.\"\n    if [ -d .git ]; then\n        echo -e \".git directory exists\"\n        if [ -f .git/config ]; then\n            echo -e \"loading info from git config\"\n            ORIGIN=$(git config --get remote.origin.url)\n        else\n            echo -e \"files found with no git config\"\n            echo -e \"closing out without touching things to not break anything\"\n            exit 10\n        fi\n    fi\n\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\n        echo \"pulling latest from github\"\n        git pull\n    fi\nelse\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\n    if [ -z ${BRANCH} ]; then\n        echo -e \"cloning default branch\"\n        git clone ${GIT_ADDRESS} .\n    else\n        echo -e \"cloning ${BRANCH}'\"\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\n    fi\nfi\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone I.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Branch",
+            "description": "The branch to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files. 0 = false (default) 1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git. It's best practice to use a Personal Access Token. https://github.com/settings/tokens https://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "project file",
+            "description": "The main project file if multiple are present",
+            "env_variable": "PROJECT_FILE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Project location",
+            "description": "The location of where the .csproj file is located. not the .sln file!",
+            "env_variable": "PROJECT_DIR",
+            "default_value": "/home/container",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "generic-c-8841d3948706",
+        "name": "Generic C#",
+        "description": "A generic C# (dotnet) egg that runs your C# project.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/generic-c-8841d3948706.json",
+        "sha256": "4e57524ff9aca9c2b8a9397a42b361989cf365cd776543d61e70ad1b5044c409",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "generic/c#/egg-generic-c.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/8841d3948706.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-24T14:29:09+01:00",
+        "name": "Generic C#",
+        "author": "josdekurk@gmail.com",
+        "description": "A generic C# (dotnet) egg that runs your C# project.",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/parkervcp/yolks:dotnet_8",
+          "Dotnet_7": "ghcr.io/parkervcp/yolks:dotnet_7",
+          "Dotnet_6": "ghcr.io/parkervcp/yolks:dotnet_6",
+          "Dotnet_5": "ghcr.io/parkervcp/yolks:dotnet_5",
+          "Dotnet_3.1": "ghcr.io/parkervcp/yolks:dotnet_3.1",
+          "Dotnet_2.1": "ghcr.io/parkervcp/yolks:dotnet_2.1"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; cd {{PROJECT_DIR}}; dotnet restore; dotnet run --project {{PROJECT_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"change this text 1\", \"change this text 2\"]}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Branch",
+            "description": "The branch to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "project file",
+            "description": "The main project file if multiple are present",
+            "env_variable": "PROJECT_FILE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Project location",
+            "description": "The location of where the .csproj file is located. not the .sln file!",
+            "env_variable": "PROJECT_DIR",
+            "default_value": "/home/container",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "generic-c-a34e5d223e28",
+        "name": "Generic C#",
+        "description": "A generic C# (dotnet) egg that runs your C# project.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/generic-c-a34e5d223e28.json",
+        "sha256": "36fcafda961fc5e157623c6bbfcb603806c8d7f20c4e998aa21406ddd236c70c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "c#/egg-generic-c.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/a34e5d223e28.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-03-24T14:29:09+01:00",
+        "name": "Generic C#",
+        "author": "josdekurk@gmail.com",
+        "description": "A generic C# (dotnet) egg that runs your C# project.",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/ptero-eggs/yolks:dotnet_8",
+          "Dotnet_7": "ghcr.io/ptero-eggs/yolks:dotnet_7",
+          "Dotnet_6": "ghcr.io/ptero-eggs/yolks:dotnet_6",
+          "Dotnet_5": "ghcr.io/ptero-eggs/yolks:dotnet_5",
+          "Dotnet_3.1": "ghcr.io/ptero-eggs/yolks:dotnet_3.1",
+          "Dotnet_2.1": "ghcr.io/ptero-eggs/yolks:dotnet_2.1"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; cd {{PROJECT_DIR}}; dotnet restore; dotnet run --project {{PROJECT_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"change this text 1\", \"change this text 2\"]}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y git curl jq file unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "GitHub Repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Branch",
+            "description": "The branch to install.",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "project file",
+            "description": "The main project file if multiple are present",
+            "env_variable": "PROJECT_FILE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Project location",
+            "description": "The location of where the .csproj file is located. not the .sln file!",
+            "env_variable": "PROJECT_DIR",
+            "default_value": "/home/container",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "generic-java-8d4ce0b4a9db",
+        "name": "Generic Java",
+        "description": "Creates a container that runs java.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/generic-java-8d4ce0b4a9db.json",
+        "sha256": "41b10deb7920f92fa1607f19e13de6569ea5f1a5e7f60f389e4bcc8c9b2ccb97",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "java/egg-java.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/8d4ce0b4a9db.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-05-13T17:14:01+01:00",
+        "name": "Generic Java",
+        "author": "sneaky@sneakyhub.com",
+        "description": "Creates a container that runs java.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:java_8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "ghcr.io/ptero-eggs/yolks:java_11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "ghcr.io/ptero-eggs/yolks:java_16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "ghcr.io/ptero-eggs/yolks:java_17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "ghcr.io/ptero-eggs/yolks:java_19": "ghcr.io/ptero-eggs/yolks:java_19",
+          "ghcr.io/ptero-eggs/yolks:java_21": "ghcr.io/ptero-eggs/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -Dterminal.jline=false -Dterminal.ansi=true -jar {{JARFILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this text\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Java Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=java\r\n\r\napt update\r\napt install -y curl jq\r\n\r\ncd /mnt/server",
+            "container": "ghcr.io/ptero-eggs/yolks:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "JAR FILE",
+            "description": "",
+            "env_variable": "JARFILE",
+            "default_value": "sneakyhub.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "generic-java-9d543236d822",
+        "name": "Generic Java",
+        "description": "Creates a container that runs java.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/generic-java-9d543236d822.json",
+        "sha256": "db434ee7defa32904dbfa63267e5eaebede6f4141cf8a02da5aa426be873b642",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "generic/java/egg-java.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/9d543236d822.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-13T17:26:13+0000",
+        "name": "Generic Java",
+        "author": "sneaky@sneakyhub.com",
+        "description": "Creates a container that runs java.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8",
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17",
+          "ghcr.io/parkervcp/yolks:java_19": "ghcr.io/parkervcp/yolks:java_19",
+          "ghcr.io/parkervcp/yolks:java_21": "ghcr.io/parkervcp/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -Dterminal.jline=false -Dterminal.ansi=true -jar {{JARFILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this text\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Java Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=java\r\n\r\napt update\r\napt install -y curl jq\r\n\r\ncd /mnt/server",
+            "container": "ghcr.io/parkervcp/yolks:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "JAR FILE",
+            "description": "",
+            "env_variable": "JARFILE",
+            "default_value": "sneakyhub.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "generic-java-9f61d4e49eea",
+        "name": "Generic Java",
+        "description": "Creates a container that runs java.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/generic-java-9f61d4e49eea.json",
+        "sha256": "7e1db9825c50f9d8ff667bde43bcf5cce0ffc9e1c36a7e6a51c8457a4259d264",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "java/egg-generic-java.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/9f61d4e49eea.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:51+00:00",
+        "name": "Generic Java",
+        "author": "sneaky@sneakyhub.com",
+        "uuid": "a3ff6992-6e87-42b8-b8ca-cde33f38a435",
+        "description": "Creates a container that runs java.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8",
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17",
+          "ghcr.io/parkervcp/yolks:java_19": "ghcr.io/parkervcp/yolks:java_19",
+          "ghcr.io/parkervcp/yolks:java_21": "ghcr.io/parkervcp/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -Dterminal.jline=false -Dterminal.ansi=true -jar {{JARFILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this text\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Java Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=java\r\n\r\napt update\r\napt install -y curl jq\r\n\r\ncd /mnt/server",
+            "container": "ghcr.io/parkervcp/yolks:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "JAR FILE",
+            "description": "",
+            "env_variable": "JARFILE",
+            "default_value": "sneakyhub.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

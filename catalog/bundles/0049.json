@@ -1,0 +1,1600 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "left-4-dead-2-e21bc2eeb83d",
+        "name": "Left 4 Dead 2",
+        "description": "Left 4 Dead 2 is set in the aftermath of a worldwide pandemic of a disease nicknamed the \"Green Flu\", which rapidly transforms humans into zombie-like creatures and mutated forms that demonstrate extreme aggression towards non-infected beings. A few humans are immune to the disease, while some of those who are infected have no symptoms. The Civil Emergency and Defense Agency (CEDA) and the U.S. military create safe zones to attempt to evacuate as many survivors as possible.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/left-4-dead-2-e21bc2eeb83d.json",
+        "sha256": "61e6bf03733da42e97af3506fc873618c726d97d666cb30b28e5476fff49fe7e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "left4dead_2/egg-left4dead_2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/e21bc2eeb83d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-16T11:07:44+00:00",
+        "name": "Left 4 Dead 2",
+        "author": "pterodactyl@mazoyer.eu",
+        "description": "Left 4 Dead 2 is set in the aftermath of a worldwide pandemic of a disease nicknamed the \"Green Flu\", which rapidly transforms humans into zombie-like creatures and mutated forms that demonstrate extreme aggression towards non-infected beings. A few humans are immune to the disease, while some of those who are infected have no symptoms. The Civil Emergency and Defense Agency (CEDA) and the U.S. military create safe zones to attempt to evacuate as many survivors as possible.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\n\r\n# Due to issues at valve some games are failing to download their manifest file\r\nif [ ! -e \"/mnt/server/steamapps/appmanifest_222860.acf\" ] ; then\r\necho \"Manually writing app manifest\"\r\ncat <<EOF > /mnt/server/steamapps/appmanifest_222860.acf\r\n\"AppState\"\r\n{\r\n        \"appid\"         \"222860\"\r\n        \"Universe\"              \"1\"\r\n        \"name\"          \"Left 4 Dead 2 Dedicated Server\"\r\n        \"StateFlags\"            \"2\"\r\n        \"installdir\"            \"Left 4 Dead 2 Dedicated Server\"\r\n        \"LastUpdated\"           \"0\"\r\n        \"LastPlayed\"            \"0\"\r\n        \"SizeOnDisk\"            \"0\"\r\n        \"StagingSize\"           \"0\"\r\n        \"buildid\"               \"0\"\r\n        \"LastOwner\"             \"0\"\r\n        \"UpdateResult\"          \"0\"\r\n        \"BytesToDownload\"               \"0\"\r\n        \"BytesDownloaded\"               \"0\"\r\n        \"BytesToStage\"          \"0\"\r\n        \"BytesStaged\"           \"0\"\r\n        \"TargetBuildID\"         \"0\"\r\n        \"AutoUpdateBehavior\"            \"0\"\r\n        \"AllowOtherDownloadsWhileRunning\"               \"0\"\r\n        \"ScheduledAutoUpdate\"           \"0\"\r\n        \"InstalledDepots\"\r\n        {\r\n        }\r\n        \"UserConfig\"\r\n        {\r\n        }\r\n        \"MountedConfig\"\r\n        {\r\n        }\r\n}\r\nEOF\r\nfi\r\n\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "222860",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:222860",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default map used when starting the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "c1m1_hotel",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "longvinter-1b128bf84b11",
+        "name": "Longvinter",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/longvinter-1b128bf84b11.json",
+        "sha256": "cd6c4717896125f12ff2ae068a0677a929d006fa80da097cc325f64934395144",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "longvinter/egg-pterodactyl-longvinter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/1b128bf84b11.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:57+00:00",
+        "name": "Longvinter",
+        "author": "tueye@tuworld.de",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/longvinter-linux-server/Longvinter/Binaries/Linux/LongvinterServer-Linux-Shipping Longvinter -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}}",
+        "config": {
+          "files": "{\"longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\", \"ServerTag\": \"ServerTag={{server.build.env.SERVER_TAG}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerMOTD\": \"ServerMOTD={{server.build.env.SERVER_MOTD}}\", \"Password\": \"Password={{server.build.env.SERVER_PASSWORD}}\", \"CommunityWebsite\": \"CommunityWebsite={{server.build.env.COMMUNITY_WEBSITE}}\", \"AdminSteamID\": \"AdminSteamID={{server.build.env.ADMIN_ID}}\", \"PVP\": \"PVP={{server.build.env.ENABLE_PVP}}\", \"TentDecay\": \"TentDecay={{server.build.env.ENABLE_TENTDECAY}}\", \"MaxTents\": \"MaxTents={{server.build.env.MAX_TENTS}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"CreateSession: Successfully created session\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Longvinter Egg - egg-longvinter.json\r\n# Authors: TuEye\r\n# Date: 2022/05/15\r\n# License: MIT License\r\n\r\n\r\n## Install Git LFS\r\ncurl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash\r\napt -y install git-lfs\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Longvinter setup\r\n# If not using auto update and gamedir exist, remove it\r\nif [ ! \"${AUTO_UPDATE}\" ] && [ -d \"$HOME/longvinter-linux-server\" ]; then\r\n    echo -e \"\\nDelete game dir\\n\"\r\n    rm -r $HOME/longvinter-linux-server\r\nfi\r\n\r\n# Clone Longvinter Dedicated Server repo or do auto update if activated\r\ncd $HOME\r\nif [ ! -d \"$HOME/longvinter-linux-server\" ]; then\r\n    git clone \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\"\r\nelif [ \"${AUTO_UPDATE}\" ]; then\r\n    echo -e \"\\nUpdating gamefiles\\n\"\r\n    cd $HOME/longvinter-linux-server\r\n    git config pull.rebase false\r\n    git restore .\r\n    git stash\r\n    git pull \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\" main\r\nfi\r\nchmod -R ugo+rwx $HOME/longvinter-linux-server/\r\n\r\n\r\n# Create base config if not exist\r\nif [ ! -f $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini ]; then\r\n    echo -e \"\\nCreating game config\\n\"\r\n    cp $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini.default $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    if ! grep -q \"ServerTag=\" \"$HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\"; then\r\n        sed -i '/^ServerName=.*/a ServerTag=Default' $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    fi\r\nfi\r\n\r\necho -e \"\\nLongvinter Dedicated Server successfully installed!\\n\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name of the server, appears in Game browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Longvinter Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Tag",
+            "description": "It's the tag that allows for easier search of the server. Please don't use the word OFFICIAL on it. \r\nAnd only place one tag.",
+            "env_variable": "SERVER_TAG",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum allowed players that can connect at any given time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Server MOTD",
+            "description": "Server message that is on a signs around the island.",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome to Pterodactyl Island!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Add you password here. Use only number and letters. If left empty there is no password on the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_num|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Community Website",
+            "description": "Allows you to promote a website on a same place where the server message is shown. This link can be opened in-game.",
+            "env_variable": "COMMUNITY_WEBSITE",
+            "default_value": "pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin EOS Account ID",
+            "description": "Here you can add all the admins that you want to have in the server. If you want to add multiple separate the ID's with single space.\r\nThe ID is found in-game under Options > General.",
+            "env_variable": "ADMIN_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^([a-z0-9]{32} ?)*$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Here you write true or false if you want to enable/disable Player versus Player fights.",
+            "env_variable": "ENABLE_PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Tent Decay",
+            "description": "Here you write true or false if you want to enable/disable tent decay to make sure there isn't an abundant number of abandoned tents in the server.",
+            "env_variable": "ENABLE_TENTDECAY",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Tents",
+            "description": "Maximum allowed of tents that players that can place in the server",
+            "env_variable": "MAX_TENTS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Updates gamefiles when reinstalling. Otherwise the server is freshly installed and you will loose your savegames.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query port used by steam",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1007",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1007",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "longvinter-428dc669c1f4",
+        "name": "Longvinter",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/longvinter-428dc669c1f4.json",
+        "sha256": "7f48dfbee091050db97e45483652fe9661348fcb330ecffad7dc229da4049ff6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/longvinter/egg-longvinter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/428dc669c1f4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-13T18:49:35+01:00",
+        "name": "Longvinter",
+        "author": "tueye@tuworld.de",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/longvinter-linux-server/Longvinter/Binaries/Linux/LongvinterServer-Linux-Shipping Longvinter -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}}",
+        "config": {
+          "files": "{\"longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\", \"ServerTag\": \"ServerTag={{server.build.env.SERVER_TAG}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerMOTD\": \"ServerMOTD={{server.build.env.SERVER_MOTD}}\", \"Password\": \"Password={{server.build.env.SERVER_PASSWORD}}\", \"CommunityWebsite\": \"CommunityWebsite={{server.build.env.COMMUNITY_WEBSITE}}\", \"AdminSteamID\": \"AdminSteamID={{server.build.env.ADMIN_ID}}\", \"PVP\": \"PVP={{server.build.env.ENABLE_PVP}}\", \"TentDecay\": \"TentDecay={{server.build.env.ENABLE_TENTDECAY}}\", \"MaxTents\": \"MaxTents={{server.build.env.MAX_TENTS}}\"}}}",
+          "startup": "{\"done\": \"CreateSession: Successfully created session\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Longvinter Egg - egg-longvinter.json\r\n# Authors: TuEye\r\n# Date: 2022/05/15\r\n# License: MIT License\r\n\r\n\r\n## Install Git LFS\r\ncurl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash\r\napt -y install git-lfs\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Longvinter setup\r\n# If not using auto update and gamedir exist, remove it\r\nif [ ! \"${AUTO_UPDATE}\" ] && [ -d \"$HOME/longvinter-linux-server\" ]; then\r\n    echo -e \"\\nDelete game dir\\n\"\r\n    rm -r $HOME/longvinter-linux-server\r\nfi\r\n\r\n# Clone Longvinter Dedicated Server repo or do auto update if activated\r\ncd $HOME\r\nif [ ! -d \"$HOME/longvinter-linux-server\" ]; then\r\n    git clone \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\"\r\nelif [ \"${AUTO_UPDATE}\" ]; then\r\n    echo -e \"\\nUpdating gamefiles\\n\"\r\n    cd $HOME/longvinter-linux-server\r\n    git config pull.rebase false\r\n    git restore .\r\n    git stash\r\n    git pull \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\" main\r\nfi\r\nchmod -R ugo+rwx $HOME/longvinter-linux-server/\r\n\r\n\r\n# Create base config if not exist\r\nif [ ! -f $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini ]; then\r\n    echo -e \"\\nCreating game config\\n\"\r\n    cp $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini.default $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    if ! grep -q \"ServerTag=\" \"$HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\"; then\r\n        sed -i '/^ServerName=.*/a ServerTag=Default' $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    fi\r\nfi\r\n\r\necho -e \"\\nLongvinter Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name of the server, appears in Game browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Longvinter Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Tag",
+            "description": "It's the tag that allows for easier search of the server. Please don't use the word OFFICIAL on it. \r\nAnd only place one tag.",
+            "env_variable": "SERVER_TAG",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum allowed players that can connect at any given time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Server MOTD",
+            "description": "Server message that is on a signs around the island.",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome to Pterodactyl Island!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Add you password here. Use only number and letters. If left empty there is no password on the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_num|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Community Website",
+            "description": "Allows you to promote a website on a same place where the server message is shown. This link can be opened in-game.",
+            "env_variable": "COMMUNITY_WEBSITE",
+            "default_value": "pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin EOS Account ID",
+            "description": "Here you can add all the admins that you want to have in the server. If you want to add multiple separate the ID's with single space.\r\nThe ID is found in-game under Options > General.",
+            "env_variable": "ADMIN_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^([a-z0-9]{32} ?)*$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Here you write true or false if you want to enable/disable Player versus Player fights.",
+            "env_variable": "ENABLE_PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Tent Decay",
+            "description": "Here you write true or false if you want to enable/disable tent decay to make sure there isn't an abundant number of abandoned tents in the server.",
+            "env_variable": "ENABLE_TENTDECAY",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Tents",
+            "description": "Maximum allowed of tents that players that can place in the server",
+            "env_variable": "MAX_TENTS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Updates gamefiles when reinstalling. Otherwise the server is freshly installed and you will loose your savegames.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query port used by steam",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1007",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1007",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "longvinter-96f4df497fba",
+        "name": "Longvinter",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/longvinter-96f4df497fba.json",
+        "sha256": "279f22793c58c73d674711ab956b63ecdb70ebf843577ffa5998a3d7c673f851",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "longvinter/egg-longvinter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/96f4df497fba.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Longvinter",
+        "author": "tueye@tuworld.de",
+        "uuid": "7d890b9b-8ba3-401f-9ca3-d03d12404844",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/longvinter-linux-server/Longvinter/Binaries/Linux/LongvinterServer-Linux-Shipping Longvinter -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}}",
+        "config": {
+          "files": "{\"longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\", \"ServerTag\": \"ServerTag={{server.build.env.SERVER_TAG}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerMOTD\": \"ServerMOTD={{server.build.env.SERVER_MOTD}}\", \"Password\": \"Password={{server.build.env.SERVER_PASSWORD}}\", \"CommunityWebsite\": \"CommunityWebsite={{server.build.env.COMMUNITY_WEBSITE}}\", \"AdminSteamID\": \"AdminSteamID={{server.build.env.ADMIN_ID}}\", \"PVP\": \"PVP={{server.build.env.ENABLE_PVP}}\", \"TentDecay\": \"TentDecay={{server.build.env.ENABLE_TENTDECAY}}\", \"MaxTents\": \"MaxTents={{server.build.env.MAX_TENTS}}\"}}}",
+          "startup": "{\"done\": \"CreateSession: Successfully created session\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Longvinter Egg - egg-longvinter.json\r\n# Authors: TuEye\r\n# Date: 2022/05/15\r\n# License: MIT License\r\n\r\n\r\n## Install Git LFS\r\ncurl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash\r\napt -y install git-lfs\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Longvinter setup\r\n# If not using auto update and gamedir exist, remove it\r\nif [ ! \"${AUTO_UPDATE}\" ] && [ -d \"$HOME/longvinter-linux-server\" ]; then\r\n    echo -e \"\\nDelete game dir\\n\"\r\n    rm -r $HOME/longvinter-linux-server\r\nfi\r\n\r\n# Clone Longvinter Dedicated Server repo or do auto update if activated\r\ncd $HOME\r\nif [ ! -d \"$HOME/longvinter-linux-server\" ]; then\r\n    git clone \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\"\r\nelif [ \"${AUTO_UPDATE}\" ]; then\r\n    echo -e \"\\nUpdating gamefiles\\n\"\r\n    cd $HOME/longvinter-linux-server\r\n    git config pull.rebase false\r\n    git restore .\r\n    git stash\r\n    git pull \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\" main\r\nfi\r\nchmod -R ugo+rwx $HOME/longvinter-linux-server/\r\n\r\n\r\n# Create base config if not exist\r\nif [ ! -f $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini ]; then\r\n    echo -e \"\\nCreating game config\\n\"\r\n    cp $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini.default $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    if ! grep -q \"ServerTag=\" \"$HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\"; then\r\n        sed -i '/^ServerName=.*/a ServerTag=Default' $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    fi\r\nfi\r\n\r\necho -e \"\\nLongvinter Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name of the server, appears in Game browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Longvinter Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Tag",
+            "description": "It's the tag that allows for easier search of the server. Please don't use the word OFFICIAL on it. \r\nAnd only place one tag.",
+            "env_variable": "SERVER_TAG",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum allowed players that can connect at any given time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server MOTD",
+            "description": "Server message that is on a signs around the island.",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome to Pterodactyl Island!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Add you password here. Use only number and letters. If left empty there is no password on the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_num|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Community Website",
+            "description": "Allows you to promote a website on a same place where the server message is shown. This link can be opened in-game.",
+            "env_variable": "COMMUNITY_WEBSITE",
+            "default_value": "pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin EOS Account ID",
+            "description": "Here you can add all the admins that you want to have in the server. If you want to add multiple separate the ID's with single space.\r\nThe ID is found in-game under Options > General.",
+            "env_variable": "ADMIN_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^([a-z0-9]{32} ?)*$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Here you write true or false if you want to enable/disable Player versus Player fights.",
+            "env_variable": "ENABLE_PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Tent Decay",
+            "description": "Here you write true or false if you want to enable/disable tent decay to make sure there isn't an abundant number of abandoned tents in the server.",
+            "env_variable": "ENABLE_TENTDECAY",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Tents",
+            "description": "Maximum allowed of tents that players that can place in the server",
+            "env_variable": "MAX_TENTS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Updates gamefiles when reinstalling. Otherwise the server is freshly installed and you will loose your savegames.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query port used by steam",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1007",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1007",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "longvinter-bfb1038aa94a",
+        "name": "Longvinter",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/longvinter-bfb1038aa94a.json",
+        "sha256": "4ece16bb7511902e109b618ffffa6f32656f25ca87b70b2fb36c7fce6af4e312",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "longvinter/egg-longvinter.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/bfb1038aa94a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-13T18:49:35+01:00",
+        "name": "Longvinter",
+        "author": "tueye@tuworld.de",
+        "description": "Longvinter is a multiplayer, third-person sandbox game that implements Crafting, Farming, Building, Trading, and PVP.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/longvinter-linux-server/Longvinter/Binaries/Linux/LongvinterServer-Linux-Shipping Longvinter -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}}",
+        "config": {
+          "files": "{\"longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\": {\"parser\": \"file\", \"find\": {\"ServerName\": \"ServerName={{server.build.env.SERVER_NAME}}\", \"ServerTag\": \"ServerTag={{server.build.env.SERVER_TAG}}\", \"MaxPlayers\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"ServerMOTD\": \"ServerMOTD={{server.build.env.SERVER_MOTD}}\", \"Password\": \"Password={{server.build.env.SERVER_PASSWORD}}\", \"CommunityWebsite\": \"CommunityWebsite={{server.build.env.COMMUNITY_WEBSITE}}\", \"AdminSteamID\": \"AdminSteamID={{server.build.env.ADMIN_ID}}\", \"PVP\": \"PVP={{server.build.env.ENABLE_PVP}}\", \"TentDecay\": \"TentDecay={{server.build.env.ENABLE_TENTDECAY}}\", \"MaxTents\": \"MaxTents={{server.build.env.MAX_TENTS}}\"}}}",
+          "startup": "{\"done\": \"CreateSession: Successfully created session\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n# File: Pterodactyl Longvinter Egg - egg-longvinter.json\r\n# Authors: TuEye\r\n# Date: 2022/05/15\r\n# License: MIT License\r\n\r\n\r\n## Install Git LFS\r\ncurl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash\r\napt -y install git-lfs\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so /mnt/server/.steam/sdk64/steamclient.so\r\n\r\n## Longvinter setup\r\n# If not using auto update and gamedir exist, remove it\r\nif [ ! \"${AUTO_UPDATE}\" ] && [ -d \"$HOME/longvinter-linux-server\" ]; then\r\n    echo -e \"\\nDelete game dir\\n\"\r\n    rm -r $HOME/longvinter-linux-server\r\nfi\r\n\r\n# Clone Longvinter Dedicated Server repo or do auto update if activated\r\ncd $HOME\r\nif [ ! -d \"$HOME/longvinter-linux-server\" ]; then\r\n    git clone \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\"\r\nelif [ \"${AUTO_UPDATE}\" ]; then\r\n    echo -e \"\\nUpdating gamefiles\\n\"\r\n    cd $HOME/longvinter-linux-server\r\n    git config pull.rebase false\r\n    git restore .\r\n    git stash\r\n    git pull \"https://github.com/Uuvana-Studios/longvinter-linux-server.git\" main\r\nfi\r\nchmod -R ugo+rwx $HOME/longvinter-linux-server/\r\n\r\n\r\n# Create base config if not exist\r\nif [ ! -f $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini ]; then\r\n    echo -e \"\\nCreating game config\\n\"\r\n    cp $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini.default $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    if ! grep -q \"ServerTag=\" \"$HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\"; then\r\n        sed -i '/^ServerName=.*/a ServerTag=Default' $HOME/longvinter-linux-server/Longvinter/Saved/Config/LinuxServer/Game.ini\r\n    fi\r\nfi\r\n\r\necho -e \"\\nLongvinter Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Name of the server, appears in Game browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Longvinter Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Tag",
+            "description": "It's the tag that allows for easier search of the server. Please don't use the word OFFICIAL on it. \r\nAnd only place one tag.",
+            "env_variable": "SERVER_TAG",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum allowed players that can connect at any given time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Server MOTD",
+            "description": "Server message that is on a signs around the island.",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome to Pterodactyl Island!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Add you password here. Use only number and letters. If left empty there is no password on the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_num|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Community Website",
+            "description": "Allows you to promote a website on a same place where the server message is shown. This link can be opened in-game.",
+            "env_variable": "COMMUNITY_WEBSITE",
+            "default_value": "pterodactyl.io",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin EOS Account ID",
+            "description": "Here you can add all the admins that you want to have in the server. If you want to add multiple separate the ID's with single space.\r\nThe ID is found in-game under Options > General.",
+            "env_variable": "ADMIN_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|regex:/^([a-z0-9]{32} ?)*$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Here you write true or false if you want to enable/disable Player versus Player fights.",
+            "env_variable": "ENABLE_PVP",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Tent Decay",
+            "description": "Here you write true or false if you want to enable/disable tent decay to make sure there isn't an abundant number of abandoned tents in the server.",
+            "env_variable": "ENABLE_TENTDECAY",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Tents",
+            "description": "Maximum allowed of tents that players that can place in the server",
+            "env_variable": "MAX_TENTS",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Updates gamefiles when reinstalling. Otherwise the server is freshly installed and you will loose your savegames.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query port used by steam",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1007",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1007",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "midnight-ghost-hunt-759cf2e2e20e",
+        "name": "Midnight Ghost Hunt",
+        "description": "The chaotic multiplayer hide-and-seek game. Possess seemingly harmless objects as Ghosts or chase them down as Hunters before the clock strikes midnight! ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/midnight-ghost-hunt-759cf2e2e20e.json",
+        "sha256": "f91b1c0d8933ff1fb7b6e500481129a7e8ba803195344f7201998a4512c17242",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "midnight_ghost_hunt/egg-midnight-ghost-hunt.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/759cf2e2e20e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-07-28T19:43:17+02:00",
+        "name": "Midnight Ghost Hunt",
+        "author": "josdekurk@gmail.com",
+        "uuid": "b8327da9-c298-4e5a-9271-04c35a377ce3",
+        "description": "The chaotic multiplayer hide-and-seek game. Possess seemingly harmless objects as Ghosts or chase them down as Hunters before the clock strikes midnight! ",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "proton run MidnightGhostHunt/Binaries/Win64/MidnightGhostHuntServer-Win64-Shipping.exe -server -log -port={{SERVER_PORT}} -queryport={{QUERY_PORT}} -BeaconPort={{BEACON_PORT}} -multihome=0.0.0.0 -Map={{MAP}} -Gamename=\"{{GAME_NAME}}\" -Gamemode=\"{{GAME_MODE}}\" -Region=\"{{REGION}}\" -BotDifficulty=\"{{B_DIFFICULTY}}\" -password=\"{{PASSWORD}}\" {{ADDITIONAL_ARGS}}  & GH_PID=$!; sleep 1; tail -c0 -F  /home/container/MidnightGhostHunt/Saved/Logs/MidnightGhostHunt.log --pid=$GH_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"IpNetDriver listening on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server/MidnightGhostHunt/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1118810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1118810",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update a server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "Changes the game name.",
+            "env_variable": "GAME_NAME",
+            "default_value": "Dedicated_Server_01",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:3",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Sets your server password.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Map",
+            "description": "The map of the server.\n\nOptions:\n(Mansion, Asylum, Theatre, Museum, Ghost Ship, Carnival, School, Graveyard, Doll Factory, Mall)",
+            "env_variable": "MAP",
+            "default_value": "Asylum",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "The server gamemode.\n\nOptions:\n(4v4 Hunt, 6v6 Hunt, Darkness)",
+            "env_variable": "GAME_MODE",
+            "default_value": "4v4 Hunt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Region",
+            "description": "The region of dedicated server.\n\nOptions:\n(North America, South America, Western Europe, Northern Europe, Eastern Europe, Middle East, Asia, Africa, Oceania)",
+            "env_variable": "REGION",
+            "default_value": "Eastern Europe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Difficlty",
+            "description": "The difficulty setting for bots, Auto takes the average player level in the server to determine difficulty.\n\nOptions:\n(Easy, Normal, Hard, Auto)",
+            "env_variable": "B_DIFFICULTY",
+            "default_value": "Auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Addittional Args",
+            "description": "Extra arguments like: -NoBots -NoAutobalance",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Beacon Port",
+            "description": "",
+            "env_variable": "BEACON_PORT",
+            "default_value": "7787",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "midnight-ghost-hunt-eac83d49ac7b",
+        "name": "Midnight Ghost Hunt",
+        "description": "The chaotic multiplayer hide-and-seek game. Possess seemingly harmless objects as Ghosts or chase them down as Hunters before the clock strikes midnight! ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/midnight-ghost-hunt-eac83d49ac7b.json",
+        "sha256": "ae4a065c8950bcd37a73ad6ab6e17ddc785cfc7456c3300b6d76b331e5fbcc4d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "midnight_ghost_hunt/egg-pterodactyl-midnight-ghost-hunt.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/eac83d49ac7b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-07-28T19:43:17+02:00",
+        "name": "Midnight Ghost Hunt",
+        "author": "josdekurk@gmail.com",
+        "uuid": "b8327da9-c298-4e5a-9271-04c35a377ce3",
+        "description": "The chaotic multiplayer hide-and-seek game. Possess seemingly harmless objects as Ghosts or chase them down as Hunters before the clock strikes midnight! ",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "proton run MidnightGhostHunt/Binaries/Win64/MidnightGhostHuntServer-Win64-Shipping.exe -server -log -port={{SERVER_PORT}} -queryport={{QUERY_PORT}} -BeaconPort={{BEACON_PORT}} -multihome=0.0.0.0 -Map={{MAP}} -Gamename=\"{{GAME_NAME}}\" -Gamemode=\"{{GAME_MODE}}\" -Region=\"{{REGION}}\" -BotDifficulty=\"{{B_DIFFICULTY}}\" -password=\"{{PASSWORD}}\" {{ADDITIONAL_ARGS}}  & GH_PID=$!; sleep 1; tail -c0 -F  /home/container/MidnightGhostHunt/Saved/Logs/MidnightGhostHunt.log --pid=$GH_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"IpNetDriver listening on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server/MidnightGhostHunt/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1118810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1118810",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update a server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "Changes the game name.",
+            "env_variable": "GAME_NAME",
+            "default_value": "Dedicated_Server_01",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:3",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Sets your server password.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Map",
+            "description": "The map of the server.\n\nOptions:\n(Mansion, Asylum, Theatre, Museum, Ghost Ship, Carnival, School, Graveyard, Doll Factory, Mall)",
+            "env_variable": "MAP",
+            "default_value": "Asylum",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "The server gamemode.\n\nOptions:\n(4v4 Hunt, 6v6 Hunt, Darkness)",
+            "env_variable": "GAME_MODE",
+            "default_value": "4v4 Hunt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Region",
+            "description": "The region of dedicated server.\n\nOptions:\n(North America, South America, Western Europe, Northern Europe, Eastern Europe, Middle East, Asia, Africa, Oceania)",
+            "env_variable": "REGION",
+            "default_value": "Eastern Europe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Difficlty",
+            "description": "The difficulty setting for bots, Auto takes the average player level in the server to determine difficulty.\n\nOptions:\n(Easy, Normal, Hard, Auto)",
+            "env_variable": "B_DIFFICULTY",
+            "default_value": "Auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Addittional Args",
+            "description": "Extra arguments like: -NoBots -NoAutobalance",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Beacon Port",
+            "description": "",
+            "env_variable": "BEACON_PORT",
+            "default_value": "7787",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "midnight-ghost-hunt-f5f745c25f1b",
+        "name": "Midnight Ghost Hunt",
+        "description": "The chaotic multiplayer hide-and-seek game. Possess seemingly harmless objects as Ghosts or chase them down as Hunters before the clock strikes midnight! ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/midnight-ghost-hunt-f5f745c25f1b.json",
+        "sha256": "f5bc0387318ddbe561e9f41563ec2167c80ae6985d9c9dfe158ecf6f0f8460f9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "midnight_ghost_hunt/egg-midnight-ghost-hunt.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/f5f745c25f1b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Midnight Ghost Hunt",
+        "author": "josdekurk@gmail.com",
+        "uuid": "b8327da9-c298-4e5a-9271-04c35a377ce3",
+        "description": "The chaotic multiplayer hide-and-seek game. Possess seemingly harmless objects as Ghosts or chase them down as Hunters before the clock strikes midnight! ",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "proton run MidnightGhostHunt/Binaries/Win64/MidnightGhostHuntServer-Win64-Shipping.exe -server -log -port={{SERVER_PORT}} -queryport={{QUERY_PORT}} -BeaconPort={{BEACON_PORT}} -multihome=0.0.0.0 -Map={{MAP}} -Gamename=\"{{GAME_NAME}}\" -Gamemode=\"{{GAME_MODE}}\" -Region=\"{{REGION}}\" -BotDifficulty=\"{{B_DIFFICULTY}}\" -password=\"{{PASSWORD}}\" {{ADDITIONAL_ARGS}}  & GH_PID=$!; sleep 1; tail -c0 -F  /home/container/MidnightGhostHunt/Saved/Logs/MidnightGhostHunt.log --pid=$GH_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"IpNetDriver listening on port\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server/MidnightGhostHunt/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1118810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1118810",
+            "field_type": "text"
+          },
+          {
+            "sort": 2,
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "sort": 3,
+            "name": "Auto Update",
+            "description": "Auto Update a server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "sort": 4,
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "sort": 6,
+            "name": "Game Name",
+            "description": "Changes the game name.",
+            "env_variable": "GAME_NAME",
+            "default_value": "Dedicated_Server_01",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:3",
+            "field_type": "text"
+          },
+          {
+            "sort": 7,
+            "name": "Server Password",
+            "description": "Sets your server password.",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash|max:128",
+            "field_type": "text"
+          },
+          {
+            "sort": 8,
+            "name": "Server Map",
+            "description": "The map of the server.\n\nOptions:\n(Mansion, Asylum, Theatre, Museum, Ghost Ship, Carnival, School, Graveyard, Doll Factory, Mall)",
+            "env_variable": "MAP",
+            "default_value": "Asylum",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": 9,
+            "name": "Gamemode",
+            "description": "The server gamemode.\n\nOptions:\n(4v4 Hunt, 6v6 Hunt, Darkness)",
+            "env_variable": "GAME_MODE",
+            "default_value": "4v4 Hunt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": 10,
+            "name": "Region",
+            "description": "The region of dedicated server.\n\nOptions:\n(North America, South America, Western Europe, Northern Europe, Eastern Europe, Middle East, Asia, Africa, Oceania)",
+            "env_variable": "REGION",
+            "default_value": "Eastern Europe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": 11,
+            "name": "Bot Difficlty",
+            "description": "The difficulty setting for bots, Auto takes the average player level in the server to determine difficulty.\n\nOptions:\n(Easy, Normal, Hard, Auto)",
+            "env_variable": "B_DIFFICULTY",
+            "default_value": "Auto",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": 12,
+            "name": "Addittional Args",
+            "description": "Extra arguments like: -NoBots -NoAutobalance",
+            "env_variable": "ADDITIONAL_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": 5,
+            "name": "Beacon Port",
+            "description": "",
+            "env_variable": "BEACON_PORT",
+            "default_value": "7787",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mindustry-0baa31775cb0",
+        "name": "Mindustry",
+        "description": "Mindustry is a hybrid tower-defense sandbox factory game. Create elaborate supply chains of conveyor belts to feed ammo into your turrets, produce materials to use for building, and defend your structures from waves of enemies.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/mindustry-0baa31775cb0.json",
+        "sha256": "9b187c3d21a7fa4465a6fbf81aaa51269189434f57ee404aeb27f6b547a52cad",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "mindustry/egg-mindustry.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0baa31775cb0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:05:24+02:00",
+        "name": "Mindustry",
+        "author": "sir3lit@gmail.com",
+        "description": "Mindustry is a hybrid tower-defense sandbox factory game. Create elaborate supply chains of conveyor belts to feed ammo into your turrets, produce materials to use for building, and defend your structures from waves of enemies.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:java_11": "ghcr.io/ptero-eggs/yolks:java_11"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar server-release.jar config port {{SERVER_PORT}},config name {{SERVER_NAME}},host {{MAPNAME}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server loaded. \"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nGITHUB_PACKAGE=Anuken/Mindustry\r\nMATCH=server-release.jar\r\n\r\ncd /mnt/server\r\n\r\nif [ -z ${DOWNLOAD_LINK} ]; then\r\n    if [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n        echo -e \"using anon api call\"\r\n    else\r\n        echo -e \"user and oauth token set\"\r\n        alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\n    fi\r\n\r\n    ## get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq -r '.assets | .[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            echo -e \"defaulting to latest release\"\r\n            DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\nelse\r\n    echo -e \"Checking supplied download link\"\r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_LINK}\"\r\n    else\r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\necho -e \"running: wget ${DOWNLOAD_LINK}\"\r\nwget ${DOWNLOAD_LINK}\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "The version to download. Example \"v96\" NOT \"4.0v96\" (default is latest)\r\n\r\nThis would also be the github tag for the release",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The server name that shows up in the server list\r\n\r\n(Default: Pterodactyl Testing Server)",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "Default Maps Available: Ancient Caldera, Fork, Fortress, Glacier, Islands, Labyrinth, Maze, Shattered, Tendrils, Triad, Veins, Wasteland.\r\n\r\n(Default: Tendrils)",
+            "env_variable": "MAPNAME",
+            "default_value": "Tendrils",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mindustry-926c48ae358d",
+        "name": "Mindustry",
+        "description": "Mindustry is a hybrid tower-defense sandbox factory game. Create elaborate supply chains of conveyor belts to feed ammo into your turrets, produce materials to use for building, and defend your structures from waves of enemies.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/mindustry-926c48ae358d.json",
+        "sha256": "315240e7448088e46bfaab837e22eabb2f3645edeaacfd9e968476fba098db97",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "mindustry/egg-mindustry.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/926c48ae358d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:53+00:00",
+        "name": "Mindustry",
+        "author": "sir3lit@gmail.com",
+        "uuid": "d7187af4-57c2-4771-b220-6b6276a6c88f",
+        "description": "Mindustry is a hybrid tower-defense sandbox factory game. Create elaborate supply chains of conveyor belts to feed ammo into your turrets, produce materials to use for building, and defend your structures from waves of enemies.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar server-release.jar config port {{SERVER_PORT}},config name {{SERVER_NAME}},host {{MAPNAME}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server loaded. \"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nGITHUB_PACKAGE=Anuken/Mindustry\r\nMATCH=server-release.jar\r\n\r\ncd /mnt/server\r\n\r\nif [ -z ${DOWNLOAD_LINK} ]; then\r\n    if [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n        echo -e \"using anon api call\"\r\n    else\r\n        echo -e \"user and oauth token set\"\r\n        alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\n    fi\r\n\r\n    ## get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq -r '.assets | .[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            echo -e \"defaulting to latest release\"\r\n            DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\nelse\r\n    echo -e \"Checking supplied download link\"\r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_LINK}\"\r\n    else\r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\necho -e \"running: wget ${DOWNLOAD_LINK}\"\r\nwget ${DOWNLOAD_LINK}\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "The version to download. Example \"v96\" NOT \"4.0v96\" (default is latest)\r\n\r\nThis would also be the github tag for the release",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The server name that shows up in the server list\r\n\r\n(Default: Pterodactyl Testing Server)",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "Default Maps Available: Ancient Caldera, Fork, Fortress, Glacier, Islands, Labyrinth, Maze, Shattered, Tendrils, Triad, Veins, Wasteland.\r\n\r\n(Default: Tendrils)",
+            "env_variable": "MAPNAME",
+            "default_value": "Tendrils",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1418 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "assaultcube-1e349c5a5ec4",
+        "name": "AssaultCube",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assaultcube-1e349c5a5ec4.json",
+        "sha256": "5b56728e57c3ae4b3166b28af237fbf4456e2405d7be82b515ff1ae3e5fb094e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "cubeengine/assaultcube/egg-assault-cube.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/1e349c5a5ec4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-30T10:56:35+02:00",
+        "name": "AssaultCube",
+        "author": "holeintheseat@gmail.com",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin_unix/linux_64_server -Y{{ASSAULT_SERVER_KEY}} -n\"{{ASSAULT_SERVER_DESCRIPTION}}\" -o\"{{ASSAULT_SERVER_MOTD}}\" -c{{ASSAULT_SERVER_MAXPLAYERS}} -x{{ASSAULT_SERVER_ADMINPASSWORD}} -f{{SERVER_PORT}} -p{{ASSAULT_SERVER_PLAYERPASSWORD}} -m{{ASSAULT_SERVER_MASTERSERVER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"dedicated server started, waiting for clients...\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# AssaultCube Server Egg (By HoleInTheSeat) <|-|> (https://assault.cubers.net/)\r\n#\r\n# Server Files: /mnt/server\r\n\r\n#######-|Dependencies|-#######\r\napt update\r\napt -y install tar make bzip2 build-essential clang libclang-dev libclang1 llvm llvm-dev clang-tools libz-dev curl jq\r\n\r\n#######-|Downloading files|-#######\r\ncd /mnt/server\r\n## get release info and download links\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases\")\r\nMATCH=tar.bz2\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\n\r\ncurl -sSL -o AssaultCube.tar.bz2 ${DOWNLOAD_URL}\r\ntar -xf AssaultCube.tar.bz2\r\nrm AssaultCube.tar.bz2\r\n\r\n#######-|Setting Up Server|-#######\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\nrm -rf bin_win32/ *.sh\r\n\r\nif [ \"$(uname -m)\" = \"x86_64\" ]; then\r\n    echo -e \"x86 System\"\r\nelse\r\n    cd /mnt/server/source/src\r\n    make server_install\r\nfi\r\n#######-|Insert Server Authkey|-#######\r\ncd /mnt/server\r\nsed -i 's/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/{{ASSAULT_SERVER_KEY}}/' ./config/servercmdline.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Auth Key",
+            "description": "You must provide your own key for the server to register on the masterserver.\r\nTo generate a key you can run the client and issue the command:\r\n\r\n            authkey new server \r\n        \r\nSee: (https://assault.cubers.net/docs/server.html)",
+            "env_variable": "ASSAULT_SERVER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Message of the Day",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_MOTD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the limit on amount of players able to join (MAX 16)",
+            "env_variable": "ASSAULT_SERVER_MAXPLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|integer|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_ADMINPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512|min:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Player Password",
+            "description": "Password need to join the server.",
+            "env_variable": "ASSAULT_SERVER_PLAYERPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Server",
+            "description": "Forces the server to register with the hostname or IP address of a different masterserver.\r\nThe default is ms.cubers.net\r\nIf you want your server to be hidden and not report to the masterserver, use -mlocalhost",
+            "env_variable": "ASSAULT_SERVER_MASTERSERVER",
+            "default_value": "ms.cubers.net",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version of the engine you want to download.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assaultcube-4721cfb961e5",
+        "name": "AssaultCube",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assaultcube-4721cfb961e5.json",
+        "sha256": "cf01a9aae81de622364cb506d9fdef0f69cc58cd3e165830a7380ed4001c1ffb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/cubeengine/assaultcube/egg-assault-cube.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/4721cfb961e5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-30T10:56:35+02:00",
+        "name": "AssaultCube",
+        "author": "holeintheseat@gmail.com",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin_unix/linux_64_server -Y{{ASSAULT_SERVER_KEY}} -n\"{{ASSAULT_SERVER_DESCRIPTION}}\" -o\"{{ASSAULT_SERVER_MOTD}}\" -c{{ASSAULT_SERVER_MAXPLAYERS}} -x{{ASSAULT_SERVER_ADMINPASSWORD}} -f{{SERVER_PORT}} -p{{ASSAULT_SERVER_PLAYERPASSWORD}} -m{{ASSAULT_SERVER_MASTERSERVER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"dedicated server started, waiting for clients...\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# AssaultCube Server Egg (By HoleInTheSeat) <|-|> (https://assault.cubers.net/)\r\n#\r\n# Server Files: /mnt/server\r\n\r\n#######-|Dependencies|-#######\r\napt update\r\napt -y install tar make bzip2 build-essential clang libclang-dev libclang1 llvm llvm-dev clang-tools libz-dev curl jq\r\n\r\n#######-|Downloading files|-#######\r\ncd /mnt/server\r\n## get release info and download links\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases\")\r\nMATCH=tar.bz2\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\n\r\ncurl -sSL -o AssaultCube.tar.bz2 ${DOWNLOAD_URL}\r\ntar -xf AssaultCube.tar.bz2\r\nrm AssaultCube.tar.bz2\r\n\r\n#######-|Setting Up Server|-#######\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\nrm -rf bin_win32/ *.sh\r\n\r\nif [ \"$(uname -m)\" = \"x86_64\" ]; then\r\n    echo -e \"x86 System\"\r\nelse\r\n    cd /mnt/server/source/src\r\n    make server_install\r\nfi\r\n#######-|Insert Server Authkey|-#######\r\ncd /mnt/server\r\nsed -i 's/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/{{ASSAULT_SERVER_KEY}}/' ./config/servercmdline.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Auth Key",
+            "description": "You must provide your own key for the server to register on the masterserver.\r\nTo generate a key you can run the client and issue the command:\r\n\r\n            authkey new server \r\n        \r\nSee: (https://assault.cubers.net/docs/server.html)",
+            "env_variable": "ASSAULT_SERVER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Message of the Day",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_MOTD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the limit on amount of players able to join (MAX 16)",
+            "env_variable": "ASSAULT_SERVER_MAXPLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|integer|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_ADMINPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512|min:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Player Password",
+            "description": "Password need to join the server.",
+            "env_variable": "ASSAULT_SERVER_PLAYERPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Server",
+            "description": "Forces the server to register with the hostname or IP address of a different masterserver.\r\nThe default is ms.cubers.net\r\nIf you want your server to be hidden and not report to the masterserver, use -mlocalhost",
+            "env_variable": "ASSAULT_SERVER_MASTERSERVER",
+            "default_value": "ms.cubers.net",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version of the engine you want to download.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assaultcube-8d0e4e472857",
+        "name": "AssaultCube",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assaultcube-8d0e4e472857.json",
+        "sha256": "2dffc75fd7b4c33e0010985f9e229a03bfc9607ce03996cef256f31bcb670074",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "cubeengine/assaultcube/egg-assault-cube.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/8d0e4e472857.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-19T20:55:13+00:00",
+        "name": "AssaultCube",
+        "author": "holeintheseat@gmail.com",
+        "uuid": "5a75a672-5ffc-4b78-9989-9356a3e56754",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin_unix/linux_64_server -Y{{ASSAULT_SERVER_KEY}} -n\"{{ASSAULT_SERVER_DESCRIPTION}}\" -o\"{{ASSAULT_SERVER_MOTD}}\" -c{{ASSAULT_SERVER_MAXPLAYERS}} -x{{ASSAULT_SERVER_ADMINPASSWORD}} -f{{SERVER_PORT}} -p{{ASSAULT_SERVER_PLAYERPASSWORD}} -m{{ASSAULT_SERVER_MASTERSERVER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"dedicated server started, waiting for clients...\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# AssaultCube Server Egg (By HoleInTheSeat) <|-|> (https://assault.cubers.net/)\r\n#\r\n# Server Files: /mnt/server\r\n\r\n#######-|Dependencies|-#######\r\napt update\r\napt -y install tar make bzip2 build-essential clang libclang-dev libclang1 llvm llvm-dev clang-tools libz-dev curl jq\r\n\r\n#######-|Downloading files|-#######\r\ncd /mnt/server\r\n## get release info and download links\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases\")\r\nMATCH=tar.bz2\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\n\r\ncurl -sSL -o AssaultCube.tar.bz2 ${DOWNLOAD_URL}\r\ntar -xf AssaultCube.tar.bz2\r\nrm AssaultCube.tar.bz2\r\n\r\n#######-|Setting Up Server|-#######\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\nrm -rf bin_win32/ *.sh\r\n\r\nif [ \"$(uname -m)\" = \"x86_64\" ]; then\r\n    echo -e \"x86 System\"\r\nelse\r\n    cd /mnt/server/source/src\r\n    make server_install\r\nfi\r\n#######-|Insert Server Authkey|-#######\r\ncd /mnt/server\r\nsed -i 's/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/{{ASSAULT_SERVER_KEY}}/' ./config/servercmdline.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Auth Key",
+            "description": "You must provide your own key for the server to register on the masterserver.\r\nTo generate a key you can run the client and issue the command:\r\n\r\n            authkey new server \r\n        \r\nSee: (https://assault.cubers.net/docs/server.html)",
+            "env_variable": "ASSAULT_SERVER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": 1
+          },
+          {
+            "name": "Server Description",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "sort": 2
+          },
+          {
+            "name": "Message of the Day",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_MOTD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "sort": 3
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the limit on amount of players able to join (MAX 16)",
+            "env_variable": "ASSAULT_SERVER_MAXPLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|integer|max:16",
+            "sort": 4
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_ADMINPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:5,512",
+            "sort": 5
+          },
+          {
+            "name": "Player Password",
+            "description": "Password need to join the server.",
+            "env_variable": "ASSAULT_SERVER_PLAYERPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "sort": 6
+          },
+          {
+            "name": "Master Server",
+            "description": "Forces the server to register with the hostname or IP address of a different masterserver.\r\nThe default is ms.cubers.net\r\nIf you want your server to be hidden and not report to the masterserver, use -mlocalhost",
+            "env_variable": "ASSAULT_SERVER_MASTERSERVER",
+            "default_value": "ms.cubers.net",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512",
+            "sort": 7
+          },
+          {
+            "name": "Version",
+            "description": "The version of the engine you want to download.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 8
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assaultcube-b4d7fa04aba7",
+        "name": "AssaultCube",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assaultcube-b4d7fa04aba7.json",
+        "sha256": "bd774ea5bccae0efe9208a67ff30a7586b8eb370e473573f33308b9fb4555604",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "cubeengine/assaultcube/egg-pterodactyl-assault-cube.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/b4d7fa04aba7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-19T20:49:51+00:00",
+        "name": "AssaultCube",
+        "author": "holeintheseat@gmail.com",
+        "description": "AssaultCube is a FREE, multiplayer, first-person shooter game, based on the CUBE engine.\r\n\r\nTaking place in realistic environments, with fast, arcade gameplay, it's addictive and fun!",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin_unix/linux_64_server -Y{{ASSAULT_SERVER_KEY}} -n\"{{ASSAULT_SERVER_DESCRIPTION}}\" -o\"{{ASSAULT_SERVER_MOTD}}\" -c{{ASSAULT_SERVER_MAXPLAYERS}} -x{{ASSAULT_SERVER_ADMINPASSWORD}} -f{{SERVER_PORT}} -p{{ASSAULT_SERVER_PLAYERPASSWORD}} -m{{ASSAULT_SERVER_MASTERSERVER}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"dedicated server started, waiting for clients...\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# AssaultCube Server Egg (By HoleInTheSeat) <|-|> (https://assault.cubers.net/)\r\n#\r\n# Server Files: /mnt/server\r\n\r\n#######-|Dependencies|-#######\r\napt update\r\napt -y install tar make bzip2 build-essential clang libclang-dev libclang1 llvm llvm-dev clang-tools libz-dev curl jq\r\n\r\n#######-|Downloading files|-#######\r\ncd /mnt/server\r\n## get release info and download links\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/assaultcube/AC/releases\")\r\nMATCH=tar.bz2\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\n\r\ncurl -sSL -o AssaultCube.tar.bz2 ${DOWNLOAD_URL}\r\ntar -xf AssaultCube.tar.bz2\r\nrm AssaultCube.tar.bz2\r\n\r\n#######-|Setting Up Server|-#######\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\nrm -rf bin_win32/ *.sh\r\n\r\nif [ \"$(uname -m)\" = \"x86_64\" ]; then\r\n    echo -e \"x86 System\"\r\nelse\r\n    cd /mnt/server/source/src\r\n    make server_install\r\nfi\r\n#######-|Insert Server Authkey|-#######\r\ncd /mnt/server\r\nsed -i 's/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/{{ASSAULT_SERVER_KEY}}/' ./config/servercmdline.txt\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Auth Key",
+            "description": "You must provide your own key for the server to register on the masterserver.\r\nTo generate a key you can run the client and issue the command:\r\n\r\n            authkey new server \r\n        \r\nSee: (https://assault.cubers.net/docs/server.html)",
+            "env_variable": "ASSAULT_SERVER_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Message of the Day",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_MOTD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Set the limit on amount of players able to join (MAX 16)",
+            "env_variable": "ASSAULT_SERVER_MAXPLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|integer|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ASSAULT_SERVER_ADMINPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512|min:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Player Password",
+            "description": "Password need to join the server.",
+            "env_variable": "ASSAULT_SERVER_PLAYERPASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Master Server",
+            "description": "Forces the server to register with the hostname or IP address of a different masterserver.\r\nThe default is ms.cubers.net\r\nIf you want your server to be hidden and not report to the masterserver, use -mlocalhost",
+            "env_variable": "ASSAULT_SERVER_MASTERSERVER",
+            "default_value": "ms.cubers.net",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version of the engine you want to download.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assetto-corsa-14318a8a99c6",
+        "name": "Assetto Corsa",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-14318a8a99c6.json",
+        "sha256": "8250ae0ae3be43340ac590c90c064c87510420827308bdc5748c4b0810c05a06",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/assetto_corsa/egg-assetto-corsa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/14318a8a99c6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-27T17:14:48+01:00",
+        "name": "Assetto Corsa",
+        "author": "admin@softwarenoob.com",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./acServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"file\", \"find\": {\"NAME\": \"NAME={{server.build.env.HOSTNAME}}\", \"PASSWORD\": \"PASSWORD={{server.build.env.PASSWORD}}\", \"ADMIN_PASSWORD\": \"ADMIN_PASSWORD={{server.build.env.ADM_PASSWORD}}\", \"UDP_PORT\": \"UDP_PORT={{server.build.default.port}}\", \"TCP_PORT\": \"TCP_PORT={{server.build.default.port}}\", \"HTTP_PORT\": \"HTTP_PORT={{server.build.env.HTTP_PORT}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nif [ \"${STEAM_USER}\" == \"anonymous\" ]; then\r\n    echo -e \"ERROR - STEAM USER NOT SET\\n\"\r\n    echo -e \"Steam account must have the dedicated server in library to install and host the game\\n\"\r\n    echo -e \"You must configure Steam account in the server startup variables, after that reinstall the server\\n\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username of an account that owns the game is required",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth Code",
+            "description": "Steam Auth Code required if the Steam Account is using Steam Auth. Slow installs will cause the code to expire before it can be used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:45",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If enabled players must enter the password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Used to login as server administrator, type /help in-game for more",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40|min:8",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTP Port",
+            "description": "HTTP Port",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|int",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "302550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "autoupdate Server on start or restart. 1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Required to always install and update the correct version of the game.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assetto-corsa-15c1b45aa789",
+        "name": "Assetto Corsa",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-15c1b45aa789.json",
+        "sha256": "4d747185f5d755c611ebbb6ebc9158bd26b5d7992b37bc10d522ed2909e1769d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "assetto_corsa/egg-pterodactyl-assetto-corsa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/15c1b45aa789.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:50+00:00",
+        "name": "Assetto Corsa",
+        "author": "admin@softwarenoob.com",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./acServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"file\", \"find\": {\"NAME\": \"NAME={{server.build.env.HOSTNAME}}\", \"PASSWORD\": \"PASSWORD={{server.build.env.PASSWORD}}\", \"ADMIN_PASSWORD\": \"ADMIN_PASSWORD={{server.build.env.ADM_PASSWORD}}\", \"UDP_PORT\": \"UDP_PORT={{server.build.default.port}}\", \"TCP_PORT\": \"TCP_PORT={{server.build.default.port}}\", \"HTTP_PORT\": \"HTTP_PORT={{server.build.env.HTTP_PORT}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server started\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nif [ \"${STEAM_USER}\" == \"anonymous\" ]; then\r\n    echo -e \"ERROR - STEAM USER NOT SET\\n\"\r\n    echo -e \"Steam account must have the dedicated server in library to install and host the game\\n\"\r\n    echo -e \"You must configure Steam account in the server startup variables, after that reinstall the server\\n\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username of an account that owns the game is required",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth Code",
+            "description": "Steam Auth Code required if the Steam Account is using Steam Auth. Slow installs will cause the code to expire before it can be used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:45",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If enabled players must enter the password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Used to login as server administrator, type /help in-game for more",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40|min:8",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTP Port",
+            "description": "HTTP Port",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|int",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "302550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "autoupdate Server on start or restart. 1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Required to always install and update the correct version of the game.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assetto-corsa-576308980b88",
+        "name": "Assetto Corsa",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-576308980b88.json",
+        "sha256": "77d18cfc8f3b57c57ff27377859c27af5294f866d76ffdeec564cd5424085ea6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "assetto_corsa/egg-assetto-corsa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/576308980b88.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Assetto Corsa",
+        "author": "admin@softwarenoob.com",
+        "uuid": "afc57cbd-ab88-4700-9483-d8bff4d5c3a6",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./acServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"file\", \"find\": {\"NAME\": \"NAME={{server.build.env.HOSTNAME}}\", \"PASSWORD\": \"PASSWORD={{server.build.env.PASSWORD}}\", \"ADMIN_PASSWORD\": \"ADMIN_PASSWORD={{server.build.env.ADM_PASSWORD}}\", \"UDP_PORT\": \"UDP_PORT={{server.build.default.port}}\", \"TCP_PORT\": \"TCP_PORT={{server.build.default.port}}\", \"HTTP_PORT\": \"HTTP_PORT={{server.build.env.HTTP_PORT}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nif [ \"${STEAM_USER}\" == \"anonymous\" ]; then\r\n    echo -e \"ERROR - STEAM USER NOT SET\\n\"\r\n    echo -e \"Steam account must have the dedicated server in library to install and host the game\\n\"\r\n    echo -e \"You must configure Steam account in the server startup variables, after that reinstall the server\\n\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username of an account that owns the game is required",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth Code",
+            "description": "Steam Auth Code required if the Steam Account is using Steam Auth. Slow installs will cause the code to expire before it can be used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:45",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If enabled players must enter the password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Used to login as server administrator, type /help in-game for more",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40|min:8",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "HTTP Port",
+            "description": "HTTP Port",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|int",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "302550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "autoupdate Server on start or restart. 1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Required to always install and update the correct version of the game.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assetto-corsa-96399b4c4c30",
+        "name": "Assetto Corsa",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-96399b4c4c30.json",
+        "sha256": "b834bf2db6605d5c3328748c7900e275f162dea02092cfb1edc0722a20290744",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "assetto_corsa/egg-assetto-corsa.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/96399b4c4c30.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-14T02:10:45+00:00",
+        "name": "Assetto Corsa",
+        "author": "admin@softwarenoob.com",
+        "description": "Assetto Corsa (Italian for \"Race Setup\") is a sim racing video game developed by the Italian video game developer Kunos Simulazioni. It is designed with an emphasis on a realistic racing experience with support for extensive customization and moddability",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./acServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"file\", \"find\": {\"NAME\": \"NAME={{server.build.env.HOSTNAME}}\", \"PASSWORD\": \"PASSWORD={{server.build.env.PASSWORD}}\", \"ADMIN_PASSWORD\": \"ADMIN_PASSWORD={{server.build.env.ADMIN_PASSWORD}}\", \"UDP_PORT\": \"UDP_PORT={{server.build.default.port}}\", \"TCP_PORT\": \"TCP_PORT={{server.build.default.port}}\", \"HTTP_PORT\": \"HTTP_PORT={{server.build.env.HTTP_PORT}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nif [ \"${STEAM_USER}\" == \"anonymous\" ]; then\r\n    echo -e \"ERROR - STEAM USER NOT SET\\n\"\r\n    echo -e \"Steam account must have the dedicated server in library to install and host the game\\n\"\r\n    echo -e \"You must configure Steam account in the server startup variables, after that reinstall the server\\n\"\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username of an account that owns the game is required",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth Code",
+            "description": "Steam Auth Code required if the Steam Account is using Steam Auth. Slow installs will cause the code to expire before it can be used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:45",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If enabled players must enter the password to join the server",
+            "env_variable": "PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "Used to login as server administrator, type /help in-game for more",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40|min:8",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTP Port",
+            "description": "HTTP Port",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|int",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "302550",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "autoupdate Server on start or restart. 1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Required to always install and update the correct version of the game.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assetto-corsa-freeroam-ai-04e0cef7459c",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-freeroam-ai-04e0cef7459c.json",
+        "sha256": "97968728497ba75abaf5a0aee8aafe8c9b319606f3c05e22d7e3347894494a8a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "assetto_corsa/egg-assetto-corsa--freeroam--a-i.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/04e0cef7459c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-05-05T11:08:46+02:00",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "author": "josdekurk@gmail.com",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/ptero-eggs/yolks:dotnet_8"
+        },
+        "file_denylist": [],
+        "startup": "./AssettoServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"ini\", \"find\": {\"SERVER.NAME\": \"{{server.build.env.SERVER_NAME}}\", \"SERVER.PASSWORD\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SERVER.ADMIN_PASSWORD\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"SERVER.HTTP_PORT\": \"{{server.build.env.HTTP_PORT}}\", \"SERVER.MAX_CLIENTS\": \"{{server.build.env.MAX_CLIENTS}}\", \"SERVER.UDP_PORT\": \"{{server.build.default.port}}\", \"SERVER.TCP_PORT\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Starting update loop with an update rate of\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl git jq tar\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\nVERSION=latest\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i linux | head -1)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o assetto-server-linux.tar.gz ${DOWNLOAD_URL}\r\n\r\ntar xvf assetto-server-linux.tar.gz\r\nrm assetto-server-linux.tar.gz\r\nchmod +x AssettoServer\r\n\r\nmkdir cfg/\r\ncd cfg/\r\n\r\n[ -f \"server_cfg.ini\" ] || curl -sSL -o \"server_cfg.ini\" \"https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/assetto_corsa/cfg/server_cfg.ini\"\r\n[ -f \"extra_cfg.yml\" ] || curl -sSL -o \"extra_cfg.yml\" \"https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/assetto_corsa/cfg/extra_cfg.yml\"\r\n[ -f \"entry_list.ini\" ] || touch entry_list.ini\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name off the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "AC_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Http port",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric|",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "18",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,25",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "assetto-corsa-freeroam-ai-8268b72f6671",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/assetto-corsa-freeroam-ai-8268b72f6671.json",
+        "sha256": "1fc548d6abad09da42dab5163e95538c30a5243bf4aa18917647b8b0ebfa41d6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "assetto_corsa/egg-pterodactyl-assetto-corsa--freeroam--a-i.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8268b72f6671.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:54+00:00",
+        "name": "Assetto Corsa (Freeroam + AI)",
+        "author": "josdekurk@gmail.com",
+        "description": "Custom Assetto Corsa server with focus on freeroam",
+        "features": null,
+        "docker_images": {
+          "Dotnet_8": "ghcr.io/parkervcp/yolks:dotnet_8"
+        },
+        "file_denylist": [],
+        "startup": "./AssettoServer",
+        "config": {
+          "files": "{\"cfg/server_cfg.ini\": {\"parser\": \"ini\", \"find\": {\"SERVER.NAME\": \"{{server.build.env.SERVER_NAME}}\", \"SERVER.PASSWORD\": \"{{server.build.env.SERVER_PASSWORD}}\", \"SERVER.ADMIN_PASSWORD\": \"{{server.build.env.ADMIN_PASSWORD}}\", \"SERVER.HTTP_PORT\": \"{{server.build.env.HTTP_PORT}}\", \"SERVER.MAX_CLIENTS\": \"{{server.build.env.MAX_CLIENTS}}\", \"SERVER.UDP_PORT\": \"{{server.build.default.port}}\", \"SERVER.TCP_PORT\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Starting update loop with an update rate of\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl git jq tar\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/compujuckel/AssettoServer/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\nVERSION=latest\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i linux | head -1)\r\n    fi\r\nfi\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sSL -o assetto-server-linux.tar.gz ${DOWNLOAD_URL}\r\n\r\ntar xvf assetto-server-linux.tar.gz\r\nrm assetto-server-linux.tar.gz\r\nchmod +x AssettoServer\r\n\r\nmkdir cfg/\r\ncd cfg/\r\n\r\n[ -f \"server_cfg.ini\" ] || curl -sSL -o \"server_cfg.ini\" \"https://raw.githubusercontent.com/pelican-eggs/steamcmd/main/assetto_corsa/cfg/server_cfg.ini\"\r\n[ -f \"extra_cfg.yml\" ] || curl -sSL -o \"extra_cfg.yml\" \"https://raw.githubusercontent.com/pelican-eggs/steamcmd/main/assetto_corsa/cfg/extra_cfg.yml\"\r\n[ -f \"entry_list.ini\" ] || touch entry_list.ini\r\n\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name off the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "AC_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Http port",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric|",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "18",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:2,25",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

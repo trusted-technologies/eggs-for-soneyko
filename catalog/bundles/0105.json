@@ -1,0 +1,951 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "vanilla-minecraft-2bdcc32ddeff",
+        "name": "Vanilla Minecraft",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds\nand build amazing things from the simplest of homes to the grandest of castles. Play in Creative\nMode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off\ndangerous mobs. Do all this alone or with friends.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-minecraft-2bdcc32ddeff.json",
+        "sha256": "681484160985c6d9fb59243c06a571d8d38e08cd3249de11f539bd45213390e8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/vanilla/pterodactyl-egg-vanilla-minecraft.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/2bdcc32ddeff.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-03-27T18:15:55+00:00",
+        "name": "Vanilla Minecraft",
+        "author": "panel@example.com",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds\nand build amazing things from the simplest of homes to the grandest of castles. Play in Creative\nMode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off\ndangerous mobs. Do all this alone or with friends.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "[]",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\n# Vanilla MC Installation Script\n#\n# Server Files: /mnt/server\nmkdir -p /mnt/server\ncd /mnt/server\n\nLATEST_VERSION=`curl https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r '.latest.release'`\nLATEST_SNAPSHOT_VERSION=`curl https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r '.latest.snapshot'`\n\necho -e \"latest version is $LATEST_VERSION\"\necho -e \"latest snapshot is $LATEST_SNAPSHOT_VERSION\"\n\nif [ -z \"$VANILLA_VERSION\" ] || [ \"$VANILLA_VERSION\" == \"latest\" ]; then\n  MANIFEST_URL=$(curl -sSL https://launchermeta.mojang.com/mc/game/version_manifest.json | jq --arg VERSION $LATEST_VERSION -r '.versions | .[] | select(.id== $VERSION )|.url')\nelif [ \"$VANILLA_VERSION\" == \"snapshot\" ]; then\n  MANIFEST_URL=$(curl -sSL https://launchermeta.mojang.com/mc/game/version_manifest.json | jq --arg VERSION $LATEST_SNAPSHOT_VERSION -r '.versions | .[] | select(.id== $VERSION )|.url')\nelse\n  MANIFEST_URL=$(curl -sSL https://launchermeta.mojang.com/mc/game/version_manifest.json | jq --arg VERSION $VANILLA_VERSION -r '.versions | .[] | select(.id== $VERSION )|.url')\nfi\n\nDOWNLOAD_URL=$(curl ${MANIFEST_URL} | jq .downloads.server | jq -r '. | .url')\n\necho -e \"running: curl -o ${SERVER_JARFILE} $DOWNLOAD_URL\"\ncurl -o ${SERVER_JARFILE} $DOWNLOAD_URL\n\necho -e \"Install Complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Minecraft Vanilla to install. Use \"latest\" to install the latest version, or use\n\"snapshot\" to install the latest snapshot. Go to Settings > Reinstall Server to apply.",
+            "env_variable": "VANILLA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanillacord-5a7452647e8a",
+        "name": "VanillaCord",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanillacord-5a7452647e8a.json",
+        "sha256": "1593272af263942e2af752f39229f5e6b5755cf248d81b318bd0db4972abe37e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/vanillacord/egg-vanilla-cord.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5a7452647e8a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "VanillaCord",
+        "author": "support@pterodactyl.io",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n\r\napk --no-cache --update add curl jq\r\n\r\ncd /mnt/server\r\n\r\necho $VANILLA_VERSION\r\n\r\nLATEST_VERSION=`curl https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r '.latest.release'`\r\n\r\nif { [ -z \"$VANILLA_VERSION\" ] || [ \"$VANILLA_VERSION\" == \"latest\" ]; } then\r\n  INSTALLING_VERSION=$LATEST_VERSION\r\nelse\r\n  INSTALLING_VERSION=$VANILLA_VERSION\r\nfi\r\n\r\nMAJOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^([0-9]*)\\.[0-9]*\\.[0-9]*$/\\1/p')\r\nMINOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.([0-9]*)\\.[0-9]*$/\\1/p')\r\nPATCH_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.[0-9]*\\.([0-9]*)$/\\1/p')\r\n\r\nVANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.12/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nif [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 12 ]; then\r\n  VANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.7.10/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nfi\r\n\r\nif { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -eq 7 ] && [ $PATCH_VERSION -lt 10 ]; } || { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 7 ]; } then\r\n  echo \"VanillaCord is only supported on Minecraft 1.7.10 or higher! You cannot use it with $INSTALLING_VERSION.\"\r\n  exit 1\r\nfi\r\n\r\ncurl -o vanillacord.jar $VANILLACORD_URL\r\njava -jar vanillacord.jar $INSTALLING_VERSION\r\n\r\nrm -f vanillacord.jar\r\nrm -rf in\r\nmv out/*.jar $SERVER_JARFILE\r\nrm -rf out",
+            "container": "eclipse-temurin:8-jdk-jammy",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Minecraft Vanilla to install. Use \"latest\" to install the latest version.",
+            "env_variable": "VANILLA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanillacord-80be26787637",
+        "name": "VanillaCord",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanillacord-80be26787637.json",
+        "sha256": "2fd4887f43b4eb3b9e0f0ad9b71d297aff14a0415c3ba17c8cbc5aee0ce761f7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/vanillacord/egg-vanilla-cord.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/80be26787637.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-17T23:20:29+01:00",
+        "name": "VanillaCord",
+        "author": "support@pterodactyl.io",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n\r\napk --no-cache --update add curl jq\r\n\r\ncd /mnt/server\r\n\r\necho $VANILLA_VERSION\r\n\r\nLATEST_VERSION=`curl https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r '.latest.release'`\r\n\r\nif { [ -z \"$VANILLA_VERSION\" ] || [ \"$VANILLA_VERSION\" == \"latest\" ]; } then\r\n  INSTALLING_VERSION=$LATEST_VERSION\r\nelse\r\n  INSTALLING_VERSION=$VANILLA_VERSION\r\nfi\r\n\r\nMAJOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^([0-9]*)\\.[0-9]*\\.[0-9]*$/\\1/p')\r\nMINOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.([0-9]*)\\.[0-9]*$/\\1/p')\r\nPATCH_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.[0-9]*\\.([0-9]*)$/\\1/p')\r\n\r\nVANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.12/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nif [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 12 ]; then\r\n  VANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.7.10/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nfi\r\n\r\nif { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -eq 7 ] && [ $PATCH_VERSION -lt 10 ]; } || { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 7 ]; } then\r\n  echo \"VanillaCord is only supported on Minecraft 1.7.10 or higher! You cannot use it with $INSTALLING_VERSION.\"\r\n  exit 1\r\nfi\r\n\r\ncurl -o vanillacord.jar $VANILLACORD_URL\r\njava -jar vanillacord.jar $INSTALLING_VERSION\r\n\r\nrm -f vanillacord.jar\r\nrm -rf in\r\nmv out/*.jar $SERVER_JARFILE\r\nrm -rf out",
+            "container": "openjdk:8-jre-alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Minecraft Vanilla to install. Use \"latest\" to install the latest version.",
+            "env_variable": "VANILLA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanillacord-b1f23fa2d339",
+        "name": "VanillaCord",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanillacord-b1f23fa2d339.json",
+        "sha256": "c1965c049a5324b5284251848bf4913d0e95f4a6f52b386271fec5a0215106dd",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/vanillacord/egg-vanilla-cord.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/b1f23fa2d339.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "VanillaCord",
+        "author": "support@pterodactyl.io",
+        "uuid": "afa9c224-ffa4-4a12-ac65-028599a78113",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 18": "ghcr.io/pelican-eggs/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n\r\napk --no-cache --update add curl jq\r\n\r\ncd /mnt/server\r\n\r\necho $VANILLA_VERSION\r\n\r\nLATEST_VERSION=`curl https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r '.latest.release'`\r\n\r\nif { [ -z \"$VANILLA_VERSION\" ] || [ \"$VANILLA_VERSION\" == \"latest\" ]; } then\r\n  INSTALLING_VERSION=$LATEST_VERSION\r\nelse\r\n  INSTALLING_VERSION=$VANILLA_VERSION\r\nfi\r\n\r\nMAJOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^([0-9]*)\\.[0-9]*\\.[0-9]*$/\\1/p')\r\nMINOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.([0-9]*)\\.[0-9]*$/\\1/p')\r\nPATCH_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.[0-9]*\\.([0-9]*)$/\\1/p')\r\n\r\nVANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.12/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nif [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 12 ]; then\r\n  VANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.7.10/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nfi\r\n\r\nif { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -eq 7 ] && [ $PATCH_VERSION -lt 10 ]; } || { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 7 ]; } then\r\n  echo \"VanillaCord is only supported on Minecraft 1.7.10 or higher! You cannot use it with $INSTALLING_VERSION.\"\r\n  exit 1\r\nfi\r\n\r\ncurl -o vanillacord.jar $VANILLACORD_URL\r\njava -jar vanillacord.jar $INSTALLING_VERSION\r\n\r\nrm -f vanillacord.jar\r\nrm -rf in\r\nmv out/*.jar $SERVER_JARFILE\r\nrm -rf out",
+            "container": "ghcr.io/pelican-eggs/installers:java_8",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Minecraft Vanilla to install. Use \"latest\" to install the latest version.",
+            "env_variable": "VANILLA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanillacord-d8a1ef949182",
+        "name": "VanillaCord",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanillacord-d8a1ef949182.json",
+        "sha256": "eed98699512e9fdf6844e95b4dda6030220b3999084484d75ca7ca6e001f0545",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/vanillacord/egg-pterodactyl-vanilla-cord.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/d8a1ef949182.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:08+00:00",
+        "name": "VanillaCord",
+        "author": "support@pterodactyl.io",
+        "description": "Minecraft is a game about placing blocks and going on adventures. Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in Creative Mode with unlimited resources or mine deep in Survival Mode, crafting weapons and armor to fend off dangerous mobs. Do all this alone or with friends.\r\n\r\nVanillaCord adds support for BungeeCord's ip_forward setting.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:java_8",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n\r\napk --no-cache --update add curl jq\r\n\r\ncd /mnt/server\r\n\r\necho $VANILLA_VERSION\r\n\r\nLATEST_VERSION=`curl https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r '.latest.release'`\r\n\r\nif { [ -z \"$VANILLA_VERSION\" ] || [ \"$VANILLA_VERSION\" == \"latest\" ]; } then\r\n  INSTALLING_VERSION=$LATEST_VERSION\r\nelse\r\n  INSTALLING_VERSION=$VANILLA_VERSION\r\nfi\r\n\r\nMAJOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^([0-9]*)\\.[0-9]*\\.[0-9]*$/\\1/p')\r\nMINOR_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.([0-9]*)\\.[0-9]*$/\\1/p')\r\nPATCH_VERSION=$(echo $INSTALLING_VERSION | sed -En 's/^[0-9]*\\.[0-9]*\\.([0-9]*)$/\\1/p')\r\n\r\nVANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.12/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nif [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 12 ]; then\r\n  VANILLACORD_URL=https://src.me1312.net/jenkins/job/VanillaCord/job/1.7.10/lastSuccessfulBuild/artifact/artifacts/VanillaCord.jar\r\nfi\r\n\r\nif { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -eq 7 ] && [ $PATCH_VERSION -lt 10 ]; } || { [ $MAJOR_VERSION -eq 1 ] && [ $MINOR_VERSION -lt 7 ]; } then\r\n  echo \"VanillaCord is only supported on Minecraft 1.7.10 or higher! You cannot use it with $INSTALLING_VERSION.\"\r\n  exit 1\r\nfi\r\n\r\ncurl -o vanillacord.jar $VANILLACORD_URL\r\njava -jar vanillacord.jar $INSTALLING_VERSION\r\n\r\nrm -f vanillacord.jar\r\nrm -rf in\r\nmv out/*.jar $SERVER_JARFILE\r\nrm -rf out"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Minecraft Vanilla to install. Use \"latest\" to install the latest version.",
+            "env_variable": "VANILLA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|between:3,15",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "velocity-60d0ebc6f4a1",
+        "name": "Velocity",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/velocity-60d0ebc6f4a1.json",
+        "sha256": "91870882ac1ceec91fe58451d5516ade649ce9c0bb1c38090f01663943db1b26",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "proxy/java/velocity/egg-velocity.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/60d0ebc6f4a1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Velocity",
+        "author": "parker@parkervcp.com",
+        "uuid": "44d20b6d-0a20-4144-a96c-71d214b3c850",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "image": "data:image/png;base64,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",
+        "tags": [
+          "minecraft",
+          "proxy"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"velocity.toml\": {\"parser\": \"file\", \"find\": {\"bind = \": \"bind = \\\"0.0.0.0:{{server.allocations.default.port}}\\\"\"}}}",
+          "startup": "{\"done\": \"Done (\"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Velocity Proxy Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=velocity\r\n\r\nif [[ -z ${VELOCITY_VERSION} ]] || [[ ${VELOCITY_VERSION} == \"latest\" ]]; then\r\n    VELOCITY_VERSION=\"latest\"\r\nfi\r\n\r\nif [[ -n \"${DOWNLOAD_LINK}\" ]]; then\r\n    echo -e \"Using supplied download url: ${DOWNLOAD_LINK}\"\r\n    DOWNLOAD_URL=$(eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g'))\r\nelse\r\n    VER_EXISTS=`curl -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r --arg VERSION $VELOCITY_VERSION '.versions | any(.[]; index($VERSION))' | grep -m1 true`\r\n    LATEST_VERSION=`curl -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r '.versions | to_entries | .[0].value[0]'`\r\n\r\nif [[ \"${VER_EXISTS}\" == \"true\" ]]; then\r\n    echo -e \"Version is valid. Using version ${VELOCITY_VERSION}\"\r\nelse\r\n    echo -e \"Using the latest ${PROJECT} version\"\r\n    VELOCITY_VERSION=${LATEST_VERSION}\r\nfi\r\n\r\nBUILD_EXISTS=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\r\nLATEST_BUILD=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r '.builds' | jq -r '.[0]'`\r\n\r\nif [[ \"${BUILD_EXISTS}\" == \"true\" ]]; then\r\n    echo -e \"Build is valid for version ${VELOCITY_VERSION}. Using build ${BUILD_NUMBER}\"\r\nelse\r\n    echo -e \"Using the latest ${PROJECT} build for version ${VELOCITY_VERSION}\"\r\n    BUILD_NUMBER=${LATEST_BUILD}\r\nfi\r\n\r\nJAR_NAME=${PROJECT}-${VELOCITY_VERSION}-${BUILD_NUMBER}.jar\r\necho \"Version being downloaded\"\r\necho -e \"Velocity Version: ${VELOCITY_VERSION}\"\r\necho -e \"Build: ${BUILD_NUMBER}\"\r\necho -e \"JAR Name of Build: ${JAR_NAME}\"\r\nDOWNLOAD_URL=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${VELOCITY_VERSION}/builds/${BUILD_NUMBER} | jq -r '.downloads.\"server:default\".url'`\r\n\r\nfi\r\n\r\ncd /mnt/server\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [[ -f ${SERVER_JARFILE} ]]; then\r\nmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [[ -f velocity.toml ]]; then\r\n    echo -e \"velocity config file exists\"\r\nelse\r\n    echo -e \"downloading velocity config file.\"\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/java/velocity/velocity.toml -o velocity.toml\r\nfi\r\n\r\nif [[ -f forwarding.secret ]]; then\r\n    echo -e \"velocity forwarding secret file already exists\"\r\nelse\r\n    echo -e \"creating forwarding secret file\"\r\n    touch forwarding.secret\r\n    date +%s | sha256sum | base64 | head -c 12 > forwarding.secret\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Velocity Version",
+            "description": "The Velocity Proxy version to download.\r\n\r\nSet to 'latest ' the download the last stable build.",
+            "env_variable": "VELOCITY_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20"
+          },
+          {
+            "sort": 2,
+            "name": "Server Jar File",
+            "description": "Server Jarfile, by default this is set to 'velocity.jar'.\r\nSet it to otherwise if you wish to have a different jarfile name.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "velocity.jar",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:32|regex:/^([\\w\\d._-]+)(\\.jar)$/"
+          },
+          {
+            "sort": 3,
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 4,
+            "name": "Build Number",
+            "description": "The build number for the velocity release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20"
+          }
+        ],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar {{SERVER_JARFILE}}"
+      }
+    },
+    {
+      "entry": {
+        "id": "velocity-80cd5cc35690",
+        "name": "Velocity",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/velocity-80cd5cc35690.json",
+        "sha256": "e17785d46d8754013130311f7e8fd520848f31dc907caef5469ab297b1c87c0b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/proxy/java/velocity/egg-velocity.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/80cd5cc35690.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-13T17:26:13+0000",
+        "name": "Velocity",
+        "author": "parker@parkervcp.com",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 21": "ghcr.io/pterodactyl/yolks:java_21",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"velocity.toml\": {\"parser\": \"file\", \"find\": {\"bind = \": \"bind = \\\"0.0.0.0:{{server.build.default.port}}\\\"\"}}}",
+          "startup": "{\"done\": \"Done (\"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Velocity Proxy Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=velocity\r\n\r\nif [[ -z ${VELOCITY_VERSION} ]] || [[ ${VELOCITY_VERSION} == \"latest\" ]]; then\r\n    VELOCITY_VERSION=\"latest\"\r\nfi\r\n\r\nif [[ -n \"${DOWNLOAD_LINK}\" ]]; then\r\n    echo -e \"Using supplied download url: ${DOWNLOAD_LINK}\"\r\n    DOWNLOAD_URL=$(eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g'))\r\nelse\r\n    VER_EXISTS=$(curl -s https://papermc.io/api/v2/projects/${PROJECT} | jq -r --arg VERSION $VELOCITY_VERSION '.versions[] | contains($VERSION)' | grep true)\r\n    LATEST_VERSION=$(curl -s https://papermc.io/api/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]')\r\n\r\nif [[ \"${VER_EXISTS}\" == \"true\" ]]; then\r\n    echo -e \"Version is valid. Using version ${VELOCITY_VERSION}\"\r\nelse\r\n    echo -e \"Using the latest ${PROJECT} version\"\r\n    VELOCITY_VERSION=${LATEST_VERSION}\r\nfi\r\n\r\nBUILD_EXISTS=$(curl -s https://papermc.io/api/v2/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep true)\r\nLATEST_BUILD=$(curl -s https://papermc.io/api/v2/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r '.builds' | jq -r '.[-1]')\r\n\r\nif [[ \"${BUILD_EXISTS}\" == \"true\" ]]; then\r\n    echo -e \"Build is valid for version ${VELOCITY_VERSION}. Using build ${BUILD_NUMBER}\"\r\nelse\r\n    echo -e \"Using the latest ${PROJECT} build for version ${VELOCITY_VERSION}\"\r\n    BUILD_NUMBER=${LATEST_BUILD}\r\nfi\r\n\r\nJAR_NAME=${PROJECT}-${VELOCITY_VERSION}-${BUILD_NUMBER}.jar\r\necho \"Version being downloaded\"\r\necho -e \"Velocity Version: ${VELOCITY_VERSION}\"\r\necho -e \"Build: ${BUILD_NUMBER}\"\r\necho -e \"JAR Name of Build: ${JAR_NAME}\"\r\nDOWNLOAD_URL=https://papermc.io/api/v2/projects/${PROJECT}/versions/${VELOCITY_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\n\r\nfi\r\ncd /mnt/server\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [[ -f ${SERVER_JARFILE} ]]; then\r\nmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [[ -f velocity.toml ]]; then\r\n    echo -e \"velocity config file exists\"\r\nelse\r\n    echo -e \"downloading velocity config file.\"\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/java/velocity/velocity.toml -o velocity.toml\r\nfi\r\n\r\nif [[ -f forwarding.secret ]]; then\r\n    echo -e \"velocity forwarding secret file already exists\"\r\nelse\r\n    echo -e \"creating forwarding secret file\"\r\n    touch forwarding.secret\r\n    date +%s | sha256sum | base64 | head -c 12 > forwarding.secret\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Velocity Version",
+            "description": "The Velocity Proxy version to download.\r\n\r\nSet to 'latest ' the download the last stable build.",
+            "env_variable": "VELOCITY_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "Server Jarfile, by default this is set to 'velocity.jar'.\r\nSet it to otherwise if you wish to have a different jarfile name.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "velocity.jar",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:32|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the velocity release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "velocity-89dbc04fbab2",
+        "name": "Velocity",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/velocity-89dbc04fbab2.json",
+        "sha256": "1fa0519a4fcb76f3b0646e4f24143f0b4b82354c18d2fb3afa8a28f47eaa885f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "proxy/java/velocity/egg-pterodactyl-velocity.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/89dbc04fbab2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:07+00:00",
+        "name": "Velocity",
+        "author": "parker@parkervcp.com",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"velocity.toml\": {\"parser\": \"file\", \"find\": {\"bind = \": \"bind = \\\"0.0.0.0:{{server.build.default.port}}\\\"\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Done (\"}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Velocity Proxy Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=velocity\r\n\r\nif [[ -z ${VELOCITY_VERSION} ]] || [[ ${VELOCITY_VERSION} == \"latest\" ]]; then\r\n    VELOCITY_VERSION=\"latest\"\r\nfi\r\n\r\nif [[ -n \"${DOWNLOAD_LINK}\" ]]; then\r\n    echo -e \"Using supplied download url: ${DOWNLOAD_LINK}\"\r\n    DOWNLOAD_URL=$(eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g'))\r\nelse\r\n    VER_EXISTS=$(curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $VELOCITY_VERSION '.versions[] | contains($VERSION)' | grep true)\r\n    LATEST_VERSION=$(curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]')\r\n\r\nif [[ \"${VER_EXISTS}\" == \"true\" ]]; then\r\n    echo -e \"Version is valid. Using version ${VELOCITY_VERSION}\"\r\nelse\r\n    echo -e \"Using the latest ${PROJECT} version\"\r\n    VELOCITY_VERSION=${LATEST_VERSION}\r\nfi\r\n\r\nBUILD_EXISTS=$(curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep true)\r\nLATEST_BUILD=$(curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r '.builds' | jq -r '.[-1]')\r\n\r\nif [[ \"${BUILD_EXISTS}\" == \"true\" ]]; then\r\n    echo -e \"Build is valid for version ${VELOCITY_VERSION}. Using build ${BUILD_NUMBER}\"\r\nelse\r\n    echo -e \"Using the latest ${PROJECT} build for version ${VELOCITY_VERSION}\"\r\n    BUILD_NUMBER=${LATEST_BUILD}\r\nfi\r\n\r\nJAR_NAME=${PROJECT}-${VELOCITY_VERSION}-${BUILD_NUMBER}.jar\r\necho \"Version being downloaded\"\r\necho -e \"Velocity Version: ${VELOCITY_VERSION}\"\r\necho -e \"Build: ${BUILD_NUMBER}\"\r\necho -e \"JAR Name of Build: ${JAR_NAME}\"\r\nDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${VELOCITY_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\n\r\nfi\r\ncd /mnt/server\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [[ -f ${SERVER_JARFILE} ]]; then\r\nmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [[ -f velocity.toml ]]; then\r\n    echo -e \"velocity config file exists\"\r\nelse\r\n    echo -e \"downloading velocity config file.\"\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/proxy/java/velocity/velocity.toml -o velocity.toml\r\nfi\r\n\r\nif [[ -f forwarding.secret ]]; then\r\n    echo -e \"velocity forwarding secret file already exists\"\r\nelse\r\n    echo -e \"creating forwarding secret file\"\r\n    touch forwarding.secret\r\n    date +%s | sha256sum | base64 | head -c 12 > forwarding.secret\r\nfi\r\n\r\necho -e \"install complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Velocity Version",
+            "description": "The Velocity Proxy version to download.\r\n\r\nSet to 'latest ' the download the last stable build.",
+            "env_variable": "VELOCITY_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "Server Jarfile, by default this is set to 'velocity.jar'.\r\nSet it to otherwise if you wish to have a different jarfile name.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "velocity.jar",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:32|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the velocity release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "velocity-99b65b03a47f",
+        "name": "Velocity",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/velocity-99b65b03a47f.json",
+        "sha256": "04e32af7b6b41fa0159b311cb22ea444407a814fec7c8e5517b42e0754f27a69",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/proxy/java/velocity/egg-velocity.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/99b65b03a47f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-03-07T23:02:39+00:00",
+        "name": "Velocity",
+        "author": "parker@parkervcp.com",
+        "description": "Velocity is a Minecraft server proxy with unparalleled server support, scalability, and flexibility.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"velocity.toml\": {\"parser\": \"file\", \"find\": {\"bind = \": \"bind = \\\"0.0.0.0:{{server.build.default.port}}\\\"\"}}}",
+          "startup": "{\"done\": \"Done (\"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Velocity Proxy Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=velocity\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r --arg VERSION $VELOCITY_VERSION '.versions | any(.[]; index($VERSION))' | grep -m1 true`\r\n\tLATEST_VERSION=`curl -s https://fill.papermc.io/v3/projects/${PROJECT} | jq -r '.versions | to_entries | .[0].value[0]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${VELOCITY_VERSION}\"\r\n\telse\r\n\t\techo -e \"Specified version not found. Defaulting to the latest ${PROJECT} version\"\r\n\t\tVELOCITY_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\r\n\tBUILD_EXISTS=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep -m1 true`\r\n\tLATEST_BUILD=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${VELOCITY_VERSION} | jq -r '.builds' | jq -r '.[0]'`\r\n\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${VELOCITY_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${VELOCITY_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\r\n\techo \"Version being downloaded\"\r\n\techo -e \"Project: ${PROJECT}\"\r\n\techo -e \"Velocity Version: ${VELOCITY_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\tDOWNLOAD_URL=`curl -s https://fill.papermc.io/v3/projects/${PROJECT}/versions/${VELOCITY_VERSION}/builds/${BUILD_NUMBER} | jq -r '.downloads.\"server:default\".url'`\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\nif [[ -f velocity.toml ]]; then\r\n\techo -e \"velocity config file exists\"\r\nelse\r\n\techo -e \"downloading velocity config file.\"\r\n\tcurl https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/proxy/java/velocity/velocity.toml -o velocity.toml\r\nfi\r\n\r\nif [[ -f forwarding.secret ]]; then\r\n\techo -e \"velocity forwarding secret file already exists\"\r\nelse\r\n\techo -e \"creating forwarding secret file\"\r\n\ttouch forwarding.secret\r\n\tdate +%s | sha256sum | base64 | head -c 12 > forwarding.secret\r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Velocity Version",
+            "description": "The Velocity Proxy version to download.\r\n\r\nSet to 'latest ' the download the last stable build.",
+            "env_variable": "VELOCITY_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "Server Jarfile, by default this is set to 'velocity.jar'.\r\nSet it to otherwise if you wish to have a different jarfile name.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "velocity.jar",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:32|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Path",
+            "description": "A URL to use to download a server.jar rather than the ones in the install script. This is not user viewable.",
+            "env_variable": "DL_PATH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Build Number",
+            "description": "The build number for the velocity release.\r\n\r\nLeave at latest to always get the latest version. Invalid versions will default to latest.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "viaaas-5d74b86b8e61",
+        "name": "VIAaaS",
+        "description": "VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/viaaas-5d74b86b8e61.json",
+        "sha256": "d158fb267d83c90f07aac1547dbf24b062c3fef2c82e9b61a416807dc0256165",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/proxy/java/viaaas/egg-v-i-aaa-s.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/5d74b86b8e61.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:26:33+02:00",
+        "name": "VIAaaS",
+        "author": "regulad@outlook.com",
+        "description": "VIAaaS - ViaVersion as a Service - Standalone ViaVersion proxy",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17",
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}} -sslPort={{WEBSERVER_PORT}}",
+        "config": {
+          "files": "{\"config/viaaas.yml\": {\"parser\": \"yaml\", \"find\": {\"port\": \"{{server.build.default.port}}\", \"bind-address\": \"0.0.0.0\"}}}",
+          "startup": "{\"done\": \"Application started in \"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# VIAaaS Installation Script\r\n#\r\n# Server Files: /mnt/server\r\ncd /mnt/server\r\nwget -O ${SERVER_JARFILE} \"https://jitpack.io/com/github/ViaVersion/VIAaaS/master-SNAPSHOT/VIAaaS-master-SNAPSHOT-all.jar\"\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "VIAaaS JAR File",
+            "description": "The name of the JAR file to be used when downloading & running VIAaaS.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "VIAaaS-all.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Web Server Port",
+            "description": "The port to listen to web server connections on.",
+            "env_variable": "WEBSERVER_PORT",
+            "default_value": "25543",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

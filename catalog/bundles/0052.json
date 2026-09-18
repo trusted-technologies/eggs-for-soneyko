@@ -1,0 +1,1367 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "multi-theft-auto-83caa3975be1",
+        "name": "Multi Theft Auto",
+        "description": "What more could you want? Multi Theft Auto provides the best online Grand Theft Auto experience there is. Read on to find out more.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/multi-theft-auto-83caa3975be1.json",
+        "sha256": "63dc0a97f996c3e9dd7c2356c9499c33373fed8c819835796431d70408b236ed",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/mtasa/egg-multi-theft-auto.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/83caa3975be1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-01-14T15:48:28+01:00",
+        "name": "Multi Theft Auto",
+        "author": "info@six-gaming.com",
+        "description": "What more could you want? Multi Theft Auto provides the best online Grand Theft Auto experience there is. Read on to find out more.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:mta": "ghcr.io/ptero-eggs/games:mta"
+        },
+        "file_denylist": [],
+        "startup": "./mta-server64 --port {{SERVER_PORT}} --httpport {{SERVER_WEBPORT}} -n",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server started and is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\ncd /tmp\r\ncurl -sSL -o multitheftauto_linux_x64.tar.gz https://linux.multitheftauto.com/dl/multitheftauto_linux_x64.tar.gz\r\ncurl -sSL -o mta-baseconfig.tar.gz https://linux.multitheftauto.com/dl/baseconfig.tar.gz\r\ncurl -sSL -o mtasa-resources-latest.zip https://mirror.multitheftauto.com/mtasa/resources/mtasa-resources-latest.zip\r\n\r\nmkdir -p /mnt/server\r\ntar -xvf multitheftauto_linux_x64.tar.gz\r\ncp -rf multitheftauto_linux_x64/* /mnt/server\r\n\r\nif [ ! -f /mnt/server/x64/libmysqlclient.so.16 ]; then\r\n    curl -L http://nightly.mtasa.com/files/libmysqlclient.so.16 -o /mnt/server/x64/libmysqlclient.so.16\r\nfi\r\n\r\nmkdir -p /mnt/server/mods/deathmatch/resources\r\nunzip -o -d /mnt/server/mods/deathmatch/resources mtasa-resources-latest.zip\r\n\r\ntar -xvf mta-baseconfig.tar.gz\r\ncp -rf baseconfig/* /mnt/server/mods/deathmatch\r\n\r\nchown -R root:root /mnt\r\n\r\nexport HOME=/mnt/server\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:ubuntu",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SERVER_WEBPORT",
+            "description": "The http port for web resource.\r\nThis Port needs to be the {{SERVER_PORT}}+3.",
+            "env_variable": "SERVER_WEBPORT",
+            "default_value": "22005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "multi-theft-auto-f3a31d46b236",
+        "name": "Multi Theft Auto",
+        "description": "What more could you want? Multi Theft Auto provides the best online Grand Theft Auto experience there is. Read on to find out more.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/multi-theft-auto-f3a31d46b236.json",
+        "sha256": "85a6e1de757ac7470a0c6d773fdf900aa7eecd7ab7e9e6490002080db8783ff1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/mtasa/egg-pterodactyl-multi-theft-auto.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/f3a31d46b236.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-05-10T14:02:07-04:00",
+        "name": "Multi Theft Auto",
+        "author": "info@six-gaming.com",
+        "description": "What more could you want? Multi Theft Auto provides the best online Grand Theft Auto experience there is. Read on to find out more.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/games:mta": "ghcr.io/parkervcp/games:mta"
+        },
+        "file_denylist": [],
+        "startup": "./mta-server64 --port {{SERVER_PORT}} --httpport {{SERVER_WEBPORT}} -n",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server started and is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\ncd /tmp\r\ncurl -sSL -o multitheftauto_linux_x64.tar.gz https://linux.multitheftauto.com/dl/multitheftauto_linux_x64.tar.gz\r\n# curl -sSL -o multitheftauto_linux_x64.tar.gz https://nightly.mtasa.com/multitheftauto_linux_x64-1.6.0-rc-23196.tar.gz\r\ncurl -sSL -o mta-baseconfig.tar.gz https://linux.multitheftauto.com/dl/baseconfig.tar.gz\r\ncurl -sSL -o mtasa-resources-latest.zip https://mirror.multitheftauto.com/mtasa/resources/mtasa-resources-latest.zip\r\n\r\nmkdir -p /mnt/server\r\ntar -xvf multitheftauto_linux_x64.tar.gz\r\ncp -rf multitheftauto_linux_x64/* /mnt/server\r\n\r\nif [ ! -f /mnt/server/x64/libmysqlclient.so.16 ]; then\r\n    curl -L http://nightly.mtasa.com/files/libmysqlclient.so.16 -o /mnt/server/x64/libmysqlclient.so.16\r\nfi\r\n\r\nmkdir -p /mnt/server/mods/deathmatch/resources\r\nunzip -o -d /mnt/server/mods/deathmatch/resources mtasa-resources-latest.zip\r\n\r\ntar -xvf mta-baseconfig.tar.gz\r\ncp -rf baseconfig/* /mnt/server/mods/deathmatch\r\n\r\nchown -R root:root /mnt\r\n\r\nexport HOME=/mnt/server\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:ubuntu",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SERVER_WEBPORT",
+            "description": "The http port for web resource.\r\nThis Port needs to be the {{SERVER_PORT}}+2.",
+            "env_variable": "SERVER_WEBPORT",
+            "default_value": "22005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "LD_PRELOAD",
+            "description": "",
+            "env_variable": "LD_PRELOAD",
+            "default_value": "/usr/lib/x86_64-linux-gnu/libzstd.so",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "multi-theft-auto-fde55aa3e9ae",
+        "name": "Multi Theft Auto",
+        "description": "What more could you want? Multi Theft Auto provides the best online Grand Theft Auto experience there is. Read on to find out more.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/multi-theft-auto-fde55aa3e9ae.json",
+        "sha256": "28d0decf6edb67041004009036899d64d3bca74e7de08f6fb023115828978f6c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/mtasa/egg-multi-theft-auto.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/fde55aa3e9ae.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-05-10T18:07:42+00:00",
+        "name": "Multi Theft Auto",
+        "author": "info@six-gaming.com",
+        "uuid": "8c6e8e0c-dabb-4b90-afab-075619b93b9a",
+        "description": "What more could you want? Multi Theft Auto provides the best online Grand Theft Auto experience there is. Read on to find out more.",
+        "tags": [],
+        "features": [],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:mta": "ghcr.io/parkervcp/games:mta"
+        },
+        "file_denylist": [],
+        "startup": "./mta-server64 --port {{SERVER_PORT}} --httpport {{SERVER_WEBPORT}} -n",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server started and is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\ncd /tmp\r\ncurl -sSL -o multitheftauto_linux_x64.tar.gz https://linux.multitheftauto.com/dl/multitheftauto_linux_x64.tar.gz\r\ncurl -sSL -o mta-baseconfig.tar.gz https://linux.multitheftauto.com/dl/baseconfig.tar.gz\r\ncurl -sSL -o mtasa-resources-latest.zip https://mirror.multitheftauto.com/mtasa/resources/mtasa-resources-latest.zip\r\n\r\nmkdir -p /mnt/server\r\ntar -xvf multitheftauto_linux_x64.tar.gz\r\ncp -rf multitheftauto_linux_x64/* /mnt/server\r\n\r\nif [ ! -f /mnt/server/x64/libmysqlclient.so.16 ]; then\r\n    curl -L http://nightly.mtasa.com/files/libmysqlclient.so.16 -o /mnt/server/x64/libmysqlclient.so.16\r\nfi\r\n\r\nmkdir -p /mnt/server/mods/deathmatch/resources\r\nunzip -o -d /mnt/server/mods/deathmatch/resources mtasa-resources-latest.zip\r\n\r\ntar -xvf mta-baseconfig.tar.gz\r\ncp -rf baseconfig/* /mnt/server/mods/deathmatch\r\n\r\nchown -R root:root /mnt\r\n\r\nexport HOME=/mnt/server\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:ubuntu",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 2,
+            "name": "LD_PRELOAD",
+            "description": "",
+            "env_variable": "LD_PRELOAD",
+            "default_value": "/usr/lib/x86_64-linux-gnu/libzstd.so",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": ""
+          },
+          {
+            "sort": 1,
+            "name": "SERVER_WEBPORT",
+            "description": "The http port for web resource.\r\nThis Port needs to be the {{SERVER_PORT}}+2.",
+            "env_variable": "SERVER_WEBPORT",
+            "default_value": "22005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "myth-of-empires-23e9b9c6c585",
+        "name": "Myth of Empires",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/myth-of-empires-23e9b9c6c585.json",
+        "sha256": "a16d729a7a2dc4d5c683b55a2bf3d623cfc933b73191a24f07f89b178f0fd4ef",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "myth_of_empires/egg-myth-of-empires.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/23e9b9c6c585.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-27T16:19:43+01:00",
+        "name": "Myth of Empires",
+        "author": "josdekurk@gmail.com",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:proton": "ghcr.io/ptero-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "export PROTON_USE_WINED3D=1; export PROTON_NO_ESYNC=1; proton run MOE/Binaries/Win64/MOEServer.exe {{MAP_NAME}} -game -server -DataLocalFile -NotCheckServerSteamAuth -LOCALLOGTIMES -PrivateServer -MultiHome=0.0.0.0 -OutAddress={{SERVER_IP}} -SessionName=\"{{SERVER_NAME}}\" -GameServerPVPType={{PVP}} -MaxPlayers={{MAX_PLAYERS}} -MapDifficultyRate=1 -UseACE -EnableVACBan=1 -ServerId={{SERVER_ID}} -ClusterId={{CLUSTER_ID}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -bStartShutDownServiceInPrivateServer={{SHUTDOWN_SERVICE}} -ShutDownServiceIP=127.0.0.1 -ShutDownServicePort={{RCON_PORT}} -ShutDownServiceKey=\"{{RCON_PASSWORD}}\" -ServerAdminAccounts=\"{{ADMIN_IDS}}\" {{EXTRA_FLAGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1794810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1794810",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Windows version",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "",
+            "env_variable": "MAP_NAME",
+            "default_value": "LargeTerrain_Central_Main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:LargeTerrain_Central_Main,LargeTerrain_Central2_Main",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Enable or disable PVP",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "12888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Shutdown Service",
+            "description": "",
+            "env_variable": "SHUTDOWN_SERVICE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "13888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|min:5|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin ID's",
+            "description": "Steam admin ID list",
+            "env_variable": "ADMIN_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Extra flags.All starting with a -\r\nexample: -ServerLevelAddMul=1.01",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster ID",
+            "description": "",
+            "env_variable": "CLUSTER_ID",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server ID",
+            "description": "",
+            "env_variable": "SERVER_ID",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "myth-of-empires-5afc283137a5",
+        "name": "Myth of Empires",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/myth-of-empires-5afc283137a5.json",
+        "sha256": "ce82fcbea7e353d775124fa3a9fec6c60b48b3e6638aa7fbe5d995b481dc22b1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "myth_of_empires/egg-pterodactyl-myth-of-empires.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/5afc283137a5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:23+00:00",
+        "name": "Myth of Empires",
+        "author": "josdekurk@gmail.com",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "export PROTON_USE_WINED3D=1; export PROTON_NO_ESYNC=1; proton run MOE/Binaries/Win64/MOEServer.exe {{MAP_NAME}} -game -server -DataLocalFile -NotCheckServerSteamAuth -LOCALLOGTIMES -PrivateServer -MultiHome=0.0.0.0 -OutAddress={{SERVER_IP}} -SessionName=\"{{SERVER_NAME}}\" -GameServerPVPType={{PVP}} -MaxPlayers={{MAX_PLAYERS}} -MapDifficultyRate=1 -UseACE -EnableVACBan=1 -ServerId={{SERVER_ID}} -ClusterId={{CLUSTER_ID}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -bStartShutDownServiceInPrivateServer={{SHUTDOWN_SERVICE}} -ShutDownServiceIP=127.0.0.1 -ShutDownServicePort={{RCON_PORT}} -ShutDownServiceKey=\"{{RCON_PASSWORD}}\" -ServerAdminAccounts=\"{{ADMIN_IDS}}\" {{EXTRA_FLAGS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game.\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1794810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1794810",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Windows version",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "",
+            "env_variable": "MAP_NAME",
+            "default_value": "LargeTerrain_Central_Main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:LargeTerrain_Central_Main,LargeTerrain_Central2_Main",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Enable or disable PVP",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "12888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Shutdown Service",
+            "description": "",
+            "env_variable": "SHUTDOWN_SERVICE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "13888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|min:5|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin ID's",
+            "description": "Steam admin ID list",
+            "env_variable": "ADMIN_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Extra flags.All starting with a -\r\nexample: -ServerLevelAddMul=1.01",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster ID",
+            "description": "",
+            "env_variable": "CLUSTER_ID",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server ID",
+            "description": "",
+            "env_variable": "SERVER_ID",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "myth-of-empires-811fa0c64c23",
+        "name": "Myth of Empires",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/myth-of-empires-811fa0c64c23.json",
+        "sha256": "069b991ccabbf6a8fc1444ed07307b0760d31c2a88d93303130f83b00cc19f93",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "myth_of_empires/egg-myth-of-empires.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/811fa0c64c23.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Myth of Empires",
+        "author": "josdekurk@gmail.com",
+        "uuid": "f0ba2df0-dadc-40b9-bc97-225fb74e427b",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "export PROTON_USE_WINED3D=1; export PROTON_NO_ESYNC=1; proton run MOE/Binaries/Win64/MOEServer.exe {{MAP_NAME}} -game -server -DataLocalFile -NotCheckServerSteamAuth -LOCALLOGTIMES -PrivateServer -MultiHome=0.0.0.0 -OutAddress={{SERVER_IP}} -SessionName=\"{{SERVER_NAME}}\" -GameServerPVPType={{PVP}} -MaxPlayers={{MAX_PLAYERS}} -MapDifficultyRate=1 -UseACE -EnableVACBan=1 -ServerId={{SERVER_ID}} -ClusterId={{CLUSTER_ID}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -bStartShutDownServiceInPrivateServer={{SHUTDOWN_SERVICE}} -ShutDownServiceIP=127.0.0.1 -ShutDownServicePort={{RCON_PORT}} -ShutDownServiceKey=\"{{RCON_PASSWORD}}\" -ServerAdminAccounts=\"{{ADMIN_IDS}}\" {{EXTRA_FLAGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1794810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1794810",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Install Windows version",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "",
+            "env_variable": "MAP_NAME",
+            "default_value": "LargeTerrain_Central_Main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:LargeTerrain_Central_Main,LargeTerrain_Central2_Main",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:80",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Enable or disable PVP",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "12888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Shutdown Service",
+            "description": "",
+            "env_variable": "SHUTDOWN_SERVICE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "13888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|min:5|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin ID's",
+            "description": "Steam admin ID list",
+            "env_variable": "ADMIN_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Extra flags.All starting with a -\r\nexample: -ServerLevelAddMul=1.01",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster ID",
+            "description": "",
+            "env_variable": "CLUSTER_ID",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server ID",
+            "description": "",
+            "env_variable": "SERVER_ID",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "myth-of-empires-e0824bd789fe",
+        "name": "Myth of Empires",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/myth-of-empires-e0824bd789fe.json",
+        "sha256": "2e3aea6dae8efb3848426f79a0d7aada7af6d5a8918eb58af9eb0487bfedbe9e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/myth_of_empires/egg-myth-of-empires.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/e0824bd789fe.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-27T16:19:43+01:00",
+        "name": "Myth of Empires",
+        "author": "josdekurk@gmail.com",
+        "description": "Myth of Empires is a multiplayer war sandbox game featuring a high degree of freedom. Players must survive, craft, create, and lead troops in their quest to conquer territory and build their own empire.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:proton": "ghcr.io/parkervcp/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "export PROTON_USE_WINED3D=1; export PROTON_NO_ESYNC=1; proton run MOE/Binaries/Win64/MOEServer.exe {{MAP_NAME}} -game -server -DataLocalFile -NotCheckServerSteamAuth -LOCALLOGTIMES -PrivateServer -MultiHome=0.0.0.0 -OutAddress={{SERVER_IP}} -SessionName=\"{{SERVER_NAME}}\" -GameServerPVPType={{PVP}} -MaxPlayers={{MAX_PLAYERS}} -MapDifficultyRate=1 -UseACE -EnableVACBan=1 -ServerId={{SERVER_ID}} -ClusterId={{CLUSTER_ID}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -bStartShutDownServiceInPrivateServer={{SHUTDOWN_SERVICE}} -ShutDownServiceIP=127.0.0.1 -ShutDownServicePort={{RCON_PORT}} -ShutDownServiceKey=\"{{RCON_PASSWORD}}\" -ServerAdminAccounts=\"{{ADMIN_IDS}}\" {{EXTRA_FLAGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogInit: Display: Starting Game.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1794810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1794810",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Windows version",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "",
+            "env_variable": "MAP_NAME",
+            "default_value": "LargeTerrain_Central_Main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:LargeTerrain_Central_Main,LargeTerrain_Central2_Main",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable PVP",
+            "description": "Enable or disable PVP",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "25",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,150",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "12888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Shutdown Service",
+            "description": "",
+            "env_variable": "SHUTDOWN_SERVICE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Port",
+            "description": "",
+            "env_variable": "RCON_PORT",
+            "default_value": "13888",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|int",
+            "field_type": "text"
+          },
+          {
+            "name": "RCON Password",
+            "description": "",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|min:5|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin ID's",
+            "description": "Steam admin ID list",
+            "env_variable": "ADMIN_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Flags",
+            "description": "Extra flags.All starting with a -\r\nexample: -ServerLevelAddMul=1.01",
+            "env_variable": "EXTRA_FLAGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster ID",
+            "description": "",
+            "env_variable": "CLUSTER_ID",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server ID",
+            "description": "",
+            "env_variable": "SERVER_ID",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nazi-zombies-portable-59a58fbdbef7",
+        "name": "Nazi Zombies: Portable",
+        "description": "NZ:P (Nazi Zombies: Portable) is based off of the FTEQW (Fore Thought Engine Quake World). This egg is specifically made for use with NZ:P (just downloads assets and QuakeC from NZ:P repositories) but there is nothing stopping you from using it as a general FTEQW egg given the NZ:P fork of FTEQW only added fog to the client (and added SDL which caused issues with arguments being eaten preventing dedicated flag from being read) which is why upstream FTEQW is used.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nazi-zombies-portable-59a58fbdbef7.json",
+        "sha256": "81a4c731d8d1112fe6eab71d5b20bd4401f80733e402bbaeceb4f18fc22f065f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "nazi_zombies_portable/egg-nazi-zombies-portable.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/59a58fbdbef7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-03T18:19:58+00:00",
+        "name": "Nazi Zombies: Portable",
+        "author": "jordanadamsbusiness@outlook.com",
+        "uuid": "8569960f-865d-40ad-bdb0-aff8368f1e5a",
+        "description": "NZ:P (Nazi Zombies: Portable) is based off of the FTEQW (Fore Thought Engine Quake World). This egg is specifically made for use with NZ:P (just downloads assets and QuakeC from NZ:P repositories) but there is nothing stopping you from using it as a general FTEQW egg given the NZ:P fork of FTEQW only added fog to the client (and added SDL which caused issues with arguments being eaten preventing dedicated flag from being read) which is why upstream FTEQW is used.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:ubuntu": "ghcr.io/parkervcp/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "./fteqw-sv64 -dedicated +sv_port {{SERVER_PORT}} +sv_port_tcp {{SERVER_PORT}} +com_protocolname {{PROTOCOL}} +sv_mintic {{TICKRATE}} +map {{MAP}} {{GAME_ARGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"======== Nazi Zombies Portable Initialized ========\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Nazi Zombies: Portable (NZ:P) Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# FTEQW (Engine)\r\nwget https://www.fteqw.org/dl/fteqw_linux64.zip\r\nunzip -o fteqw_linux64.zip -d /mnt/server\r\n\r\n# Assets\r\nASSETS_LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/nzp-team/assets/releases/latest | jq -r '.tag_name')\r\nwget \"https://github.com/nzp-team/assets/releases/download/$ASSETS_LATEST_VERSION/pc-nzp-assets.zip\"\r\nunzip -o pc-nzp-assets.zip -d /mnt/server\r\n\r\n# QuakeC\r\nQUAKEC_LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/nzp-team/quakec/releases/latest | jq -r '.tag_name')\r\nwget \"https://github.com/nzp-team/quakec/releases/download/$QUAKEC_LATEST_VERSION/fte-nzp-qc.zip\"\r\nwget \"https://github.com/nzp-team/quakec/releases/download/$QUAKEC_LATEST_VERSION/standard-nzp-qc.zip\"\r\nunzip -o fte-nzp-qc.zip -d /mnt/server/nzp\r\nunzip -o standard-nzp-qc.zip -d /mnt/server/nzp",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Protocol",
+            "description": "NZ:P Native Clients - `NZP-REBOOT`.\r\nNZ:P Web Clients - `NZP-REBOOT-WEB`.\r\n\r\nHit your \"`/~\" key on your keyboard, this will open console, then you will type `connect ip:port` for native clients, for web clients you would type `connect ws://ip:port`. In addition, you MUST be on the HTTP version of the website you are playing the web client on, otherwise the browser will block the request",
+            "env_variable": "PROTOCOL",
+            "default_value": "NZP-REBOOT",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": null
+          },
+          {
+            "name": "Tickrate",
+            "description": "Think of this like fps, the default value is 1 frame per 45 ms (0.045 seconds) which is ~22 fps, 30 fps is ~33.3 ms, 60 fps is ~16.6ms, the reason the tickrate is low is due to zombies being bandwidth heavy (especially in the higher rounds), take caution when changing this, but if you up the tickrate, it may fix physics bugs like zombies getting stuck on terrain.",
+            "env_variable": "TICKRATE",
+            "default_value": "0.045",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:20",
+            "sort": null
+          },
+          {
+            "name": "Map",
+            "description": "The map to load, you can find a list via `listmaps`, default map is ndu otherwise known as \"Nacht der Untoten\"",
+            "env_variable": "MAP",
+            "default_value": "ndu",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null
+          },
+          {
+            "name": "Additional Game Arguments",
+            "description": "`+cvar value` is the format for changing the cvars",
+            "env_variable": "GAME_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "max:200",
+            "sort": null
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nazi-zombies-portable-e7adaaff1ec9",
+        "name": "Nazi Zombies: Portable",
+        "description": "NZ:P (Nazi Zombies: Portable) is based off of the FTEQW (Fore Thought Engine Quake World). This egg is specifically made for use with NZ:P (just downloads assets and QuakeC from NZ:P repositories) but there is nothing stopping you from using it as a general FTEQW egg given the NZ:P fork of FTEQW only added fog to the client (and added SDL which caused issues with arguments being eaten preventing dedicated flag from being read) which is why upstream FTEQW is used.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nazi-zombies-portable-e7adaaff1ec9.json",
+        "sha256": "98467698f5a4d358e717e5ec0b011ff62acc98c982d9d4b9b17eacae8c2ae47a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "Nazi Zombies Portable/egg-nazi-zombies--portable.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/e7adaaff1ec9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-13T16:14:15+00:00",
+        "name": "Nazi Zombies: Portable",
+        "author": "jordanadamsbusiness@outlook.com",
+        "description": "NZ:P (Nazi Zombies: Portable) is based off of the FTEQW (Fore Thought Engine Quake World). This egg is specifically made for use with NZ:P (just downloads assets and QuakeC from NZ:P repositories) but there is nothing stopping you from using it as a general FTEQW egg given the NZ:P fork of FTEQW only added fog to the client (and added SDL which caused issues with arguments being eaten preventing dedicated flag from being read) which is why upstream FTEQW is used.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:ubuntu": "ghcr.io/ptero-eggs/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "./fteqw-sv64 -dedicated +sv_port {{SERVER_PORT}} +sv_port_tcp {{SERVER_PORT}} +com_protocolname {{PROTOCOL}} +sv_mintic {{TICKRATE}} +map {{MAP}} {{GAME_ARGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"======== Nazi Zombies Portable Initialized ========\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Nazi Zombies: Portable (NZ:P) Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# FTEQW (Engine)\r\nwget https://www.fteqw.org/dl/fteqw_linux64.zip\r\nunzip -o fteqw_linux64.zip -d /mnt/server\r\n\r\n# Assets\r\nASSETS_LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/nzp-team/assets/releases/latest | jq -r '.tag_name')\r\nwget \"https://github.com/nzp-team/assets/releases/download/$ASSETS_LATEST_VERSION/pc-nzp-assets.zip\"\r\nunzip -o pc-nzp-assets.zip -d /mnt/server\r\n\r\n# QuakeC\r\nQUAKEC_LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/nzp-team/quakec/releases/latest | jq -r '.tag_name')\r\nwget \"https://github.com/nzp-team/quakec/releases/download/$QUAKEC_LATEST_VERSION/fte-nzp-qc.zip\"\r\nwget \"https://github.com/nzp-team/quakec/releases/download/$QUAKEC_LATEST_VERSION/standard-nzp-qc.zip\"\r\nunzip -o fte-nzp-qc.zip -d /mnt/server/nzp\r\nunzip -o standard-nzp-qc.zip -d /mnt/server/nzp",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Protocol",
+            "description": "NZ:P Native Clients - `NZP-REBOOT`.\r\nNZ:P Web Clients - `NZP-REBOOT-WEB`.\r\n\r\nHit your \"`/~\" key on your keyboard, this will open console, then you will type `connect ip:port` for native clients, for web clients you would type `connect ws://ip:port`. In addition, you MUST be on the HTTP version of the website you are playing the web client on, otherwise the browser will block the request",
+            "env_variable": "PROTOCOL",
+            "default_value": "NZP-REBOOT",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Tickrate",
+            "description": "Think of this like fps, the default value is 1 frame per 45 ms (0.045 seconds) which is ~22 fps, 30 fps is ~33.3 ms, 60 fps is ~16.6ms, the reason the tickrate is low is due to zombies being bandwidth heavy (especially in the higher rounds), take caution when changing this, but if you up the tickrate, it may fix physics bugs like zombies getting stuck on terrain.",
+            "env_variable": "TICKRATE",
+            "default_value": "0.045",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The map to load, you can find a list via `listmaps`, default map is ndu otherwise known as \"Nacht der Untoten\"",
+            "env_variable": "MAP",
+            "default_value": "ndu",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Game Arguments",
+            "description": "`+cvar value` is the format for changing the cvars",
+            "env_variable": "GAME_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "max:200",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nazi-zombies-portable-ef3fc9f6c7f4",
+        "name": "Nazi Zombies: Portable",
+        "description": "NZ:P (Nazi Zombies: Portable) is based off of the FTEQW (Fore Thought Engine Quake World). This egg is specifically made for use with NZ:P (just downloads assets and QuakeC from NZ:P repositories) but there is nothing stopping you from using it as a general FTEQW egg given the NZ:P fork of FTEQW only added fog to the client (and added SDL which caused issues with arguments being eaten preventing dedicated flag from being read) which is why upstream FTEQW is used.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nazi-zombies-portable-ef3fc9f6c7f4.json",
+        "sha256": "1a468b179951a19c8c3fed7b16ee967f3a29ff0f30b6057495a16441cf03b08e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "nazi_zombies_portable/egg-pterodactyl-nazi-zombies--portable.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/ef3fc9f6c7f4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-03T13:12:47-05:00",
+        "name": "Nazi Zombies: Portable",
+        "author": "jordanadamsbusiness@outlook.com",
+        "description": "NZ:P (Nazi Zombies: Portable) is based off of the FTEQW (Fore Thought Engine Quake World). This egg is specifically made for use with NZ:P (just downloads assets and QuakeC from NZ:P repositories) but there is nothing stopping you from using it as a general FTEQW egg given the NZ:P fork of FTEQW only added fog to the client (and added SDL which caused issues with arguments being eaten preventing dedicated flag from being read) which is why upstream FTEQW is used.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:ubuntu": "ghcr.io/parkervcp/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "./fteqw-sv64 -dedicated +sv_port {{SERVER_PORT}} +sv_port_tcp {{SERVER_PORT}} +com_protocolname {{PROTOCOL}} +sv_mintic {{TICKRATE}} +map {{MAP}} {{GAME_ARGS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"======== Nazi Zombies Portable Initialized ========\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Nazi Zombies: Portable (NZ:P) Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# FTEQW (Engine)\r\nwget https://www.fteqw.org/dl/fteqw_linux64.zip\r\nunzip -o fteqw_linux64.zip -d /mnt/server\r\n\r\n# Assets\r\nASSETS_LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/nzp-team/assets/releases/latest | jq -r '.tag_name')\r\nwget \"https://github.com/nzp-team/assets/releases/download/$ASSETS_LATEST_VERSION/pc-nzp-assets.zip\"\r\nunzip -o pc-nzp-assets.zip -d /mnt/server\r\n\r\n# QuakeC\r\nQUAKEC_LATEST_VERSION=$(curl -L -s -H 'Accept: application/json' https://github.com/nzp-team/quakec/releases/latest | jq -r '.tag_name')\r\nwget \"https://github.com/nzp-team/quakec/releases/download/$QUAKEC_LATEST_VERSION/fte-nzp-qc.zip\"\r\nwget \"https://github.com/nzp-team/quakec/releases/download/$QUAKEC_LATEST_VERSION/standard-nzp-qc.zip\"\r\nunzip -o fte-nzp-qc.zip -d /mnt/server/nzp\r\nunzip -o standard-nzp-qc.zip -d /mnt/server/nzp",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Protocol",
+            "description": "NZ:P Native Clients - `NZP-REBOOT`.\r\nNZ:P Web Clients - `NZP-REBOOT-WEB`.\r\n\r\nHit your \"`/~\" key on your keyboard, this will open console, then you will type `connect ip:port` for native clients, for web clients you would type `connect ws://ip:port`. In addition, you MUST be on the HTTP version of the website you are playing the web client on, otherwise the browser will block the request",
+            "env_variable": "PROTOCOL",
+            "default_value": "NZP-REBOOT",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Tickrate",
+            "description": "Think of this like fps, the default value is 1 frame per 45 ms (0.045 seconds) which is ~22 fps, 30 fps is ~33.3 ms, 60 fps is ~16.6ms, the reason the tickrate is low is due to zombies being bandwidth heavy (especially in the higher rounds), take caution when changing this, but if you up the tickrate, it may fix physics bugs like zombies getting stuck on terrain.",
+            "env_variable": "TICKRATE",
+            "default_value": "0.045",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The map to load, you can find a list via `listmaps`, default map is ndu otherwise known as \"Nacht der Untoten\"",
+            "env_variable": "MAP",
+            "default_value": "ndu",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Game Arguments",
+            "description": "`+cvar value` is the format for changing the cvars",
+            "env_variable": "GAME_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "max:200",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1673 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "neverwinter-nights-enhanced-edition-f92d5d04fbea",
+        "name": "Neverwinter Nights: Enhanced Edition",
+        "description": "Return to the Forgotten Realms in this bestselling Dungeons & Dragons roleplaying game. Combines all the content of Neverwinter Nights Diamond Edition with all-new enhanced features. Includes 100+ hours of award-winning adventures and the tools to create your own!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/neverwinter-nights-enhanced-edition-f92d5d04fbea.json",
+        "sha256": "b3cb78d0108eb54765937bb30e1d04ee1809427a3c7fc291e4044b292dd41025",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "neverwinter_nights_ee/egg-neverwinter-nights--enhanced-edition.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/f92d5d04fbea.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-01-30T23:02:22-08:00",
+        "name": "Neverwinter Nights: Enhanced Edition",
+        "author": "git@robsti.dev",
+        "description": "Return to the Forgotten Realms in this bestselling Dungeons & Dragons roleplaying game. Combines all the content of Neverwinter Nights Diamond Edition with all-new enhanced features. Includes 100+ hours of award-winning adventures and the tools to create your own!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "cd bin/linux-x86 && ./nwserver-linux -port $SERVER_PORT -userdirectory '/home/container/user' -servername \"${SERVER_NAME}\" -module \"${MODULE_NAME}\" -publicserver \"${IS_PUBLIC}\" -maxclients \"${MAX_CLIENTS}\" -minlevel \"${MIN_LEVEL}\" -maxlevel \"${MAX_LEVEL}\" -pauseandplay \"${PAUSE_AND_PLAY}\" -pvp \"${PVP}\" -servervault \"${SERVER_VAULT}\" -elc \"${ELC}\" -ilr \"${ILR}\" -gametype \"${GAME_TYPE}\" -oneparty \"${ONE_PARTY}\" -difficulty \"${DIFFICULTY}\" -autosaveinterval \"${AUTO_SAVE_INTERVAL}\" -playerpassword \"${PLAYER_PASSWORD}\" -dmpassword \"${DM_PASSWORD}\" -reloadwhenempty \"${RELOAD_WHEN_EMPTY}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server: Module loaded\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Neverwinter Nights Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# Download the latest version from the Beamdog website\r\nif [ -z \"$NWN_VERSION\" ] || [ \"$NWN_VERSION\" == \"latest\" ]; then\r\n    NWN_VERSION=$(curl -L -s 'https://registry.hub.docker.com/v2/repositories/beamdog/nwserver/tags' | jq -r '[.\"results\"[][\"name\"] | select(test(\"\\\\d*\\\\.\\\\d*$\"))][0]')\r\nfi\r\n\r\ncd /mnt/server\r\ncurl -o nwnee.zip -L https://nwn.beamdog.net/downloads/nwnee-dedicated-${NWN_VERSION}.zip\r\nunzip -u nwnee.zip -d .\r\n\r\n# Run the server once to generate default files and directories\r\ncd bin/linux-x86 && ./nwserver-linux\r\n\r\n# Copy generated files into the volume and update relevant paths\r\nmv /root/.local/share/Neverwinter\\ Nights /mnt/server/user\r\nsed -i 's/\\/root\\/.local\\/share\\/Neverwinter Nights/\\/home\\/container\\/user/g' /mnt/server/user/nwn.ini\r\nsed -i 's/\\/root\\/.local\\/share\\/Neverwinter Nights/\\/home\\/container\\/user/g' /mnt/server/user/nwnplayer.ini\r\nsed -i 's/\\/root\\/.local\\/share\\/Neverwinter Nights/\\/home\\/container\\/user/g' /mnt/server/user/settings.tml\r\n\r\necho \"Installation complete.\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game Version",
+            "description": "Version of the game to install",
+            "env_variable": "NWN_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Module Name",
+            "description": "Name of the module we want to load. Official modules are stored in `~/data` and custom modules need to be stored in `~/user`. Must match the file name exactly without the extension.",
+            "env_variable": "MODULE_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Load Slot #",
+            "description": "Save game slot number to load on boot.",
+            "env_variable": "SAVE_SLOT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Number Of Clients",
+            "description": "Maximum number of connections to the game server.",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "96",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Minimum Level",
+            "description": "Minimum character level required to access the game server.",
+            "env_variable": "MIN_LEVEL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Level",
+            "description": "Maximum character level required to access the game server.",
+            "env_variable": "MAX_LEVEL",
+            "default_value": "100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Pause And Play",
+            "description": "Toggle game pausing permissions.\r\n0 = game can only be paused by DM\r\n1 = game can by paused by players",
+            "env_variable": "PAUSE_AND_PLAY",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "PvP Mode",
+            "description": "The mode of PvP enabled.\r\n0 = none\r\n1 = party\r\n2 = full",
+            "env_variable": "PVP",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1,2",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Vault Mode",
+            "description": "0 = local characters only\r\n1 = server characters only",
+            "env_variable": "SERVER_VAULT",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Legal Characters",
+            "description": "Toggle enforcement of legal characters.",
+            "env_variable": "ELC",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Enforce Item Level Restrictions",
+            "description": "Toggle enforcement of item level restrictions.",
+            "env_variable": "ILR",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Type",
+            "description": "Set which game room to post the game to. This only applies if the game is public.",
+            "env_variable": "GAME_TYPE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Toggle Single Parties",
+            "description": "Toggle if multiple parties are allowed.",
+            "env_variable": "ONE_PARTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Game difficulty selection.\r\n1 = easy\r\n2 = normal\r\n3 = D&D hardcore\r\n4 = very difficult",
+            "env_variable": "DIFFICULTY",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|in:1,2,3,4",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Save Interval",
+            "description": "Interval between autosaves in minutes.",
+            "env_variable": "AUTO_SAVE_INTERVAL",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Player Password",
+            "description": "Password needed to join the server as a player.",
+            "env_variable": "PLAYER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "DM Password",
+            "description": "Password needed to join the server as a DM.",
+            "env_variable": "DM_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server as shown on the server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Is Public Game",
+            "description": "Toggle indicating if this is a public or private game.",
+            "env_variable": "IS_PUBLIC",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Reload When Empty",
+            "description": "Determines if the module state is persistent when the server is empty.",
+            "env_variable": "RELOAD_WHEN_EMPTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "night-of-the-dead-0a575b7b5fb6",
+        "name": "Night Of The Dead",
+        "description": "Build defenses against nightly waves of zombies. Survive and escape the island.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/night-of-the-dead-0a575b7b5fb6.json",
+        "sha256": "f467481139425225a19e84383d6c72e728f0bc09963782b4440306906a72209f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "night_of_the_dead/egg-night-of-the-dead.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0a575b7b5fb6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-15T18:59:35+02:00",
+        "name": "Night Of The Dead",
+        "author": "marshals@gmail.com",
+        "description": "Build defenses against nightly waves of zombies. Survive and escape the island.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/LF/Binaries/Win64/LFServer-Win64-Shipping.exe ?listen -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -console -log --CRASHREPORTS {{OTHER_ARGS}} & NOTD_PID=$!; sleep 5; tail -c0 -F  /home/container/LF/Saved/Logs/LF.log --pid=$NOTD_PID",
+        "config": {
+          "files": "{\"LF/Saved/Config/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"ServerSettings.ServerName\": \"{{env.SERVER_NAME}}\", \"ServerSettings.Password\": \"{{env.SERVER_PASSWORD}}\", \"SystemSettings.SaveName\": \"{{env.SERVER_SAVEGAME}}\", \"SystemSettings.IngameAdminPassword\": \"{{env.SERVER_ADMIN_PASSWORD}}\", \"SystemSettings.DefaultMessageOfTheDay\": \"{env.SERVER_MOTD}}\", \"GameSettings.Difficulty\": \"{{env.DIFFICULTY}}\", \"GameSettings/General.MODSelect\": \"{{env.PVP}}\"}}}",
+          "startup": "{\"done\": [\"Successfully updated session\", \"Start Session Complete\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## make needed dir\r\nmkdir -p /mnt/server/LF/Saved/SaveGames\r\nmkdir -p /mnt/server/LF/Saved/Config\r\n\r\ncurl -sSL -o /mnt/server/LF/Saved/Config/ServerSettings.ini https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/night_of_the_dead/ServerSettings.ini\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1420710",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1420710",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin Password",
+            "description": "",
+            "env_variable": "SERVER_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "",
+            "env_variable": "DIFFICULTY",
+            "default_value": "Normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Normal,Peaceful,Easy,Hard,Survival,Challenge,Legend",
+            "field_type": "text"
+          },
+          {
+            "name": "PVP",
+            "description": "1=PVE 0=PVP",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Savegame Name",
+            "description": "",
+            "env_variable": "SERVER_SAVEGAME",
+            "default_value": "savedgame1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Winetricks Run",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server MOTD",
+            "description": "",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome to the server.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Args",
+            "description": "other arguments added to command line.",
+            "env_variable": "OTHER_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "XVFB",
+            "description": "Start XVFB in the background.",
+            "env_variable": "XVFB",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "night-of-the-dead-7ec3821bed31",
+        "name": "Night Of The Dead",
+        "description": "Build defenses against nightly waves of zombies. Survive and escape the island.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/night-of-the-dead-7ec3821bed31.json",
+        "sha256": "19b07a5fe85592d3442fe00206312eaf944e2c01ad729c12699c8e518f102bd4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "night_of_the_dead/egg-night-of-the-dead.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/7ec3821bed31.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Night Of The Dead",
+        "author": "marshals@gmail.com",
+        "uuid": "08b518e7-fa75-4db9-9fdc-07fc9bc35c28",
+        "description": "Build defenses against nightly waves of zombies. Survive and escape the island.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/LF/Binaries/Win64/LFServer-Win64-Shipping.exe ?listen -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -console -log --CRASHREPORTS {{OTHER_ARGS}} & NOTD_PID=$!; sleep 5; tail -c0 -F  /home/container/LF/Saved/Logs/LF.log --pid=$NOTD_PID",
+        "config": {
+          "files": "{\"LF/Saved/Config/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"ServerSettings.ServerName\": \"{{server.environment.SERVER_NAME}}\", \"ServerSettings.Password\": \"{{server.environment.SERVER_PASSWORD}}\", \"SystemSettings.SaveName\": \"{{server.environment.SERVER_SAVEGAME}}\", \"SystemSettings.IngameAdminPassword\": \"{{server.environment.SERVER_ADMIN_PASSWORD}}\", \"SystemSettings.DefaultMessageOfTheDay\": \"{{server.environment.SERVER_MOTD}}\", \"GameSettings.Difficulty\": \"{{server.environment.DIFFICULTY}}\", \"GameSettings/General.MODSelect\": \"{{server.environment.PVP}}\"}}}",
+          "startup": "{\"done\": [\"Successfully updated session\", \"Start Session Complete\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## make needed dir\r\nmkdir -p /mnt/server/LF/Saved/SaveGames\r\nmkdir -p /mnt/server/LF/Saved/Config\r\n\r\ncurl -sSL -o /mnt/server/LF/Saved/Config/ServerSettings.ini https://raw.githubusercontent.com/pelican-eggs/games-steamcmd/main/night_of_the_dead/ServerSettings.ini\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 1
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1420710",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1420710",
+            "sort": 2
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "sort": 3
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 4
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:5",
+            "sort": 5
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pelican",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": 6
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "sort": 7
+          },
+          {
+            "name": "Server Admin Password",
+            "description": "",
+            "env_variable": "SERVER_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": 8
+          },
+          {
+            "name": "Difficulty",
+            "description": "",
+            "env_variable": "DIFFICULTY",
+            "default_value": "Normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Normal,Peaceful,Easy,Hard,Survival,Challenge,Legend,Custom",
+            "sort": 9
+          },
+          {
+            "name": "PVP",
+            "description": "1=PVE 0=PVP",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 10
+          },
+          {
+            "name": "Savegame Name",
+            "description": "",
+            "env_variable": "SERVER_SAVEGAME",
+            "default_value": "savedgame1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": 11
+          },
+          {
+            "name": "Winetricks Run",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": 12
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 13
+          },
+          {
+            "name": "Server MOTD",
+            "description": "",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome to the server.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": 14
+          },
+          {
+            "name": "Extra Args",
+            "description": "other arguments added to command line.",
+            "env_variable": "OTHER_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": 15
+          },
+          {
+            "name": "XVFB",
+            "description": "Start XVFB in the background.",
+            "env_variable": "XVFB",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "sort": 16
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "night-of-the-dead-aad0ba847a1c",
+        "name": "Night Of The Dead",
+        "description": "Build defenses against nightly waves of zombies. Survive and escape the island.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/night-of-the-dead-aad0ba847a1c.json",
+        "sha256": "1765952c73d373f91adf922afd9cb5fc762c1bb4527e8eb908282203d8b34b41",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "night_of_the_dead/egg-pterodactyl-night-of-the-dead.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/aad0ba847a1c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-27T17:30:55+01:00",
+        "name": "Night Of The Dead",
+        "author": "marshals@gmail.com",
+        "description": "Build defenses against nightly waves of zombies. Survive and escape the island.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/LF/Binaries/Win64/LFServer-Win64-Shipping.exe ?listen -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -console -log --CRASHREPORTS {{OTHER_ARGS}} & NOTD_PID=$!; sleep 5; tail -c0 -F  /home/container/LF/Saved/Logs/LF.log --pid=$NOTD_PID",
+        "config": {
+          "files": "{\"LF/Saved/Config/ServerSettings.ini\": {\"parser\": \"ini\", \"find\": {\"ServerSettings.ServerName\": \"{{env.SERVER_NAME}}\", \"ServerSettings.Password\": \"{{env.SERVER_PASSWORD}}\", \"SystemSettings.SaveName\": \"{{env.SERVER_SAVEGAME}}\", \"SystemSettings.IngameAdminPassword\": \"{{env.SERVER_ADMIN_PASSWORD}}\", \"SystemSettings.DefaultMessageOfTheDay\": \"{{env.SERVER_MOTD}}\", \"GameSettings.Difficulty\": \"{{env.DIFFICULTY}}\", \"GameSettings/General.MODSelect\": \"{{env.PVP}}\"}}}",
+          "startup": "{\"done\": [\"Successfully updated session\", \"Start Session Complete\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n## make needed dir\r\nmkdir -p /mnt/server/LF/Saved/SaveGames\r\nmkdir -p /mnt/server/LF/Saved/Config\r\n\r\ncurl -sSL -o /mnt/server/LF/Saved/Config/ServerSettings.ini https://raw.githubusercontent.com/pelican-eggs/games-steamcmd/main/night_of_the_dead/ServerSettings.ini\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1420710",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1420710",
+            "field_type": "text"
+          },
+          {
+            "name": "WINDOWS_INSTALL",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on start",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pelican",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin Password",
+            "description": "",
+            "env_variable": "SERVER_ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "",
+            "env_variable": "DIFFICULTY",
+            "default_value": "Normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:Normal,Peaceful,Easy,Hard,Survival,Challenge,Legend,Custom",
+            "field_type": "text"
+          },
+          {
+            "name": "PVP",
+            "description": "1=PVE 0=PVP",
+            "env_variable": "PVP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Savegame Name",
+            "description": "",
+            "env_variable": "SERVER_SAVEGAME",
+            "default_value": "savedgame1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Winetricks Run",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server MOTD",
+            "description": "",
+            "env_variable": "SERVER_MOTD",
+            "default_value": "Welcome to the server.",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Extra Args",
+            "description": "other arguments added to command line.",
+            "env_variable": "OTHER_ARGS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "XVFB",
+            "description": "Start XVFB in the background.",
+            "env_variable": "XVFB",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nightingale-3f84bc0856b9",
+        "name": "Nightingale",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world. ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nightingale-3f84bc0856b9.json",
+        "sha256": "269bf4af94d44a0f5df6a3d731d9867a64f40d22742307084726c132cc38bbb9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "nightingale/pterodactyl-egg-nightingale.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3f84bc0856b9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-11-02T11:29:03+00:00",
+        "name": "Nightingale",
+        "author": "quinten@pelican.dev",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world. ",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "NWX/Binaries/Linux/NWXServer-Linux-Shipping -port={{SERVER_PORT}} -multihome=0.0.0.0 -ini:Game:[/Script/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}}  -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:Password={{CONNECTION_PASSWORD}} -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:AdminPassword={{ADMIN_PASSWORD}} -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:StartingDifficulty={{DIFFICULTY}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogNWXGameMode: GameModeAwaiter became ready.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\n\nif [ ! -e \"/mnt/server/NWX/Config/ServerSettings.ini\" ]; then\n    cp /mnt/server/NWX/Config/ExampleServerSettings.ini /mnt/server/NWX/Config/ServerSettings.ini\nfi \n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Admin Password",
+            "description": "If an admin password is set, players with the correct password can authenticate in-game in\norder to kick and ban other players.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Connection Password",
+            "description": "",
+            "env_variable": "CONNECTION_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Starting map difficulty, choose from [easy, medium, hard, extreme].",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:easy,medium,hard,extreme",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join.\n\nPlease note that increasing the maximum number of players past 6 is unsupported and may\nresult in unintended behaviour.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,8",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3796810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:3796810",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta ID",
+            "description": "beta branch of a steam app. Leave blank to install normal branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nightingale-5f3c9d6f792c",
+        "name": "Nightingale",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nightingale-5f3c9d6f792c.json",
+        "sha256": "d9b2c9c0239eea721ce035cd1978b3836ac9fe5384590db65784f38ac11da2e4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "Nightingale/egg-nightingale.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5f3c9d6f792c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-09T15:23:31+01:00",
+        "name": "Nightingale",
+        "author": "brainshead@gmail.com",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world.",
+        "features": null,
+        "docker_images": {
+          "Ubuntu 24": "ghcr.io/ptero-eggs/steamcmd:ubuntu_24.04"
+        },
+        "file_denylist": [],
+        "startup": "./NWX/Binaries/Linux/NWXServer-Linux-Shipping NWX -ini:Game:[/Script/Engine.GameSession]:MaxPlayers={{MAX_PLAYER}} $( [ \"$CHEATS\" == \"1\" ] && printf %s '-EnableCheats' ) -port={{SERVER_PORT}} -multihome=0.0.0.0",
+        "config": {
+          "files": "{\"NWX/Config/ServerSettings.ini\": {\"parser\": \"file\", \"find\": {\"StartingDifficulty\": \"StartingDifficulty={{server.build.env.Difficulty}}\", \"Password\": \"Password={{server.build.env.PASSWORD}}\", \"AdminPassword\": \"AdminPassword={{server.build.env.ADMIN_PASSWORD}}\"}}}",
+          "startup": "{\"done\": \"Game mode became ready\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n#Custom Commands\r\n\r\n# Copy default server settings if none exist\r\nif [ ! -f /mnt/server/NWX/Config/ServerSettings.ini ]; then\r\n    cp /mnt/server/NWX/Config/ExampleServerSettings.ini /mnt/server/NWX/Config/ServerSettings.ini\r\n    echo \"ServerSettings.ini created from ExampleServerSettings.ini\"\r\nelse\r\n    echo \"ServerSettings.ini already exists, keeping current settings.\"\r\nfi\r\n\r\n# Make sure file is executable\r\nchmod +x /mnt/server/NWX/Binaries/Linux/NWXServer-Linux-Shipping\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam User",
+            "description": "This is a required setting and cannot be set to anonymous.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3796810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam account auth code. Required if you have 2fa enabled",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:5",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update Server",
+            "description": "This is to auto-update the game server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Starting map difficulty, choose from [easy, medium, hard, extreme]. \r\nUsed for the very first map, if one is not supplied from an imported character.",
+            "env_variable": "Difficulty",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:easy,medium,hard,extreme",
+            "field_type": "text"
+          },
+          {
+            "name": "Password",
+            "description": "By default the server will start with no password required for players to connect. It is\r\nrecommended to set one to ensure only players you intend can connect.",
+            "env_variable": "PASSWORD",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "If an admin password is set, players with the correct password can authenticate in-game in order to kick and ban other players.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "letmein",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "By default Nightingale supports a maximum of six players in a realm. This maximum can bechanged through a command-line argument.\r\nPlease note that increasing the maximum number of players past six is unsupported and may result in unintended behaviour.",
+            "env_variable": "MAX_PLAYER",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Cheats Mode",
+            "description": "To allow use of the cheat/debug menu and commands, add the enable cheats command-line argument. Players will need to authenticate with the admin password to use the cheats in-game.",
+            "env_variable": "CHEATS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nightingale-default-e1c59f9af45e",
+        "name": "Nightingale — Default",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world. ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nightingale-default-e1c59f9af45e.json",
+        "sha256": "8744b2da794059c14cca1c1e4c3b6f1549a1a9daf871802fc897047e01956b71",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "nightingale/egg-nightingale.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e1c59f9af45e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Nightingale — Default",
+        "author": "quinten@pelican.dev",
+        "uuid": "01e7a042-e6c0-4701-957b-3834c84fa281",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world. ",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogNWXGameMode: GameModeAwaiter became ready.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\n\nif [ ! -e \"/mnt/server/NWX/Config/ServerSettings.ini\" ]; then\n    cp /mnt/server/NWX/Config/ExampleServerSettings.ini /mnt/server/NWX/Config/ServerSettings.ini\nfi \n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 5,
+            "name": "Admin Password",
+            "description": "If an admin password is set, players with the correct password can authenticate in-game in\norder to kick and ban other players.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable"
+          },
+          {
+            "sort": 1,
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean"
+          },
+          {
+            "sort": 4,
+            "name": "Connection Password",
+            "description": "",
+            "env_variable": "CONNECTION_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 7,
+            "name": "Difficulty",
+            "description": "Starting map difficulty, choose from [easy, medium, hard, extreme].",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:easy,medium,hard,extreme"
+          },
+          {
+            "sort": 3,
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join.\n\nPlease note that increasing the maximum number of players past 6 is unsupported and may\nresult in unintended behaviour.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,8"
+          },
+          {
+            "sort": 2,
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3796810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:3796810"
+          },
+          {
+            "sort": 6,
+            "name": "Beta ID",
+            "description": "beta branch of a steam app. Leave blank to install normal branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable"
+          }
+        ],
+        "startup": "NWX/Binaries/Linux/NWXServer-Linux-Shipping -port={{SERVER_PORT}} -multihome=0.0.0.0 -ini:Game:[/Script/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}}  -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:Password={{CONNECTION_PASSWORD}} -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:AdminPassword={{ADMIN_PASSWORD}} -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:StartingDifficulty={{DIFFICULTY}}"
+      }
+    },
+    {
+      "entry": {
+        "id": "nightingale-with-cheats-babf3c378930",
+        "name": "Nightingale — With cheats",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world. ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nightingale-with-cheats-babf3c378930.json",
+        "sha256": "67cbbacd08f76aef63822dbbaa870acefb8e7d210f98d0976768b548c6533c8a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "nightingale/egg-nightingale.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/babf3c378930.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Nightingale — With cheats",
+        "author": "quinten@pelican.dev",
+        "uuid": "01e7a042-e6c0-4701-957b-3834c84fa281",
+        "description": "Nightingale is an open world survival crafting game, where you’ll adventure across the mysterious and dangerous Fae Realms. As a daring Realmwalker, you’ll defeat monstrous enemies, survive hostile environments, and build elaborate estates in a visually stunning Gaslamp Fantasy world. ",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Steamcmd": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogNWXGameMode: GameModeAwaiter became ready.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\n\nif [ ! -e \"/mnt/server/NWX/Config/ServerSettings.ini\" ]; then\n    cp /mnt/server/NWX/Config/ExampleServerSettings.ini /mnt/server/NWX/Config/ServerSettings.ini\nfi \n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 5,
+            "name": "Admin Password",
+            "description": "If an admin password is set, players with the correct password can authenticate in-game in\norder to kick and ban other players.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable"
+          },
+          {
+            "sort": 1,
+            "name": "Auto Update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean"
+          },
+          {
+            "sort": 4,
+            "name": "Connection Password",
+            "description": "",
+            "env_variable": "CONNECTION_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 7,
+            "name": "Difficulty",
+            "description": "Starting map difficulty, choose from [easy, medium, hard, extreme].",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:easy,medium,hard,extreme"
+          },
+          {
+            "sort": 3,
+            "name": "Max Players",
+            "description": "The maximum amount of players that can join.\n\nPlease note that increasing the maximum number of players past 6 is unsupported and may\nresult in unintended behaviour.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric|between:1,8"
+          },
+          {
+            "sort": 2,
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3796810",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:3796810"
+          },
+          {
+            "sort": 6,
+            "name": "Beta ID",
+            "description": "beta branch of a steam app. Leave blank to install normal branch",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable"
+          }
+        ],
+        "startup": "NWX/Binaries/Linux/NWXServer-Linux-Shipping -port={{SERVER_PORT}} -multihome=0.0.0.0 -ini:Game:[/Script/Engine.GameSession]:MaxPlayers={{MAX_PLAYERS}}  -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:Password={{CONNECTION_PASSWORD}} -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:AdminPassword={{ADMIN_PASSWORD}} -ini:ServerSettings:[/Script/NWX.NWXServerSettings]:StartingDifficulty={{DIFFICULTY}} -EnableCheats"
+      }
+    },
+    {
+      "entry": {
+        "id": "nmrih-0cf1b7b1648d",
+        "name": "nmrih",
+        "description": "No More Room In Hell",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nmrih-0cf1b7b1648d.json",
+        "sha256": "23a141a6c3def3529a8f357918609a5507c2ac7ae1545e4dd2841374a02ea2e1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "nmrih/egg-nmrih.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0cf1b7b1648d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:07:23+02:00",
+        "name": "nmrih",
+        "author": "avalongamecs@gmail.com",
+        "description": "No More Room In Hell",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "nmrih id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "317670",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:317670",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "game name",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "nmrih",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(nmrih)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "default map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "nms_northway",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "nmrih-47ff7a33974c",
+        "name": "nmrih",
+        "description": "No More Room In Hell",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/nmrih-47ff7a33974c.json",
+        "sha256": "7157bfaa5b169d8c89be5abfd52c61b680dfdeab6f74e664a5da0220468d6268",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/nmrih/egg-nmrih.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/47ff7a33974c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T12:07:23+02:00",
+        "name": "nmrih",
+        "author": "avalongamecs@gmail.com",
+        "description": "No More Room In Hell",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game {{SRCDS_GAME}} -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "nmrih id",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "317670",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:317670",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "game name",
+            "env_variable": "SRCDS_GAME",
+            "default_value": "nmrih",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^(nmrih)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "default map",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "nms_northway",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto update the server on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

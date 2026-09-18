@@ -1,0 +1,1376 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "clusterio-447639c88792",
+        "name": "Clusterio",
+        "description": "Clusterio is a clustered Factorio server manager that provides the tooling for implementing cross server interactions in Factorio. It was previously best known for implementing cross server transfer and cloud storage of items via teleporter chests. But this functionality has been pulled out of Clusterio into its own plugin for Clusterio named Subspace Storage.\r\n\r\nBy itself Clusterio doesn't change the gameplay in any way, you could even use Clusterio to manage completely vanilla Factorio servers. Plugins do the work of modding in the visible changes into the game, see the Plugins section for ready-made plugins you can install into a Clusterio cluster.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/clusterio-447639c88792.json",
+        "sha256": "7902cef5c4f24688b42216037fbc12dae2cc790e05ca024f59eb9db50cf3c788",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "factorio/clusterio/egg-clusterio.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/447639c88792.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T14:24:51+02:00",
+        "name": "Clusterio",
+        "author": "psychoalex@thevcbc.com",
+        "description": "Clusterio is a clustered Factorio server manager that provides the tooling for implementing cross server interactions in Factorio. It was previously best known for implementing cross server transfer and cloud storage of items via teleporter chests. But this functionality has been pulled out of Clusterio into its own plugin for Clusterio named Subspace Storage.\r\n\r\nBy itself Clusterio doesn't change the gameplay in any way, you could even use Clusterio to manage completely vanilla Factorio servers. Plugins do the work of modding in the visible changes into the game, see the Plugins section for ready-made plugins you can install into a Clusterio cluster.",
+        "features": null,
+        "docker_images": {
+          "NodeJS 21": "ghcr.io/ptero-eggs/yolks:nodejs_21",
+          "NodeJS 20": "ghcr.io/ptero-eggs/yolks:nodejs_20",
+          "NodeJS 19": "ghcr.io/ptero-eggs/yolks:nodejs_19",
+          "NodeJS 18": "ghcr.io/ptero-eggs/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "exec ./node_modules/.bin/clusterio{{SERVER_MODE}} run",
+        "config": {
+          "files": "{\"config-controller.json\": {\"parser\": \"json\", \"find\": {\"controller~1http_port\": \"{{server.build.default.port}}\", \"controller~1name\": \"{{server.build.env.CLUSTER_NAME}}\"}}, \"config-host.json\": {\"parser\": \"json\", \"find\": {\"host~1controller_url\": \"{{server.build.env.CONTROLLER_URL}}\", \"host~1controller_token\": \"{{server.build.env.CONTROLLER_TOKEN}}\", \"host~1public_address\": \"{{server.build.default.ip}}\"}}}",
+          "startup": "{\"done\": \"Started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Clusterio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl jq file unzip make gcc g++ python3 python3-dev libtool\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\ncase \"${SERVER_MODE}\" in\r\n\r\n  \"controller\")\r\n    echo -e \"Initialising Clustorio In Controller mode\"\r\n        npm init \"@clusterio\" -y -- --allow-install-as-root --mode \"${SERVER_MODE}\" --download-headless --log-level \"${LOG_LEVEL}\" --admin \"${ADMIN_STRING}\" --public-address \"${SERVER_IP}\":\"${SERVER_PORT}\" --plugins ${PLUGINS}\r\n\t;;\r\n\r\n  \"host\")\r\n    echo -e \"Initialising Clustorio In Host mode\"\r\n\tnpm init \"@clusterio\" -y -- --allow-install-as-root --mode \"${SERVER_MODE}\" --download-headless --log-level \"${LOG_LEVEL}\" --host-name \"${HOST_NAME}\" --public-address \"${SERVER_IP}\" --controller-url \"${CONTROLLER_URL}\" --controller-token \"${CONTROLLER_TOKEN}\" --plugins ${PLUGINS}\r\n    ;;\r\n    \r\nesac\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "node:21-bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Mode",
+            "description": "Set's the cluster operation mode of the server, can be either \"controller\" or \"host\". This is better thought of as Management or Gameserver nodes.\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "SERVER_MODE",
+            "default_value": "controller",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:controller,host",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Level",
+            "description": "Options: \"none\", \"fatal\", \"error\", \"warn\", \"audit\", \"info\", \"verbose\"\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "LOG_LEVEL",
+            "default_value": "info",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:none,fatal,error,warn,audit,info,verbose",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin",
+            "description": "Superadmin account name\r\n\r\nRequired on:\r\nController",
+            "env_variable": "ADMIN_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Host Name",
+            "description": "Host name in the Controller Web UI\r\n\r\nRequired on:\r\nHost",
+            "env_variable": "HOST_NAME",
+            "default_value": "Your Sub-Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Controller URL",
+            "description": "Connection URL to the Controller server, can be an internal address if you have allocated an additional internal port to the Controller Server.\r\nExample: http://yourip:yourport\r\nRequired on:\r\nHost",
+            "env_variable": "CONTROLLER_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Controller Token",
+            "description": "Authentication token used to connect to the Controller server, generated through the Controller Web UI.\r\n\r\nRequired on:\r\nHost",
+            "env_variable": "CONTROLLER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Plugins",
+            "description": "Clusterio Plugins to install, space separate list.\r\n\r\nExample:\r\n@clusterio/plugin-subspace_storage @clusterio/plugin-global_chat @clusterio/plugin-research_sync @clusterio/plugin-inventory_sync\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "PLUGINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Name",
+            "description": "The Name of your Controller server cluster.\r\n\r\nRequired:\r\nController",
+            "env_variable": "CLUSTER_NAME",
+            "default_value": "Your Cluster",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "clusterio-7127ac19689b",
+        "name": "Clusterio",
+        "description": "Clusterio is a clustered Factorio server manager that provides the tooling for implementing cross server interactions in Factorio. It was previously best known for implementing cross server transfer and cloud storage of items via teleporter chests. But this functionality has been pulled out of Clusterio into its own plugin for Clusterio named Subspace Storage.\r\n\r\nBy itself Clusterio doesn't change the gameplay in any way, you could even use Clusterio to manage completely vanilla Factorio servers. Plugins do the work of modding in the visible changes into the game, see the Plugins section for ready-made plugins you can install into a Clusterio cluster.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/clusterio-7127ac19689b.json",
+        "sha256": "445ccbc5b4b9d76252242390b959b76f2bbaf5129d3f2439c10032d010e328ca",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "factorio/clusterio/egg-pterodactyl-clusterio.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/factorio/clusterio/egg-clusterio.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/7127ac19689b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:31+00:00",
+        "name": "Clusterio",
+        "author": "psychoalex@thevcbc.com",
+        "description": "Clusterio is a clustered Factorio server manager that provides the tooling for implementing cross server interactions in Factorio. It was previously best known for implementing cross server transfer and cloud storage of items via teleporter chests. But this functionality has been pulled out of Clusterio into its own plugin for Clusterio named Subspace Storage.\r\n\r\nBy itself Clusterio doesn't change the gameplay in any way, you could even use Clusterio to manage completely vanilla Factorio servers. Plugins do the work of modding in the visible changes into the game, see the Plugins section for ready-made plugins you can install into a Clusterio cluster.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18",
+          "ghcr.io/parkervcp/yolks:nodejs_19": "ghcr.io/parkervcp/yolks:nodejs_19",
+          "ghcr.io/parkervcp/yolks:nodejs_20": "ghcr.io/parkervcp/yolks:nodejs_20",
+          "ghcr.io/parkervcp/yolks:nodejs_21": "ghcr.io/parkervcp/yolks:nodejs_21"
+        },
+        "file_denylist": [],
+        "startup": "exec ./node_modules/.bin/clusterio{{SERVER_MODE}} run",
+        "config": {
+          "files": "{\"config-controller.json\": {\"parser\": \"json\", \"find\": {\"controller~1http_port\": \"{{server.build.default.port}}\", \"controller~1name\": \"{{server.build.env.CLUSTER_NAME}}\"}}, \"config-host.json\": {\"parser\": \"json\", \"find\": {\"host~1controller_url\": \"{{server.build.env.CONTROLLER_URL}}\", \"host~1controller_token\": \"{{server.build.env.CONTROLLER_TOKEN}}\", \"host~1public_address\": \"{{server.build.default.ip}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Started\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "node:21-bookworm-slim",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Clusterio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl jq file unzip make gcc g++ python3 python3-dev libtool\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\ncase \"${SERVER_MODE}\" in\r\n\r\n  \"controller\")\r\n    echo -e \"Initialising Clustorio In Controller mode\"\r\n        npm init \"@clusterio\" -y -- --allow-install-as-root --mode \"${SERVER_MODE}\" --download-headless --log-level \"${LOG_LEVEL}\" --admin \"${ADMIN_STRING}\" --public-address \"${SERVER_IP}\":\"${SERVER_PORT}\" --plugins ${PLUGINS}\r\n\t;;\r\n\r\n  \"host\")\r\n    echo -e \"Initialising Clustorio In Host mode\"\r\n\tnpm init \"@clusterio\" -y -- --allow-install-as-root --mode \"${SERVER_MODE}\" --download-headless --log-level \"${LOG_LEVEL}\" --host-name \"${HOST_NAME}\" --public-address \"${SERVER_IP}\" --controller-url \"${CONTROLLER_URL}\" --controller-token \"${CONTROLLER_TOKEN}\" --plugins ${PLUGINS}\r\n    ;;\r\n    \r\nesac\r\n\r\necho -e \"install complete\"\r\nexit 0"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Mode",
+            "description": "Set's the cluster operation mode of the server, can be either \"controller\" or \"host\". This is better thought of as Management or Gameserver nodes.\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "SERVER_MODE",
+            "default_value": "controller",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:controller,host",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Level",
+            "description": "Options: \"none\", \"fatal\", \"error\", \"warn\", \"audit\", \"info\", \"verbose\"\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "LOG_LEVEL",
+            "default_value": "info",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:none,fatal,error,warn,audit,info,verbose",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin",
+            "description": "Superadmin account name\r\n\r\nRequired on:\r\nController",
+            "env_variable": "ADMIN_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Host Name",
+            "description": "Host name in the Controller Web UI\r\n\r\nRequired on:\r\nHost",
+            "env_variable": "HOST_NAME",
+            "default_value": "Your Sub-Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Controller URL",
+            "description": "Connection URL to the Controller server, can be an internal address if you have allocated an additional internal port to the Controller Server.\r\nExample: http://yourip:yourport\r\nRequired on:\r\nHost",
+            "env_variable": "CONTROLLER_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Controller Token",
+            "description": "Authentication token used to connect to the Controller server, generated through the Controller Web UI.\r\n\r\nRequired on:\r\nHost",
+            "env_variable": "CONTROLLER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Plugins",
+            "description": "Clusterio Plugins to install, space separate list.\r\n\r\nExample:\r\n@clusterio/plugin-subspace_storage @clusterio/plugin-global_chat @clusterio/plugin-research_sync @clusterio/plugin-inventory_sync\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "PLUGINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Name",
+            "description": "The Name of your Controller server cluster.\r\n\r\nRequired:\r\nController",
+            "env_variable": "CLUSTER_NAME",
+            "default_value": "Your Cluster",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "clusterio-85b262c78e68",
+        "name": "Clusterio",
+        "description": "Clusterio is a clustered Factorio server manager that provides the tooling for implementing cross server interactions in Factorio. It was previously best known for implementing cross server transfer and cloud storage of items via teleporter chests. But this functionality has been pulled out of Clusterio into its own plugin for Clusterio named Subspace Storage.\r\n\r\nBy itself Clusterio doesn't change the gameplay in any way, you could even use Clusterio to manage completely vanilla Factorio servers. Plugins do the work of modding in the visible changes into the game, see the Plugins section for ready-made plugins you can install into a Clusterio cluster.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/clusterio-85b262c78e68.json",
+        "sha256": "6c1e53d2852c71a1316cdbea4a44448e3e8d4125f8ea61213072979c1e21575b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "factorio/clusterio/egg-clusterio.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/85b262c78e68.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:31+00:00",
+        "name": "Clusterio",
+        "author": "psychoalex@thevcbc.com",
+        "uuid": "935a6b24-0e36-45b4-9615-58c5aa153971",
+        "description": "Clusterio is a clustered Factorio server manager that provides the tooling for implementing cross server interactions in Factorio. It was previously best known for implementing cross server transfer and cloud storage of items via teleporter chests. But this functionality has been pulled out of Clusterio into its own plugin for Clusterio named Subspace Storage.\r\n\r\nBy itself Clusterio doesn't change the gameplay in any way, you could even use Clusterio to manage completely vanilla Factorio servers. Plugins do the work of modding in the visible changes into the game, see the Plugins section for ready-made plugins you can install into a Clusterio cluster.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_21": "ghcr.io/parkervcp/yolks:nodejs_21",
+          "ghcr.io/parkervcp/yolks:nodejs_20": "ghcr.io/parkervcp/yolks:nodejs_20",
+          "ghcr.io/parkervcp/yolks:nodejs_19": "ghcr.io/parkervcp/yolks:nodejs_19",
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "exec ./node_modules/.bin/clusterio{{SERVER_MODE}} run",
+        "config": {
+          "files": "{\"config-controller.json\": {\"parser\": \"json\", \"find\": {\"controller~1http_port\": \"{{server.build.default.port}}\", \"controller~1name\": \"{{server.build.env.CLUSTER_NAME}}\"}}, \"config-host.json\": {\"parser\": \"json\", \"find\": {\"host~1controller_url\": \"{{server.build.env.CONTROLLER_URL}}\", \"host~1controller_token\": \"{{server.build.env.CONTROLLER_TOKEN}}\", \"host~1public_address\": \"{{server.build.default.ip}}\"}}}",
+          "startup": "{\"done\": \"Started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Clusterio Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl jq file unzip make gcc g++ python3 python3-dev libtool\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\ncase \"${SERVER_MODE}\" in\r\n\r\n  \"controller\")\r\n    echo -e \"Initialising Clustorio In Controller mode\"\r\n        npm init \"@clusterio\" -y -- --allow-install-as-root --mode \"${SERVER_MODE}\" --download-headless --log-level \"${LOG_LEVEL}\" --admin \"${ADMIN_STRING}\" --public-address \"${SERVER_IP}\":\"${SERVER_PORT}\" --plugins ${PLUGINS}\r\n\t;;\r\n\r\n  \"host\")\r\n    echo -e \"Initialising Clustorio In Host mode\"\r\n\tnpm init \"@clusterio\" -y -- --allow-install-as-root --mode \"${SERVER_MODE}\" --download-headless --log-level \"${LOG_LEVEL}\" --host-name \"${HOST_NAME}\" --public-address \"${SERVER_IP}\" --controller-url \"${CONTROLLER_URL}\" --controller-token \"${CONTROLLER_TOKEN}\" --plugins ${PLUGINS}\r\n    ;;\r\n    \r\nesac\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "node:21-bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Mode",
+            "description": "Set's the cluster operation mode of the server, can be either \"controller\" or \"host\". This is better thought of as Management or Gameserver nodes.\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "SERVER_MODE",
+            "default_value": "controller",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:controller,host",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Log Level",
+            "description": "Options: \"none\", \"fatal\", \"error\", \"warn\", \"audit\", \"info\", \"verbose\"\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "LOG_LEVEL",
+            "default_value": "info",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:none,fatal,error,warn,audit,info,verbose",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Admin",
+            "description": "Superadmin account name\r\n\r\nRequired on:\r\nController",
+            "env_variable": "ADMIN_STRING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Host Name",
+            "description": "Host name in the Controller Web UI\r\n\r\nRequired on:\r\nHost",
+            "env_variable": "HOST_NAME",
+            "default_value": "Your Sub-Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Controller URL",
+            "description": "Connection URL to the Controller server, can be an internal address if you have allocated an additional internal port to the Controller Server.\r\nExample: http://yourip:yourport\r\nRequired on:\r\nHost",
+            "env_variable": "CONTROLLER_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Controller Token",
+            "description": "Authentication token used to connect to the Controller server, generated through the Controller Web UI.\r\n\r\nRequired on:\r\nHost",
+            "env_variable": "CONTROLLER_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:256",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Plugins",
+            "description": "Clusterio Plugins to install, space separate list.\r\n\r\nExample:\r\n@clusterio/plugin-subspace_storage @clusterio/plugin-global_chat @clusterio/plugin-research_sync @clusterio/plugin-inventory_sync\r\n\r\nRequired on:\r\nAll",
+            "env_variable": "PLUGINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:512",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Cluster Name",
+            "description": "The Name of your Controller server cluster.\r\n\r\nRequired:\r\nController",
+            "env_variable": "CLUSTER_NAME",
+            "default_value": "Your Cluster",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "colony-survival-0207491a03ef",
+        "name": "Colony Survival",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/colony-survival-0207491a03ef.json",
+        "sha256": "3ef2f1446f0e40aca3a49ea3c1c1d542af3950ad67b0140223b1879461f7b313",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "colony_survival/egg-colony-survival.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0207491a03ef.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-18T17:27:56+01:00",
+        "name": "Colony Survival",
+        "author": "josdekurk@gmail.com",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "features": null,
+        "docker_images": {
+          "SteamCMD": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./colonyserver.x86_64 -batchmode -nographics +server.world \"{{WORLD_NAME}}\" +server.networktype SteamOnline +server.name \"{{SERVER_NAME}}\" +server.maxplayers {{MAX_PLAYERS}} +server.gameport {{SERVER_PORT}} +server.ip 0.0.0.0 +server.steamport {{SERVER_STEAMPORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Starting networking type\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_update ${SRCDS_APPID} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "APP ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "748090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:748090",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "World name",
+            "description": "",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server steamport",
+            "description": "",
+            "env_variable": "SERVER_STEAMPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "colony-survival-cd3ff1fd10ef",
+        "name": "Colony Survival",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/colony-survival-cd3ff1fd10ef.json",
+        "sha256": "85ab15a6ca49cb77d1b302123c0d8b72233127727c617e3349528afccf702415",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/colony_survival/egg-colony-survival.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/cd3ff1fd10ef.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-18T17:27:56+01:00",
+        "name": "Colony Survival",
+        "author": "josdekurk@gmail.com",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "features": null,
+        "docker_images": {
+          "SteamCMD": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./colonyserver.x86_64 -batchmode -nographics +server.world \"{{WORLD_NAME}}\" +server.networktype SteamOnline +server.name \"{{SERVER_NAME}}\" +server.maxplayers {{MAX_PLAYERS}} +server.gameport {{SERVER_PORT}} +server.ip 0.0.0.0 +server.steamport {{SERVER_STEAMPORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Starting networking type\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_update ${SRCDS_APPID} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "APP ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "748090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:748090",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "World name",
+            "description": "",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server steamport",
+            "description": "",
+            "env_variable": "SERVER_STEAMPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "colony-survival-d00371788433",
+        "name": "Colony Survival",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/colony-survival-d00371788433.json",
+        "sha256": "9d2ff16125cdf4fc0dd03192e2e4487b3f0662f22fb161ab531cb5e1cd2caab3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "colony_survival/egg-pterodactyl-colony-survival.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/d00371788433.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:44+00:00",
+        "name": "Colony Survival",
+        "author": "josdekurk@gmail.com",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "features": null,
+        "docker_images": {
+          "SteamCMD": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./colonyserver.x86_64 -batchmode -nographics +server.world \"{{WORLD_NAME}}\" +server.networktype SteamOnline +server.name \"{{SERVER_NAME}}\" +server.maxplayers {{MAX_PLAYERS}} +server.gameport {{SERVER_PORT}} +server.ip 0.0.0.0 +server.steamport {{SERVER_STEAMPORT}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Starting networking type\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_update ${SRCDS_APPID} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "APP ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "748090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:748090",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "World name",
+            "description": "",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Server steamport",
+            "description": "",
+            "env_variable": "SERVER_STEAMPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "colony-survival-d68447bde33f",
+        "name": "Colony Survival",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/colony-survival-d68447bde33f.json",
+        "sha256": "76f691a0eabd829e93706ed96cd41f045574d8a7d908471518efeda8e61ce8ea",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "colony_survival/egg-colony-survival.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/d68447bde33f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Colony Survival",
+        "author": "josdekurk@gmail.com",
+        "uuid": "0b59b4fb-febe-4e1d-ac40-bd24e287a491",
+        "description": "Colony Survival is a unique first-person strategy game developed by a two-man team. Build your own colony in a voxel world. Command guards, farmers, miners and other colonists. Defend your colony against the horde of monsters that attacks every night!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": null,
+        "docker_images": {
+          "SteamCMD": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./colonyserver.x86_64 -batchmode -nographics +server.world \"{{WORLD_NAME}}\" +server.networktype SteamOnline +server.name \"{{SERVER_NAME}}\" +server.maxplayers {{MAX_PLAYERS}} +server.gameport {{SERVER_PORT}} +server.ip 0.0.0.0 +server.steamport {{SERVER_STEAMPORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Starting networking type\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_update ${SRCDS_APPID} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "APP ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "748090",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:748090",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update the server on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World name",
+            "description": "",
+            "env_variable": "WORLD_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server steamport",
+            "description": "",
+            "env_variable": "SERVER_STEAMPORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "conan-exiles-6072a1b08004",
+        "name": "Conan Exiles",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/conan-exiles-6072a1b08004.json",
+        "sha256": "89c61d85e0132d668fb28f8ad869fd7b3c9ca2a816ffc1fb181da346c8b0525e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "conan_exiles/pterodactyl-egg-conan-exiles-legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/6072a1b08004.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-16T17:15:36+00:00",
+        "name": "Conan Exiles",
+        "author": "brycea@terrahost.cloud",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Proton": "ghcr.io/pelican-eggs/steamcmd:proton"
+        },
+        "file_denylist": [],
+        "startup": "xvfb-run --auto-servernum proton run /home/container/ConanSandbox/Binaries/Win64/ConanSandboxServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -ServerPassword=\"{{SRV_PW}}\" -console -log & SR_PID=$!; tail -c0 -F /home/container/ConanSandbox/Saved/Logs/ConanSandbox.log --pid=$SR_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started SourceServerQueries\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\n##\n#\n# Variables\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\n#\n ##\n\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App id",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:443030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Decide if you want to update your server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pelican hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon port",
+            "description": "Remote administrative access",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta ID",
+            "description": "Select the UE4 version ID",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "conan-exiles-legacy",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "conan-exiles-e1becce8ef72",
+        "name": "Conan Exiles",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/conan-exiles-e1becce8ef72.json",
+        "sha256": "7c20db1b0f760d84cd3f555dce7a27818f29b84fa718ead674c1674bc2654ed5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/conan_exiles/egg-conan-exiles.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/e1becce8ef72.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-08-17T16:55:04+02:00",
+        "name": "Conan Exiles",
+        "author": "brycea@terrahost.cloud",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "xvfb-run --auto-servernum wine /home/container/ConanSandbox/Binaries/Win64/ConanSandboxServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -ServerPassword=\"{{SRV_PW}}\" -console -log",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started SourceServerQueries\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App id",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:443030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Decide if you want to update your server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2013 vcrun2015 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon port",
+            "description": "Remote administrative access",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "conan-exiles-f27fbd778818",
+        "name": "Conan Exiles",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/conan-exiles-f27fbd778818.json",
+        "sha256": "c269cebcd579c749c9cf502664aa9bca580ca06edb79db5229d30b78f2a0e61e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "conan_exiles/egg-conan-exiles.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/f27fbd778818.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-06T20:53:16+02:00",
+        "name": "Conan Exiles",
+        "author": "brycea@terrahost.cloud",
+        "description": "Conan Exiles is an open-world survival game set in the brutal lands of Conan the Barbarian. Survive in a savage world, build your kingdom, and dominate your enemies in brutal combat and epic warfare.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/ConanSandbox/Binaries/Win64/ConanSandboxServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -RconPort={{RCON_PORT}} -ServerName=\"{{SRV_NAME}}\" -ServerPassword=\"{{SRV_PW}}\" -console -log & CONAN_PID=$!; tail -c0 -F /home/container/ConanSandbox/Saved/Logs/ConanSandbox.log --pid=$CONAN_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Started SourceServerQueries\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App id",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "443030",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:443030",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Decide if you want to update your server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|max:65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon port",
+            "description": "Remote administrative access",
+            "env_variable": "RCON_PORT",
+            "default_value": "25575",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

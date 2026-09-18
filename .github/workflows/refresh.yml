@@ -1,0 +1,25 @@
+name: Prepare upstream catalog update
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python tools/sync_catalog.py
+      - run: python -m unittest discover -s tests
+      - name: Push a review branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "catalog/update-${GITHUB_RUN_ID}"
+          git add catalog eggs originals licenses
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Refresh upstream Egg catalog'
+          git push origin HEAD
+          echo 'Review this branch before merging; install scripts are executable code.' >> "$GITHUB_STEP_SUMMARY"

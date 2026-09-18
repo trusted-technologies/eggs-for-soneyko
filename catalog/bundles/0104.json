@@ -1,0 +1,1208 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "travertine-c979b23d4582",
+        "name": "Travertine",
+        "description": "Travertine is a fork of Waterfall with 1.7 protocol support. Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/travertine-c979b23d4582.json",
+        "sha256": "f6babf3bbd9903b16ed3438a547fcaaa9b4068789e6825e7bf2be7832a3fbd7a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "proxy/java/travertine/egg-pterodactyl-travertine.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/c979b23d4582.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:19+00:00",
+        "name": "Travertine",
+        "author": "parker@parkervcp.com",
+        "description": "Travertine is a fork of Waterfall with 1.7 protocol support. Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "ghcr.io/pelican-eggs/yolks:java_16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"listeners[0].host\": \"0.0.0.0:{{server.build.default.port}}\", \"servers.*.address\": {\"127.0.0.1\": \"{{config.docker.interface}}\", \"localhost\": \"{{config.docker.interface}}\"}}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Listening on \"}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Travertine Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=travertine\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://api.papermc.io/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://api.papermc.io/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft that water was built to support.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|between:1,6",
+            "field_type": "text"
+          },
+          {
+            "name": "Travertine Jar File",
+            "description": "The name of the jar file to use when running Travertine.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "travertine.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "A link to the server jar to download the Travertine jar.",
+            "env_variable": "DL_LINK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Travertine build number",
+            "description": "Default is latest.\r\n\r\nif set to latest or an invalid version will grab the latest build number.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "travertine-cd567437c4a9",
+        "name": "Travertine",
+        "description": "Travertine is a fork of Waterfall with 1.7 protocol support. Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/travertine-cd567437c4a9.json",
+        "sha256": "1fdaaa3e7976ad8fe451346bc48d89b90e4988a48a202d8008f7a305e7a20ce3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "proxy/java/travertine/egg-travertine.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/cd567437c4a9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Travertine",
+        "author": "parker@parkervcp.com",
+        "uuid": "fce95d08-d726-438c-a1d3-28798071bd91",
+        "description": "Travertine is a fork of Waterfall with 1.7 protocol support. Waterfall is a fork of the well-known BungeeCord server teleportation suite.",
+        "tags": [
+          "minecraft",
+          "proxy"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "ghcr.io/pelican-eggs/yolks:java_16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "ghcr.io/pelican-eggs/yolks:java_11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -Dterminal.jline=false -Dterminal.ansi=true -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"config.yml\": {\"parser\": \"yaml\", \"find\": {\"listeners[0].host\": \"0.0.0.0:{{server.build.default.port}}\", \"servers.*.address\": {\"127.0.0.1\": \"{{config.docker.interface}}\", \"localhost\": \"{{config.docker.interface}}\"}}}}",
+          "startup": "{\"done\": \"Listening on \"}",
+          "logs": "{}",
+          "stop": "end"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Travertine Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=travertine\r\n\r\nif [ -n \"${DL_PATH}\" ]; then\r\n\techo -e \"Using supplied download url: ${DL_PATH}\"\r\n\tDOWNLOAD_URL=`eval echo $(echo ${DL_PATH} | sed -e 's/{{/${/g' -e 's/}}/}/g')`\r\nelse\r\n\tVER_EXISTS=`curl -s https://papermc.io/api/v2/projects/${PROJECT} | jq -r --arg VERSION $MINECRAFT_VERSION '.versions[] | contains($VERSION)' | grep true`\r\n\tLATEST_VERSION=`curl -s https://papermc.io/api/v2/projects/${PROJECT} | jq -r '.versions' | jq -r '.[-1]'`\r\n\r\n\tif [ \"${VER_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Version is valid. Using version ${MINECRAFT_VERSION}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} version\"\r\n\t\tMINECRAFT_VERSION=${LATEST_VERSION}\r\n\tfi\r\n\t\r\n\tBUILD_EXISTS=`curl -s https://papermc.io/api/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r --arg BUILD ${BUILD_NUMBER} '.builds[] | tostring | contains($BUILD)' | grep true`\r\n\tLATEST_BUILD=`curl -s https://papermc.io/api/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION} | jq -r '.builds' | jq -r '.[-1]'`\r\n\t\r\n\tif [ \"${BUILD_EXISTS}\" == \"true\" ]; then\r\n\t\techo -e \"Build is valid for version ${MINECRAFT_VERSION}. Using build ${BUILD_NUMBER}\"\r\n\telse\r\n\t\techo -e \"Using the latest ${PROJECT} build for version ${MINECRAFT_VERSION}\"\r\n\t\tBUILD_NUMBER=${LATEST_BUILD}\r\n\tfi\r\n\t\r\n\tJAR_NAME=${PROJECT}-${MINECRAFT_VERSION}-${BUILD_NUMBER}.jar\r\n\t\r\n\techo \"Version being downloaded\"\r\n\techo -e \"MC Version: ${MINECRAFT_VERSION}\"\r\n\techo -e \"Build: ${BUILD_NUMBER}\"\r\n\techo -e \"JAR Name of Build: ${JAR_NAME}\"\r\n\tDOWNLOAD_URL=https://papermc.io/api/v2/projects/${PROJECT}/versions/${MINECRAFT_VERSION}/builds/${BUILD_NUMBER}/downloads/${JAR_NAME}\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"Running curl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\"\r\n\r\nif [ -f ${SERVER_JARFILE} ]; then\r\n\tmv ${SERVER_JARFILE} ${SERVER_JARFILE}.old\r\nfi\r\n\r\ncurl -o ${SERVER_JARFILE} ${DOWNLOAD_URL}\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Minecraft Version",
+            "description": "The version of Minecraft that water was built to support.",
+            "env_variable": "MINECRAFT_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_num|between:1,6",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Travertine Jar File",
+            "description": "The name of the jar file to use when running Travertine.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "travertine.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Download Link",
+            "description": "A link to the server jar to download the Travertine jar.",
+            "env_variable": "DL_LINK",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Travertine build number",
+            "description": "Default is latest.\r\n\r\nif set to latest or an invalid version will grab the latest build number.",
+            "env_variable": "BUILD_NUMBER",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-47d744a289dc",
+        "name": "Vanilla Bedrock",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-47d744a289dc.json",
+        "sha256": "4b2e1a13e900e847aca4e0f582ce4d8fa3248d72e6d9ea89d06d92832bfb2b14",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/bedrock/bedrock/egg-vanilla-bedrock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/47d744a289dc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-06-15T07:15:38+00:00",
+        "name": "Vanilla Bedrock",
+        "author": "parker@parkervcp.com",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"allow-cheats\": \"{{server.build.env.CHEATS}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl jq\r\n\r\ncd /mnt/server || { echo \"Failed to change directory to /mnt/server\"; exit 1; }\r\n\r\n# Default version to latest if not set\r\nBEDROCK_VERSION=${BEDROCK_VERSION:-latest}\r\n\r\n# Filename to use for the downloaded file\r\nDOWNLOAD_FILE=\"bedrock-server-installer.zip\"\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\n\r\nif [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo \"Finding latest Bedrock server version\"\r\n    DOWNLOAD_URL=$(curl --silent https://net-secondary.web.minecraft-services.net/api/v1.0/download/links | jq -r '.result.links[] | select(.downloadType == \"serverBedrockLinux\") | .downloadUrl')\r\n    if [ -z \"${DOWNLOAD_URL}\" ]; then\r\n        echo \"Failed to retrieve the latest Bedrock server version. Please check your network connection or the Minecraft API.\"\r\n        exit 1\r\n    fi\r\nelse\r\n    echo \"Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\necho \"Download URL: $DOWNLOAD_URL\"\r\n\r\n\r\n\r\n\r\n\r\necho -e \"Backing up config files\"\r\nmkdir /tmp/config_backup\r\ncp -v server.properties /tmp/config_backup/ 2>/dev/null \r\ncp -v permissions.json /tmp/config_backup/ 2>/dev/null \r\ncp -v allowlist.json /tmp/config_backup/ 2>/dev/null \r\n\r\n\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho -e \"Restoring backup config files\"\r\ncp -rfv /tmp/config_backup/* /mnt/server/ 2>/dev/null || { echo \"No files to restore\"; }\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-70ac6fea4d85",
+        "name": "Vanilla Bedrock",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-70ac6fea4d85.json",
+        "sha256": "7e341130169ddf9df1e27d629cba3b9ab0fcdd7b4752e06982bdcc04493a7512",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/bedrock/egg-pterodactyl-vanilla-bedrock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/70ac6fea4d85.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-06-18T12:40:19+02:00",
+        "name": "Vanilla Bedrock",
+        "author": "parker@parkervcp.com",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"level-name\": \"{{server.build.env.WORLDNAME}}\", \"allow-cheats\": \"{{server.build.env.CHEATS}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BEDROCK_VERSION}\" ] || [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://net-secondary.web.minecraft-services.net/api/v1.0/download/links\r\n    DOWNLOAD_URL=$(zgrep -o 'https://www.minecraft.net/bedrockdedicatedserver/bin-linux/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"backing up config files\"\r\nrm *.bak versions.html.gz\r\ncp server.properties server.properties.bak\r\ncp permissions.json permissions.json.bak\r\ncp allowlist.json allowlist.json.bak\r\n\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho -e \"restoring backup config files - on first install there will be file not found errors which you can ignore.\"\r\ncp -rf server.properties.bak server.properties\r\ncp -rf permissions.json.bak permissions.json\r\ncp -rf allowlist.json.bak allowlist.json\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Choose World",
+            "description": "If you have multiple world files, Enter the World Folder Name you want to Select to Start the Server",
+            "env_variable": "WORLDNAME",
+            "default_value": "default",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-ccc77c541b31",
+        "name": "Vanilla Bedrock",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-ccc77c541b31.json",
+        "sha256": "6f897b94d9c7f985b91ccc224d882c27b9e6c3580bcad5a35d49489fdc94a8a4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/bedrock/egg-vanilla-bedrock.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/ccc77c541b31.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Vanilla Bedrock",
+        "author": "parker@parkervcp.com",
+        "uuid": "a03036b8-8c1b-4c8a-80be-018baad3dcaf",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:debian": "ghcr.io/pelican-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.allocations.default.port}}\", \"server-name\": \"{{server.environment.SERVERNAME}}\", \"gamemode\": \"{{server.environment.GAMEMODE}}\", \"difficulty\": \"{{server.environment.DIFFICULTY}}\", \"level-name\": \"{{server.environment.WORLDNAME}}\", \"allow-cheats\": \"{{server.environment.CHEATS}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BEDROCK_VERSION}\" ] || [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://net-secondary.web.minecraft-services.net/api/v1.0/download/links\r\n    DOWNLOAD_URL=$(zgrep -o 'https://www.minecraft.net/bedrockdedicatedserver/bin-linux/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"backing up config files\"\r\nrm *.bak versions.html.gz\r\ncp server.properties server.properties.bak\r\ncp permissions.json permissions.json.bak\r\ncp allowlist.json allowlist.json.bak\r\n\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho -e \"restoring backup config files - on first install there will be file not found errors which you can ignore.\"\r\ncp -rf server.properties.bak server.properties\r\ncp -rf permissions.json.bak permissions.json\r\ncp -rf allowlist.json.bak allowlist.json\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null
+          },
+          {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": null
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "sort": null
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "sort": null
+          },
+          {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null
+          },
+          {
+            "name": "Choose World",
+            "description": "If you have multiple world files, Enter the World Folder Name you want to Select to Start the Server",
+            "env_variable": "WORLDNAME",
+            "default_value": "default",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "sort": null
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-e5928f52a82d",
+        "name": "Vanilla Bedrock",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-e5928f52a82d.json",
+        "sha256": "962c07c6b60c7f4e4558e9fd0268db1fc3ced34eb3be5fe42982ce539e111781",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/bedrock/bedrock/egg-vanilla-bedrock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/e5928f52a82d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-06-18T11:45:33+02:00",
+        "name": "Vanilla Bedrock",
+        "author": "parker@parkervcp.com",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"allow-cheats\": \"{{server.build.env.CHEATS}}\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BEDROCK_VERSION}\" ] || [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://www.minecraft.net/en-us/download/server/bedrock\r\n    DOWNLOAD_URL=$(zgrep -o 'https://minecraft.azureedge.net/bin-linux/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://minecraft.azureedge.net/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"backing up config files\"\r\nrm *.bak versions.html.gz\r\ncp server.properties server.properties.bak\r\ncp permissions.json permissions.json.bak\r\ncp allowlist.json allowlist.json.bak\r\n\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho -e \"restoring backup config files - on first install there will be file not found errors which you can ignore.\"\r\ncp -rf server.properties.bak server.properties\r\ncp -rf permissions.json.bak permissions.json\r\ncp -rf allowlist.json.bak allowlist.json\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-arm64-350e1a960ce1",
+        "name": "Vanilla Bedrock ARM64",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-arm64-350e1a960ce1.json",
+        "sha256": "33084270ecb01172b0a88f7f299fd3750820a94b25277940c1ee24209438fd72",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/bedrock/bedrock/egg-vanilla-bedrock-ARM64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/350e1a960ce1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-06-18T11:46:24+02:00",
+        "name": "Vanilla Bedrock ARM64",
+        "author": "josdekurk@gmail.com",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:box64": "ghcr.io/parkervcp/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "box64 ./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"allow-cheats\": \"{{server.build.env.CHEATS}}\", \"max-threads\": \"2\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BEDROCK_VERSION}\" ] || [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://www.minecraft.net/en-us/download/server/bedrock\r\n    DOWNLOAD_URL=$(zgrep -o 'https://minecraft.azureedge.net/bin-linux/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://minecraft.azureedge.net/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"backing up config files\"\r\nrm *.bak versions.html.gz\r\ncp server.properties server.properties.bak\r\ncp permissions.json permissions.json.bak\r\ncp allowlist.json allowlist.json.bak\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho 'emit-server-telemetry=true' >> server.properties\r\n\r\necho -e \"restoring backup config files - on first install there will be file not found errors which you can ignore.\"\r\ncp -rf server.properties.bak server.properties\r\ncp -rf permissions.json.bak permissions.json\r\ncp -rf allowlist.json.bak allowlist.json\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-arm64-98c7313e1500",
+        "name": "Vanilla Bedrock ARM64",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-arm64-98c7313e1500.json",
+        "sha256": "b7db44eb701054f03e2a86fd96dbd6ebfce3d0f3c3c52644a3bb253f5dd0ba9e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/bedrock/bedrock/egg-vanilla-bedrock-ARM64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/98c7313e1500.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-09-24T13:43:50-07:00",
+        "name": "Vanilla Bedrock ARM64",
+        "author": "josdekurk@gmail.com",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:box64": "ghcr.io/ptero-eggs/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "box64 ./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"allow-cheats\": \"{{server.build.env.CHEATS}}\", \"max-threads\": \"2\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl jq\r\n\r\ncd /mnt/server || { echo \"Failed to change directory to /mnt/server\"; exit 1; }\r\n\r\n# Default version to latest if not set\r\nBEDROCK_VERSION=${BEDROCK_VERSION:-latest}\r\n\r\n# Filename to use for the downloaded file\r\nDOWNLOAD_FILE=\"bedrock-server-installer.zip\"\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\n\r\nif [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo \"Finding latest Bedrock server version\"\r\n    DOWNLOAD_URL=$(curl --silent https://net-secondary.web.minecraft-services.net/api/v1.0/download/links | jq -r '.result.links[] | select(.downloadType == \"serverBedrockLinux\") | .downloadUrl')\r\n    if [ -z \"${DOWNLOAD_URL}\" ]; then\r\n        echo \"Failed to retrieve the latest Bedrock server version. Please check your network connection or the Minecraft API.\"\r\n        exit 1\r\n    fi\r\nelse\r\n    echo \"Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\necho \"Download URL: $DOWNLOAD_URL\"\r\n\r\n\r\n\r\n\r\n\r\necho -e \"Backing up config files\"\r\nmkdir /tmp/config_backup\r\ncp -v server.properties /tmp/config_backup/ 2>/dev/null \r\ncp -v permissions.json /tmp/config_backup/ 2>/dev/null \r\ncp -v allowlist.json /tmp/config_backup/ 2>/dev/null \r\n\r\n\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho -e \"Restoring backup config files\"\r\ncp -rfv /tmp/config_backup/* /mnt/server/ 2>/dev/null || { echo \"No files to restore\"; }\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-arm64-b2295d51c50d",
+        "name": "Vanilla Bedrock ARM64",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-arm64-b2295d51c50d.json",
+        "sha256": "a7942a612f1d9a9971f866eea14294581aa919d366ff8edade4dd5ebb4216b46",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/bedrock/egg-vanilla-bedrock-a-r-m64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/b2295d51c50d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Vanilla Bedrock ARM64",
+        "author": "josdekurk@gmail.com",
+        "uuid": "121d13de-82d1-41c5-bd32-a6ef3663d616",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:box64": "ghcr.io/pelican-eggs/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "box64 ./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.allocations.default.port}}\", \"server-name\": \"{{server.environment.SERVERNAME}}\", \"gamemode\": \"{{server.environment.GAMEMODE}}\", \"difficulty\": \"{{server.environment.DIFFICULTY}}\", \"allow-cheats\": \"{{server.environment.CHEATS}}\", \"max-threads\": \"2\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BEDROCK_VERSION}\" ] || [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://net-secondary.web.minecraft-services.net/api/v1.0/download/links\r\n    DOWNLOAD_URL=$(zgrep -o 'https://www.minecraft.net/bedrockdedicatedserver/bin-linux/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"backing up config files\"\r\nrm *.bak versions.html.gz\r\ncp server.properties server.properties.bak\r\ncp permissions.json permissions.json.bak\r\ncp allowlist.json allowlist.json.bak\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho 'emit-server-telemetry=true' >> server.properties\r\n\r\necho -e \"restoring backup config files - on first install there will be file not found errors which you can ignore.\"\r\ncp -rf server.properties.bak server.properties\r\ncp -rf permissions.json.bak permissions.json\r\ncp -rf allowlist.json.bak allowlist.json\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 1,
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": 2,
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "sort": 3,
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "sort": 4,
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+          },
+          {
+            "sort": 5,
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+          },
+          {
+            "sort": 6,
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vanilla-bedrock-arm64-b2f874b89673",
+        "name": "Vanilla Bedrock ARM64",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/vanilla-bedrock-arm64-b2f874b89673.json",
+        "sha256": "ea98de884f8cd60211160f7f27d00a2387d9537a0d25214b8267ae8651e4b2ee",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/bedrock/egg-pterodactyl-vanilla-bedrock-a-r-m64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/b2f874b89673.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-06-18T12:40:19+02:00",
+        "name": "Vanilla Bedrock ARM64",
+        "author": "josdekurk@gmail.com",
+        "description": "Bedrock Edition (also known as the Bedrock Version, Bedrock Codebase, Bedrock Engine or just Bedrock) refers to the multi-platform family of editions of Minecraft developed by Mojang AB, Microsoft Studios, 4J Studios, and SkyBox Labs. Prior to this term, as the engine originated with Pocket Edition, this entire product family was referred to as \"Pocket Edition\", \"MCPE\", or \"Pocket/Windows 10 Edition\".",
+        "features": [
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:box64": "ghcr.io/pelican-eggs/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "box64 ./bedrock_server",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"allow-cheats\": \"{{server.build.env.CHEATS}}\", \"max-threads\": \"2\"}}}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y zip unzip wget curl\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server\r\n\r\n# Minecraft CDN Akamai blocks script user-agents\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BEDROCK_VERSION}\" ] || [ \"${BEDROCK_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://net-secondary.web.minecraft-services.net/api/v1.0/download/links\r\n    DOWNLOAD_URL=$(zgrep -o 'https://www.minecraft.net/bedrockdedicatedserver/bin-linux/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BEDROCK_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://www.minecraft.net/bedrockdedicatedserver/bin-linux/bedrock-server-$BEDROCK_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"backing up config files\"\r\nrm *.bak versions.html.gz\r\ncp server.properties server.properties.bak\r\ncp permissions.json permissions.json.bak\r\ncp allowlist.json allowlist.json.bak\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\n\r\necho 'emit-server-telemetry=true' >> server.properties\r\n\r\necho -e \"restoring backup config files - on first install there will be file not found errors which you can ignore.\"\r\ncp -rf server.properties.bak server.properties\r\ncp -rf permissions.json.bak permissions.json\r\ncp -rf allowlist.json.bak allowlist.json\r\n\r\nchmod +x bedrock_server\r\n\r\necho -e \"Install Completed\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Version",
+            "description": "The version of bedrock. (Ex. 1.7.0.13)\r\n\r\nDefault version is latest.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "Dumb reasons to need this",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": ".",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:survival,creative,adventure",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:peaceful,easy,normal,hard",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow cheats",
+            "description": "If true then cheats like commands can be used.\r\n\r\nAllowed values: \"true\" or \"false\"",
+            "env_variable": "CHEATS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

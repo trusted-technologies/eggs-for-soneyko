@@ -1,0 +1,1607 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "openrct2-c066a2b6710d",
+        "name": "OpenRCT2",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openrct2-c066a2b6710d.json",
+        "sha256": "0cb2f5f9bf5b7efc796f909064d99582460c81bcea59c358da123ef6924d3f48",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openrct2/egg-open-r-c-t2.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/c066a2b6710d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-13T17:10:38-08:00",
+        "name": "OpenRCT2",
+        "author": "red_thirten@yahoo.com",
+        "uuid": "a64e7eb1-c81f-48a4-a65d-5b2261e724a3",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "tags": [],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"ServerData/config.ini\": {\"parser\": \"ini\", \"find\": {\"general.autosave\": \"{{server.environment.AUTOSAVE_INTERVAL}}\", \"general.autosave_amount\": \"{{server.environment.AUTOSAVE_AMOUNT}}\", \"network.player_name\": \"\\\"{{server.environment.SERVER_PLAYER_NAME}}\\\"\", \"network.default_port\": \"{{server.allocations.default.port}}\", \"network.default_password\": \"\\\"{{server.environment.SERVER_PASSWORD}}\\\"\", \"network.advertise\": \"{{server.environment.SERVER_ADVERTISE}}\", \"network.maxplayers\": \"{{server.environment.MAX_PLAYERS}}\", \"network.server_name\": \"\\\"{{server.environment.SERVER_NAME}}\\\"\", \"network.server_description\": \"\\\"{{server.environment.SERVER_DESCRIPTION}}\\\"\", \"network.server_greeting\": \"\\\"{{server.environment.SERVER_GREETING}}\\\"\", \"network.provider_name\": \"\\\"{{server.environment.PROVIDER_NAME}}\\\"\", \"network.provider_email\": \"\\\"{{server.environment.PROVIDER_EMAIL}}\\\"\", \"network.provider_website\": \"\\\"{{server.environment.PROVIDER_WEBSITE}}\\\"\", \"network.log_chat\": \"{{server.environment.LOG_CHAT}}\", \"network.log_server_actions\": \"{{server.environment.LOG_SERVER_ACTIONS}}\", \"network.pause_server_if_no_clients\": \"{{server.environment.PAUSE_NO_CLIENTS}}\"}}}",
+          "startup": "{\"done\": \"Listening for clients on\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pelican OpenRCT2 Egg - egg-open-r-c-t2.json\r\n## Authors: David Wolfe (Red-Thirten), parkervcp\r\n## Date: 2025/12/13\r\n## License: MIT License\r\n\r\nexport HOME=/mnt/server\r\n\r\nGITHUB_PACKAGE=\"OpenRCT2/OpenRCT2\"\r\nMATCH=\"Linux-bookworm-x86_64.tar.gz\"\r\nDEFAULT_SAVE=\"https://raw.githubusercontent.com/pelican-eggs/games-standalone/master/openrct2/save.park\"\r\n\r\n## OpenRCT2 Install\r\n[ ! -d $HOME ] && mkdir $HOME\r\ncd $HOME\r\n# Remove existing installation if present\r\n[ -d OpenRCT2 ] && rm -rf OpenRCT2\r\n# Setup temp directory for downloading/building and move to it\r\n[ -d temp ] && rm -rf temp\r\nmkdir temp && cd temp\r\n\r\n# Determine if installing from source or from release\r\nif [ \"${VERSION}\" == \"develop\" ]; then\r\n    # Get required packages\r\n    apt -y update\r\n    apt -y install --no-install-recommends \\\r\n        git \\\r\n        make \\\r\n        cmake \\\r\n        gcc \\\r\n        build-essential \\\r\n        libicu-dev \\\r\n        pkg-config \\\r\n        libcurl4-openssl-dev \\\r\n        libcrypto++-dev \\\r\n        libpng-dev \\\r\n        libssl-dev \\\r\n        libzip-dev \\\r\n        duktape-dev \\\r\n        nlohmann-json3-dev \\\r\n        libzstd-dev \\\r\n        libsdl2-dev \\\r\n        libspeexdsp-dev \\\r\n        libflac-dev \\\r\n        libvorbis-dev\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from source...\\n\"\r\n    \r\n    # Clone the branch and check if successful\r\n    git clone --branch \"${VERSION}\" https://github.com/${GITHUB_PACKAGE}\r\n    if [ ! -d OpenRCT2 ]; then\r\n        echo -e \"\\nFailed to clone \\\"${VERSION}\\\" branch from https://github.com/${GITHUB_PACKAGE}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    cd OpenRCT2\r\n    mkdir build && cd build\r\n    # Prepare CMake files for a lightweight and CLI-only build of OpenRCT2, using the appropriate flags\r\n    # (The `-DDISABLE_GUI=ON` flag is currently broken & has been temp. removed. This requires 4 addl. UI packages to be installed.)\r\n    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DPORTABLE=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_CXX_FLAGS=\"-g -gz\" -DDISABLE_TTF=ON -DDISABLE_GOOGLE_BENCHMARK=ON -DDISABLE_DISCORD_RPC=ON\r\n    echo -e \"\\nBuilding OpenRCT2 package from source...\\n\\tThis process can take quite some time. Grab a coffee :)\\n\"\r\n    # Build OpenRCT2\r\n    DESTDIR=. make install\r\n    # Check if build was successful\r\n    if [ ! -f usr/local/bin/openrct2-cli ]; then\r\n        echo -e \"\\nFailed to successfully build OpenRCT2!\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Make executable-ready package by moving compiled files to the correct locations\r\n    mkdir -p $HOME/OpenRCT2/{data,lib}\r\n    cd usr/local\r\n    mv bin/openrct2-cli $HOME/OpenRCT2/\r\n    mv bin/*.so $HOME/OpenRCT2/lib\r\n    mv share/openrct2/* $HOME/OpenRCT2/data/\r\n    # mv share/openrct2-cli/* $HOME/OpenRCT2/data/\r\n    mv share/doc $HOME/OpenRCT2/\r\n    echo -e \"\\nBuild of OpenRCT2 package complete!\"\r\nelse\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from release tag \\\"${VERSION}\\\"...\\n\"\r\n    \r\n    # This is a simple script to use the GitHub API for release versions.\r\n    # This requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (MATCH is to match the filename in some way).\r\n    # Get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\n    # Download the release and check if successful\r\n    curl -L ${DOWNLOAD_URL} -o OpenRCT2.tar.gz\r\n    if [ ! -f OpenRCT2.tar.gz ]; then\r\n        echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Extract archive\r\n    tar -xvf OpenRCT2.tar.gz -C $HOME\r\n\r\n    echo -e \"\\nDownload/Update of OpenRCT2 release successful!\"\r\nfi\r\n\r\ncd $HOME\r\nrm -rf temp # Clean up temp building directory\r\n\r\n## OpenRCT2 Setup\r\n# Setup ServerData/save directory\r\n[ ! -d ServerData/save ] && mkdir -p ServerData/save\r\ncd ServerData/save\r\n# Download default save.park if missing\r\nif [ ! -f save.park ]; then\r\n    echo -e \"Downloading default save.park file from ${DEFAULT_SAVE}\"\r\n    curl -sSLO ${DEFAULT_SAVE}\r\nfi\r\n\r\necho -e \"\\nOpenRCT2 Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Save File",
+            "description": "Save file (.sv4 / .sv6 / .park) to load. Can be a file path or can be a webhosted file URL. An existing save file must be specified; the server cannot generate a new scenario/save from scratch.",
+            "env_variable": "SAVE_URI",
+            "default_value": "ServerData/save/save.park",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:4",
+            "sort": 1
+          },
+          {
+            "name": "Load Latest Autosave",
+            "description": "Will load the latest autosave (assuming one is present) *instead* of the Save File when the server is started. Useful for loading the latest progress of a park after a reboot. Set to \"false\" to \"lock\" progress of the park, and always load the original Save File on start up.",
+            "env_variable": "LOAD_AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 2
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "0 = Every 1 min, 1 = Every 5 min, 2 = Every 15 min, 3 = Every 30 min, 4 = Every hour, 5 = Never",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2,3,4,5",
+            "sort": 3
+          },
+          {
+            "name": "Autosaves To Keep",
+            "description": "Number of autosaves to keep before rolling over and deleting the oldest one. Set to 0 to disable autosaving.",
+            "env_variable": "AUTOSAVE_AMOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "sort": 4
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "sort": 5
+          },
+          {
+            "name": "Server Password",
+            "description": "Password requested by the server for clients to connect. Admins do not have to enter password to join. Leave empty for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 6
+          },
+          {
+            "name": "Advertise Server",
+            "description": "If set to \"false\", the server will not be advertised in the master server list, and clients must manually connect.",
+            "env_variable": "SERVER_ADVERTISE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 7
+          },
+          {
+            "name": "Pause Server If No Clients",
+            "description": "Set to \"true\" to have the server pause simulation if no clients are on the server.",
+            "env_variable": "PAUSE_NO_CLIENTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 8
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server that appears in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 9
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the server that appears when hovering over the server in the server list.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 10
+          },
+          {
+            "name": "Server Player Name",
+            "description": "The server appears as a player in the player list. This is the name it will have.",
+            "env_variable": "SERVER_PLAYER_NAME",
+            "default_value": "Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 11
+          },
+          {
+            "name": "Server Greeting",
+            "description": "The \"Message of the Day\" that gets sent to all clients who join.",
+            "env_variable": "SERVER_GREETING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 12
+          },
+          {
+            "name": "Provider Name",
+            "description": "Server provider name that appears in server information window.",
+            "env_variable": "PROVIDER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 13
+          },
+          {
+            "name": "Server Provider E-Mail",
+            "description": "Server provider e-mail that appears in server information window.",
+            "env_variable": "PROVIDER_EMAIL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 14
+          },
+          {
+            "name": "Server Provider Website",
+            "description": "Server provider website that appears in server information window.",
+            "env_variable": "PROVIDER_WEBSITE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 15
+          },
+          {
+            "name": "Log Chat",
+            "description": "Set to \"true\" if you would like in-game chat logged to file in `~/ServerData/chatlogs`.",
+            "env_variable": "LOG_CHAT",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 16
+          },
+          {
+            "name": "Log Server Actions",
+            "description": "Set to \"true\" if you would like in-game actions logged to file in `~/ServerData/serverlogs`.",
+            "env_variable": "LOG_SERVER_ACTIONS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 17
+          },
+          {
+            "name": "OpenRCT2 Version",
+            "description": "The release tag (version) of OpenRCT2 to download and install from their official Github (ie. \"v0.4.15\"). Use \"latest\" to download the latest release, or \"develop\" to build from the latest source (takes longer to install but is the most up to date).",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 18
+          },
+          {
+            "name": "[System] Library Path",
+            "description": "What path to load libraries from for release binaries. Rarely needs to be changed.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./OpenRCT2/lib",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": 19
+          }
+        ],
+        "startup": "./OpenRCT2/openrct2-cli --version && ./OpenRCT2/openrct2-cli host $(if {{LOAD_AUTOSAVE}} && [ -d ServerData/save/autosave/ ]; then find ServerData/save/autosave/ | sort -r | head -1; else echo \"{{SAVE_URI}}\"; fi) --port {{SERVER_PORT}} --user-data-path /home/container/ServerData/"
+      }
+    },
+    {
+      "entry": {
+        "id": "openrct2-e2a56439109c",
+        "name": "OpenRCT2",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openrct2-e2a56439109c.json",
+        "sha256": "b37cbeb74594ee8f9abcfb405d57338cf5db6d4fc91b70b775a0bdd39b1febe7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/tycoon_games/openrct2/egg-openrct2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/e2a56439109c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "Pterodactyl OpenRCT2 Egg ~ Red-Thirten and parkervcp ~ 2022-06-28",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "name": "OpenRCT2",
+        "author": "rehlmgaming@gmail.com",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./OpenRCT2/openrct2-cli --version && ./OpenRCT2/openrct2-cli host $(if {{LOAD_AUTOSAVE}} && [ -d ServerData/save/autosave/ ]; then find ServerData/save/autosave/ | sort -r | head -1; else echo \"{{SAVE_URI}}\"; fi) --port {{SERVER_PORT}} --user-data-path /home/container/ServerData/",
+        "config": {
+          "files": "{\"ServerData/config.ini\": {\"parser\": \"ini\", \"find\": {\"general.autosave\": \"{{server.build.env.AUTOSAVE_INTERVAL}}\", \"general.autosave_amount\": \"{{server.build.env.AUTOSAVE_AMOUNT}}\", \"network.player_name\": \"\\\"{{server.build.env.SERVER_PLAYER_NAME}}\\\"\", \"network.default_port\": \"{{server.build.default.port}}\", \"network.default_password\": \"\\\"{{server.build.env.SERVER_PASSWORD}}\\\"\", \"network.advertise\": \"{{server.build.env.SERVER_ADVERTISE}}\", \"network.maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"network.server_name\": \"\\\"{{server.build.env.SERVER_NAME}}\\\"\", \"network.server_description\": \"\\\"{{server.build.env.SERVER_DESCRIPTION}}\\\"\", \"network.server_greeting\": \"\\\"{{server.build.env.SERVER_GREETING}}\\\"\", \"network.provider_name\": \"\\\"{{server.build.env.PROVIDER_NAME}}\\\"\", \"network.provider_email\": \"\\\"{{server.build.env.PROVIDER_EMAIL}}\\\"\", \"network.provider_website\": \"\\\"{{server.build.env.PROVIDER_WEBSITE}}\\\"\", \"network.log_chat\": \"{{server.build.env.LOG_CHAT}}\", \"network.log_server_actions\": \"{{server.build.env.LOG_SERVER_ACTIONS}}\", \"network.pause_server_if_no_clients\": \"{{server.build.env.PAUSE_NO_CLIENTS}}\"}}}",
+          "startup": "{\"done\": \"Listening for clients on\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl OpenRCT2 Egg - egg-openrct2.json\r\n## Authors: David Wolfe (Red-Thirten), parkervcp\r\n## Date: 2022/06/28\r\n## License: MIT License\r\n\r\nGITHUB_PACKAGE=\"OpenRCT2/OpenRCT2\"\r\nMATCH=\"linux-x86_64.AppImage\"\r\nDEFAULT_SAVE=\"https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/tycoon_games/openrct2/save.park\"\r\n\r\n## OpenRCT2 Install\r\napt -y update\r\n[ ! -d /mnt/server ] && mkdir /mnt/server\r\ncd /mnt/server\r\n# Remove existing installation if present\r\n[ -d OpenRCT2 ] && rm -rf OpenRCT2\r\n# Setup OpenRCT2 directory\r\nmkdir -p OpenRCT2/data\r\n# Setup temp directory for building and move to it\r\n[ -d temp ] && rm -rf temp\r\nmkdir temp && cd temp\r\n\r\n# Determine if installing from source or from release\r\nif [ \"${VERSION}\" == \"develop\" ]; then\r\n    # Get required packages\r\n    apt -y install curl git make cmake gcc build-essential libicu-dev pkg-config libcurl4-openssl-dev libcrypto++-dev libpng-dev libssl-dev libzip-dev duktape-dev nlohmann-json3-dev\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from source...\\n\"\r\n    \r\n    # Clone the branch and check if successful\r\n    git clone --branch \"${VERSION}\" https://github.com/${GITHUB_PACKAGE}\r\n    if [ ! -d OpenRCT2 ]; then\r\n        echo -e \"\\nFailed to clone \\\"${VERSION}\\\" branch from https://github.com/${GITHUB_PACKAGE}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    cd OpenRCT2\r\n    mkdir build && cd build\r\n    # Prepare CMake files for a lightweight and CLI-only build of OpenRCT2, using the appropriate flags\r\n    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DPORTABLE=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_CXX_FLAGS=\"-g -gz\" -DDISABLE_TTF=ON -DDISABLE_GOOGLE_BENCHMARK=ON -DDISABLE_DISCORD_RPC=ON -DDISABLE_GUI=ON\r\n    echo -e \"\\nBuilding OpenRCT2 package from source...\\n\\tThis process can take quite some time. Grab a coffee :)\\n\"\r\n    # Build OpenRCT2\r\n    DESTDIR=. make install\r\n    # Check if build was successful\r\n    if [ ! -d usr/local ]; then\r\n        echo -e \"\\nFailed to successfully build OpenRCT2!\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Make executable-ready package by moving compiled files to the correct locations\r\n    cd usr/local\r\n    mv bin/* /mnt/server/OpenRCT2/\r\n    mv share/openrct2/* share/openrct2-cli/* /mnt/server/OpenRCT2/data/\r\n    mv share/doc /mnt/server/OpenRCT2/\r\n    echo -e \"\\nBuild of OpenRCT2 package complete!\"\r\nelse\r\n    # Get required packages\r\n    apt install -y curl jq\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from release tag \\\"${VERSION}\\\"...\\n\"\r\n    \r\n    # This is a simple script to use the GitHub API for release versions.\r\n    # This requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (MATCH is to match the filename in some way).\r\n    # Get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\n    # Download the release and check if successful\r\n    curl -L ${DOWNLOAD_URL} -o OpenRCT2.AppImage\r\n    if [ ! -f OpenRCT2.AppImage ]; then\r\n        echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    chmod +x OpenRCT2.AppImage\r\n    # Extract AppImage and check if successful\r\n    echo -e \"Extracting AppImage files...\"\r\n    ./OpenRCT2.AppImage --appimage-extract\r\n    if [ ! -d squashfs-root/usr ]; then\r\n        echo -e \"\\nFailed to extract AppImage!\\n\\t(Is the `MATCH` variable set to download an AppImage?)\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Move needed files to correct directories\r\n    cd squashfs-root/usr\r\n    mv lib bin/openrct2-cli /mnt/server/OpenRCT2/\r\n    mv share/openrct2/* /mnt/server/OpenRCT2/data/\r\n    mkdir /mnt/server/OpenRCT2/doc && mv share/doc/openrct2 $_\r\n    echo -e \"\\nDownload/Update of OpenRCT2 release successful!\"\r\nfi\r\n\r\ncd /mnt/server\r\nrm -rf temp # Clean up temp building directory\r\n\r\n## OpenRCT2 Setup\r\n# Setup ServerData/save directory\r\n[ ! -d ServerData/save ] && mkdir -p ServerData/save\r\ncd ServerData/save\r\n# Download default save.park if missing\r\nif [ ! -f save.park ]; then\r\n    echo -e \"Downloading default save.park file from ${DEFAULT_SAVE}\"\r\n    curl -sSLO ${DEFAULT_SAVE}\r\nfi\r\n\r\necho -e \"\\nOpenRCT2 Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Save File",
+            "description": "Save file (.sv4 / .sv6 / .park) to load. Can be a file path or can be a webhosted file URL. An existing save file must be specified; the server cannot generate a new scenario/save from scratch.",
+            "env_variable": "SAVE_URI",
+            "default_value": "ServerData/save/save.park",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:4",
+            "field_type": "text"
+          },
+          {
+            "name": "Load Latest Autosave",
+            "description": "Will load the latest autosave (assuming one is present) *instead* of the Save File when the server is started. Useful for loading the latest progress of a park after a reboot. Set to \"false\" to \"lock\" progress of the park, and always load the original Save File on start up.",
+            "env_variable": "LOAD_AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "0 = Every 1 min, 1 = Every 5 min, 2 = Every 15 min, 3 = Every 30 min, 4 = Every hour, 5 = Never",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosaves To Keep",
+            "description": "Number of autosaves to keep before rolling over and deleting the oldest one. Set to 0 to disable autosaving.",
+            "env_variable": "AUTOSAVE_AMOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password requested by the server for clients to connect. Admins do not have to enter password to join. Leave empty for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertise Server",
+            "description": "If set to \"false\", the server will not be advertised in the master server list, and clients must manually connect.",
+            "env_variable": "SERVER_ADVERTISE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Pause Server If No Clients",
+            "description": "Set to \"true\" to have the server pause simulation if no clients are on the server.",
+            "env_variable": "PAUSE_NO_CLIENTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server that appears in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the server that appears when hovering over the server in the server list.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Player Name",
+            "description": "The server appears as a player in the player list. This is the name it will have.",
+            "env_variable": "SERVER_PLAYER_NAME",
+            "default_value": "Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Greeting",
+            "description": "The \"Message of the Day\" that gets sent to all clients who join.",
+            "env_variable": "SERVER_GREETING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Provider Name",
+            "description": "Server provider name that appears in server information window.",
+            "env_variable": "PROVIDER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Provider E-Mail",
+            "description": "Server provider e-mail that appears in server information window.",
+            "env_variable": "PROVIDER_EMAIL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Provider Website",
+            "description": "Server provider website that appears in server information window.",
+            "env_variable": "PROVIDER_WEBSITE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Chat",
+            "description": "Set to \"true\" if you would like in-game chat logged to file in Data/chatlogs.",
+            "env_variable": "LOG_CHAT",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Server Actions",
+            "description": "Set to \"true\" if you would like in-game actions logged to file in Data/serverlogs.",
+            "env_variable": "LOG_SERVER_ACTIONS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenRCT2 Version",
+            "description": "The release tag (version) of OpenRCT2 to download and install from their official Github (ie. \"v0.3.5.1\"). Use \"latest\" to download the latest release, or \"develop\" to build from the latest source (takes longer to install but is the most up to date).",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Library Path",
+            "description": "What path to load libraries from for release binaries. Rarely needs to be changed.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./OpenRCT2/lib",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openrct2-fcc7c5de226e",
+        "name": "OpenRCT2",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openrct2-fcc7c5de226e.json",
+        "sha256": "509e7817d32a80d93138c9b9c97167aafe63fe9cc24525646fabdabf4366b0e2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "openrct2/egg-openrct2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/fcc7c5de226e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-29T14:32:30+01:00",
+        "name": "OpenRCT2",
+        "author": "red_thirten@yahoo.com",
+        "description": "OpenRCT2 is an open-source re-implementation of RollerCoaster Tycoon 2 (RCT2), expanding the game with new features, fixing bugs and raising game limits.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./OpenRCT2/openrct2-cli --version && ./OpenRCT2/openrct2-cli host $(if {{LOAD_AUTOSAVE}} && [ -d ServerData/save/autosave/ ]; then find ServerData/save/autosave/ | sort -r | head -1; else echo \"{{SAVE_URI}}\"; fi) --port {{SERVER_PORT}} --user-data-path /home/container/ServerData/",
+        "config": {
+          "files": "{\"ServerData/config.ini\": {\"parser\": \"ini\", \"find\": {\"general.autosave\": \"{{server.build.env.AUTOSAVE_INTERVAL}}\", \"general.autosave_amount\": \"{{server.build.env.AUTOSAVE_AMOUNT}}\", \"network.player_name\": \"\\\"{{server.build.env.SERVER_PLAYER_NAME}}\\\"\", \"network.default_port\": \"{{server.build.default.port}}\", \"network.default_password\": \"\\\"{{server.build.env.SERVER_PASSWORD}}\\\"\", \"network.advertise\": \"{{server.build.env.SERVER_ADVERTISE}}\", \"network.maxplayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"network.server_name\": \"\\\"{{server.build.env.SERVER_NAME}}\\\"\", \"network.server_description\": \"\\\"{{server.build.env.SERVER_DESCRIPTION}}\\\"\", \"network.server_greeting\": \"\\\"{{server.build.env.SERVER_GREETING}}\\\"\", \"network.provider_name\": \"\\\"{{server.build.env.PROVIDER_NAME}}\\\"\", \"network.provider_email\": \"\\\"{{server.build.env.PROVIDER_EMAIL}}\\\"\", \"network.provider_website\": \"\\\"{{server.build.env.PROVIDER_WEBSITE}}\\\"\", \"network.log_chat\": \"{{server.build.env.LOG_CHAT}}\", \"network.log_server_actions\": \"{{server.build.env.LOG_SERVER_ACTIONS}}\", \"network.pause_server_if_no_clients\": \"{{server.build.env.PAUSE_NO_CLIENTS}}\"}}}",
+          "startup": "{\"done\": \"Listening for clients on\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl OpenRCT2 Egg - egg-openrct2.json\r\n## Authors: David Wolfe (Red-Thirten), ptero-eggs\r\n## Date: 2022/06/28\r\n## License: MIT License\r\n\r\nGITHUB_PACKAGE=\"OpenRCT2/OpenRCT2\"\r\nMATCH=\"linux-x86_64.AppImage\"\r\nDEFAULT_SAVE=\"https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/openrct2/save.park\"\r\n\r\n## OpenRCT2 Install\r\napt -y update\r\n[ ! -d /mnt/server ] && mkdir /mnt/server\r\ncd /mnt/server\r\n# Remove existing installation if present\r\n[ -d OpenRCT2 ] && rm -rf OpenRCT2\r\n# Setup OpenRCT2 directory\r\nmkdir -p OpenRCT2/data\r\n# Setup temp directory for building and move to it\r\n[ -d temp ] && rm -rf temp\r\nmkdir temp && cd temp\r\n\r\n# Determine if installing from source or from release\r\nif [ \"${VERSION}\" == \"develop\" ]; then\r\n    # Get required packages\r\n    apt -y install curl git make cmake gcc build-essential libicu-dev pkg-config libcurl4-openssl-dev libcrypto++-dev libpng-dev libssl-dev libzip-dev duktape-dev nlohmann-json3-dev\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from source...\\n\"\r\n    \r\n    # Clone the branch and check if successful\r\n    git clone --branch \"${VERSION}\" https://github.com/${GITHUB_PACKAGE}\r\n    if [ ! -d OpenRCT2 ]; then\r\n        echo -e \"\\nFailed to clone \\\"${VERSION}\\\" branch from https://github.com/${GITHUB_PACKAGE}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    cd OpenRCT2\r\n    mkdir build && cd build\r\n    # Prepare CMake files for a lightweight and CLI-only build of OpenRCT2, using the appropriate flags\r\n    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DPORTABLE=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_CXX_FLAGS=\"-g -gz\" -DDISABLE_TTF=ON -DDISABLE_GOOGLE_BENCHMARK=ON -DDISABLE_DISCORD_RPC=ON -DDISABLE_GUI=ON\r\n    echo -e \"\\nBuilding OpenRCT2 package from source...\\n\\tThis process can take quite some time. Grab a coffee :)\\n\"\r\n    # Build OpenRCT2\r\n    DESTDIR=. make install\r\n    # Check if build was successful\r\n    if [ ! -d usr/local ]; then\r\n        echo -e \"\\nFailed to successfully build OpenRCT2!\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Make executable-ready package by moving compiled files to the correct locations\r\n    cd usr/local\r\n    mv bin/* /mnt/server/OpenRCT2/\r\n    mv share/openrct2/* share/openrct2-cli/* /mnt/server/OpenRCT2/data/\r\n    mv share/doc /mnt/server/OpenRCT2/\r\n    echo -e \"\\nBuild of OpenRCT2 package complete!\"\r\nelse\r\n    # Get required packages\r\n    apt install -y curl jq\r\n    echo -e \"\\nInstalling/Updating OpenRCT2 from release tag \\\"${VERSION}\\\"...\\n\"\r\n    \r\n    # This is a simple script to use the GitHub API for release versions.\r\n    # This requires the egg has a variable for GITHUB_PACKAGE, VERSION and MATCH (MATCH is to match the filename in some way).\r\n    # Get release info and download links\r\n    LATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\n    RELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n    if [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\n    else\r\n        VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n        if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n            DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n        else\r\n            DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n        fi\r\n    fi\r\n    # Download the release and check if successful\r\n    curl -L ${DOWNLOAD_URL} -o OpenRCT2.AppImage\r\n    if [ ! -f OpenRCT2.AppImage ]; then\r\n        echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    chmod +x OpenRCT2.AppImage\r\n    # Extract AppImage and check if successful\r\n    echo -e \"Extracting AppImage files...\"\r\n    ./OpenRCT2.AppImage --appimage-extract\r\n    if [ ! -d squashfs-root/usr ]; then\r\n        echo -e \"\\nFailed to extract AppImage!\\n\\t(Is the `MATCH` variable set to download an AppImage?)\\n\"\r\n        exit 1\r\n    fi\r\n    \r\n    # Move needed files to correct directories\r\n    cd squashfs-root/usr\r\n    mv lib bin/openrct2-cli /mnt/server/OpenRCT2/\r\n    mv share/openrct2/* /mnt/server/OpenRCT2/data/\r\n    mkdir /mnt/server/OpenRCT2/doc && mv share/doc/openrct2 $_\r\n    echo -e \"\\nDownload/Update of OpenRCT2 release successful!\"\r\nfi\r\n\r\ncd /mnt/server\r\nrm -rf temp # Clean up temp building directory\r\n\r\n## OpenRCT2 Setup\r\n# Setup ServerData/save directory\r\n[ ! -d ServerData/save ] && mkdir -p ServerData/save\r\ncd ServerData/save\r\n# Download default save.park if missing\r\nif [ ! -f save.park ]; then\r\n    echo -e \"Downloading default save.park file from ${DEFAULT_SAVE}\"\r\n    curl -sSLO ${DEFAULT_SAVE}\r\nfi\r\n\r\necho -e \"\\nOpenRCT2 Successfully Installed!\"",
+            "container": "debian:bullseye-slim",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Save File",
+            "description": "Save file (.sv4 / .sv6 / .park) to load. Can be a file path or can be a webhosted file URL. An existing save file must be specified; the server cannot generate a new scenario/save from scratch.",
+            "env_variable": "SAVE_URI",
+            "default_value": "ServerData/save/save.park",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:4",
+            "field_type": "text"
+          },
+          {
+            "name": "Load Latest Autosave",
+            "description": "Will load the latest autosave (assuming one is present) *instead* of the Save File when the server is started. Useful for loading the latest progress of a park after a reboot. Set to \"false\" to \"lock\" progress of the park, and always load the original Save File on start up.",
+            "env_variable": "LOAD_AUTOSAVE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Interval",
+            "description": "0 = Every 1 min, 1 = Every 5 min, 2 = Every 15 min, 3 = Every 30 min, 4 = Every hour, 5 = Never",
+            "env_variable": "AUTOSAVE_INTERVAL",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosaves To Keep",
+            "description": "Number of autosaves to keep before rolling over and deleting the oldest one. Set to 0 to disable autosaving.",
+            "env_variable": "AUTOSAVE_AMOUNT",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:0",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password requested by the server for clients to connect. Admins do not have to enter password to join. Leave empty for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Advertise Server",
+            "description": "If set to \"false\", the server will not be advertised in the master server list, and clients must manually connect.",
+            "env_variable": "SERVER_ADVERTISE",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Pause Server If No Clients",
+            "description": "Set to \"true\" to have the server pause simulation if no clients are on the server.",
+            "env_variable": "PAUSE_NO_CLIENTS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server that appears in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Description of the server that appears when hovering over the server in the server list.",
+            "env_variable": "SERVER_DESCRIPTION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Player Name",
+            "description": "The server appears as a player in the player list. This is the name it will have.",
+            "env_variable": "SERVER_PLAYER_NAME",
+            "default_value": "Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Greeting",
+            "description": "The \"Message of the Day\" that gets sent to all clients who join.",
+            "env_variable": "SERVER_GREETING",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Provider Name",
+            "description": "Server provider name that appears in server information window.",
+            "env_variable": "PROVIDER_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Provider E-Mail",
+            "description": "Server provider e-mail that appears in server information window.",
+            "env_variable": "PROVIDER_EMAIL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Provider Website",
+            "description": "Server provider website that appears in server information window.",
+            "env_variable": "PROVIDER_WEBSITE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Chat",
+            "description": "Set to \"true\" if you would like in-game chat logged to file in Data/chatlogs.",
+            "env_variable": "LOG_CHAT",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Log Server Actions",
+            "description": "Set to \"true\" if you would like in-game actions logged to file in Data/serverlogs.",
+            "env_variable": "LOG_SERVER_ACTIONS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenRCT2 Version",
+            "description": "The release tag (version) of OpenRCT2 to download and install from their official Github (ie. \"v0.3.5.1\"). Use \"latest\" to download the latest release, or \"develop\" to build from the latest source (takes longer to install but is the most up to date).",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Library Path",
+            "description": "What path to load libraries from for release binaries. Rarely needs to be changed.",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./OpenRCT2/lib",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openttd-716b5b326bcb",
+        "name": "OpenTTD",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openttd-716b5b326bcb.json",
+        "sha256": "5cf52952a76e979b188b484e50fd7204b0cea0eda62a86c65bd4ef072c4e4ec1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openttd/egg-pterodactyl-open-t-t-d-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/716b5b326bcb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-10-21T21:46:13+02:00",
+        "name": "OpenTTD",
+        "author": "admin@justmyrandomstuff.com",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./openttd -D",
+        "config": {
+          "files": "{\"openttd.cfg\": {\"parser\": \"ini\", \"find\": {\"network.server_port\": \"{{server.build.default.port}}\", \"network.server_name\": \"{{server.build.env.srv_name}}\", \"network.lan_internet\": 0, \"network.server_advertise\": \"{{server.build.env.srv_advertise}}\"}}}",
+          "startup": "{\"done\": \"Map generated, starting game\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\napk add --no-cache xz curl tar unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz\"\r\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz \r\n\r\necho -e \"\\nUnpacking tar\"\r\ntar -xf openttd-linux.tar.xz --strip-components=1\r\nrm openttd-linux.tar.xz\r\nchmod +x openttd\r\n\r\necho -e \"\\nRunning curl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\"\r\ncurl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\r\nunzip opengfx.zip \r\n\r\ntar --strip-components=1 -C baseset/ -xvf opengfx*.tar\r\nrm -fR open*zip open*tar open*gz\r\n\r\n[ -f /home/container/openttd.cfg  ] || curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/tycoon_games/openttd/openttd.cfg > openttd.cfg\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "alpine:latest",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name shown in the serverlist",
+            "env_variable": "srv_name",
+            "default_value": "OpenTTD Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Show in masterlist?",
+            "description": "Show the server in the serverlist on the client, true or false",
+            "env_variable": "srv_advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenTTD Version",
+            "description": "The version of OpenTTD i.e. 12.2",
+            "env_variable": "OPENTTD_VERSION",
+            "default_value": "13.0-RC2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenGFX Version",
+            "description": "The OpenGFX Version i.e. 7.1",
+            "env_variable": "OPENGFX_VERSION",
+            "default_value": "7.1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openttd-fa70b585f5a9",
+        "name": "OpenTTD",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openttd-fa70b585f5a9.json",
+        "sha256": "1d57f4a36e3eb9eddf510b3af982a2e36b4d2b188f3fd266a3d6d73ac038535c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "openttd/egg-open-t-t-d-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/fa70b585f5a9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-10-21T19:12:22+00:00",
+        "name": "OpenTTD",
+        "author": "admin@justmyrandomstuff.com",
+        "uuid": "878470b2-369e-4629-95db-7e5fe0eafb99",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./openttd -D",
+        "config": {
+          "files": "{\"openttd.cfg\": {\"parser\": \"ini\", \"find\": {\"network.server_port\": \"{{server.allocations.default.port}}\", \"network.server_name\": \"{{server.environment.srv_name}}\", \"network.lan_internet\": 0, \"network.server_advertise\": \"{{server.environment.srv_advertise}}\"}}}",
+          "startup": "{\"done\": \"Map generated, starting game\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\napk add --no-cache xz curl tar unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz\"\r\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz \r\n\r\necho -e \"\\nUnpacking tar\"\r\ntar -xf openttd-linux.tar.xz --strip-components=1\r\nrm openttd-linux.tar.xz\r\nchmod +x openttd\r\n\r\necho -e \"\\nRunning curl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\"\r\ncurl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\r\nunzip opengfx.zip \r\n\r\ntar --strip-components=1 -C baseset/ -xvf opengfx*.tar\r\nrm -fR open*zip open*tar open*gz\r\n\r\n[ -f /home/container/openttd.cfg  ] || curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/tycoon_games/openttd/openttd.cfg > openttd.cfg\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "alpine:latest",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name shown in the serverlist",
+            "env_variable": "srv_name",
+            "default_value": "OpenTTD Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 1,
+            "field_type": "text"
+          },
+          {
+            "name": "Show in masterlist?",
+            "description": "Show the server in the serverlist on the client, true or false",
+            "env_variable": "srv_advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 2,
+            "field_type": "text"
+          },
+          {
+            "name": "OpenTTD Version",
+            "description": "The version of OpenTTD i.e. 12.2",
+            "env_variable": "OPENTTD_VERSION",
+            "default_value": "13.0-RC2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 3,
+            "field_type": "text"
+          },
+          {
+            "name": "OpenGFX Version",
+            "description": "The OpenGFX Version i.e. 7.1",
+            "env_variable": "OPENGFX_VERSION",
+            "default_value": "7.1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 4,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openttd-server-266f501d933d",
+        "name": "OpenTTD Server",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openttd-server-266f501d933d.json",
+        "sha256": "33753120a2f858241c4d276ac5549fc9fb79160c538b5c4c41375a3f120db704",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "openttd/egg-open-t-t-d-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/266f501d933d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-03-26T16:13:26+02:00",
+        "name": "OpenTTD Server",
+        "author": "admin@justmyrandomstuff.com",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./openttd -D",
+        "config": {
+          "files": "{\"openttd.cfg\": {\"parser\": \"ini\", \"find\": {\"network.server_port\": \"{{server.build.default.port}}\", \"network.server_name\": \"{{server.build.env.srv_name}}\", \"network.lan_internet\": 0, \"network.server_advertise\": \"{{server.build.env.srv_advertise}}\"}}}",
+          "startup": "{\"done\": \"[net] Map generated, starting game\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\napk add --no-cache xz curl tar unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz\"\r\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz \r\n\r\necho -e \"\\nUnpacking tar\"\r\ntar -xf openttd-linux.tar.xz --strip-components=1\r\nrm openttd-linux.tar.xz\r\nchmod +x openttd\r\n\r\necho -e \"\\nRunning curl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\"\r\ncurl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\r\nunzip opengfx.zip \r\n\r\ntar --strip-components=1 -C baseset/ -xvf opengfx*.tar\r\nrm -fR open*zip open*tar open*gz\r\n\r\n[ -f /home/container/openttd.cfg  ] || curl https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/openttd/openttd.cfg > openttd.cfg\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "alpine:latest",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name shown in the serverlist",
+            "env_variable": "srv_name",
+            "default_value": "OpenTTD Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Show in masterlist?",
+            "description": "Show the server in the serverlist on the client, true or false",
+            "env_variable": "srv_advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenTTD Version",
+            "description": "The version of OpenTTD i.e. 12.2",
+            "env_variable": "OPENTTD_VERSION",
+            "default_value": "13.0-RC2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenGFX Version",
+            "description": "The OpenGFX Version i.e. 7.1",
+            "env_variable": "OPENGFX_VERSION",
+            "default_value": "7.1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "openttd-server-7a989d8c4e5f",
+        "name": "OpenTTD Server",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/openttd-server-7a989d8c4e5f.json",
+        "sha256": "9258c6393d8c3af72a1e3adbb3977e563366d967f0e87c70d65cca97f3e6136f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/tycoon_games/openttd/egg-open-t-t-d-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/7a989d8c4e5f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-03-26T16:13:26+02:00",
+        "name": "OpenTTD Server",
+        "author": "admin@justmyrandomstuff.com",
+        "description": "OpenTTD is an open source simulation game based upon the popular Microprose game \"Transport Tycoon Deluxe\", written by Chris Sawyer. It attempts to mimic the original game as closely as possible while extending it with new features.\r\n\r\nOpenTTD is modelled after the original Transport Tycoon game by Chris Sawyer and enhances the game experience dramatically. Many features were inspired by TTDPatch while others are original.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./openttd -D",
+        "config": {
+          "files": "{\"openttd.cfg\": {\"parser\": \"ini\", \"find\": {\"network.server_port\": \"{{server.build.default.port}}\", \"network.server_name\": \"{{server.build.env.srv_name}}\", \"network.lan_internet\": 0, \"network.server_advertise\": \"{{server.build.env.srv_advertise}}\"}}}",
+          "startup": "{\"done\": \"[net] Map generated, starting game\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\napk add --no-cache xz curl tar unzip\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho -e \"\\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz\"\r\ncurl -SsL -o openttd-linux.tar.xz https://cdn.openttd.org/openttd-releases/${OPENTTD_VERSION}/openttd-${OPENTTD_VERSION}-linux-generic-amd64.tar.xz \r\n\r\necho -e \"\\nUnpacking tar\"\r\ntar -xf openttd-linux.tar.xz --strip-components=1\r\nrm openttd-linux.tar.xz\r\nchmod +x openttd\r\n\r\necho -e \"\\nRunning curl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\"\r\ncurl -sSL -o opengfx.zip https://cdn.openttd.org/opengfx-releases/${OPENGFX_VERSION}/opengfx-${OPENGFX_VERSION}-all.zip\r\nunzip opengfx.zip \r\n\r\ntar --strip-components=1 -C baseset/ -xvf opengfx*.tar\r\nrm -fR open*zip open*tar open*gz\r\n\r\n[ -f /home/container/openttd.cfg  ] || curl https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/tycoon_games/openttd/openttd.cfg > openttd.cfg\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name shown in the serverlist",
+            "env_variable": "srv_name",
+            "default_value": "OpenTTD Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Show in masterlist?",
+            "description": "Show the server in the serverlist on the client, true or false",
+            "env_variable": "srv_advertise",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenTTD Version",
+            "description": "The version of OpenTTD i.e. 12.2",
+            "env_variable": "OPENTTD_VERSION",
+            "default_value": "13.0-RC2",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "OpenGFX Version",
+            "description": "The OpenGFX Version i.e. 7.1",
+            "env_variable": "OPENGFX_VERSION",
+            "default_value": "7.1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "operation-harsh-doorstop-90b4ad58d57b",
+        "name": "Operation Harsh Doorstop",
+        "description": "Operation: Harsh Doorstop is an Unreal Engine powered shooter sandbox similar to mod-friendly games like Ravenfield and Garry's Mod but with roots in tactical shooters like Squad and Arma III. Our game is entirely donation funded, completely free, and has full Steam workshop support!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/operation-harsh-doorstop-90b4ad58d57b.json",
+        "sha256": "730cefa92138f9276fbb5efeb50c6590c277ba11991fa6792797708e3df0cb83",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "operation_harsh_doorstop/egg-pterodactyl-operation-harsh-doorstop.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/operation_harsh_doorstop/egg-operation-harsh-doorstop.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/90b4ad58d57b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:32+00:00",
+        "name": "Operation Harsh Doorstop",
+        "author": "josdekurk@gmail.com",
+        "description": "Operation: Harsh Doorstop is an Unreal Engine powered shooter sandbox similar to mod-friendly games like Ravenfield and Garry's Mod but with roots in tactical shooters like Squad and Arma III. Our game is entirely donation funded, completely free, and has full Steam workshop support!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./HarshDoorstop/Binaries/Linux/HarshDoorstopServer-Linux-Shipping HarshDoorstop AAS-TestMap?MaxPlayers={{MAX_PLAYERS}} -SteamServerName=\"{{SERVER_NAME}}\" -Port={{SERVER_PORT}} -MULTIHOME=0.0.0.0 -QueryPort={{QUERY_PORT}} -RCONPort={{RCON_PORT}} -EnableRCON -RCONMaxAuthAttempts={{RCON_MAX_AUTH_ATTEMPTS}} -RCONPassword=\"{{RCON_PASSWORD}}\" -RCONMaxActiveConnections={{RCON_MAX_CONNECTIONS}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"LogRCON: RCON server listening on\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/HarshDoorstop/Saved/Config/LinuxServer/\r\ncd /mnt/server/HarshDoorstop/Saved/Config/LinuxServer/\r\ntouch Game.ini\r\ntee -a mnt/server/HarshDoorstop/Saved/Config/LinuxServer/Game.ini << END\r\n[/Script/RCON.RCONServerSystem]\r\nbEnabled=True\r\nListenPort=7779\r\nPassword=\"LetMeIn\"\r\nMaxActiveConnections=5\r\nMaxAuthAttempts=3\r\n\r\n[/Script/Engine.GameSession]\r\nMaxPlayers=32\r\nServerName=\"My Awesome Server\"\r\nPassword=\"cookies\"\r\nEND\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Autop update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "app id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "950900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:950900",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed by this server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "Defines the display or host name of the game server when listed in a server browser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Harsh Doorstop Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "Defines port for Steam master server traffic",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "Defines port for RCON server traffic",
+            "env_variable": "RCON_PORT",
+            "default_value": "7779",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Max Auth Attempts",
+            "description": "Defines the maximum number of authentication attempts an RCON connection can make before being forcibly disconnected",
+            "env_variable": "RCON_MAX_AUTH_ATTEMPTS",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Password",
+            "description": "Defines the password used for authenticating with the RCON server",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Max Connections",
+            "description": "Maximum number of concurrent RCON connections",
+            "env_variable": "RCON_MAX_CONNECTIONS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "operation-harsh-doorstop-b4d9012689cb",
+        "name": "Operation Harsh Doorstop",
+        "description": "Operation: Harsh Doorstop is an Unreal Engine powered shooter sandbox similar to mod-friendly games like Ravenfield and Garry's Mod but with roots in tactical shooters like Squad and Arma III. Our game is entirely donation funded, completely free, and has full Steam workshop support!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/operation-harsh-doorstop-b4d9012689cb.json",
+        "sha256": "7b85ed69860f8fc7064574224800eae6128972220f18ddb051543c0e2d0206d2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "operation_harsh_doorstop/egg-operation-harsh-doorstop.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/b4d9012689cb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Operation Harsh Doorstop",
+        "author": "josdekurk@gmail.com",
+        "uuid": "593bfe27-f1bb-4713-b032-61d4ec53318e",
+        "description": "Operation: Harsh Doorstop is an Unreal Engine powered shooter sandbox similar to mod-friendly games like Ravenfield and Garry's Mod but with roots in tactical shooters like Squad and Arma III. Our game is entirely donation funded, completely free, and has full Steam workshop support!",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./HarshDoorstop/Binaries/Linux/HarshDoorstopServer-Linux-Shipping HarshDoorstop AAS-TestMap?MaxPlayers={{MAX_PLAYERS}} -SteamServerName=\"{{SERVER_NAME}}\" -Port={{SERVER_PORT}} -MULTIHOME=0.0.0.0 -QueryPort={{QUERY_PORT}} -RCONPort={{RCON_PORT}} -EnableRCON -RCONMaxAuthAttempts={{RCON_MAX_AUTH_ATTEMPTS}} -RCONPassword=\"{{RCON_PASSWORD}}\" -RCONMaxActiveConnections={{RCON_MAX_CONNECTIONS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogRCON: RCON server listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/HarshDoorstop/Saved/Config/LinuxServer/\r\ncd /mnt/server/HarshDoorstop/Saved/Config/LinuxServer/\r\ntouch Game.ini\r\ntee -a mnt/server/HarshDoorstop/Saved/Config/LinuxServer/Game.ini << END\r\n[/Script/RCON.RCONServerSystem]\r\nbEnabled=True\r\nListenPort=7779\r\nPassword=\"LetMeIn\"\r\nMaxActiveConnections=5\r\nMaxAuthAttempts=3\r\n\r\n[/Script/Engine.GameSession]\r\nMaxPlayers=32\r\nServerName=\"My Awesome Server\"\r\nPassword=\"cookies\"\r\nEND\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Autop update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "app id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "950900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:950900",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed by this server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "Defines the display or host name of the game server when listed in a server browser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Harsh Doorstop Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "Defines port for Steam master server traffic",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "Defines port for RCON server traffic",
+            "env_variable": "RCON_PORT",
+            "default_value": "7779",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Max Auth Attempts",
+            "description": "Defines the maximum number of authentication attempts an RCON connection can make before being forcibly disconnected",
+            "env_variable": "RCON_MAX_AUTH_ATTEMPTS",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Password",
+            "description": "Defines the password used for authenticating with the RCON server",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Max Connections",
+            "description": "Maximum number of concurrent RCON connections",
+            "env_variable": "RCON_MAX_CONNECTIONS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "operation-harsh-doorstop-ba76307cc133",
+        "name": "Operation Harsh Doorstop",
+        "description": "Operation: Harsh Doorstop is an Unreal Engine powered shooter sandbox similar to mod-friendly games like Ravenfield and Garry's Mod but with roots in tactical shooters like Squad and Arma III. Our game is entirely donation funded, completely free, and has full Steam workshop support!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/operation-harsh-doorstop-ba76307cc133.json",
+        "sha256": "5918c9e579ae0e6d29431684a59a8bc5e8f3adb0d9c869cf654c3049c705f34b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "operation_harsh_doorstop/egg-operation-harsh-doorstop.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/ba76307cc133.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-03-11T19:59:13+01:00",
+        "name": "Operation Harsh Doorstop",
+        "author": "josdekurk@gmail.com",
+        "description": "Operation: Harsh Doorstop is an Unreal Engine powered shooter sandbox similar to mod-friendly games like Ravenfield and Garry's Mod but with roots in tactical shooters like Squad and Arma III. Our game is entirely donation funded, completely free, and has full Steam workshop support!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./HarshDoorstop/Binaries/Linux/HarshDoorstopServer-Linux-Shipping HarshDoorstop AAS-TestMap?MaxPlayers={{MAX_PLAYERS}} -SteamServerName=\"{{SERVER_NAME}}\" -Port={{SERVER_PORT}} -MULTIHOME=0.0.0.0 -QueryPort={{QUERY_PORT}} -RCONPort={{RCON_PORT}} -EnableRCON -RCONMaxAuthAttempts={{RCON_MAX_AUTH_ATTEMPTS}} -RCONPassword=\"{{RCON_PASSWORD}}\" -RCONMaxActiveConnections={{RCON_MAX_CONNECTIONS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogRCON: RCON server listening on\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\nmkdir -p /mnt/server/HarshDoorstop/Saved/Config/LinuxServer/\r\ncd /mnt/server/HarshDoorstop/Saved/Config/LinuxServer/\r\ntouch Game.ini\r\ntee -a mnt/server/HarshDoorstop/Saved/Config/LinuxServer/Game.ini << END\r\n[/Script/RCON.RCONServerSystem]\r\nbEnabled=True\r\nListenPort=7779\r\nPassword=\"LetMeIn\"\r\nMaxActiveConnections=5\r\nMaxAuthAttempts=3\r\n\r\n[/Script/Engine.GameSession]\r\nMaxPlayers=32\r\nServerName=\"My Awesome Server\"\r\nPassword=\"cookies\"\r\nEND\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Autop update",
+            "description": "Auto update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "app id",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "950900",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:950900",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed by this server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "32",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "Defines the display or host name of the game server when listed in a server browser",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Harsh Doorstop Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Query port",
+            "description": "Defines port for Steam master server traffic",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Port",
+            "description": "Defines port for RCON server traffic",
+            "env_variable": "RCON_PORT",
+            "default_value": "7779",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Max Auth Attempts",
+            "description": "Defines the maximum number of authentication attempts an RCON connection can make before being forcibly disconnected",
+            "env_variable": "RCON_MAX_AUTH_ATTEMPTS",
+            "default_value": "3",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Password",
+            "description": "Defines the password used for authenticating with the RCON server",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Max Connections",
+            "description": "Maximum number of concurrent RCON connections",
+            "env_variable": "RCON_MAX_CONNECTIONS",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

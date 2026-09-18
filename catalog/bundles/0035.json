@@ -1,0 +1,1720 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "cubic-odyssey-0ee14b620438",
+        "name": "Cubic Odyssey",
+        "description": "Embark on a galactic journey in Cubic Odyssey, an open-world adventure where you explore vibrant planets, craft tools, build vehicles, and fight the Red Darkness. Uncover ancient mysteries, and shape a universe full of life, danger, and limitless possibilities!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/cubic-odyssey-0ee14b620438.json",
+        "sha256": "5f837834861fd187addd11bee806e1505cdc3f739653949e7f26a0af4dd7f3b4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "cubic_odyssey/egg-cubic-odyssey.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/0ee14b620438.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-27T22:40:22+01:00",
+        "name": "Cubic Odyssey",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Embark on a galactic journey in Cubic Odyssey, an open-world adventure where you explore vibrant planets, craft tools, build vehicles, and fight the Red Darkness. Uncover ancient mysteries, and shape a universe full of life, danger, and limitless possibilities!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/ptero-eggs/yolks:wine_latest",
+          "Wine Staging": "ghcr.io/ptero-eggs/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "wine ./server/CubicOdysseyServer.exe -Port={{GAME_PORT}} -Password=\"{{SERVER_PASSWORD}}\" -Gamemode={{GAMEMODE}} -MaxNumPlayers={{MAX_PLAYERS}}",
+        "config": {
+          "files": "{\"config/server_config.txt\": {\"parser\": \"file\", \"find\": {\"\\t\\tserverName \": \"\\t\\tserverName \\\"{{server.build.env.SERVER_NAME}}\\\"\", \"\\t\\tprivateServer \": \"\\t\\tprivateServer {{server.build.env.PRIVATE_SERVER}}\", \"\\t\\tgalaxySeed \": \"\\t\\tgalaxySeed {{server.build.env.GALAXY_SEED}}\"}}}",
+          "startup": "{\"done\": \"Lobbies (OnCreateLobbyFinished): lobby created.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd and request app license\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_license_request 3858450 $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam Username",
+            "description": "A steam username of an account that owns the server tool is required",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam User Password",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth Code",
+            "description": "Steam Auth Code required if the Steam Account is using Steam Auth. Slow installs will cause the code to expire before it can be used.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server, this will be shown on the server-list",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Cubic Odyssey Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "If enabled players must enter the password to join the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game port",
+            "description": "This sets the port the server will bind to",
+            "env_variable": "GAME_PORT",
+            "default_value": "20000",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "This will set the maximum number of allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Sets the desired game mode, it's adventure by default, available options: adventure, creative",
+            "env_variable": "GAMEMODE",
+            "default_value": "adventure",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:adventure,creative",
+            "field_type": "text"
+          },
+          {
+            "name": "Private Server",
+            "description": "This will make the server private/public",
+            "env_variable": "PRIVATE_SERVER",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:TRUE,FALSE",
+            "field_type": "text"
+          },
+          {
+            "name": "Galaxy Seed",
+            "description": "This sets the seed used by the server",
+            "env_variable": "GALAXY_SEED",
+            "default_value": "21945875634",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:11",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "autoupdate Server on start or restart. 1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3858450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3858450",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Required to always install and update the correct version of the game.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "cubic-odyssey-286a040c588d",
+        "name": "Cubic Odyssey",
+        "description": "Adventure, creation, and survival await!\nStep into a boundless open world where every planet, every system, and every moment is yours to shape. Explore a universe rich with life, ancient mysteries, and untamed beauty. Fight back the Red Darkness menace as you mine resources, craft tools, weapons, and build vehicles that are essential for your odyssey. Collaborate with friends to battle colossal threats and bring hope to the galaxy.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/cubic-odyssey-286a040c588d.json",
+        "sha256": "143ffda6f3e281e14207f7d9de19e8292afcf2148ade8f247a9c6d95f8993d33",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "cubic_odyssey/pterodactyl-egg-cubic-odyssey.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/286a040c588d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-12-25T09:29:43+00:00",
+        "name": "Cubic Odyssey",
+        "author": "mads@mrnissen.com",
+        "description": "Adventure, creation, and survival await!\nStep into a boundless open world where every planet, every system, and every moment is yours to shape. Explore a universe rich with life, ancient mysteries, and untamed beauty. Fight back the Red Darkness menace as you mine resources, craft tools, weapons, and build vehicles that are essential for your odyssey. Collaborate with friends to battle colossal threats and bring hope to the galaxy.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/pelican-eggs/yolks:wine_latest",
+          "Wine Staging": "ghcr.io/pelican-eggs/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "wine ./server/CubicOdysseyServer.exe",
+        "config": {
+          "files": "{\"config/server_config.txt\": {\"parser\": \"file\", \"find\": {\"\\t\\tstartingPort\": \"\\t\\tstartingPort {{env.STARTING_PORT}}\", \"\\t\\tendingPort\": \"\\t\\tendingPort {{env.ENDING_PORT}}\", \"\\t\\tserverName\": \"\\t\\tserverName \\\"{{env.SERVER_NAME}}\\\"\", \"\\t\\tserverPassword\": \"\\t\\tserverPassword \\\"{{env.SERVER_PASSWORD}}\\\"\", \"\\t\\tmaxPlayers\": \"\\t\\tmaxPlayers {{env.MAX_PLAYERS}}\", \"\\t\\tgameMode\": \"\\t\\tgameMode {{env.GAME_MODE}}\", \"\\t\\tprivateServer\": \"\\t\\tprivateServer {{env.PRIVATE_SERVER}}\", \"\\t\\tgalaxySeed\": \"\\t\\tgalaxySeed {{env.GALAXY_SEED}}\", \"\\t\\tenableCrashDumps\": \"\\t\\tenableCrashDumps {{env.ENABLE_CRASH_DUMPS}}\", \"\\t\\tallowRelaying\": \"\\t\\tallowRelaying {{env.ALLOW_RELAYING}}\", \"\\t\\tenableLogging\": \"\\t\\tenableLogging {{env.ENABLE_LOGGING}}\"}}}",
+          "startup": "{\"done\": \"Lobby Id: \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\nclear\nRED='\\\\033[0;31m'\nGREEN='\\\\033[0;32m'\nYELLOW='\\\\033[1;33m'\nBLUE='\\\\033[0;34m'\nNC='\\\\033[0m'\n\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}Cubic Odyssey Installscript${NC}\"\necho -e \"${YELLOW}Egg by MrNissenDK ${NC}\"\necho -e \"${YELLOW}Install script from Enshrouded by gOOvER | https://goover.dev${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates jq dos2unix\n\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\\\n\"\n    echo -e \"Using anonymous user.\\\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\necho -e \"${GREEN}..done..${NC}\"\n\n## install game using steamcmd\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) $( [[ \"${STEAM_SDK}\" == \"1\" ]] && printf %s '+app_update 1007' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\necho -e \"${GREEN}..done..${NC}\"\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n# add below your custom commands if needed\n\nFILE=$HOME/config/server_config.txt\nif [ -f \"$FILE\" ]; then\n  echo -e \"server_config.txt found.\"\nelse  \n  echo -e \"No server_config.txt found. Moving default...\"\n  cp -f $FILE.sample $FILE\n  echo -e \".done..\"\nfi\n\n## install end\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${GREEN}Installation completed...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Allow relaying",
+            "description": "Whethere it should send data to creators",
+            "env_variable": "ALLOW_RELAYING",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable crash dumps",
+            "description": "If server crash should it make a infomation file",
+            "env_variable": "ENABLE_CRASH_DUMPS",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable logging",
+            "description": "If it should log everything",
+            "env_variable": "ENABLE_LOGGING",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "field_type": "text"
+          },
+          {
+            "name": "Ending Port",
+            "description": "The maximum port to try to bind to starting from the port value",
+            "env_variable": "ENDING_PORT",
+            "default_value": "27100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "between:1024,65535|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Galaxy seed",
+            "description": "Seed of the galaxy",
+            "env_variable": "GALAXY_SEED",
+            "default_value": "21945875634",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Game mode",
+            "description": "Sets the desired game mode, it's adventure by default",
+            "env_variable": "GAME_MODE",
+            "default_value": "ADVENTURE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:CREATIVE,ADVENTURE",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "Will set the maximum number of allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Private server",
+            "description": "If you dont want it to be on the server list",
+            "env_variable": "PRIVATE_SERVER",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "field_type": "text"
+          },
+          {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Cubic Odyssey Dedicated Server - Pelican",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "The code people need to use to join",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "[STEAM] AppID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3858450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3858450",
+            "field_type": "text"
+          },
+          {
+            "name": "Starting Port",
+            "description": "Set the port to bind the game to, sample",
+            "env_variable": "STARTING_PORT",
+            "default_value": "27001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[WINE] WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|max:20|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "cubic-odyssey-822fb50bb909",
+        "name": "Cubic Odyssey",
+        "description": "Adventure, creation, and survival await!\nStep into a boundless open world where every planet, every system, and every moment is yours to shape. Explore a universe rich with life, ancient mysteries, and untamed beauty. Fight back the Red Darkness menace as you mine resources, craft tools, weapons, and build vehicles that are essential for your odyssey. Collaborate with friends to battle colossal threats and bring hope to the galaxy.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/cubic-odyssey-822fb50bb909.json",
+        "sha256": "5f2203233b121c5be89f2dcc80c66c6811f61d7d07c5c677bb8d6b3aaaab480d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "cubic_odyssey/egg-cubic-odyssey.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/822fb50bb909.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Cubic Odyssey",
+        "author": "mads@mrnissen.com",
+        "uuid": "98286014-aa2b-404a-adca-777252ab7986",
+        "description": "Adventure, creation, and survival await!\nStep into a boundless open world where every planet, every system, and every moment is yours to shape. Explore a universe rich with life, ancient mysteries, and untamed beauty. Fight back the Red Darkness menace as you mine resources, craft tools, weapons, and build vehicles that are essential for your odyssey. Collaborate with friends to battle colossal threats and bring hope to the galaxy.",
+        "image": null,
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/pelican-eggs/yolks:wine_latest",
+          "Wine Staging": "ghcr.io/pelican-eggs/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"config/server_config.txt\": {\"parser\": \"file\", \"find\": {\"\\t\\tstartingPort\": \"\\t\\tstartingPort {{env.STARTING_PORT}}\", \"\\t\\tendingPort\": \"\\t\\tendingPort {{env.ENDING_PORT}}\", \"\\t\\tserverName\": \"\\t\\tserverName \\\"{{env.SERVER_NAME}}\\\"\", \"\\t\\tserverPassword\": \"\\t\\tserverPassword \\\"{{env.SERVER_PASSWORD}}\\\"\", \"\\t\\tmaxPlayers\": \"\\t\\tmaxPlayers {{env.MAX_PLAYERS}}\", \"\\t\\tgameMode\": \"\\t\\tgameMode {{env.GAME_MODE}}\", \"\\t\\tprivateServer\": \"\\t\\tprivateServer {{env.PRIVATE_SERVER}}\", \"\\t\\tgalaxySeed\": \"\\t\\tgalaxySeed {{env.GALAXY_SEED}}\", \"\\t\\tenableCrashDumps\": \"\\t\\tenableCrashDumps {{env.ENABLE_CRASH_DUMPS}}\", \"\\t\\tallowRelaying\": \"\\t\\tallowRelaying {{env.ALLOW_RELAYING}}\", \"\\t\\tenableLogging\": \"\\t\\tenableLogging {{env.ENABLE_LOGGING}}\"}}}",
+          "startup": "{\"done\": \"Lobby Id: \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\nclear\nRED='\\\\033[0;31m'\nGREEN='\\\\033[0;32m'\nYELLOW='\\\\033[1;33m'\nBLUE='\\\\033[0;34m'\nNC='\\\\033[0m'\n\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}Cubic Odyssey Installscript${NC}\"\necho -e \"${YELLOW}Egg by MrNissenDK ${NC}\"\necho -e \"${YELLOW}Install script from Enshrouded by gOOvER | https://goover.dev${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n#apt -y update\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates jq dos2unix\n\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}download and install steamcmd. please wait...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\\\n\"\n    echo -e \"Using anonymous user.\\\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\necho -e \"${GREEN}..done..${NC}\"\n\n## install game using steamcmd\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${YELLOW}install game using steamcmd. please wait...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"\n\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) $( [[ \"${STEAM_SDK}\" == \"1\" ]] && printf %s '+app_update 1007' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\necho -e \"${GREEN}..done..${NC}\"\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n# add below your custom commands if needed\n\nFILE=$HOME/config/server_config.txt\nif [ -f \"$FILE\" ]; then\n  echo -e \"server_config.txt found.\"\nelse  \n  echo -e \"No server_config.txt found. Moving default...\"\n  cp -f $FILE.sample $FILE\n  echo -e \".done..\"\nfi\n\n## install end\necho -e \"${BLUE}-------------------------------------------------${NC}\"\necho -e \"${GREEN}Installation completed...${NC}\"\necho -e \"${BLUE}-------------------------------------------------${NC}\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Allow relaying",
+            "description": "Whethere it should send data to creators",
+            "env_variable": "ALLOW_RELAYING",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "sort": 10
+          },
+          {
+            "name": "Enable crash dumps",
+            "description": "If server crash should it make a infomation file",
+            "env_variable": "ENABLE_CRASH_DUMPS",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "sort": 9
+          },
+          {
+            "name": "Enable logging",
+            "description": "If it should log everything",
+            "env_variable": "ENABLE_LOGGING",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "sort": 11
+          },
+          {
+            "name": "Ending Port",
+            "description": "The maximum port to try to bind to starting from the port value",
+            "env_variable": "ENDING_PORT",
+            "default_value": "27100",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "between:1024,65535|integer",
+            "sort": 2
+          },
+          {
+            "name": "Galaxy seed",
+            "description": "Seed of the galaxy",
+            "env_variable": "GALAXY_SEED",
+            "default_value": "21945875634",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "numeric",
+            "sort": 7
+          },
+          {
+            "name": "Game mode",
+            "description": "Sets the desired game mode, it's adventure by default",
+            "env_variable": "GAME_MODE",
+            "default_value": "ADVENTURE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:CREATIVE,ADVENTURE",
+            "sort": 6
+          },
+          {
+            "name": "Max players",
+            "description": "Will set the maximum number of allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "48",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "numeric",
+            "sort": 5
+          },
+          {
+            "name": "Private server",
+            "description": "If you dont want it to be on the server list",
+            "env_variable": "PRIVATE_SERVER",
+            "default_value": "FALSE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "in:TRUE,FALSE",
+            "sort": 8
+          },
+          {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Cubic Odyssey Dedicated Server - Pelican",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "sort": 3
+          },
+          {
+            "name": "Server password",
+            "description": "The code people need to use to join",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string",
+            "sort": 4
+          },
+          {
+            "name": "[STEAM] AppID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3858450",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:3858450",
+            "sort": 12
+          },
+          {
+            "name": "Starting Port",
+            "description": "Set the port to bind the game to, sample",
+            "env_variable": "STARTING_PORT",
+            "default_value": "27001",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer|between:1024,65535",
+            "sort": 1
+          },
+          {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "sort": 13
+          },
+          {
+            "name": "[WINE] WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|max:20|string",
+            "sort": 14
+          }
+        ],
+        "startup": "wine ./server/CubicOdysseyServer.exe"
+      }
+    },
+    {
+      "entry": {
+        "id": "custom-hlds-engine-game-376370e216aa",
+        "name": "Custom HLDS Engine Game",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/custom-hlds-engine-game-376370e216aa.json",
+        "sha256": "7da1bd191f62257ae9d9ac0fb39c859cc08d801c5c8fe833730bfe4f25d74a5d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "hlds_server/vanilla/egg-custom-h-l-d-s-engine-game.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/376370e216aa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Custom HLDS Engine Game",
+        "author": "parker@parkervcp.com",
+        "uuid": "2d71abbe-5e06-4cc7-863f-b1f7a2fe5a36",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# SRCDS Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_set_config 90 mod ${HLDS_GAME} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS.\r\n\r\nall the HLDS server names are here - https://developer.valvesoftware.com/wiki/Dedicated_Server_Name_Enumeration",
+            "env_variable": "HLDS_GAME",
+            "default_value": "cstrike",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Steam account used to download files (Defaults to anonymous)",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:32",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for Steam account",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam Guard 2FA code for account",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,steam_legacy",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "custom-hlds-engine-game-585da540b966",
+        "name": "Custom HLDS Engine Game",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/custom-hlds-engine-game-585da540b966.json",
+        "sha256": "325dc8caa1f3d827c6ee1f096f9d9f3124fc0d8ad6d1b65bd7ce7e2a73c408eb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/hlds_server/vanilla/egg-custom-h-l-d-s-engine-game.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/585da540b966.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-16T13:44:10+01:00",
+        "name": "Custom HLDS Engine Game",
+        "author": "parker@parkervcp.com",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# SRCDS Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_set_config 90 mod ${HLDS_GAME} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS.\r\n\r\nall the HLDS server names are here - https://developer.valvesoftware.com/wiki/Dedicated_Server_Name_Enumeration",
+            "env_variable": "HLDS_GAME",
+            "default_value": "cstrike",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Steam account used to download files (Defaults to anonymous)",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for Steam account",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam Guard 2FA code for account",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "custom-hlds-engine-game-772712e4d7cd",
+        "name": "Custom HLDS Engine Game",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/custom-hlds-engine-game-772712e4d7cd.json",
+        "sha256": "4d2d194c09f60ad16570dd0457bf769b6e6edef41271e5edcf401994cefc27d0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "hlds_server/vanilla/egg-custom-h-l-d-s-engine-game.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/772712e4d7cd.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-16T13:44:10+01:00",
+        "name": "Custom HLDS Engine Game",
+        "author": "parker@parkervcp.com",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# SRCDS Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_set_config 90 mod ${HLDS_GAME} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS.\r\n\r\nall the HLDS server names are here - https://developer.valvesoftware.com/wiki/Dedicated_Server_Name_Enumeration",
+            "env_variable": "HLDS_GAME",
+            "default_value": "cstrike",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Steam account used to download files (Defaults to anonymous)",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for Steam account",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam Guard 2FA code for account",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "custom-hlds-engine-game-8d4148ea324c",
+        "name": "Custom HLDS Engine Game",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/custom-hlds-engine-game-8d4148ea324c.json",
+        "sha256": "7c506353aa436b038978d552e0b0511e5dd7de413ba7f903b9bf590444ed022f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "hlds_server/vanilla/egg-pterodactyl-custom-h-l-d-s-engine-game.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/8d4148ea324c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:07+00:00",
+        "name": "Custom HLDS Engine Game",
+        "author": "parker@parkervcp.com",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# SRCDS Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_set_config 90 mod ${HLDS_GAME} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS.\r\n\r\nall the HLDS server names are here - https://developer.valvesoftware.com/wiki/Dedicated_Server_Name_Enumeration",
+            "env_variable": "HLDS_GAME",
+            "default_value": "cstrike",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "de_dust2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Steam account used to download files (Defaults to anonymous)",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for Steam account",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam Guard 2FA code for account",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "custom-rehlds-engine-game-4e6fa62fb6a7",
+        "name": "Custom ReHLDS Engine Game",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel, substituting the official Valve engine binaries with the ReHLDS binaries.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/custom-rehlds-engine-game-4e6fa62fb6a7.json",
+        "sha256": "5e9d38b5dced9beba091c6a9aa777debba55691831e01900e51574b3232e9b10",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "hlds_server/rehlds/egg-custom-re-h-l-d-s-engine-game.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4e6fa62fb6a7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Custom ReHLDS Engine Game",
+        "author": "shigbeard@ndlee.com",
+        "uuid": "936bb359-8a0b-47e7-bd57-110ed3afb166",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel, substituting the official Valve engine binaries with the ReHLDS binaries.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# SRCDS Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_set_config 90 mod ${HLDS_GAME} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n# Github Release Grabber script\r\n## get release info and download links\r\nLATEST_JSON=$(curl -sSL \"https://api.github.com/repos/rehlds/ReHLDS/releases/latest\")\r\nRELEASES=$(curl -sSL \"https://api.github.com/repos/rehlds/ReHLDS/releases\")\r\nMATCH=\"rehlds-bin\"\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -Ei ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\ncd /tmp\r\ncurl -sSL -o rehlds-bin.zip ${DOWNLOAD_URL}\r\nunzip -q -o rehlds-bin.zip\r\n\r\ncp -r /tmp/bin/linux32/* /mnt/server\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 11,
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean"
+          },
+          {
+            "sort": 2,
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS.\r\n\r\nall the HLDS server names are here - https://developer.valvesoftware.com/wiki/Dedicated_Server_Name_Enumeration",
+            "env_variable": "HLDS_GAME",
+            "default_value": "valve",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|alpha_dash|between:1,100"
+          },
+          {
+            "sort": 1,
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90"
+          },
+          {
+            "sort": 10,
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,steam_legacy"
+          },
+          {
+            "sort": 3,
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "crossfire",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash"
+          },
+          {
+            "sort": 9,
+            "name": "Steam Auth",
+            "description": "Steam authenticator code for the account",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 8,
+            "name": "Steam Password",
+            "description": "Steam Password for account.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 7,
+            "name": "Steam Username",
+            "description": "Username associated wanted to be used. Not needed.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string"
+          },
+          {
+            "sort": 4,
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5"
+          },
+          {
+            "sort": 6,
+            "name": "Validate",
+            "description": "Validate game files on update. Recommended to turn off with ReHLDS due to SteamCMD overwriting its changes",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean"
+          },
+          {
+            "sort": 5,
+            "name": "ReHLDS Version",
+            "description": "The version of ReHLDS to install, or 'latest' for the latest release.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "custom-rehlds-engine-game-70bd06096082",
+        "name": "Custom ReHLDS Engine Game",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel, substituting the official Valve engine binaries with the ReHLDS binaries.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/custom-rehlds-engine-game-70bd06096082.json",
+        "sha256": "748bc99a6960c4ed76a075e5d047dc7312edeb6a14405af66819b6b6ffa7ea0e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "hlds_server/rehlds/egg-pterodactyl-custom-re-h-l-d-s-engine-game.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/70bd06096082.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-04-16T18:31:43-04:00",
+        "name": "Custom ReHLDS Engine Game",
+        "author": "shigbeard@ndlee.com",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel, substituting the official Valve engine binaries with the ReHLDS binaries.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# SRCDS Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_set_config 90 mod ${HLDS_GAME} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n# Github Release Grabber script\r\n## get release info and download links\r\nLATEST_JSON=$(curl -sSL \"https://api.github.com/repos/rehlds/ReHLDS/releases/latest\")\r\nRELEASES=$(curl -sSL \"https://api.github.com/repos/rehlds/ReHLDS/releases\")\r\nMATCH=\"rehlds-bin\"\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -Ei ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\ncd /tmp\r\ncurl -sSL -o rehlds-bin.zip ${DOWNLOAD_URL}\r\nunzip -q -o rehlds-bin.zip\r\n\r\ncp -r /tmp/bin/linux32/* /mnt/server\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS.\r\n\r\nall the HLDS server names are here - https://developer.valvesoftware.com/wiki/Dedicated_Server_Name_Enumeration",
+            "env_variable": "HLDS_GAME",
+            "default_value": "valve",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "crossfire",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+          },
+          {
+            "name": "ReHLDS Version",
+            "description": "The version of ReHLDS to install, or 'latest' for the latest release.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Validate",
+            "description": "Validate game files on update. Recommended to turn off with ReHLDS due to SteamCMD overwriting its changes",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Username associated wanted to be used. Not needed.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam Password for account.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam authenticator code for the account",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "custom-rehlds-engine-game-aba400c0a98e",
+        "name": "Custom ReHLDS Engine Game",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel, substituting the official Valve engine binaries with the ReHLDS binaries.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/custom-rehlds-engine-game-aba400c0a98e.json",
+        "sha256": "4fb5c464bbb0f16c00307d775bbc02f88a94118fdfcc25039914ab322ebde542",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/hlds_server/rehlds/egg-custom-re-h-l-d-s-engine-game.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/aba400c0a98e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-16T13:44:48+01:00",
+        "name": "Custom ReHLDS Engine Game",
+        "author": "shigbeard@ndlee.com",
+        "description": "This option allows modifying the startup arguments and other details to run a custom HLDS based game on the panel, substituting the official Valve engine binaries with the ReHLDS binaries.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./hlds_run -console -game {{HLDS_GAME}} -port {{SERVER_PORT}} -sport {{VAC_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Connection to Steam servers successful\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# SRCDS Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n# just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH}  +app_set_config 90 mod ${HLDS_GAME} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n\r\n# Github Release Grabber script\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/dreamstalker/rehlds/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/dreamstalker/rehlds/releases\")\r\nMATCH=\"rehlds-bin\"\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -Ei ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\ncd /tmp\r\ncurl -sSL -o rehlds-bin.zip ${DOWNLOAD_URL}\r\nunzip -q -o rehlds-bin.zip\r\n\r\ncp -r /tmp/bin/linux32/* /mnt/server\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using HLDS.\r\n\r\nThe HLDS server ID is 90. This should not be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "90",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:90",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Name",
+            "description": "The name corresponding to the game to download and run using HLDS.\r\n\r\nall the HLDS server names are here - https://developer.valvesoftware.com/wiki/Dedicated_Server_Name_Enumeration",
+            "env_variable": "HLDS_GAME",
+            "default_value": "valve",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|alpha_dash|between:1,100",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The default map for the server.",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "crossfire",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "VAC port",
+            "description": "Specifies the VAC port the server should use. Default is 26900.",
+            "env_variable": "VAC_PORT",
+            "default_value": "26900",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,5",
+            "field_type": "text"
+          },
+          {
+            "name": "ReHLDS Version",
+            "description": "The version of ReHLDS to install, or 'latest' for the latest release.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Validate",
+            "description": "Validate game files on update. Recommended to turn off with ReHLDS due to SteamCMD overwriting its changes",
+            "env_variable": "VALIDATE",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Username associated wanted to be used. Not needed.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Steam Password for account.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Auth",
+            "description": "Steam authenticator code for the account",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Beta branch",
+            "description": "Leave empty for the public branch, for the legacy version select steam_legacy.",
+            "env_variable": "SRCDS_BETAID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:,steam_legacy",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,831 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "generic-java-a9d0931d18e9",
+        "name": "Generic Java",
+        "description": "Creates a container that runs java.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/generic-java-a9d0931d18e9.json",
+        "sha256": "43f3ddcbb5c365d96568c6c866b375d161bddc89ab55d1438a0926da8fa92431",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "java/egg-pterodactyl-generic-java.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/a9d0931d18e9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:51+00:00",
+        "name": "Generic Java",
+        "author": "sneaky@sneakyhub.com",
+        "description": "Creates a container that runs java.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17",
+          "ghcr.io/parkervcp/yolks:java_19": "ghcr.io/parkervcp/yolks:java_19",
+          "ghcr.io/parkervcp/yolks:java_21": "ghcr.io/parkervcp/yolks:java_21",
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Dterminal.jline=false -Dterminal.ansi=true -jar {{JARFILE}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"change this text\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/yolks:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Java Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nPROJECT=java\r\n\r\napt update\r\napt install -y curl jq\r\n\r\ncd /mnt/server"
+          }
+        },
+        "variables": [
+          {
+            "name": "JAR FILE",
+            "description": "",
+            "env_variable": "JARFILE",
+            "default_value": "sneakyhub.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "gitea-bcdf781c3b2a",
+        "name": "Gitea",
+        "description": "Gitea is a community managed lightweight code hosting solution written in Go. It is published under the MIT license.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/gitea-bcdf781c3b2a.json",
+        "sha256": "55979afb85e1646594ec6fd88b727a124731b06ae863d6d87adfd9f728b7510c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "gitea/egg-pterodactyl-gitea.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/gitea/egg-gitea.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/bcdf781c3b2a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:59+00:00",
+        "name": "Gitea",
+        "author": "mario.franze@gmail.com",
+        "description": "Gitea is a community managed lightweight code hosting solution written in Go. It is published under the MIT license.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./gitea web -p {{SERVER_PORT}} -c ./app.ini",
+        "config": {
+          "files": "{\"custom/app.ini\": {\"parser\": \"file\", \"find\": {\"DISABLE_SSH\": \"DISABLE_SSH: {{server.build.env.DISABLE_SSH}}\", \"SSH_PORT\": \"SSH_PORT: {{server.build.env.SSH_PORT}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Listen: \"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "## Gitea Installscript\r\n\r\n## update system\r\napt update\r\napt -y install --no-install-recommends jq curl ca-certificates\r\n\r\n## Variables\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nLATEST=$(curl -sSL https://dl.gitea.io/gitea/version.json | jq -r .latest.version)\r\n\r\n\r\ncd /mnt/server\r\n\r\n## install gitea\r\necho -e \"Download url: https://dl.gitea.io/gitea/${LATEST}/gitea-${LATEST}-linux-${ARCH}\"\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"downloading Gitea $LATEST\"\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/${LATEST}/gitea-${LATEST}-linux-${ARCH}\r\nelif [ \"${VERSION}\" == \"nightly\" ]; then\r\n    echo -e \"downloading Gitea nightly\"\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/main/gitea-main-linux-${ARCH}\r\nelse\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/${VERSION}/gitea-${VERSION}-linux-${ARCH}\r\n    echo -e \"downloading Gitea $VERSION\"\r\nfi\r\n\r\nchmod +x gitea\r\n\r\nmkdir -p custom\r\n\r\nif [ -f \"/mnt/server/custom/app.ini\" ]; then\r\n    echo \"config file exists\"\r\nelse\r\n    echo \"[server]\r\n    LOCAL_ROOT_URL = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DOMAIN           = ${SERVER_IP}\r\n    HTTP_PORT        = ${SERVER_PORT}\r\n    ROOT_URL         = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DISABLE_SSH      = ${DISABLE_SSH}\r\n    SSH_PORT         = ${SSH_PORT}\" > /mnt/server/custom/app.ini\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Disable SSH",
+            "description": "Disable SSH feature when it’s not available",
+            "env_variable": "DISABLE_SSH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "SSH Port",
+            "description": "SSH port displayed in clone URL.",
+            "env_variable": "SSH_PORT",
+            "default_value": "2020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "you can use latest, nightly or version (e.g. 1.18.1)",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "gitea-c5b0728193b5",
+        "name": "Gitea",
+        "description": "Gitea is a community managed lightweight code hosting solution written in Go. It is published under the MIT license.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/gitea-c5b0728193b5.json",
+        "sha256": "2dd4d3421ab3897c744dedc69b1086fd71320ceedfd262ad137d8df9df43009b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "gitea/egg-gitea.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/c5b0728193b5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:59+00:00",
+        "name": "Gitea",
+        "author": "mario.franze@gmail.com",
+        "description": "Gitea is a community managed lightweight code hosting solution written in Go. It is published under the MIT license.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./gitea web -p {{SERVER_PORT}} -c ./app.ini",
+        "config": {
+          "files": "{\"custom/app.ini\": {\"parser\": \"file\", \"find\": {\"DISABLE_SSH\": \"DISABLE_SSH: {{server.build.env.DISABLE_SSH}}\", \"SSH_PORT\": \"SSH_PORT: {{server.build.env.SSH_PORT}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Listen: \"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "## Gitea Installscript\r\n\r\n## update system\r\napt update\r\napt -y install --no-install-recommends jq curl ca-certificates\r\n\r\n## Variables\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nLATEST=$(curl -sSL https://dl.gitea.io/gitea/version.json | jq -r .latest.version)\r\n\r\n\r\ncd /mnt/server\r\n\r\n## install gitea\r\necho -e \"Download url: https://dl.gitea.io/gitea/${LATEST}/gitea-${LATEST}-linux-${ARCH}\"\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"downloading Gitea $LATEST\"\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/${LATEST}/gitea-${LATEST}-linux-${ARCH}\r\nelif [ \"${VERSION}\" == \"nightly\" ]; then\r\n    echo -e \"downloading Gitea nightly\"\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/main/gitea-main-linux-${ARCH}\r\nelse\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/${VERSION}/gitea-${VERSION}-linux-${ARCH}\r\n    echo -e \"downloading Gitea $VERSION\"\r\nfi\r\n\r\nchmod +x gitea\r\n\r\nmkdir -p custom\r\n\r\nif [ -f \"/mnt/server/custom/app.ini\" ]; then\r\n    echo \"config file exists\"\r\nelse\r\n    echo \"[server]\r\n    LOCAL_ROOT_URL = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DOMAIN           = ${SERVER_IP}\r\n    HTTP_PORT        = ${SERVER_PORT}\r\n    ROOT_URL         = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DISABLE_SSH      = ${DISABLE_SSH}\r\n    SSH_PORT         = ${SSH_PORT}\" > /mnt/server/custom/app.ini\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Disable SSH",
+            "description": "Disable SSH feature when it’s not available",
+            "env_variable": "DISABLE_SSH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "SSH Port",
+            "description": "SSH port displayed in clone URL.",
+            "env_variable": "SSH_PORT",
+            "default_value": "2020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "you can use latest, nightly or version (e.g. 1.18.1)",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "gitea-ddb32a218b5b",
+        "name": "Gitea",
+        "description": "Gitea is a community managed lightweight code hosting solution written in Go. It is published under the MIT license.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/gitea-ddb32a218b5b.json",
+        "sha256": "5476d7ea9de23557715c5b9399703105376861455e84d14b74394fcd9b8c8348",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "gitea/egg-gitea.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/ddb32a218b5b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:59+00:00",
+        "name": "Gitea",
+        "author": "mario.franze@gmail.com",
+        "uuid": "f924edb1-eabc-4e39-b19d-edf548a043c8",
+        "description": "Gitea is a community managed lightweight code hosting solution written in Go. It is published under the MIT license.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./gitea web -p {{SERVER_PORT}} -c ./app.ini",
+        "config": {
+          "files": "{\"custom/app.ini\": {\"parser\": \"file\", \"find\": {\"DISABLE_SSH\": \"DISABLE_SSH: {{server.build.env.DISABLE_SSH}}\", \"SSH_PORT\": \"SSH_PORT: {{server.build.env.SSH_PORT}}\"}}}",
+          "startup": "{\"done\": \"Listen: \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## Gitea Installscript\r\n\r\n## update system\r\napt update\r\napt -y install --no-install-recommends jq curl ca-certificates\r\n\r\n## Variables\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\nLATEST=$(curl -sSL https://dl.gitea.io/gitea/version.json | jq -r .latest.version)\r\n\r\n\r\ncd /mnt/server\r\n\r\n## install gitea\r\necho -e \"Download url: https://dl.gitea.io/gitea/${LATEST}/gitea-${LATEST}-linux-${ARCH}\"\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"downloading Gitea $LATEST\"\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/${LATEST}/gitea-${LATEST}-linux-${ARCH}\r\nelif [ \"${VERSION}\" == \"nightly\" ]; then\r\n    echo -e \"downloading Gitea nightly\"\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/main/gitea-main-linux-${ARCH}\r\nelse\r\n    curl -sSL -o gitea https://dl.gitea.io/gitea/${VERSION}/gitea-${VERSION}-linux-${ARCH}\r\n    echo -e \"downloading Gitea $VERSION\"\r\nfi\r\n\r\nchmod +x gitea\r\n\r\nmkdir -p custom\r\n\r\nif [ -f \"/mnt/server/custom/app.ini\" ]; then\r\n    echo \"config file exists\"\r\nelse\r\n    echo \"[server]\r\n    LOCAL_ROOT_URL = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DOMAIN           = ${SERVER_IP}\r\n    HTTP_PORT        = ${SERVER_PORT}\r\n    ROOT_URL         = http://${SERVER_IP}:${SERVER_PORT}/\r\n    DISABLE_SSH      = ${DISABLE_SSH}\r\n    SSH_PORT         = ${SSH_PORT}\" > /mnt/server/custom/app.ini\r\nfi\r\n\r\necho -e \"-------------------------------------------------\"\r\necho -e \"Installation completed\"\r\necho -e \"-------------------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Disable SSH",
+            "description": "Disable SSH feature when it’s not available",
+            "env_variable": "DISABLE_SSH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SSH Port",
+            "description": "SSH port displayed in clone URL.",
+            "env_variable": "SSH_PORT",
+            "default_value": "2020",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65535",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "you can use latest, nightly or version (e.g. 1.18.1)",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "golang-generic-1a5ac02597d6",
+        "name": "golang generic",
+        "description": "A generic golang egg that compiles the application and saves an executable\r\n\r\nMeant to be customized before it is used.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/golang-generic-1a5ac02597d6.json",
+        "sha256": "57f09e9ad2729a67aea5ba4da4fd33f081af90b361c2533a968f718125323b85",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "golang/egg-golang-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/1a5ac02597d6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:56+00:00",
+        "name": "golang generic",
+        "author": "parker@parkervcp.com",
+        "uuid": "b1c18867-5be4-4124-9ce2-8924339de747",
+        "description": "A generic golang egg that compiles the application and saves an executable\r\n\r\nMeant to be customized before it is used.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./${EXECUTABLE}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# golang generic package\r\n\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ngo get ${GO_PACKAGE}\r\n\r\ncd src/${GO_PACKAGE}\r\n\r\ngo get\r\n\r\ngo build\r\n\r\ncp -f ${EXECUTABLE} /mnt/server/",
+            "container": "golang:1.15-buster",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Go Package",
+            "description": "Go package to get and build",
+            "env_variable": "GO_PACKAGE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Executable",
+            "description": "This is the executable from the build.",
+            "env_variable": "EXECUTABLE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "golang-generic-5893e20eb582",
+        "name": "golang generic",
+        "description": "A generic golang egg that compiles the application and saves an executable\r\n\r\nMeant to be customized before it is used.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/golang-generic-5893e20eb582.json",
+        "sha256": "78774b0b1b7313fc14739e83467b0cd29c00aed04c08f34f386a3a7214768d60",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "golang/egg-pterodactyl-golang-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "generic/golang/egg-golang-generic.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--generic/5893e20eb582.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:56+00:00",
+        "name": "golang generic",
+        "author": "parker@parkervcp.com",
+        "description": "A generic golang egg that compiles the application and saves an executable\r\n\r\nMeant to be customized before it is used.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./${EXECUTABLE}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "golang:1.15-buster",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# golang generic package\r\n\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ngo get ${GO_PACKAGE}\r\n\r\ncd src/${GO_PACKAGE}\r\n\r\ngo get\r\n\r\ngo build\r\n\r\ncp -f ${EXECUTABLE} /mnt/server/"
+          }
+        },
+        "variables": [
+          {
+            "name": "Go Package",
+            "description": "Go package to get and build",
+            "env_variable": "GO_PACKAGE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Executable",
+            "description": "This is the executable from the build.",
+            "env_variable": "EXECUTABLE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "golang-generic-ad5f791c2ecf",
+        "name": "golang generic",
+        "description": "A generic golang egg that compiles the application and saves an executable\r\n\r\nMeant to be customized before it is used.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/golang-generic-ad5f791c2ecf.json",
+        "sha256": "f5135913131874d985770663621e92dc4cca22b6d6fc73ec4dfb4d0aba846654",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "golang/egg-golang-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/ad5f791c2ecf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-07-25T14:20:37-04:00",
+        "name": "golang generic",
+        "author": "parker@parkervcp.com",
+        "description": "A generic golang egg that compiles the application and saves an executable\r\n\r\nMeant to be customized before it is used.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./${EXECUTABLE}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# golang generic package\r\n\r\n\r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ngo get ${GO_PACKAGE}\r\n\r\ncd src/${GO_PACKAGE}\r\n\r\ngo get\r\n\r\ngo build\r\n\r\ncp -f ${EXECUTABLE} /mnt/server/",
+            "container": "golang:1.15-buster",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Go Package",
+            "description": "Go package to get and build",
+            "env_variable": "GO_PACKAGE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Executable",
+            "description": "This is the executable from the build.",
+            "env_variable": "EXECUTABLE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "grafana-869ec871506b",
+        "name": "Grafana",
+        "description": "The open and composable observability and data visualization platform.\r\nVisualize metrics, logs, and traces from multiple sources like Prometheus, Loki, Elasticsearch, InfluxDB, Postgres and many more.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/grafana-869ec871506b.json",
+        "sha256": "086314e8275f4e20ca9166e03620de53f517d3c2c972f7d45c5116dae8ed4225",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "grafana/egg-grafana.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/869ec871506b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:00+00:00",
+        "name": "Grafana",
+        "author": "p.zarrad@outlook.de",
+        "uuid": "096dad58-a667-4620-a86b-db361e6fb8c4",
+        "description": "The open and composable observability and data visualization platform.\r\nVisualize metrics, logs, and traces from multiple sources like Prometheus, Loki, Elasticsearch, InfluxDB, Postgres and many more.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/grafana server web",
+        "config": {
+          "files": "{\"conf/defaults.ini\": {\"parser\": \"ini\", \"find\": {\"server.http_port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"HTTP Server Listen\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\nshopt -s extglob\r\n\r\n# Switch to mounted directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Update installation system and install curl\r\napt-get update\r\napt-get install -y curl\r\n\r\n# Cleanup previous install if available\r\nif [ -d \"conf\" ]; then mv conf conf.bak; fi\r\nrm -rfv !(conf.bak|data)\r\n\r\n# Download and extract Grafana\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n\r\nversion=${GRAFANA_VERSION}\r\nif [ \"$version\" = \"latest\" ]; then version=$(curl --silent \"https://api.github.com/repos/grafana/grafana/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\ncurl https://dl.grafana.com/oss/release/grafana-${version}.linux-${ARCH}.tar.gz --output grafana.tar.gz\r\ntar -zxvf grafana.tar.gz\r\nmv -n grafana-*/* ./\r\nrm -rf grafana.tar.gz grafana-*/\r\n\r\n# Restore configuration if necessary\r\nif [ -d \"conf.bak\" ]; then rm -rf conf && mv conf.bak conf && rm -rf conf.bak; fi\r\n\r\n# Update existing plugins and install Grafana plugins\r\nif [ ! -z \"${GRAFANA_PLUGINS}\" ]; then\r\nfor v in $(tr ',' '\\n' <<< \"${GRAFANA_PLUGINS}\") ; do ./bin/grafana-cli --pluginsDir=\"/mnt/server/data/plugins\" plugins install \"$v\" ; done\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Grafana Version",
+            "description": "The version of Grafana to install. By default the latest version is being installed.",
+            "env_variable": "GRAFANA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Grafana Plugins",
+            "description": "A list of Grafana plugins that should be installed. Enter the plugins comma separated (e. g. a,b,c).",
+            "env_variable": "grafana_plugins",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "grafana-ba44a13b5199",
+        "name": "Grafana",
+        "description": "The open and composable observability and data visualization platform.\r\nVisualize metrics, logs, and traces from multiple sources like Prometheus, Loki, Elasticsearch, InfluxDB, Postgres and many more.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/grafana-ba44a13b5199.json",
+        "sha256": "64a4dc99cc869e3e619d095f7f95612d8eca2ea3a499491782e7cfe8bd1314e6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "grafana/egg-pterodactyl-grafana.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/grafana/egg-grafana.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/ba44a13b5199.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:00+00:00",
+        "name": "Grafana",
+        "author": "p.zarrad@outlook.de",
+        "description": "The open and composable observability and data visualization platform.\r\nVisualize metrics, logs, and traces from multiple sources like Prometheus, Loki, Elasticsearch, InfluxDB, Postgres and many more.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/grafana server web",
+        "config": {
+          "files": "{\"conf/defaults.ini\": {\"parser\": \"ini\", \"find\": {\"server.http_port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"HTTP Server Listen\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\nshopt -s extglob\r\n\r\n# Switch to mounted directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Update installation system and install curl\r\napt-get update\r\napt-get install -y curl\r\n\r\n# Cleanup previous install if available\r\nif [ -d \"conf\" ]; then mv conf conf.bak; fi\r\nrm -rfv !(conf.bak|data)\r\n\r\n# Download and extract Grafana\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n\r\nversion=${GRAFANA_VERSION}\r\nif [ \"$version\" = \"latest\" ]; then version=$(curl --silent \"https://api.github.com/repos/grafana/grafana/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\ncurl https://dl.grafana.com/oss/release/grafana-${version}.linux-${ARCH}.tar.gz --output grafana.tar.gz\r\ntar -zxvf grafana.tar.gz\r\nmv -n grafana-*/* ./\r\nrm -rf grafana.tar.gz grafana-*/\r\n\r\n# Restore configuration if necessary\r\nif [ -d \"conf.bak\" ]; then rm -rf conf && mv conf.bak conf && rm -rf conf.bak; fi\r\n\r\n# Update existing plugins and install Grafana plugins\r\nif [ ! -z \"${GRAFANA_PLUGINS}\" ]; then\r\nfor v in $(tr ',' '\\n' <<< \"${GRAFANA_PLUGINS}\") ; do ./bin/grafana-cli --pluginsDir=\"/mnt/server/data/plugins\" plugins install \"$v\" ; done\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------"
+          }
+        },
+        "variables": [
+          {
+            "name": "Grafana Version",
+            "description": "The version of Grafana to install. By default the latest version is being installed.",
+            "env_variable": "GRAFANA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Grafana Plugins",
+            "description": "A list of Grafana plugins that should be installed. Enter the plugins comma separated (e. g. a,b,c).",
+            "env_variable": "grafana_plugins",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "grafana-bf9d47ced3a4",
+        "name": "Grafana",
+        "description": "The open and composable observability and data visualization platform.\r\nVisualize metrics, logs, and traces from multiple sources like Prometheus, Loki, Elasticsearch, InfluxDB, Postgres and many more.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/grafana-bf9d47ced3a4.json",
+        "sha256": "df542598ab3d2f9e6fda544e4d6e017fdd40e37f010cf940276ed06ead23410f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "grafana/egg-grafana.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/bf9d47ced3a4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:41:00+00:00",
+        "name": "Grafana",
+        "author": "p.zarrad@outlook.de",
+        "description": "The open and composable observability and data visualization platform.\r\nVisualize metrics, logs, and traces from multiple sources like Prometheus, Loki, Elasticsearch, InfluxDB, Postgres and many more.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./bin/grafana server web",
+        "config": {
+          "files": "{\"conf/defaults.ini\": {\"parser\": \"ini\", \"find\": {\"server.http_port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"HTTP Server Listen\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\nshopt -s extglob\r\n\r\n# Switch to mounted directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n# Update installation system and install curl\r\napt-get update\r\napt-get install -y curl\r\n\r\n# Cleanup previous install if available\r\nif [ -d \"conf\" ]; then mv conf conf.bak; fi\r\nrm -rfv !(conf.bak|data)\r\n\r\n# Download and extract Grafana\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n\r\nversion=${GRAFANA_VERSION}\r\nif [ \"$version\" = \"latest\" ]; then version=$(curl --silent \"https://api.github.com/repos/grafana/grafana/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\ncurl https://dl.grafana.com/oss/release/grafana-${version}.linux-${ARCH}.tar.gz --output grafana.tar.gz\r\ntar -zxvf grafana.tar.gz\r\nmv -n grafana-*/* ./\r\nrm -rf grafana.tar.gz grafana-*/\r\n\r\n# Restore configuration if necessary\r\nif [ -d \"conf.bak\" ]; then rm -rf conf && mv conf.bak conf && rm -rf conf.bak; fi\r\n\r\n# Update existing plugins and install Grafana plugins\r\nif [ ! -z \"${GRAFANA_PLUGINS}\" ]; then\r\nfor v in $(tr ',' '\\n' <<< \"${GRAFANA_PLUGINS}\") ; do ./bin/grafana-cli --pluginsDir=\"/mnt/server/data/plugins\" plugins install \"$v\" ; done\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------"
+          }
+        },
+        "variables": [
+          {
+            "name": "Grafana Version",
+            "description": "The version of Grafana to install. By default the latest version is being installed.",
+            "env_variable": "GRAFANA_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Grafana Plugins",
+            "description": "A list of Grafana plugins that should be installed. Enter the plugins comma separated (e. g. a,b,c).",
+            "env_variable": "grafana_plugins",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

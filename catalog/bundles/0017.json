@@ -1,0 +1,695 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "sogebot-d3290c2d4282",
+        "name": "SogeBot",
+        "description": "sogeBot - Free Twitch Bot built on Node.js https://sogebot.xyz/",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/sogebot-d3290c2d4282.json",
+        "sha256": "532841af877567f09fc18733096793ef969de3feb0b0c66a1d3c69960a1157a0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "twitch/sogebot/egg-pterodactyl-soge-bot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "bots/twitch/sogebot/egg-soge-bot.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--chatbots/d3290c2d4282.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:08+00:00",
+        "name": "SogeBot",
+        "author": "eggs@goover.dev",
+        "description": "sogeBot - Free Twitch Bot built on Node.js https://sogebot.xyz/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_18": "ghcr.io/parkervcp/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "npm start",
+        "config": {
+          "files": "{\".env\": {\"parser\": \"properties\", \"find\": {\"PORT\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"WebPanel is available at\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "node:18-bookworm-slim",
+            "entrypoint": "bash",
+            "script": "#/bin/bash\r\n# Installscript for sogeBot | Author: eggs@goover.dev\r\n\r\nexport DEBIAN_FRONTEND=noninteractive\r\n\r\napt -y update\r\napt install -y curl unzip jq  python3 build-essential ca-certificates\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\nexport NODE_OPTIONS=--max-old-space-size=8192\r\nchown -R root:root /mnt\r\n\r\n#Backup database & config\r\nmkdir -p .backup\r\ncp -f .env /mnt/server/.backup\r\ncp -f sogebot.db /mnt/server/.backup\r\n\r\n#delete old dir's to prevent errors on update\r\nrm -fR dest\r\nrm -fR public\r\nrm -fR node-modules\r\nrm -fR tools\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/sogebot/sogeBot/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/sogebot/sogeBot/releases\")\r\nMATCH=sogeBot\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho -e \"Downloading from $DOWNLOAD_LINK\"\r\ncurl -sSL -o sogeBot.zip ${DOWNLOAD_LINK}\r\n\r\nunzip -o sogeBot.zip\r\nrm -rf sogeBot.zip\r\n\r\n\r\necho \"--------------------------------------------------------------------------\"\r\necho \"Installing dependencies, this will take some time so sit back and relax...\"\r\necho \"IGNORE WARNINGS. THESE ARE NOT ERRORS !!!\"\r\necho \"--------------------------------------------------------------------------\"\r\n\r\nnpm install -g npm@8\r\n\r\nnpm install --verbose --force\r\n\r\necho -e \"install completed\"\r\nexit 0"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Version to install. Latest will install the latest available version.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mariadb-e400c1c0d4a0",
+        "name": "MariaDB",
+        "description": "MariaDB is a community-developed, commercially supported fork of the MySQL relational database management system, intended to remain free and open-source software under the GNU General Public.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mariadb-e400c1c0d4a0.json",
+        "sha256": "b1585a37770aa9ddc9cbaa5158927a0ba98dd0f2e9f3dc2673b8f9321a848ab7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/sql/mariadb/egg-maria-d-b.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/e400c1c0d4a0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-07-04T08:38:00+00:00",
+        "name": "MariaDB",
+        "author": "danielb@purpleflaghosting.com",
+        "description": "MariaDB is a community-developed, commercially supported fork of the MySQL relational database management system, intended to remain free and open-source software under the GNU General Public.",
+        "features": null,
+        "docker_images": {
+          "MariaDB 11.8 LTS": "ghcr.io/ptero-eggs/yolks:mariadb_11.8",
+          "MariaDB 11.6": "ghcr.io/ptero-eggs/yolks:mariadb_11.6",
+          "MariaDB 11.4 LTS": "ghcr.io/ptero-eggs/yolks:mariadb_11.4",
+          "MariaDB 10.11 LTS": "ghcr.io/ptero-eggs/yolks:mariadb_10.11",
+          "MariaDB 10.6 LTS": "ghcr.io/ptero-eggs/yolks:mariadb_10.6"
+        },
+        "file_denylist": [],
+        "startup": "${MARIADB_EXECUTABLE}",
+        "config": {
+          "files": "{\".my.cnf\": {\"parser\": \"ini\", \"find\": {\"mysqld.port\": \"{{server.build.default.port}}\", \"client.port\": \"{{server.build.default.port}}\", \"mysqld.bind-address\": \"0.0.0.0\", \"mysqld.pid-file\": \"/home/container/run/mysqld/mysqld.pid\", \"mysqld.socket\": \"/home/container/run/mysqld/mysqld.sock\", \"client.socket\": \"/home/container/run/mysqld/mysqld.sock\", \"mysqld.general_log_file\": \"/home/container/log/mysql/mysql.log\", \"client.user\": \"container\"}}}",
+          "startup": "{\"done\": \"ready for connections.\"}",
+          "logs": "{}",
+          "stop": "shutdown; exit;"
+        },
+        "scripts": {
+          "installation": {
+            "script": "# Nothing here - All the magic is in the entrypoint.sh\r\necho \"Installation complete\"",
+            "container": "alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "mariadb-10-3-957c7357a29f",
+        "name": "MariaDB 10.3",
+        "description": "One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mariadb-10-3-957c7357a29f.json",
+        "sha256": "00bfb6d78300a9e888892ca78e10e84c360c42c045b9c631eeecbdc79c54a927",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "sql/mariadb/egg-maria-d-b10-3.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/database",
+            "commit": "879998017b19a513a997a35dc45317f99863a37a",
+            "path": "sql/mariadb/egg-pterodactyl-maria-d-b10-3.json",
+            "format": "PTDL_v2"
+          },
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "database/sql/mariadb/egg-maria-d-b10-3.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--database/957c7357a29f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:34:29+00:00",
+        "name": "MariaDB 10.3",
+        "author": "parker@parkervcp.com",
+        "uuid": "4b4efa4c-1739-42f9-91d5-c99d618a6d89",
+        "description": "One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.",
+        "features": null,
+        "docker_images": {
+          "MariaDB 10.3": "ghcr.io/parkervcp/yolks:mariadb_10.3"
+        },
+        "file_denylist": [],
+        "startup": "{ /usr/sbin/mysqld & } && sleep 5 && mysql -u root",
+        "config": {
+          "files": "{\".my.cnf\": {\"parser\": \"file\", \"find\": {\"port\": \"port = {{server.build.default.port}}\", \"bind-address\": \"bind-address=0.0.0.0\"}}}",
+          "startup": "{\"done\": \"mysqld: ready for connections\"}",
+          "logs": "{}",
+          "stop": "shutdown; exit;"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# MariaDB Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nset -x\r\n\r\necho -e \"installing dependencies\"\r\napt-get -y update\r\napt-get -y install curl\r\n\r\n## add user\r\necho -e \"adding container user\"\r\nuseradd -d /home/container -m container -s /bin/bash\r\n\r\n## own server to container user\r\nchown container: /mnt/server/\r\n\r\n## run install script as user\r\necho -e \"getting my.conf\"\r\nif [ -f /mnt/server/.my.cnf ]; then\r\n    echo -e \"moving current config for install\"\r\n    mv /mnt/server/.my.cnf /mnt/server/custom.my.cnf\r\n    runuser -l container -c 'curl https://raw.githubusercontent.com/parkervcp/eggs/master/database/sql/mariadb/install.my.cnf > /mnt/server/.my.cnf'\r\nelse\r\n    runuser -l container -c 'curl https://raw.githubusercontent.com/parkervcp/eggs/master/database/sql/mariadb/install.my.cnf > /mnt/server/.my.cnf'\r\nfi\r\n\r\n## mkdir and install db\r\necho -e \"installing mysql database\"\r\nrunuser -l container -c 'mkdir -p /mnt/server/run/mysqld'\r\nrunuser -l container -c 'mkdir -p /mnt/server/log/mysql'\r\nrunuser -l container -c 'mkdir /mnt/server/mysql'\r\n\r\nrunuser -l container -c 'mysql_install_db --defaults-file=/mnt/server/.my.cnf'\r\n\r\nif [ -f /mnt/server/custom.my.cnf ]; then\r\n    echo -e \"moving current config back in place\"\r\n    mv /mnt/server/custom.my.cnf /mnt/server/.my.cnf\r\nelse\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/database/sql/mariadb/my.cnf > /mnt/server/.my.cnf\r\nfi\r\n\r\necho -e \"install complete\"\r\n\r\nexit",
+            "container": "mariadb:10.3",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "mariadb-11-4-abc8d05ceb8f",
+        "name": "MariaDB 11.4",
+        "description": "One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mariadb-11-4-abc8d05ceb8f.json",
+        "sha256": "a99f92cf9fc3f8015ccb20d60c799c9c789dc04e36a8526505f1d82ad1c77ae6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "sql/mariadb/egg-maria-d-b114.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/abc8d05ceb8f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-25T20:28:38+00:00",
+        "name": "MariaDB 11.4",
+        "author": "parker@parkervcp.com",
+        "uuid": "efad9890-b46d-43e2-8719-6a6cc3469b0d",
+        "description": "One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.",
+        "features": [],
+        "docker_images": {
+          "MariaDB 11.4": "ghcr.io/parkervcp/yolks:mariadb_11.4"
+        },
+        "file_denylist": [],
+        "startup": "{ /usr/sbin/mariadbd --defaults-file=/home/container/.my.cnf & } && sleep 5 && mariadb -u container",
+        "config": {
+          "files": "{\".my.cnf\": {\"parser\": \"file\", \"find\": {\"port\": \"port = {{server.allocations.default.port}}\", \"bind-address\": \"bind-address=0.0.0.0\"}}}",
+          "startup": "{\"done\": \"ready for connections\"}",
+          "logs": "{}",
+          "stop": "shutdown; exit;"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# MariaDB Installation Script\n#\n# Server Files: /mnt/server\nset -x\n\necho -e \"installing dependencies\"\napt-get -y update\napt-get -y install curl\n\n## add user\necho -e \"adding container user\"\nuseradd -d /home/container -m container -s /bin/bash\n\n## own server to container user\nchown container: /mnt/server/\n\n## mkdir and install db\necho -e \"installing mariadb database\"\nrunuser -l container -c 'mkdir -p /mnt/server/run/mariadbd'\nrunuser -l container -c 'mkdir -p /mnt/server/log/mariadb'\nrunuser -l container -c 'mkdir /mnt/server/mariadb'\n\n## get install config\nrunuser -l container -c 'curl https://raw.githubusercontent.com/pelican-eggs/database/refs/heads/main/sql/mariadb/install.maria.cnf > /mnt/server/install.maria.cnf'\n\n# install with install config\nrunuser -l container -c 'mariadb-install-db --defaults-file=/mnt/server/install.maria.cnf'\n\n## remove install config\nrm /mnt/server/install.maria.cnf\n\nif [ ! -f /mnt/server/.my.cnf ]; then\n    curl https://raw.githubusercontent.com/pelican-eggs/database/refs/heads/main/sql/mariadb/.maria.cnf > /mnt/server/.my.cnf\nfi\n\necho -e \"install complete\"\n\nexit",
+            "container": "mariadb:11.4",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "mariadb-11-5-e56544e11c15",
+        "name": "MariaDB 11.5",
+        "description": "One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mariadb-11-5-e56544e11c15.json",
+        "sha256": "863cb203c94ce1295bcf3deb1628733b1b8147859c0f49a2b8a6f0d05ea0d105",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "sql/mariadb/egg-maria-d-b115.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/e56544e11c15.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-25T20:28:39+00:00",
+        "name": "MariaDB 11.5",
+        "author": "parker@parkervcp.com",
+        "uuid": "b376eda5-e338-4507-b4f4-e11f949d4214",
+        "description": "One of the most popular database servers. Made by the original developers of MySQL. Guaranteed to stay open source.",
+        "features": [],
+        "docker_images": {
+          "MariaDB 11.5": "ghcr.io/parkervcp/yolks:mariadb_11.5"
+        },
+        "file_denylist": [],
+        "startup": "{ /usr/sbin/mariadbd --defaults-file=/home/container/.my.cnf & } && sleep 5 && mariadb -u container",
+        "config": {
+          "files": "{\".my.cnf\": {\"parser\": \"file\", \"find\": {\"port\": \"port = {{server.allocations.default.port}}\", \"bind-address\": \"bind-address=0.0.0.0\"}}}",
+          "startup": "{\"done\": \"ready for connections.\"}",
+          "logs": "{}",
+          "stop": "shutdown; exit;"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# MariaDB Installation Script\n#\n# Server Files: /mnt/server\nset -x\n\necho -e \"installing dependencies\"\napt-get -y update\napt-get -y install curl\n\n## add user\necho -e \"adding container user\"\nuseradd -d /home/container -m container -s /bin/bash\n\n## own server to container user\nchown container: /mnt/server/\n\n## mkdir and install db\necho -e \"installing mariadb database\"\nrunuser -l container -c 'mkdir -p /mnt/server/run/mariadbd'\nrunuser -l container -c 'mkdir -p /mnt/server/log/mariadb'\nrunuser -l container -c 'mkdir /mnt/server/mariadb'\n\n## get install config\nrunuser -l container -c 'curl https://raw.githubusercontent.com/pelican-eggs/database/refs/heads/main/sql/mariadb/install.maria.cnf > /mnt/server/install.maria.cnf'\n\n# install with install config\nrunuser -l container -c 'mariadb-install-db --defaults-file=/mnt/server/install.maria.cnf'\n\n## remove install config\nrm /mnt/server/install.maria.cnf\n\nif [ ! -f /mnt/server/.my.cnf ]; then\n    curl https://raw.githubusercontent.com/pelican-eggs/database/refs/heads/main/sql/mariadb/.maria.cnf > /mnt/server/.my.cnf\nfi\n\necho -e \"install complete\"\n\nexit",
+            "container": "mariadb:11.5",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "minio-s3-3c799276b526",
+        "name": "Minio S3",
+        "description": "MinIO is a cloud storage server compatible with Amazon S3, released under Apache License v2. As an object store, MinIO can store unstructured data such as photos, videos, log files, backups and container images. The maximum size of an object is 5TB.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/minio-s3-3c799276b526.json",
+        "sha256": "eaca42bda58a967339345e8f7443365f6d8a5a27a30c7f1c4abac60fc4837dec",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/storage",
+          "commit": "689772ac64db90e21a692ebb74a62de327821e72",
+          "path": "minio/egg-pterodactyl-minio-s3.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--storage/3c799276b526.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:32:00+00:00",
+        "name": "Minio S3",
+        "author": "accounts@bofanodes.io",
+        "description": "MinIO is a cloud storage server compatible with Amazon S3, released under Apache License v2. As an object store, MinIO can store unstructured data such as photos, videos, log files, backups and container images. The maximum size of an object is 5TB.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./minio.sh",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Documentation:\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "debian:buster-slim",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n#\r\napt update\r\napt install -y wget\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\ncd /mnt/server\r\nwget https://dl.min.io/server/minio/release/linux-${ARCH}/minio\r\nchmod +x minio\r\nmkdir data\r\nmkdir keys\r\n\r\nwget https://github.com//parkervcp/eggs/raw/master/storage/minio/minio.sh\r\nchmod +x minio.sh\r\nexport MINIO_ACCESS_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)\r\necho $MINIO_ACCESS_KEY > keys/key.txt\r\nexport MINIO_SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)\r\necho $MINIO_SECRET_KEY > keys/secret.txt\r\necho done"
+          }
+        },
+        "variables": [
+          {
+            "name": "Startup Type",
+            "description": "normal,rotate,update",
+            "env_variable": "STARTUP_TYPE",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:normal,rotate,update",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "minio-s3-6f2737db0e9e",
+        "name": "Minio S3",
+        "description": "MinIO is a cloud storage server compatible with Amazon S3, released under Apache License v2. As an object store, MinIO can store unstructured data such as photos, videos, log files, backups and container images. The maximum size of an object is 5TB.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/minio-s3-6f2737db0e9e.json",
+        "sha256": "0519b168e598078b2d1213a597bd6bf211a99ba8b1e66ae2f485118880203ff7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/storage",
+          "commit": "689772ac64db90e21a692ebb74a62de327821e72",
+          "path": "minio/egg-minio-s3.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--storage/6f2737db0e9e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:32:00+00:00",
+        "name": "Minio S3",
+        "author": "accounts@bofanodes.io",
+        "uuid": "47f32d80-860a-4c7a-81ec-57a1f9cc0386",
+        "description": "MinIO is a cloud storage server compatible with Amazon S3, released under Apache License v2. As an object store, MinIO can store unstructured data such as photos, videos, log files, backups and container images. The maximum size of an object is 5TB.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./minio.sh",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Documentation:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#\r\napt update\r\napt install -y wget\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\ncd /mnt/server\r\nwget https://dl.min.io/server/minio/release/linux-${ARCH}/minio\r\nchmod +x minio\r\nmkdir data\r\nmkdir keys\r\n\r\nwget https://github.com//parkervcp/eggs/raw/master/storage/minio/minio.sh\r\nchmod +x minio.sh\r\nexport MINIO_ACCESS_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)\r\necho $MINIO_ACCESS_KEY > keys/key.txt\r\nexport MINIO_SECRET_KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)\r\necho $MINIO_SECRET_KEY > keys/secret.txt\r\necho done",
+            "container": "debian:buster-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Startup Type",
+            "description": "normal,rotate,update",
+            "env_variable": "STARTUP_TYPE",
+            "default_value": "normal",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:normal,rotate,update",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mongodb-3b9a2c1afefb",
+        "name": "MongoDB",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-3b9a2c1afefb.json",
+        "sha256": "34b08615979ab4db07e69394604a5f38bd0ead32f5bde3f163a0a22ae45fac7b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "nosql/mongodb/egg-mongo-d-b.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/3b9a2c1afefb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:34:25+00:00",
+        "name": "MongoDB",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers.",
+        "uuid": "397bdc7f-fe96-4138-86de-f2b72357fbbf",
+        "features": null,
+        "docker_images": {
+          "MongoDB_4": "ghcr.io/parkervcp/yolks:mongodb_4",
+          "MongoDB_5": "ghcr.io/parkervcp/yolks:mongodb_5"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done && mongo --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongo --eval \"db.getSiblingDB('admin').shutdownServer()\" 127.0.0.1:${SERVER_PORT}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongo --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongo --eval \"db.getSiblingDB('admin').shutdownServer()\"",
+            "container": "mongo:4-bionic",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mongodb-bfef52cb283d",
+        "name": "MongoDB",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers and for my butt era.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-bfef52cb283d.json",
+        "sha256": "544f757d00820eb6ef4e59686b3e0df66844ea1cafdf197bf07e4a7dc97e0a59",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/nosql/mongodb/egg-mongo-d-b.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/bfef52cb283d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-08-28T13:33:51+02:00",
+        "name": "MongoDB",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers and for my butt era.",
+        "features": null,
+        "docker_images": {
+          "MongoDB_4": "ghcr.io/parkervcp/yolks:mongodb_4",
+          "MongoDB_5": "ghcr.io/parkervcp/yolks:mongodb_5"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done && mongo --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongo --eval \"db.getSiblingDB('admin').shutdownServer()\" 127.0.0.1:${SERVER_PORT}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongo --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongo --eval \"db.getSiblingDB('admin').shutdownServer()\"",
+            "container": "mongo:4-bionic",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "mongodb-6-1d4f6fdb0e18",
+        "name": "MongoDB 6",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers and for my butt era.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/mongodb-6-1d4f6fdb0e18.json",
+        "sha256": "0dce31d5861b6cdc2555f3a35bbeb3f272bcccdd8950ead34651f8aaef765ff7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/nosql/mongodb/egg-mongo-d-b6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/1d4f6fdb0e18.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-10-31T17:26:13+00:00",
+        "name": "MongoDB 6",
+        "author": "parker@parkervcp.com",
+        "description": "MongoDB is a general purpose, document-based, distributed database built for modern application developers and for my butt era.",
+        "features": null,
+        "docker_images": {
+          "MongoDB_6": "ghcr.io/parkervcp/yolks:mongodb_6"
+        },
+        "file_denylist": [],
+        "startup": "mongod --fork --dbpath /home/container/mongodb/ --port ${SERVER_PORT} --bind_ip 0.0.0.0 --logpath /home/container/logs/mongo.log -f /home/container/mongod.conf; until nc -z -v -w5 127.0.0.1 ${SERVER_PORT}; do echo 'Waiting for mongodb connection...'; sleep 5; done; mongosh --username ${MONGO_USER} --password ${MONGO_USER_PASS} --host 127.0.0.1:${SERVER_PORT} && mongosh --eval \"db.getSiblingDB('admin').shutdownServer()\" 127.0.0.1:${SERVER_PORT}",
+        "config": {
+          "files": "{\"mongod.conf\": {\"parser\": \"file\", \"find\": {\"#security:\": \"security: \\r\\n  authorization: \\\"enabled\\\"\"}}}",
+          "startup": "{\"done\": \"child process started successfully\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash \r\nif [ ! -d /mnt/server/ ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\ncp /etc/mongod.conf.orig /mnt/server/mongod.conf\r\n\r\nmkdir mongodb logs\r\n\r\nmongod --port 27017 --dbpath /mnt/server/mongodb/ --logpath /mnt/server/logs/mongo.log --fork\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').createUser({user: '${MONGO_USER}', pwd: '${MONGO_USER_PASS}', roles: ['root']})\"\r\n\r\nmongosh --eval \"db.getSiblingDB('admin').shutdownServer()\"",
+            "container": "mongo:6-focal",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Mongo Admin Username",
+            "description": "The MongoDB Admin user",
+            "env_variable": "MONGO_USER",
+            "default_value": "admin",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Mongo Admin Password",
+            "description": "",
+            "env_variable": "MONGO_USER_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

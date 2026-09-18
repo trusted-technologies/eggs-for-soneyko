@@ -1,0 +1,1086 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "rust-generic-d3ec39e16488",
+        "name": "rust generic",
+        "description": "Creates a container that runs rust with cargo.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/rust-generic-d3ec39e16488.json",
+        "sha256": "eb6018c6336fdb980849b0179e6e22432bf4b10db67cd0c4077371c8fe3162d0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "rust/egg-rust-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--generic/d3ec39e16488.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:53+00:00",
+        "name": "rust generic",
+        "author": "ethan@ethancoward.dev",
+        "uuid": "46a0d309-4e45-4475-ab2a-7e4a965fe410",
+        "description": "Creates a container that runs rust with cargo.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:rust_latest": "ghcr.io/parkervcp/yolks:rust_latest",
+          "ghcr.io/parkervcp/yolks:rust_1.60": "ghcr.io/parkervcp/yolks:rust_1.60",
+          "ghcr.io/parkervcp/yolks:rust_1.56": "ghcr.io/parkervcp/yolks:rust_1.56",
+          "ghcr.io/parkervcp/yolks:rust_1.31": "ghcr.io/parkervcp/yolks:rust_1.31"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; cargo run --release",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"change this part\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Rust Bot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\nexport HOME=/mnt/server\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "Git repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sftp-storage-share-773b9d6656db",
+        "name": "SFTP Storage Share",
+        "description": "A simple \"empty\" egg that acts as a private SFTP storage share by utilizing Pterodactyl's built in SFTP system for servers. Sub-users can be added to the server by the owner to allow additional people to access the share. \"Starting\" the server performs no actions and it should be left off.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/sftp-storage-share-773b9d6656db.json",
+        "sha256": "9c2cd2cce9f6f128fec986de1c405bb9167eef0207dcac9ea27ffbdac057f8af",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "storage/sftp_storage_share/egg-sftp-storage-share.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/773b9d6656db.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-01-27T18:29:17+00:00",
+        "name": "SFTP Storage Share",
+        "author": "rehlmgaming@gmail.com",
+        "description": "A simple \"empty\" egg that acts as a private SFTP storage share by utilizing Pterodactyl's built in SFTP system for servers. Sub-users can be added to the server by the owner to allow additional people to access the share. \"Starting\" the server performs no actions and it should be left off.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:alpine": "ghcr.io/parkervcp/yolks:alpine"
+        },
+        "file_denylist": [],
+        "startup": "echo -e \"\\n\\n\\033[0;31mThere is no need to start this server. The SFTP service is always running. Feel free to stop the server now.\\n\\t\\033[0;36m(Sub-users can be added via the Users tab to add/remove access to the share in real time)\\n\\n\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "# Pterodactyl SFTP Storage Share Egg ~ David Wolfe (Red-Thirten) ~ 2023-01-27",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "sftp-storage-share-9fa84c23119e",
+        "name": "SFTP Storage Share",
+        "description": "A simple \"empty\" egg that acts as a private SFTP storage share by utilizing Pterodactyl's built in SFTP system for servers. Sub-users can be added to the server by the owner to allow additional people to access the share. \"Starting\" the server performs no actions and it should be left off.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/sftp-storage-share-9fa84c23119e.json",
+        "sha256": "7c6a4397924946f6dcc9951f3f043ae44b9dc92d921374a992f0c9df50f79d7f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "sftp_storage_share/egg-s-f-t-p-storage-share.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/9fa84c23119e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL - PTERODACTYL.io",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:32:01+00:00",
+        "name": "SFTP Storage Share",
+        "author": "red_thirten@yahoo.com",
+        "description": "A simple \"empty\" egg that acts as a private SFTP storage share by utilizing Pterodactyl's built in SFTP system for servers. Sub-users can be added to the server by the owner to allow additional people to access the share. \"Starting\" the server performs no actions and it should be left off.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:alpine": "ghcr.io/ptero-eggs/yolks:alpine"
+        },
+        "file_denylist": [],
+        "startup": "echo -e \"\\n\\n\\033[0;31mThere is no need to start this server. The SFTP service is always running. Feel free to stop the server now.\\n\\t\\033[0;36m(Sub-users can be added via the Users tab to add/remove access to the share in real time)\\n\\n\"",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "alpine:3.4",
+            "entrypoint": "ash",
+            "script": "# Pterodactyl SFTP Storage Share Egg ~ David Wolfe (Red-Thirten) ~ 2023-01-27"
+          }
+        },
+        "variables": []
+      }
+    },
+    {
+      "entry": {
+        "id": "sogebot-08fa295480df",
+        "name": "SogeBot",
+        "description": "sogeBot - Free Twitch Bot built on Node.js https://sogebot.xyz/",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/sogebot-08fa295480df.json",
+        "sha256": "3416c060757b93fd8e76bf548f283607cff26632cca6becbdfbf1e0ddfa8ceb4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "bots/twitch/sogebot/egg-soge-bot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/08fa295480df.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:08+00:00",
+        "name": "SogeBot",
+        "author": "eggs@goover.dev",
+        "description": "sogeBot - Free Twitch Bot built on Node.js https://sogebot.xyz/",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:nodejs_18": "ghcr.io/ptero-eggs/yolks:nodejs_18"
+        },
+        "file_denylist": [],
+        "startup": "npm start",
+        "config": {
+          "files": "{\".env\": {\"parser\": \"properties\", \"find\": {\"PORT\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"WebPanel is available at\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "node:18-bookworm-slim",
+            "entrypoint": "bash",
+            "script": "#/bin/bash\r\n# Installscript for sogeBot | Author: eggs@goover.dev\r\n\r\nexport DEBIAN_FRONTEND=noninteractive\r\n\r\napt -y update\r\napt install -y curl unzip jq  python3 build-essential ca-certificates\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\nexport NODE_OPTIONS=--max-old-space-size=8192\r\nchown -R root:root /mnt\r\n\r\n#Backup database & config\r\nmkdir -p .backup\r\ncp -f .env /mnt/server/.backup\r\ncp -f sogebot.db /mnt/server/.backup\r\n\r\n#delete old dir's to prevent errors on update\r\nrm -fR dest\r\nrm -fR public\r\nrm -fR node-modules\r\nrm -fR tools\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/sogebot/sogeBot/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/sogebot/sogeBot/releases\")\r\nMATCH=sogeBot\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho -e \"Downloading from $DOWNLOAD_LINK\"\r\ncurl -sSL -o sogeBot.zip ${DOWNLOAD_LINK}\r\n\r\nunzip -o sogeBot.zip\r\nrm -rf sogeBot.zip\r\n\r\n\r\necho \"--------------------------------------------------------------------------\"\r\necho \"Installing dependencies, this will take some time so sit back and relax...\"\r\necho \"IGNORE WARNINGS. THESE ARE NOT ERRORS !!!\"\r\necho \"--------------------------------------------------------------------------\"\r\n\r\nnpm install -g npm@8\r\n\r\nnpm install --verbose --force\r\n\r\necho -e \"install completed\"\r\nexit 0"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Version to install. Latest will install the latest available version.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teamspeak3-server-arm64-61fa4b278b51",
+        "name": "Teamspeak3 Server ARM64",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/teamspeak3-server-arm64-61fa4b278b51.json",
+        "sha256": "a63f3dfcb3f3f2a3b2df117e92fa9eac4da1a223fafd1d29eae24ebf4a14e1b7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/voice",
+          "commit": "33858e0558d92e82cda04ba0550f9a733ced9d4c",
+          "path": "teamspeak/egg-teamspeak3-arm64-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--voice/61fa4b278b51.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-07-06T17:10:16+02:00",
+        "name": "Teamspeak3 Server ARM64",
+        "author": "josdekurk@gmail.com",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:box64": "ghcr.io/parkervcp/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "box64 ./ts3server default_voice_port={{SERVER_PORT}} query_port={{QUERY_PORT}} filetransfer_ip=0.0.0.0 filetransfer_port={{FILE_TRANSFER}} serveradmin_password={{SERVERADMIN_PASSWORD}} license_accepted=1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"listening on 0.0.0.0:\"}",
+          "logs": "{\"custom\": true, \"location\": \"logs/ts3.log\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# TS3 Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nif [ -z ${TS_VERSION} ] || [ ${TS_VERSION} == latest ]; then\r\n    TS_VERSION=$(curl -sSL https://teamspeak.com/versions/server.json | jq -r '.linux.x86_64.version')\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"getting files from http://files.teamspeak-services.com/releases/server/${TS_VERSION}/teamspeak3-server_linux_x86-${TS_VERSION}.tar.bz2\" \r\ncurl -L http://files.teamspeak-services.com/releases/server/${TS_VERSION}/teamspeak3-server_linux_amd64-${TS_VERSION}.tar.bz2 | tar -xvj --strip-components=1",
+            "container": "ghcr.io/pterodactyl/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Admin Password",
+            "description": "The password for the server query admin user.",
+            "env_variable": "SERVERADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Teamspeak 3 to use when running the server.",
+            "env_variable": "TS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "File Transfer Port",
+            "description": "The Teamspeak file transfer port",
+            "env_variable": "FILE_TRANSFER",
+            "default_value": "30033",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The Teamspeak Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10011",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teamspeak3-server-arm64-70ad7ea8cc8a",
+        "name": "Teamspeak3 Server ARM64",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/teamspeak3-server-arm64-70ad7ea8cc8a.json",
+        "sha256": "c5244fdba6889fcbdf81b4e60cd45f5ec9e599d09c58e49d13f3fc5db7c3c5b5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "voice_servers/teamspeak_ARM64/egg-teamspeak3-arm64-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/70ad7ea8cc8a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-07-06T17:10:16+02:00",
+        "name": "Teamspeak3 Server ARM64",
+        "author": "josdekurk@gmail.com",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:box64": "ghcr.io/parkervcp/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "box64 ./ts3server default_voice_port={{SERVER_PORT}} query_port={{QUERY_PORT}} filetransfer_ip=0.0.0.0 filetransfer_port={{FILE_TRANSFER}} serveradmin_password={{SERVERADMIN_PASSWORD}} license_accepted=1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"listening on 0.0.0.0:\"}",
+          "logs": "{\"custom\": true, \"location\": \"logs/ts3.log\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# TS3 Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nif [ -z ${TS_VERSION} ] || [ ${TS_VERSION} == latest ]; then\r\n    TS_VERSION=$(curl -sSL https://teamspeak.com/versions/server.json | jq -r '.linux.x86_64.version')\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"getting files from http://files.teamspeak-services.com/releases/server/${TS_VERSION}/teamspeak3-server_linux_x86-${TS_VERSION}.tar.bz2\" \r\ncurl -L http://files.teamspeak-services.com/releases/server/${TS_VERSION}/teamspeak3-server_linux_amd64-${TS_VERSION}.tar.bz2 | tar -xvj --strip-components=1",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Admin Password",
+            "description": "The password for the server query admin user.",
+            "env_variable": "SERVERADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Teamspeak 3 to use when running the server.",
+            "env_variable": "TS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "File Transfer Port",
+            "description": "The Teamspeak file transfer port",
+            "env_variable": "FILE_TRANSFER",
+            "default_value": "30033",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The Teamspeak Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10011",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teamspeak3-server-arm64-b8698f134726",
+        "name": "Teamspeak3 Server ARM64",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/teamspeak3-server-arm64-b8698f134726.json",
+        "sha256": "08caf6c850ab7d46656bc759d6d67a0a067c88bd18a504fe86260bbbfa904db2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "voice/teamspeak_ARM64/egg-teamspeak3-server-a-r-m64.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/b8698f134726.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-11T19:05:12+00:00",
+        "name": "Teamspeak3 Server ARM64",
+        "author": "josdekurk@gmail.com",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:box64": "ghcr.io/ptero-eggs/yolks:box64"
+        },
+        "file_denylist": [],
+        "startup": "box64 ./ts3server default_voice_port={{SERVER_PORT}} query_port={{QUERY_PORT}} filetransfer_ip=0.0.0.0 filetransfer_port={{FILE_TRANSFER}} serveradmin_password={{SERVERADMIN_PASSWORD}} license_accepted=1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"listening on 0.0.0.0:\"}",
+          "logs": "{\"custom\": true, \"location\": \"logs/ts3.log\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# TS3 Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nif [ -z ${TS_VERSION} ] || [ ${TS_VERSION} == latest ]; then\r\n    TS_VERSION=$(curl -sSL https://teamspeak.com/versions/server.json | jq -r '.linux.x86_64.version')\r\nfi\r\n\r\ncd /mnt/server\r\n\r\necho -e \"getting files from http://files.teamspeak-services.com/releases/server/${TS_VERSION}/teamspeak3-server_linux_x86-${TS_VERSION}.tar.bz2\" \r\ncurl -L http://files.teamspeak-services.com/releases/server/${TS_VERSION}/teamspeak3-server_linux_amd64-${TS_VERSION}.tar.bz2 | tar -xvj --strip-components=1",
+            "container": "ghcr.io/pterodactyl/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Admin Password",
+            "description": "The password for the server query admin user.",
+            "env_variable": "SERVERADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Teamspeak 3 to use when running the server.",
+            "env_variable": "TS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:6",
+            "field_type": "text"
+          },
+          {
+            "name": "File Transfer Port",
+            "description": "The Teamspeak file transfer port",
+            "env_variable": "FILE_TRANSFER",
+            "default_value": "30033",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "The Teamspeak Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10011",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teamspeak6-server-02cd411135a9",
+        "name": "Teamspeak6 Server",
+        "description": "TeamSpeak offers the ideal voice communication for gaming, education and training, internal business communication, and staying in touch with friends and family.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/teamspeak6-server-02cd411135a9.json",
+        "sha256": "64e33e722864eaac981cb401ed63025adb5eeb5e19c4b6365ef2b90e791bcb16",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "voice/teamspeak6_server/egg-teamspeak6-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/02cd411135a9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-07-05T14:56:23+02:00",
+        "name": "Teamspeak6 Server",
+        "author": "ptero@redbananaofficial.com",
+        "description": "TeamSpeak offers the ideal voice communication for gaming, education and training, internal business communication, and staying in touch with friends and family.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./tsserver --default-voice-port={{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"listening on 0.0.0.0:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "cd /mnt/server\r\n\r\napt-get update\r\napt-get install -y jq bzip2\r\n\r\nver=\"$TS_VERSION\"\r\nif [ -z \"$ver\" ] || [ \"$ver\" = \"latest\" ]; then\r\n    json=$(curl -sSL https://api.github.com/repos/teamspeak/teamspeak6-server/releases/latest)\r\nelse\r\n    json=$(curl -sSL https://api.github.com/repos/teamspeak/teamspeak6-server/releases/tags/$ver 2>/dev/null)\r\n    if echo \"$json\" | grep -q \"Not Found\"; then\r\n        altver=$(echo \"$ver\" | sed 's/-/\\//')\r\n        json=$(curl -sSL https://api.github.com/repos/teamspeak/teamspeak6-server/releases/tags/$altver 2>/dev/null)\r\n    fi\r\nfi\r\n\r\nif echo \"$json\" | grep -q \"Not Found\"; then\r\n    echo \"Not found: $ver\"\r\n    exit 1\r\nfi\r\n\r\nurl=$(echo \"$json\" | jq -r '.assets | map(select((.name | contains(\"linux_amd64\")) and (.name | endswith(\".tar.bz2\"))))[0].browser_download_url')\r\n\r\nif [ -z \"$url\" ] || [ \"$url\" = \"null\" ]; then\r\n    echo \"Not found: $ver\"\r\n    exit 1\r\nfi\r\n\r\ncurl -sSL \"$url\" | tar xj --strip-components=1\r\necho \"Installed\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Query Admin Password",
+            "description": "The password for the server query admin user.",
+            "env_variable": "TSSERVER_QUERY_ADMIN_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Teamspeak 3 to use when running the server.",
+            "env_variable": "TS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Accept TServer License (required)",
+            "description": "This is for accepting the license",
+            "env_variable": "TSSERVER_LICENSE_ACCEPTED",
+            "default_value": "accept",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "File Transfer Port",
+            "description": "The Teamspeak file transfer port (can be changed).",
+            "env_variable": "TSSERVER_FILE_TRANSFER_PORT",
+            "default_value": "30033",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable SSH Query",
+            "description": "Enable the SSH query interface (set to 1 to enable).",
+            "env_variable": "TSSERVER_QUERY_SSH_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "SSH Query Port",
+            "description": "The port for the SSH query interface (can be changed).",
+            "env_variable": "TSSERVER_QUERY_SSH_PORT",
+            "default_value": "10022",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable HTTP Query",
+            "description": "Enable the HTTP query interface (set to 1 to enable).",
+            "env_variable": "TSSERVER_QUERY_HTTP_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTP Query Port",
+            "description": "The port for the HTTP query interface (can be changed).",
+            "env_variable": "TSSERVER_QUERY_HTTP_PORT",
+            "default_value": "10080",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable HTTPS Query",
+            "description": "Enable the HTTPS query interface (set to 1 to enable).",
+            "env_variable": "TSSERVER_QUERY_HTTPS_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTPS Query Port",
+            "description": "The port for the HTTPS query interface (can be changed).",
+            "env_variable": "TSSERVER_QUERY_HTTPS_PORT",
+            "default_value": "10443",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable S3 File Transfer",
+            "description": "Enable S3 file transfer (set to 1 to enable).",
+            "env_variable": "TSSERVER_S3FT_ENABLED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "S3 Access Key",
+            "description": "S3 Access Key for file transfers.",
+            "env_variable": "TSSERVER_S3FT_ACCESS_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "S3 Secret Key",
+            "description": "S3 Secret Key for file transfers.",
+            "env_variable": "TSSERVER_S3FT_SECRET_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "S3 Bucket",
+            "description": "S3 Bucket name for file transfers.",
+            "env_variable": "TSSERVER_S3FT_BUCKET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "S3 Domain",
+            "description": "S3 Domain/endpoint for file transfers.",
+            "env_variable": "TSSERVER_S3FT_DOMAIN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "S3 Region",
+            "description": "S3 region for file transfers.",
+            "env_variable": "TSSERVER_S3FT_REGION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTPS Certificate Filename",
+            "description": "Place the certificate file in /home/container and enter the filename here, e.g; ts6_https_cert.pem",
+            "env_variable": "TSSERVER_QUERY_HTTPS_CERT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "HTTPS Private Key Filename",
+            "description": "Place the private key file in /home/container and enter the filename here, e.g: ts6_https_key.pem",
+            "env_variable": "TSSERVER_QUERY_HTTPS_PRIVATE_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:255",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teamspeak6-server-0a15658d83af",
+        "name": "Teamspeak6 Server",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/teamspeak6-server-0a15658d83af.json",
+        "sha256": "dcf954337a99919728027dad3834a4f0d5a21c9df751cecd95b0146a34adf7ac",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/voice",
+          "commit": "33858e0558d92e82cda04ba0550f9a733ced9d4c",
+          "path": "ts6/egg-teamspeak6-server.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--voice/0a15658d83af.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-07-05T17:46:50+00:00",
+        "name": "Teamspeak6 Server",
+        "author": "161775222+JoanFo1456@users.noreply.github.com",
+        "uuid": "a6993632-ecbf-4036-9caa-12ffeff50a4a",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "tags": [
+          "voice"
+        ],
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./tsserver --filetransfer-port {{TSSERVER_FILE_TRANSFER_PORT}} --query-http-port {{TSSERVER_QUERY_HTTP_PORT}} --query-ssh-port {{TSSERVER_QUERY_SSH_PORT}} --default-voice-port {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"listening on 0.0.0.0:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n\r\nset -euo pipefail\r\n\r\nREPO=\"teamspeak/teamspeak6-server\"\r\nARCH=\"linux_amd64\"\r\nTARGET_DIR=\"/mnt/server\"\r\n\r\n\r\ngh_api() {\r\n    curl -sL \"$1\"\r\n}\r\n\r\nif [ -z \"${TS_VERSION:-}\" ] || [ \"${TS_VERSION}\" = \"latest\" ]; then\r\n    echo \"► Fetching latest Teamspeak 6 release info from GitHub…\"\r\n    RELEASE_JSON=\"$(gh_api \"https://api.github.com/repos/${REPO}/releases\" | jq '.[0]')\"\r\nelse\r\n    echo \"► Fetching release info for tag v${TS_VERSION}…\"\r\n    RELEASE_JSON=\"$(gh_api \"https://api.github.com/repos/${REPO}/releases\" \\\r\n        | jq --arg tag \"v${TS_VERSION}\" -c '[.[] | select(.tag_name==$tag)][0]')\"\r\nfi\r\n\r\nASSET_URL=\"$(echo \"$RELEASE_JSON\" \\\r\n    | jq -r --arg arch \"$ARCH\" '.assets[]\r\n        | select(.name | test(\"linux_amd64.*\\\\.tar\\\\.bz2$\"))\r\n        | .browser_download_url')\"\r\n\r\nif [ -z \"$ASSET_URL\" ] || [ \"$ASSET_URL\" = \"null\" ]; then\r\n    echo \"✗ No linux_amd64 tarball found in this release.\"\r\n    exit 1\r\nfi\r\n\r\necho \"► Downloading and extracting: $ASSET_URL\"\r\n\r\ncd \"$TARGET_DIR\"\r\ngh_api \"$ASSET_URL\" | tar -xvj --strip-components=1\r\n",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Query Port",
+            "description": "The Teamspeak Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10011",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "sort": 3
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Teamspeak 6 to use when running the server.\nAlso used on reinstall.",
+            "env_variable": "TS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "",
+            "sort": 1
+          },
+          {
+            "name": "Tsserver Default Port",
+            "description": "The server default port",
+            "env_variable": "TSSERVER_DEFAULT_PORT",
+            "default_value": "9987",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65535",
+            "sort": 6
+          },
+          {
+            "name": "Tsserver File Transfer Port",
+            "description": "The Teamspeak file transfer port",
+            "env_variable": "TSSERVER_FILE_TRANSFER_PORT",
+            "default_value": "30033",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "sort": 2
+          },
+          {
+            "name": "Tsserver License Accepted",
+            "description": "If you accept the license or want to view it.\n(Values: accept, view)",
+            "env_variable": "TSSERVER_LICENSE_ACCEPTED",
+            "default_value": "accept",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:12",
+            "sort": 7
+          },
+          {
+            "name": "Tsserver Query Http Port",
+            "description": "TCP Port opened for ServerQuery connections using http",
+            "env_variable": "TSSERVER_QUERY_HTTP_PORT",
+            "default_value": "10080",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "sort": 5
+          },
+          {
+            "name": "Tsserver Query ssh Port",
+            "description": "TCP Port opened for ServerQuery connections using SSH",
+            "env_variable": "TSSERVER_QUERY_SSH_PORT",
+            "default_value": "10022",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "sort": 4
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "teamspeak6-server-69ba6ec73b51",
+        "name": "Teamspeak6 Server",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/teamspeak6-server-69ba6ec73b51.json",
+        "sha256": "08dcde61ec20d0cca2e66b723db9b9ffcb9345dc4893e0edb5a742f2fc567721",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/voice",
+          "commit": "33858e0558d92e82cda04ba0550f9a733ced9d4c",
+          "path": "ts6/pterodactyl-egg-teamspeak6-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--voice/69ba6ec73b51.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-13T21:03:28+01:00",
+        "name": "Teamspeak6 Server",
+        "author": "161775222+JoanFo1456@users.noreply.github.com",
+        "description": "VoIP software designed with security in mind, featuring crystal clear voice quality, endless customization options, and scalabilty up to thousands of simultaneous users.",
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./tsserver --filetransfer-port {{TSSERVER_FILE_TRANSFER_PORT}} --query-http-port {{TSSERVER_QUERY_HTTP_PORT}} --query-ssh-port {{TSSERVER_QUERY_SSH_PORT}} --default-voice-port {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"listening on 0.0.0.0:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n\r\nset -euo pipefail\r\n\r\nREPO=\"teamspeak/teamspeak6-server\"\r\nARCH=\"linux_amd64\"\r\nTARGET_DIR=\"/mnt/server\"\r\n\r\n\r\ngh_api() {\r\n    curl -sL \"$1\"\r\n}\r\n\r\nif [ -z \"${TS_VERSION:-}\" ] || [ \"${TS_VERSION}\" = \"latest\" ]; then\r\n    echo \"► Fetching latest Teamspeak 6 release info from GitHub…\"\r\n    RELEASE_JSON=\"$(gh_api \"https://api.github.com/repos/${REPO}/releases\" | jq '.[0]')\"\r\nelse\r\n    echo \"► Fetching release info for tag v${TS_VERSION}…\"\r\n    RELEASE_JSON=\"$(gh_api \"https://api.github.com/repos/${REPO}/releases\" \\\r\n        | jq --arg tag \"v${TS_VERSION}\" -c '[.[] | select(.tag_name==$tag)][0]')\"\r\nfi\r\n\r\nASSET_URL=\"$(echo \"$RELEASE_JSON\" \\\r\n    | jq -r --arg arch \"$ARCH\" '.assets[]\r\n        | select(.name | test(\"linux_amd64.*\\\\.tar\\\\.bz2$\"))\r\n        | .browser_download_url')\"\r\n\r\nif [ -z \"$ASSET_URL\" ] || [ \"$ASSET_URL\" = \"null\" ]; then\r\n    echo \"✗ No linux_amd64 tarball found in this release.\"\r\n    exit 1\r\nfi\r\n\r\necho \"► Downloading and extracting: $ASSET_URL\"\r\n\r\ncd \"$TARGET_DIR\"\r\ngh_api \"$ASSET_URL\" | tar -xvj --strip-components=1\r\n",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Query Port",
+            "description": "The Teamspeak Query Port",
+            "env_variable": "QUERY_PORT",
+            "default_value": "10011",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of Teamspeak 6 to use when running the server.\nAlso used on reinstall.",
+            "env_variable": "TS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Tsserver Default Port",
+            "description": "The server default port",
+            "env_variable": "TSSERVER_DEFAULT_PORT",
+            "default_value": "9987",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Tsserver File Transfer Port",
+            "description": "The Teamspeak file transfer port",
+            "env_variable": "TSSERVER_FILE_TRANSFER_PORT",
+            "default_value": "30033",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Tsserver License Accepted",
+            "description": "If you accept the license or want to view it.\n(Values: accept, view)",
+            "env_variable": "TSSERVER_LICENSE_ACCEPTED",
+            "default_value": "accept",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:12",
+            "field_type": "text"
+          },
+          {
+            "name": "Tsserver Query Http Port",
+            "description": "TCP Port opened for ServerQuery connections using http",
+            "env_variable": "TSSERVER_QUERY_HTTP_PORT",
+            "default_value": "10080",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          },
+          {
+            "name": "Tsserver Query ssh Port",
+            "description": "TCP Port opened for ServerQuery connections using SSH",
+            "env_variable": "TSSERVER_QUERY_SSH_PORT",
+            "default_value": "10022",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1025,65535",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

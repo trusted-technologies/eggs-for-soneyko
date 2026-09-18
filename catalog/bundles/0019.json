@@ -1,0 +1,740 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "postgres-16-4a36aa9cd36a",
+        "name": "Postgres 16",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-16-4a36aa9cd36a.json",
+        "sha256": "9800bc2b07bbb67a32b17870446e23bbdb44c6a11a201f09034205f0a15231e5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "sql/postgres/egg-postgres16.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/4a36aa9cd36a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:34:27+00:00",
+        "name": "Postgres 16",
+        "author": "parker@parkervcp.com",
+        "uuid": "3490d65d-66df-431e-8455-99a649f89c0e",
+        "description": "A default Postgres install that is not really editable.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:postgres_16": "ghcr.io/parkervcp/yolks:postgres_16"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:16-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-16-aa49ce6a8727",
+        "name": "Postgres 16",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-16-aa49ce6a8727.json",
+        "sha256": "89ab8a666ed1206912efd850fba5da6ae491313a7703d41fa971559db4e68d80",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/sql/postgres/egg-postgres16.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/aa49ce6a8727.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-26T01:12:12+00:00",
+        "name": "Postgres 16",
+        "author": "parker@parkervcp.com",
+        "description": "A default Postgres install that is not really editable.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:postgres_16": "ghcr.io/ptero-eggs/yolks:postgres_16"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/ & wait-port;  psql -h127.0.0.1 -p{{SERVER_PORT}} --dbname postgres",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "\\q"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:16-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-16-c4d6ae5d628a",
+        "name": "Postgres 16",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-16-c4d6ae5d628a.json",
+        "sha256": "b7c6974f45b49e6812af951ddc720451a30ee4c97d0982a4fbbf8a6b02519318",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/sql/postgres/egg-postgres16.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/c4d6ae5d628a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-12T15:33:25+01:00",
+        "name": "Postgres 16",
+        "author": "parker@parkervcp.com",
+        "description": "A default Postgres install that is not really editable.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:postgres_16": "ghcr.io/parkervcp/yolks:postgres_16"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:16-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "postgres-17-20fe8a56c0c9",
+        "name": "Postgres 17",
+        "description": "A default Postgres install that is not really editable.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/postgres-17-20fe8a56c0c9.json",
+        "sha256": "c584829acd191de4f76cab5cdfdf4d1fe9a72063a800de24986aeae89607acaa",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/sql/postgres/egg-postgres17.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/20fe8a56c0c9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-26T01:12:12+00:00",
+        "name": "Postgres 17",
+        "author": "parker@parkervcp.com",
+        "description": "A default Postgres install that is not really editable.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:postgres_17": "ghcr.io/ptero-eggs/yolks:postgres_17"
+        },
+        "file_denylist": [],
+        "startup": "postgres  -D /home/container/postgres_db/ & wait-port;  psql -h127.0.0.1 -p{{SERVER_PORT}} --dbname postgres",
+        "config": {
+          "files": "{\"postgres_db/postgresql.conf\": {\"parser\": \"file\", \"find\": {\"#port =\": \"port = {{server.build.default.port}}\", \"#external_pid_file =\": \"external_pid_file = '/home/container/postgres_db/run/postgres.pid'\", \"#unix_socket_directories =\": \"unix_socket_directories = '/home/container/postgres_db/run/'\"}}}",
+          "startup": "{\"done\": \"database system is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "\\q"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#! /bin/ash\r\nadduser -D -h /home/container container\r\n\r\nchown -R container: /mnt/server/\r\n\r\nsu container -c 'initdb -D /mnt/server/postgres_db/ -A md5 -U \"$PGUSER\" --pwfile=<(echo \"$PGPASSWORD\")'\r\n\r\nmkdir -p /mnt/server/postgres_db/run/\r\n\r\n## Add default \"allow from all\" auth rule to pg_hba\r\nif ! grep -q \"# Custom rules\" \"/mnt/server/postgres_db/pg_hba.conf\"; then\r\n    echo -e \"# Custom rules\\nhost    all             all             0.0.0.0/0               md5\" >> \"/mnt/server/postgres_db/pg_hba.conf\"\r\nfi\r\n\r\necho -e \"Done\"",
+            "container": "postgres:17-alpine",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Superuser Name",
+            "description": "The username for the postgres superuser",
+            "env_variable": "PGUSER",
+            "default_value": "pterodactyl",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Superuser Password",
+            "description": "The postgres super user password with a strong default.\r\nYou should be generating new ones for each server.\r\nIf you don't then users can hit other users DB's",
+            "env_variable": "PGPASSWORD",
+            "default_value": "Pl3453Ch4n63M3!",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rabbitmq-902dee56d8fa",
+        "name": "RabbitMQ",
+        "description": "RabbitMQ is a feature rich, multi-protocol messaging broker.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/rabbitmq-902dee56d8fa.json",
+        "sha256": "2446bfaddcee266af852bb2ed8866cd95d92f6e1291191640723ab996071eb1f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "rabbitmq/egg-pterodactyl-rabbit-m-q.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/rabbitmq/egg-rabbit-m-q.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/902dee56d8fa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:54+00:00",
+        "name": "RabbitMQ",
+        "author": "p.zarrad@outlook.de",
+        "description": "RabbitMQ is a feature rich, multi-protocol messaging broker.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:erlang_22": "ghcr.io/parkervcp/yolks:erlang_22",
+          "ghcr.io/parkervcp/yolks:erlang_23": "ghcr.io/parkervcp/yolks:erlang_23",
+          "ghcr.io/parkervcp/yolks:erlang_24": "ghcr.io/parkervcp/yolks:erlang_24",
+          "ghcr.io/parkervcp/yolks:erlang_25": "ghcr.io/parkervcp/yolks:erlang_25",
+          "ghcr.io/parkervcp/yolks:erlang_26": "ghcr.io/parkervcp/yolks:erlang_26"
+        },
+        "file_denylist": [],
+        "startup": "./sbin/rabbitmq-server",
+        "config": {
+          "files": "{\"etc/rabbitmq/rabbitmq.conf\": {\"parser\": \"file\", \"find\": {\"listeners.tcp.default\": \"listeners.tcp.default    = 0.0.0.0:{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \" completed with\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/sh\r\n# Switch to mounted directory\r\ncd /mnt/server\r\n# Update and install xz\r\napk update\r\napk add xz\r\n# Cleanup previous install if available but leave etc untouched\r\nfind . -maxdepth 1 ! -name \"etc\" ! -name . -exec rm -rf {} \\;\r\n# Download and extract RabbitMQ\r\nversion=${RABBITMQ_VERSION}\r\nif [ \"$version\" = \"latest\" ]; then version=$(curl --silent \"https://api.github.com/repos/rabbitmq/rabbitmq-server/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\ncurl -L https://github.com/rabbitmq/rabbitmq-server/releases/download/v${version}/rabbitmq-server-generic-unix-${version}.tar.xz --output rabbitmq.tar.xz\r\nxz -v -d rabbitmq.tar.xz && tar -xvf rabbitmq.tar\r\nmv -n rabbitmq_server-*/* ./\r\nrm -rf rabbitmq.tar rabbitmq_server-*/\r\n# If there is no config, download default one\r\nif [ ! -f \"etc/rabbitmq/rabbitmq.conf\" ]; then mkdir -p etc/rabbitmq/ && curl -L https://raw.githubusercontent.com/parkervcp/eggs/master/software/rabbitmq/rabbitmq.conf --output etc/rabbitmq/rabbitmq.conf; fi"
+          }
+        },
+        "variables": [
+          {
+            "name": "RabbitMQ Version",
+            "description": "The version of RabbitMQ to install. By default the latest version is being installed.",
+            "env_variable": "RABBITMQ_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rabbitmq-989a0466caa0",
+        "name": "RabbitMQ",
+        "description": "RabbitMQ is a feature rich, multi-protocol messaging broker.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/rabbitmq-989a0466caa0.json",
+        "sha256": "3573593f60a34d52eae75c7847f8c42c9666af1c75b120bf0daa6ed51d099153",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "rabbitmq/egg-rabbit-m-q.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/989a0466caa0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:54+00:00",
+        "name": "RabbitMQ",
+        "author": "p.zarrad@outlook.de",
+        "uuid": "cc66ddbc-4b87-497c-899e-a9b02a4108a1",
+        "description": "RabbitMQ is a feature rich, multi-protocol messaging broker.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:erlang_26": "ghcr.io/parkervcp/yolks:erlang_26",
+          "ghcr.io/parkervcp/yolks:erlang_25": "ghcr.io/parkervcp/yolks:erlang_25",
+          "ghcr.io/parkervcp/yolks:erlang_24": "ghcr.io/parkervcp/yolks:erlang_24",
+          "ghcr.io/parkervcp/yolks:erlang_23": "ghcr.io/parkervcp/yolks:erlang_23",
+          "ghcr.io/parkervcp/yolks:erlang_22": "ghcr.io/parkervcp/yolks:erlang_22"
+        },
+        "file_denylist": [],
+        "startup": "./sbin/rabbitmq-server",
+        "config": {
+          "files": "{\"etc/rabbitmq/rabbitmq.conf\": {\"parser\": \"file\", \"find\": {\"listeners.tcp.default\": \"listeners.tcp.default    = 0.0.0.0:{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \" completed with\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/sh\r\n# Switch to mounted directory\r\ncd /mnt/server\r\n# Update and install xz\r\napk update\r\napk add xz\r\n# Cleanup previous install if available but leave etc untouched\r\nfind . -maxdepth 1 ! -name \"etc\" ! -name . -exec rm -rf {} \\;\r\n# Download and extract RabbitMQ\r\nversion=${RABBITMQ_VERSION}\r\nif [ \"$version\" = \"latest\" ]; then version=$(curl --silent \"https://api.github.com/repos/rabbitmq/rabbitmq-server/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\ncurl -L https://github.com/rabbitmq/rabbitmq-server/releases/download/v${version}/rabbitmq-server-generic-unix-${version}.tar.xz --output rabbitmq.tar.xz\r\nxz -v -d rabbitmq.tar.xz && tar -xvf rabbitmq.tar\r\nmv -n rabbitmq_server-*/* ./\r\nrm -rf rabbitmq.tar rabbitmq_server-*/\r\n# If there is no config, download default one\r\nif [ ! -f \"etc/rabbitmq/rabbitmq.conf\" ]; then mkdir -p etc/rabbitmq/ && curl -L https://raw.githubusercontent.com/parkervcp/eggs/master/software/rabbitmq/rabbitmq.conf --output etc/rabbitmq/rabbitmq.conf; fi",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "RabbitMQ Version",
+            "description": "The version of RabbitMQ to install. By default the latest version is being installed.",
+            "env_variable": "RABBITMQ_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rabbitmq-dc3382538060",
+        "name": "RabbitMQ",
+        "description": "RabbitMQ is a feature rich, multi-protocol messaging broker.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/rabbitmq-dc3382538060.json",
+        "sha256": "c64ab914a6bf635f9ee03fdafcccdd6c6a7ab32ed59abb3c74968eece53c98db",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "rabbitmq/egg-rabbit-m-q.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/dc3382538060.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-03T19:05:05+02:00",
+        "name": "RabbitMQ",
+        "author": "p.zarrad@outlook.de",
+        "description": "RabbitMQ is a feature rich, multi-protocol messaging broker.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:erlang_22": "ghcr.io/ptero-eggs/yolks:erlang_22",
+          "ghcr.io/ptero-eggs/yolks:erlang_23": "ghcr.io/ptero-eggs/yolks:erlang_23",
+          "ghcr.io/ptero-eggs/yolks:erlang_24": "ghcr.io/ptero-eggs/yolks:erlang_24",
+          "ghcr.io/ptero-eggs/yolks:erlang_25": "ghcr.io/ptero-eggs/yolks:erlang_25",
+          "ghcr.io/ptero-eggs/yolks:erlang_26": "ghcr.io/ptero-eggs/yolks:erlang_26"
+        },
+        "file_denylist": [],
+        "startup": "./sbin/rabbitmq-server",
+        "config": {
+          "files": "{\"etc/rabbitmq/rabbitmq.conf\": {\"parser\": \"file\", \"find\": {\"listeners.tcp.default\": \"listeners.tcp.default    = 0.0.0.0:{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \" completed with\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/sh\r\n# Switch to mounted directory\r\ncd /mnt/server\r\n# Update and install xz\r\napk update\r\napk add xz\r\n# Cleanup previous install if available but leave etc untouched\r\nfind . -maxdepth 1 ! -name \"etc\" ! -name . -exec rm -rf {} \\;\r\n# Download and extract RabbitMQ\r\nversion=${RABBITMQ_VERSION}\r\nif [ \"$version\" = \"latest\" ]; then version=$(curl --silent \"https://api.github.com/repos/rabbitmq/rabbitmq-server/releases/latest\" | grep '\"tag_name\":' | sed -E 's/.*\"([^\"]+)\".*/\\1/' | cut -c2-); fi\r\ncurl -L https://github.com/rabbitmq/rabbitmq-server/releases/download/v${version}/rabbitmq-server-generic-unix-${version}.tar.xz --output rabbitmq.tar.xz\r\nxz -v -d rabbitmq.tar.xz && tar -xvf rabbitmq.tar\r\nmv -n rabbitmq_server-*/* ./\r\nrm -rf rabbitmq.tar rabbitmq_server-*/\r\n# If there is no config, download default one\r\nif [ ! -f \"etc/rabbitmq/rabbitmq.conf\" ]; then mkdir -p etc/rabbitmq/ && curl -L https://raw.githubusercontent.com/Ptero-Eggs/application-eggs/main/rabbitmq/rabbitmq.conf --output etc/rabbitmq/rabbitmq.conf; fi",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "RabbitMQ Version",
+            "description": "The version of RabbitMQ to install. By default the latest version is being installed.",
+            "env_variable": "RABBITMQ_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-f6ab92e5bec3",
+        "name": "Redis",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-f6ab92e5bec3.json",
+        "sha256": "9733a95dd5db4ec71906303158c40e40f9243f71337db0c889cdf7142a4d81a1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/redis/redis-5/egg-redis-5.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/f6ab92e5bec3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-07-11T13:17:43+02:00",
+        "name": "Redis",
+        "author": "parker@parkervcp.com",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:redis_5": "ghcr.io/parkervcp/yolks:redis_5"
+        },
+        "file_denylist": [],
+        "startup": "redis-server --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass {{SERVER_PASSWORD}} --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} && redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-5-09ca655d05c2",
+        "name": "Redis-5",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-5-09ca655d05c2.json",
+        "sha256": "d08f63e8eae59afbcd7539f6c6ba16c7312b32d69d2eb615666f6f807795bb95",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "redis/redis-5/egg-redis-5.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/09ca655d05c2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-09T15:43:07+00:00",
+        "name": "Redis-5",
+        "author": "parker@parkervcp.com",
+        "uuid": "5a02359e-3343-4af7-86dc-887c4a7a23ba",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:redis_5": "ghcr.io/parkervcp/yolks:redis_5"
+        },
+        "file_denylist": [],
+        "startup": "redis-server --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass '{{SERVER_PASSWORD}}' --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}} -a '{{SERVER_PASSWORD}}' && redis-cli -p {{SERVER_PORT}} -a '{{SERVER_PASSWORD}}' shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 1
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-5-0cc1ce626d28",
+        "name": "Redis-5",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-5-0cc1ce626d28.json",
+        "sha256": "b3f80c8e1b498a3a91f39b8290d06fbb5926c84f416618a921c73914e97c0cf1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/redis/redis-5/egg-redis-5.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/0cc1ce626d28.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-03T14:09:22+02:00",
+        "name": "Redis-5",
+        "author": "parker@parkervcp.com",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:redis_5": "ghcr.io/ptero-eggs/yolks:redis_5"
+        },
+        "file_denylist": [],
+        "startup": "redis-server --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass {{SERVER_PASSWORD}} --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} && redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

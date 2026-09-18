@@ -1,0 +1,1363 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "grand-theft-auto-connected-49d5cfe3dcc1",
+        "name": "Grand Theft Auto Connected",
+        "description": "Grand Theft Auto Connected is a custom scriptable multiplayer modification for multiple Grand Theft Auto games.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/grand-theft-auto-connected-49d5cfe3dcc1.json",
+        "sha256": "beeaf43c2d95594f4f88a46d761f7d22599eb9282f0cd597cad686582a39f31b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/gtac/egg-grand-theft-auto-connected.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/49d5cfe3dcc1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:47+00:00",
+        "name": "Grand Theft Auto Connected",
+        "author": "admin@softwarenoob.com",
+        "uuid": "8dd48285-6510-439e-8397-fa79dc297ef6",
+        "description": "Grand Theft Auto Connected is a custom scriptable multiplayer modification for multiple Grand Theft Auto games.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Server",
+        "config": {
+          "files": "{\"server.xml\": {\"parser\": \"xml\", \"find\": {\"server.servername\": \"{{server.build.env.SERVERNAME}}\", \"server.port\": \"{{server.build.default.port}}\", \"server.httpport\": \"{{server.build.default.port}}\", \"server.game\": \"{{server.build.env.GAMETYPE}}\", \"server.serverbrowser\": \"{{server.build.env.SERVERBROWSER}}\"}}}",
+          "startup": "{\"done\": \"Successfully added server\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\ncd /mnt/server\r\n\r\n\r\nif [ \"${DL_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=https://gtaconnected.com/downloads/server/latest/linux\r\nelse\r\n    DOWNLOAD_LINK=https://gtaconnected.com/downloads/GTAC-Server-Linux-${DL_VERSION}.tar.gz\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail --location ${DOWNLOAD_LINK}; then\r\n        echo -e \"Chosen server version is valid.\"\r\n    else\r\n        echo -e \"Chosen server version is invalid, tried $DOWNLOAD_LINK. Exiting installation\"\r\n        exit 2\r\n    fi\r\nelse\r\n    echo -e \"no download link, stopping installation\"\r\n    exit 3\r\nfi\r\n\r\necho -e \"Downloading ${DL_VERSION} version of the server\"\r\ncurl -sSL ${DOWNLOAD_LINK} -o GTAC.tar.gz\r\necho \"Extracting files\"\r\ntar -xf GTAC.tar.gz\r\n\r\nchmod +x Server\r\nrm GTAC.tar.gz\r\n\r\necho \"Install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game type",
+            "description": "Sets the game this server will support. Available options: gta:iii, gta:vc, gta:sa, gta:ug, gta:iv, gta:eflc",
+            "env_variable": "GAMETYPE",
+            "default_value": "gta:iv",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:gta:iii,gta:vc,gta:sa,gta:ug,gta:iv,gta:eflc",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server, which appears in the server browser.",
+            "env_variable": "SERVERNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "serverbrowser",
+            "description": "Whether to show the server in the server browser, set to true or false",
+            "env_variable": "SERVERBROWSER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of GATC to install such as 1.2.10, enter latest for the latest version.",
+            "env_variable": "DL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "grand-theft-auto-connected-f373442d5b30",
+        "name": "Grand Theft Auto Connected",
+        "description": "Grand Theft Auto Connected is a custom scriptable multiplayer modification for multiple Grand Theft Auto games.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/grand-theft-auto-connected-f373442d5b30.json",
+        "sha256": "045e1c731e99b951a049df883cc4478beaef38dacd7d949e93a4455ce13cc77c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "gta/gtac/egg-pterodactyl-grand-theft-auto-connected.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/gta/gtac/egg-grand-theft-auto-connected.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/f373442d5b30.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:16:47+00:00",
+        "name": "Grand Theft Auto Connected",
+        "author": "admin@softwarenoob.com",
+        "description": "Grand Theft Auto Connected is a custom scriptable multiplayer modification for multiple Grand Theft Auto games.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Server",
+        "config": {
+          "files": "{\"server.xml\": {\"parser\": \"xml\", \"find\": {\"server.servername\": \"{{server.build.env.SERVERNAME}}\", \"server.port\": \"{{server.build.default.port}}\", \"server.httpport\": \"{{server.build.default.port}}\", \"server.game\": \"{{server.build.env.GAMETYPE}}\", \"server.serverbrowser\": \"{{server.build.env.SERVERBROWSER}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Successfully added server\"}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\ncd /mnt/server\r\n\r\n\r\nif [ \"${DL_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=https://gtaconnected.com/downloads/server/latest/linux\r\nelse\r\n    DOWNLOAD_LINK=https://gtaconnected.com/downloads/GTAC-Server-Linux-${DL_VERSION}.tar.gz\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail --location ${DOWNLOAD_LINK}; then\r\n        echo -e \"Chosen server version is valid.\"\r\n    else\r\n        echo -e \"Chosen server version is invalid, tried $DOWNLOAD_LINK. Exiting installation\"\r\n        exit 2\r\n    fi\r\nelse\r\n    echo -e \"no download link, stopping installation\"\r\n    exit 3\r\nfi\r\n\r\necho -e \"Downloading ${DL_VERSION} version of the server\"\r\ncurl -sSL ${DOWNLOAD_LINK} -o GTAC.tar.gz\r\necho \"Extracting files\"\r\ntar -xf GTAC.tar.gz\r\n\r\nchmod +x Server\r\nrm GTAC.tar.gz\r\n\r\necho \"Install complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game type",
+            "description": "Sets the game this server will support. Available options: gta:iii, gta:vc, gta:sa, gta:ug, gta:iv, gta:eflc",
+            "env_variable": "GAMETYPE",
+            "default_value": "gta:iv",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:gta:iii,gta:vc,gta:sa,gta:ug,gta:iv,gta:eflc",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server, which appears in the server browser.",
+            "env_variable": "SERVERNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "serverbrowser",
+            "description": "Whether to show the server in the server browser, set to true or false",
+            "env_variable": "SERVERBROWSER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of GATC to install such as 1.2.10, enter latest for the latest version.",
+            "env_variable": "DL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "grand-theft-auto-connected-fc9d95ae214e",
+        "name": "Grand Theft Auto Connected",
+        "description": "Grand Theft Auto Connected is a custom scriptable multiplayer modification for multiple Grand Theft Auto games.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/grand-theft-auto-connected-fc9d95ae214e.json",
+        "sha256": "21b0c8b3ba5ee177213ee65e491ecd320a7a67d5eb10ced77536084c4c5bf5a3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "gta/gtac/egg-grand-theft-auto-connected.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/fc9d95ae214e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-01T11:32:04+02:00",
+        "name": "Grand Theft Auto Connected",
+        "author": "admin@softwarenoob.com",
+        "description": "Grand Theft Auto Connected is a custom scriptable multiplayer modification for multiple Grand Theft Auto games.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Server",
+        "config": {
+          "files": "{\"server.xml\": {\"parser\": \"xml\", \"find\": {\"server.servername\": \"{{server.build.env.SERVERNAME}}\", \"server.port\": \"{{server.build.default.port}}\", \"server.httpport\": \"{{server.build.default.port}}\", \"server.game\": \"{{server.build.env.GAMETYPE}}\", \"server.serverbrowser\": \"{{server.build.env.SERVERBROWSER}}\"}}}",
+          "startup": "{\"done\": \"Successfully added server\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\ncd /mnt/server\r\n\r\n\r\nif [ \"${DL_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=https://gtaconnected.com/downloads/server/latest/linux\r\nelse\r\n    DOWNLOAD_LINK=https://gtaconnected.com/downloads/GTAC-Server-Linux-${DL_VERSION}.tar.gz\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail --location ${DOWNLOAD_LINK}; then\r\n        echo -e \"Chosen server version is valid.\"\r\n    else\r\n        echo -e \"Chosen server version is invalid, tried $DOWNLOAD_LINK. Exiting installation\"\r\n        exit 2\r\n    fi\r\nelse\r\n    echo -e \"no download link, stopping installation\"\r\n    exit 3\r\nfi\r\n\r\necho -e \"Downloading ${DL_VERSION} version of the server\"\r\ncurl -sSL ${DOWNLOAD_LINK} -o GTAC.tar.gz\r\necho \"Extracting files\"\r\ntar -xf GTAC.tar.gz\r\n\r\nchmod +x Server\r\nrm GTAC.tar.gz\r\n\r\necho \"Install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game type",
+            "description": "Sets the game this server will support. Available options: gta:iii, gta:vc, gta:sa, gta:ug, gta:iv, gta:eflc",
+            "env_variable": "GAMETYPE",
+            "default_value": "gta:iv",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:gta:iii,gta:vc,gta:sa,gta:ug,gta:iv,gta:eflc",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server, which appears in the server browser.",
+            "env_variable": "SERVERNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "serverbrowser",
+            "description": "Whether to show the server in the server browser, set to true or false",
+            "env_variable": "SERVERBROWSER",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "The version of GATC to install such as 1.2.10, enter latest for the latest version.",
+            "env_variable": "DL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ground-branch-319f42c312d6",
+        "name": "Ground Branch",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ground-branch-319f42c312d6.json",
+        "sha256": "85f516cca9004a4d623a992dd15017708e912fdc838198522a9c6f203fbe121c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "ground_branch/egg-ground-branch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/319f42c312d6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-08-01T20:51:33+00:00",
+        "name": "Ground Branch",
+        "author": "red_thirten@yahoo.com",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "features": null,
+        "docker_images": {
+          "Wine [Latest]": "ghcr.io/ptero-eggs/yolks:wine_latest",
+          "Wine [Staging]": "ghcr.io/ptero-eggs/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "wine GroundBranch/Binaries/Win64/GroundBranchServer-Win64-Shipping.exe MultiHome=0.0.0.0 Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -log",
+        "config": {
+          "files": "{\"GroundBranch/ServerConfig/Server.ini\": {\"parser\": \"file\", \"find\": {\"ServerName=\": \"ServerName={{server.build.env.SERVER_NAME}}\", \"MaxPlayers=\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\"}}, \"GroundBranch/Config/DefaultModding.ini\": {\"parser\": \"file\", \"find\": {\"ModPath=\": \"ModPath=../steamapps/workshop/content/16900/\"}}}",
+          "startup": "{\"done\": \"Bringing up level for play took\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl Ground Branch Egg - egg-ground-branch.json\r\n## Authors: David Wolfe (Red-Thirten)\r\n## Date: 2023/08/01\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io/pterodactyl/installers:debian'\r\n\r\n# Download and install SteamCMD\r\nexport HOME=/mnt/server\r\ncd /tmp\r\nmkdir -p $HOME/steamcmd $HOME/steamapps\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C $HOME/steamcmd\r\ncd $HOME/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir $HOME +login anonymous $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p $HOME/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so $HOME/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so $HOME/.steam/sdk64/steamclient.so\r\n\r\n## Ground Branch setup\r\n# Make ServerConfig directory and default Server.ini file (since they are not initially present before first server start)\r\nmkdir -p $HOME/GroundBranch/ServerConfig/ && cd \"$_\"\r\n\r\nif [[ ! -f Server.ini ]]; then\r\n    echo -e '\\nCreating default \"Server.ini\" configuration file...'\r\n    cat > Server.ini << EOF\r\n[/Script/RBZooKeeper.ZKServer]\r\n; Name of the server 64 characters max)\r\nServerName=Unnamed Ground Branch Server\r\n\r\n; The message of the day (512 characters max)\r\n; e.g. ServerMOTD=This text here is displayed<br>with the 'admin motd' command.\r\nServerMOTD=\"Welcome!\"\r\n\r\n; Set to a jpg image to act as a server banner in-game where possible.\r\n; (recommended resolution: 788 x 386)\r\nServerWebBanner=\"\"\r\n; e.g. ServerWebPage=www.images.com/myimage.jpeg\r\n\r\n; Password required to join the server.\r\n;ServerPassword=\r\n\r\n; Password required to join the server as a permanent spectator.\r\n;SpectatorOnlyPassword=\r\n\r\n; Maximum number of players allowed on this server.\r\nMaxPlayers=16\r\nMaxSpectators=0\r\n\r\n; Set default match types for game modes and round limits:\r\n; Match types: Continuous, BestOf, FirstTo, Play, PlayUntilWin, TimeLimit.\r\n; Round limits = number of rounds, except Time Limit match type (minutes).\r\n; PVE / Co-op:\r\nPVEMatchType=Continuous\r\nPVERoundLimit=2\r\n; PVP:\r\nPVPMatchType=Continuous\r\nPVPRoundLimit=3\r\n; PVP FFA (Free-for-all):\r\nPVPFFAMatchType=Continuous\r\nPVPFFARoundLimit=1\r\nGameRules=((\"AllowCheats\", False),(\"AllowDeadChat\", True),(\"AllowUnrestrictedRadio\", False),(\"AllowUnrestrictedVoice\", False),(\"SpectateEnemies\", True),(\"SpectateForceFirstPerson\", False),(\"SpectateFreeCam\", True),(\"UseTeamRestrictions\", False))\r\nEOF\r\nfi\r\n\r\necho -e \"\\nGround Branch Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "This is the port that your clients will type in and use to connect to the lobby (not the game world). Ensure this port matches your externally forwarded port, and is distanced from other running Ground Branch servers in Pterodactyl (increments of 100 are recommended). This is also true for the Primary/Game Port!",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 ON | 0 OFF)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will appear in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Unnamed Ground Branch Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Ground Branch Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates. Cannot be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "476400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:476400",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEDEBUG",
+            "description": "Used to suppress WINE FIXME messages. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEARCH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEPATH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:/home/container",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ground-branch-3bd401cc2fc5",
+        "name": "Ground Branch",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ground-branch-3bd401cc2fc5.json",
+        "sha256": "4e23ddd4741f8e4a9a29812da72a363e20e1d728d5351868f7a4c2ec49fa1ce9",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "ground_branch/egg-ground-branch.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/3bd401cc2fc5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Ground Branch",
+        "author": "red_thirten@yahoo.com",
+        "uuid": "8294a38b-f31b-4a4b-bfd7-3aaea63d67b8",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [],
+        "docker_images": {
+          "Wine [Staging]": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "wine ./GroundBranch/Binaries/Win64/GroundBranchServer-Win64-Shipping.exe MultiHome=0.0.0.0 Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -log & GB_PID=$!; tail -c0 -F ./GroundBranch/Saved/Logs/GroundBranch.log --pid=$GB_PID",
+        "config": {
+          "files": "{\"GroundBranch/ServerConfig/Server.ini\": {\"parser\": \"file\", \"find\": {\"ServerName=\": \"ServerName={{env.SERVER_NAME}}\", \"MaxPlayers=\": \"MaxPlayers={{env.MAX_PLAYERS}}\"}}, \"GroundBranch/Config/DefaultModding.ini\": {\"parser\": \"file\", \"find\": {\"ModPath=\": \"ModPath=../steamapps/workshop/content/16900/\"}}}",
+          "startup": "{\"done\": \"Bringing up level for play took\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl Ground Branch Egg - egg-ground-branch.json\r\n## Authors: David Wolfe (Red-Thirten)\r\n## Date: 2023/08/01\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io/pterodactyl/installers:debian'\r\n\r\n# Download and install SteamCMD\r\nexport HOME=/mnt/server\r\ncd /tmp\r\nmkdir -p $HOME/steamcmd $HOME/steamapps\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C $HOME/steamcmd\r\ncd $HOME/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir $HOME +login anonymous $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p $HOME/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so $HOME/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so $HOME/.steam/sdk64/steamclient.so\r\n\r\n## Ground Branch setup\r\n# Make ServerConfig directory and default Server.ini file (since they are not initially present before first server start)\r\nmkdir -p $HOME/GroundBranch/ServerConfig/ && cd \"$_\"\r\n\r\nif [[ ! -f Server.ini ]]; then\r\n    echo -e '\\nCreating default \"Server.ini\" configuration file...'\r\n    cat > Server.ini << EOF\r\n[/Script/RBZooKeeper.ZKServer]\r\n; Name of the server 64 characters max)\r\nServerName=Unnamed Ground Branch Server\r\n\r\n; The message of the day (512 characters max)\r\n; e.g. ServerMOTD=This text here is displayed<br>with the 'admin motd' command.\r\nServerMOTD=\"Welcome!\"\r\n\r\n; Set to a jpg image to act as a server banner in-game where possible.\r\n; (recommended resolution: 788 x 386)\r\nServerWebBanner=\"\"\r\n; e.g. ServerWebPage=www.images.com/myimage.jpeg\r\n\r\n; Password required to join the server.\r\n;ServerPassword=\r\n\r\n; Password required to join the server as a permanent spectator.\r\n;SpectatorOnlyPassword=\r\n\r\n; Maximum number of players allowed on this server.\r\nMaxPlayers=16\r\nMaxSpectators=0\r\n\r\n; Set default match types for game modes and round limits:\r\n; Match types: Continuous, BestOf, FirstTo, Play, PlayUntilWin, TimeLimit.\r\n; Round limits = number of rounds, except Time Limit match type (minutes).\r\n; PVE / Co-op:\r\nPVEMatchType=Continuous\r\nPVERoundLimit=2\r\n; PVP:\r\nPVPMatchType=Continuous\r\nPVPRoundLimit=3\r\n; PVP FFA (Free-for-all):\r\nPVPFFAMatchType=Continuous\r\nPVPFFARoundLimit=1\r\nGameRules=((\"AllowCheats\", False),(\"AllowDeadChat\", True),(\"AllowUnrestrictedRadio\", False),(\"AllowUnrestrictedVoice\", False),(\"SpectateEnemies\", True),(\"SpectateForceFirstPerson\", False),(\"SpectateFreeCam\", True),(\"UseTeamRestrictions\", False))\r\nEOF\r\nfi\r\n\r\necho -e \"\\nGround Branch Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 ON | 0 OFF)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": 1
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "sort": 2
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will appear in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Unnamed Ground Branch Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "sort": 3
+          },
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "This is the port that your clients will type in and use to connect to the lobby (not the game world). Ensure this port matches your externally forwarded port, and is distanced from other running Ground Branch servers in Pterodactyl (increments of 100 are recommended). This is also true for the Primary/Game Port!",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "sort": 4
+          },
+          {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "sort": 5
+          },
+          {
+            "name": "[System] Ground Branch Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates. Cannot be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "476400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:476400",
+            "sort": 6
+          },
+          {
+            "name": "[System] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "sort": 7
+          },
+          {
+            "name": "[System] WINEARCH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "sort": 8
+          },
+          {
+            "name": "[System] WINEDEBUG",
+            "description": "Used to suppress WINE FIXME messages. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "sort": 9
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ground-branch-724517bdafea",
+        "name": "Ground Branch",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ground-branch-724517bdafea.json",
+        "sha256": "3f7c3d366c626d0dac3d9ba62af0b6a1a928de72b24864c00c34ee72ed456ff7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/ground_branch/egg-ground-branch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/724517bdafea.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-08-01T20:51:33+00:00",
+        "name": "Ground Branch",
+        "author": "rehlmgaming@gmail.com",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "features": null,
+        "docker_images": {
+          "Wine [Latest]": "ghcr.io/parkervcp/yolks:wine_latest",
+          "Wine [Staging]": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "wine GroundBranch/Binaries/Win64/GroundBranchServer-Win64-Shipping.exe MultiHome=0.0.0.0 Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -log",
+        "config": {
+          "files": "{\"GroundBranch/ServerConfig/Server.ini\": {\"parser\": \"file\", \"find\": {\"ServerName=\": \"ServerName={{server.build.env.SERVER_NAME}}\", \"MaxPlayers=\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\"}}, \"GroundBranch/Config/DefaultModding.ini\": {\"parser\": \"file\", \"find\": {\"ModPath=\": \"ModPath=../steamapps/workshop/content/16900/\"}}}",
+          "startup": "{\"done\": \"Bringing up level for play took\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl Ground Branch Egg - egg-ground-branch.json\r\n## Authors: David Wolfe (Red-Thirten)\r\n## Date: 2023/08/01\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io/pterodactyl/installers:debian'\r\n\r\n# Download and install SteamCMD\r\nexport HOME=/mnt/server\r\ncd /tmp\r\nmkdir -p $HOME/steamcmd $HOME/steamapps\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C $HOME/steamcmd\r\ncd $HOME/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir $HOME +login anonymous $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p $HOME/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so $HOME/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so $HOME/.steam/sdk64/steamclient.so\r\n\r\n## Ground Branch setup\r\n# Make ServerConfig directory and default Server.ini file (since they are not initially present before first server start)\r\nmkdir -p $HOME/GroundBranch/ServerConfig/ && cd \"$_\"\r\n\r\nif [[ ! -f Server.ini ]]; then\r\n    echo -e '\\nCreating default \"Server.ini\" configuration file...'\r\n    cat > Server.ini << EOF\r\n[/Script/RBZooKeeper.ZKServer]\r\n; Name of the server 64 characters max)\r\nServerName=Unnamed Ground Branch Server\r\n\r\n; The message of the day (512 characters max)\r\n; e.g. ServerMOTD=This text here is displayed<br>with the 'admin motd' command.\r\nServerMOTD=\"Welcome!\"\r\n\r\n; Set to a jpg image to act as a server banner in-game where possible.\r\n; (recommended resolution: 788 x 386)\r\nServerWebBanner=\"\"\r\n; e.g. ServerWebPage=www.images.com/myimage.jpeg\r\n\r\n; Password required to join the server.\r\n;ServerPassword=\r\n\r\n; Password required to join the server as a permanent spectator.\r\n;SpectatorOnlyPassword=\r\n\r\n; Maximum number of players allowed on this server.\r\nMaxPlayers=16\r\nMaxSpectators=0\r\n\r\n; Set default match types for game modes and round limits:\r\n; Match types: Continuous, BestOf, FirstTo, Play, PlayUntilWin, TimeLimit.\r\n; Round limits = number of rounds, except Time Limit match type (minutes).\r\n; PVE / Co-op:\r\nPVEMatchType=Continuous\r\nPVERoundLimit=2\r\n; PVP:\r\nPVPMatchType=Continuous\r\nPVPRoundLimit=3\r\n; PVP FFA (Free-for-all):\r\nPVPFFAMatchType=Continuous\r\nPVPFFARoundLimit=1\r\nGameRules=((\"AllowCheats\", False),(\"AllowDeadChat\", True),(\"AllowUnrestrictedRadio\", False),(\"AllowUnrestrictedVoice\", False),(\"SpectateEnemies\", True),(\"SpectateForceFirstPerson\", False),(\"SpectateFreeCam\", True),(\"UseTeamRestrictions\", False))\r\nEOF\r\nfi\r\n\r\necho -e \"\\nGround Branch Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "This is the port that your clients will type in and use to connect to the lobby (not the game world). Ensure this port matches your externally forwarded port, and is distanced from other running Ground Branch servers in Pterodactyl (increments of 100 are recommended). This is also true for the Primary/Game Port!",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 ON | 0 OFF)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will appear in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Unnamed Ground Branch Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Ground Branch Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates. Cannot be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "476400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:476400",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEDEBUG",
+            "description": "Used to suppress WINE FIXME messages. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEARCH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEPATH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:/home/container",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "ground-branch-de8907fb40f2",
+        "name": "Ground Branch",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/ground-branch-de8907fb40f2.json",
+        "sha256": "3c14c1c7b3b073dff48995631e8796bfa2c3de796e87d26d72ed6ff991865865",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "ground_branch/egg-pterodactyl-ground-branch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/de8907fb40f2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-07-27T12:53:37+00:00",
+        "name": "Ground Branch",
+        "author": "red_thirten@yahoo.com",
+        "description": "From one of the developers behind the original Rainbow Six® and Ghost Recon® games, comes a thinking-man's first-person shooter featuring in-depth character and weapon customization. Take your time. Think ahead. Get the job done.",
+        "features": [],
+        "docker_images": {
+          "Wine [Staging]": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "wine ./GroundBranch/Binaries/Win64/GroundBranchServer-Win64-Shipping.exe MultiHome=0.0.0.0 Port={{SERVER_PORT}} QueryPort={{QUERY_PORT}} -log & GB_PID=$!; tail -c0 -F ./GroundBranch/Saved/Logs/GroundBranch.log --pid=$GB_PID",
+        "config": {
+          "files": "{\"GroundBranch/ServerConfig/Server.ini\": {\"parser\": \"file\", \"find\": {\"ServerName=\": \"ServerName={{env.SERVER_NAME}}\", \"MaxPlayers=\": \"MaxPlayers={{env.MAX_PLAYERS}}\"}}, \"GroundBranch/Config/DefaultModding.ini\": {\"parser\": \"file\", \"find\": {\"ModPath=\": \"ModPath=../steamapps/workshop/content/16900/\"}}}",
+          "startup": "{\"done\": \"Bringing up level for play took\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pterodactyl Ground Branch Egg - egg-ground-branch.json\r\n## Authors: David Wolfe (Red-Thirten)\r\n## Date: 2023/08/01\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io/pterodactyl/installers:debian'\r\n\r\n# Download and install SteamCMD\r\nexport HOME=/mnt/server\r\ncd /tmp\r\nmkdir -p $HOME/steamcmd $HOME/steamapps\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C $HOME/steamcmd\r\ncd $HOME/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\n\r\n# Install game server using SteamCMD\r\n./steamcmd.sh +force_install_dir $HOME +login anonymous $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) validate +quit\r\n\r\n# Set up 32 and 64 bit libraries\r\nmkdir -p $HOME/.steam/sdk{32,64}\r\ncp -v linux32/steamclient.so $HOME/.steam/sdk32/steamclient.so\r\ncp -v linux64/steamclient.so $HOME/.steam/sdk64/steamclient.so\r\n\r\n## Ground Branch setup\r\n# Make ServerConfig directory and default Server.ini file (since they are not initially present before first server start)\r\nmkdir -p $HOME/GroundBranch/ServerConfig/ && cd \"$_\"\r\n\r\nif [[ ! -f Server.ini ]]; then\r\n    echo -e '\\nCreating default \"Server.ini\" configuration file...'\r\n    cat > Server.ini << EOF\r\n[/Script/RBZooKeeper.ZKServer]\r\n; Name of the server 64 characters max)\r\nServerName=Unnamed Ground Branch Server\r\n\r\n; The message of the day (512 characters max)\r\n; e.g. ServerMOTD=This text here is displayed<br>with the 'admin motd' command.\r\nServerMOTD=\"Welcome!\"\r\n\r\n; Set to a jpg image to act as a server banner in-game where possible.\r\n; (recommended resolution: 788 x 386)\r\nServerWebBanner=\"\"\r\n; e.g. ServerWebPage=www.images.com/myimage.jpeg\r\n\r\n; Password required to join the server.\r\n;ServerPassword=\r\n\r\n; Password required to join the server as a permanent spectator.\r\n;SpectatorOnlyPassword=\r\n\r\n; Maximum number of players allowed on this server.\r\nMaxPlayers=16\r\nMaxSpectators=0\r\n\r\n; Set default match types for game modes and round limits:\r\n; Match types: Continuous, BestOf, FirstTo, Play, PlayUntilWin, TimeLimit.\r\n; Round limits = number of rounds, except Time Limit match type (minutes).\r\n; PVE / Co-op:\r\nPVEMatchType=Continuous\r\nPVERoundLimit=2\r\n; PVP:\r\nPVPMatchType=Continuous\r\nPVPRoundLimit=3\r\n; PVP FFA (Free-for-all):\r\nPVPFFAMatchType=Continuous\r\nPVPFFARoundLimit=1\r\nGameRules=((\"AllowCheats\", False),(\"AllowDeadChat\", True),(\"AllowUnrestrictedRadio\", False),(\"AllowUnrestrictedVoice\", False),(\"SpectateEnemies\", True),(\"SpectateForceFirstPerson\", False),(\"SpectateFreeCam\", True),(\"UseTeamRestrictions\", False))\r\nEOF\r\nfi\r\n\r\necho -e \"\\nGround Branch Dedicated Server successfully installed!\\n\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Automatic Updates",
+            "description": "Quickly checks for any server updates on startup, and updates if necessary. (1 ON | 0 OFF)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed to connect to the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of the server that will appear in the server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Unnamed Ground Branch Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "This is the port that your clients will type in and use to connect to the lobby (not the game world). Ensure this port matches your externally forwarded port, and is distanced from other running Ground Branch servers in Pterodactyl (increments of 100 are recommended). This is also true for the Primary/Game Port!",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[Repair] Validate Server Files",
+            "description": "Leave empty (no value) for OFF or type \"true\" or \"1\" for ON. Validates all server files when Automatic Updates is enabled. Note: This will significantly increase server startup times, so it is recommended to only enable this when needed.",
+            "env_variable": "VALIDATE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|nullable",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Ground Branch Dedicated Server App ID",
+            "description": "Steam App ID used for installation and updates. Cannot be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "476400",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:476400",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] Use Windows Branch",
+            "description": "Tells the installer/updater to only download the Windows branch of the server (the only branch currently available) so that it can run on Wine. Cannot be changed.",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEARCH",
+            "description": "Used for compatibility. Cannot be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEDEBUG",
+            "description": "Used to suppress WINE FIXME messages. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string|nullable",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "half-life-2-deathmatch-5268765a97a0",
+        "name": "Half-Life 2: Deathmatch",
+        "description": "Fast multiplayer action set in the Half-Life 2 universe! HL2's physics adds a new dimension to deathmatch play. Play straight deathmatch or try Combine vs. Resistance teamplay. Toss a toilet at your friend today!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/half-life-2-deathmatch-5268765a97a0.json",
+        "sha256": "4f433a8770ff9977b998633cfd2ba0b6666325c9023bbed8722db78bd2a7c5d8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "half_life_2_deathmatch/egg-half--life2--deathmatch.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5268765a97a0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-06T13:52:09+02:00",
+        "name": "Half-Life 2: Deathmatch",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Fast multiplayer action set in the Half-Life 2 universe! HL2's physics adds a new dimension to deathmatch play. Play straight deathmatch or try Combine vs. Resistance teamplay. Toss a toilet at your friend today!",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -console -game hl2mp -maxplayers {{MAX_PLAYERS}} +map {{MAP_NAME}} -port {{SERVER_PORT}} -tickrate {{TICK_RATE}}",
+        "config": {
+          "files": "{\"hl2mp/cfg/server.cfg\": {\"parser\": \"file\", \"find\": {\"hostname \": \"hostname \\\"{{server.build.env.SERVER_NAME}}\\\"\", \"sv_password \": \"sv_password \\\"{{server.build.env.SERVER_PASSWORD}}\\\"\", \"rcon_password \": \"rcon_password \\\"{{server.build.env.RCON_PASSWORD}}\\\"\"}}}",
+          "startup": "{\"done\": \"Connection to Steam servers successful.\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## create server config\r\ncat <<EOF > /mnt/server/hl2mp/cfg/server.cfg\r\n// Basic server settings\r\nhostname \"${SERVER_NAME}\"\r\nsv_password \"${SERVER_PASSWORD}\"\r\nrcon_password \"${RCON_PASSWORD}\"\r\nsv_cheats 0\r\nsv_lan 0\r\nsv_contact \"your_email@example.com\"\r\nsv_region 0\r\nmp_disable_autokick 0\r\n\r\n// Gameplay settings\r\nsv_hl2mp_weapon_respawn_time 20\r\nsv_hl2mp_item_respawn_time 30\r\nmp_weaponstay 0\r\nmp_autocrosshair 1\r\nsv_alltalk 1\r\nmp_allowspectators 1\r\nsv_voiceenable 1\r\nmp_forcerespawn 1\r\nmp_timelimit 20\r\nmp_winlimit 0\r\nmp_maxrounds 0\r\nmp_teams_unbalance_limit 0\r\nmp_friendlyfire 0\r\nmp_flashlight 1\r\nmp_autoteambalance 0\r\nmp_restartgame 1\r\n\r\n// Player settings\r\nsv_timeout 60\r\nsv_noclipaccelerate 5\r\nsv_noclipspeed 5\r\n\r\n// Miscellaneous settings\r\nsv_downloadurl \"\"\r\nmp_forcecamera 1\r\nmapcyclefile \"mapcycle.txt\"\r\n\r\n// Server security settings\r\nsv_allowupload 1\r\nsv_allowdownload 1\r\nsv_rcon_banpenalty 10\r\nsv_rcon_maxfailures 5\r\n\r\n// Map-related settings\r\nmp_chattime 5\r\nEOF\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID used for installation and updates. Rarely needs to be changed.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "232370",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:232370",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl-server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Map Name",
+            "description": "The name of the map",
+            "env_variable": "MAP_NAME",
+            "default_value": "dm_lockdown",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum number of players allowed",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "20",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|between:1,20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password used to join the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Rcon Password",
+            "description": "The password used for the server rcon",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "ChangeMe",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Tick Rate",
+            "description": "Server tick rate",
+            "env_variable": "TICK_RATE",
+            "default_value": "66",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "hogwarp-1a7a63bfd41e",
+        "name": "Hogwarp",
+        "description": "A Pterodactyl egg for the Hogwarts Legacy mod Hogwarp - For more info see their Nexus: https://www.nexusmods.com/hogwartslegacy/mods/1378",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/hogwarp-1a7a63bfd41e.json",
+        "sha256": "d2f102dc6b791cb79a700b64de5358f688197cf65052bf33072c75be263d454e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "hogwarp/egg-hogwarp.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/1a7a63bfd41e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-30T14:42:14-05:00",
+        "name": "Hogwarp",
+        "author": "imkringle@proton.me",
+        "description": "A Pterodactyl egg for the Hogwarts Legacy mod Hogwarp - For more info see their Nexus: https://www.nexusmods.com/hogwartslegacy/mods/1378",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "export WINEDLLOVERRIDES=\"mscoree=n,b;mshtml=n,b\"; wine HogWarpServer.exe",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"ApiKey\": \"{{env.API_KEY}}\", \"Name\": \"{{env.SERV_NAME}}\", \"Port\": \"{{server.build.default.port}}\", \"Description\": \"{{env.SERV_DESC}}\", \"MaxPlayer\": \"{{env.MAX_PLAYERS}}\", \"IconUrl\": \"{{env.SERV_ICON}}\"}}}",
+          "startup": "{\"done\": \"Server started on port \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#Hogwarp Install\r\napt update -y\r\napt install -y curl file unzip\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n# Validate link\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o ${DOWNLOAD_LINK##*/}\r\n\r\n# Unpack Server zip\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\n\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"XZ\" ]; then\r\n    tar xvf ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exiting\"\r\n    exit 2 \r\nfi\r\n\r\ncd /mnt/server/\r\n\r\n#Create the Plugins folder\r\nmkdir plugins/\r\n\r\n# Check for a config.json, if it is missing; create it\r\nTARGET_FILE=\"config.json\"\r\n\r\nif test -f \"$TARGET_FILE\"; then\r\n    echo \"$TARGET_FILE exists. Skipping config install\"\r\nelse\r\n    echo \"$TARGET_FILE does not exist. Installing!\"\r\n    curl -sSL -o config.json https://pteropaste.com/hy2d48dbhtdd/\r\n    echo \"$TARGET_FILE has been installed\"\r\nfi\r\n\r\n\r\n## Install End\r\necho \"-----------------------------------------\"\r\necho \"Hogwarp Is Installed!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Wine Tricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "dotnet7",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Hogwarp API Key",
+            "description": "A API required to boot - https://presence.hogwarp.com/login\r\n- If not set on install it will fail. Set API Key then Reinstall Files",
+            "env_variable": "API_KEY",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "A name that displays on the Hogwarp list",
+            "env_variable": "SERV_NAME",
+            "default_value": "Ptero Hogwarp Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WineARCH",
+            "description": "Arch type for Wine",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max players for a server, this depends on your Patreon level for Hogwarp\r\nhttps://www.patreon.com/tiltedphoques - ( 4, 8, 16, No Limit ) In that order.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Icon URL",
+            "description": "The icon that displays on Hogwarps multiplayer listing",
+            "env_variable": "SERV_ICON",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "The description that shows on the Multiplayer list",
+            "env_variable": "SERV_DESC",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Download URL",
+            "description": "URL to pull the files from\r\n- Files can be found in their Discord (https://discord.com/invite/hogwarp). Default URL will pull from there as well\r\n- These files can be outdated! Be sure to check for an update in the event it has a version mismatch with the client.",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "https://cdn.discordapp.com/attachments/1076580539751993444/1118295980597575810/Server.zip",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "hogwarp-2b725183565b",
+        "name": "Hogwarp",
+        "description": "A Pterodactyl egg for the Hogwarts Legacy mod Hogwarp - For more info see their Nexus: https://www.nexusmods.com/hogwartslegacy/mods/1378",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/hogwarp-2b725183565b.json",
+        "sha256": "ec80c092ff6dac06fbfd1e1ef3aa24edb4e3fd36e56610c076add65e1e35e1a8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "hogwarp/egg-hogwarp.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/2b725183565b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-10-20T18:23:50+00:00",
+        "name": "Hogwarp",
+        "author": "imkringle@proton.me",
+        "uuid": "9ae78c9d-1d23-4b67-8a58-5c8fca30c124",
+        "description": "A Pterodactyl egg for the Hogwarts Legacy mod Hogwarp - For more info see their Nexus: https://www.nexusmods.com/hogwartslegacy/mods/1378",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "export WINEDLLOVERRIDES=\"mscoree=n,b;mshtml=n,b\"; wine HogWarpServer.exe",
+        "config": {
+          "files": "{\"config.json\": {\"parser\": \"json\", \"find\": {\"ApiKey\": \"{{env.API_KEY}}\", \"Name\": \"{{env.SERV_NAME}}\", \"Port\": \"{{server.allocations.default.port}}\", \"Description\": \"{{env.SERV_DESC}}\", \"MaxPlayer\": \"{{env.MAX_PLAYERS}}\", \"IconUrl\": \"{{env.SERV_ICON}}\"}}}",
+          "startup": "{\"done\": \"Server started on port \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#Hogwarp Install Script\r\n\r\napt update -y\r\napt install -y curl file unzip\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir -p /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\nARCHIVE_NAME=\"Hogwarp.zip\"\r\n\r\n# Validate link\r\nif [ ! -z \"${DOWNLOAD_URL}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_URL}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_URL}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_URL}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\ncurl -sSL ${DOWNLOAD_LINK} -o $ARCHIVE_NAME\r\n\r\n# Unpack Server zip\r\n# Backup and restore logic for config.json\r\nif [ -f /mnt/server/config.json ]; then\r\n    mv /mnt/server/config.json /mnt/server/config-backup.json\r\n    unzip -o $ARCHIVE_NAME -d /mnt/server\r\n    rm -f /mnt/server/config.json\r\n    mv /mnt/server/config-backup.json /mnt/server/config.json\r\nelse\r\n    unzip -o $ARCHIVE_NAME -d /mnt/server\r\nfi\r\n\r\n#Create the Plugins folder\r\nmkdir -p /mnt/server/plugins/\r\n\r\n\r\n## Install End\r\necho \"-----------------------------------------\"\r\necho \"Hogwarp Is Installed!\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": null,
+            "name": "Wine Tricks",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "dotnet8",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "Hogwarp API Key",
+            "description": "A API required to boot - https://presence.hogwarp.com/login\r\n- If not set on install it will fail. Set API Key then Reinstall Files",
+            "env_variable": "API_KEY",
+            "default_value": "CHANGEME",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "Server Name",
+            "description": "A name that displays on the Hogwarp list",
+            "env_variable": "SERV_NAME",
+            "default_value": "Ptero Hogwarp Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "WineARCH",
+            "description": "Arch type for Wine",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "Max Players",
+            "description": "Max players for a server, this depends on your Patreon level for Hogwarp\r\nhttps://www.patreon.com/tiltedphoques - ( 4, 8, 16, No Limit ) In that order.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "Server Icon URL",
+            "description": "The icon that displays on Hogwarps multiplayer listing",
+            "env_variable": "SERV_ICON",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "Server Description",
+            "description": "The description that shows on the Multiplayer list",
+            "env_variable": "SERV_DESC",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "Download URL",
+            "description": "URL to pull the files from - By default this is blank. Files can be found in Discord!",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "sort": null,
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

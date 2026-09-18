@@ -1,0 +1,1361 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "game-server-watcher-538ea799b7c3",
+        "name": "Game Server Watcher",
+        "description": "A simple discord/telegram/slack bot that can be hosted on a free service to monitor your game servers and players in style. 😎",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/game-server-watcher-538ea799b7c3.json",
+        "sha256": "3cb1057105ba505f84898595fe418e023b35402a9bcf98dae6cf6f9eda484f85",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "bots/discord/game-server-watcher/egg-game-server-watcher.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/538ea799b7c3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:15+00:00",
+        "name": "Game Server Watcher",
+        "author": "a-sync@devs.space",
+        "description": "A simple discord/telegram/slack bot that can be hosted on a free service to monitor your game servers and players in style. 😎",
+        "features": null,
+        "docker_images": {
+          "Node.js 20": "ghcr.io/ptero-eggs/yolks:nodejs_20"
+        },
+        "file_denylist": [],
+        "startup": "env PORT={{SERVER_PORT}} /usr/local/bin/node /home/container/dist/server.js",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"starting loop...\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "node:20-bookworm-slim",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt-get update && apt-get install ca-certificates git -yq --no-install-suggests --no-install-recommends --allow-downgrades --allow-remove-essential --allow-change-held-packages\r\n\r\n\r\ncd /mnt/server\r\n\r\ngit config --global --add safe.directory /mnt/server\r\ngit clone https://github.com/a-sync/game-server-watcher.git . || git pull\r\n\r\n\r\nnpm install --no-save && npm update gamedig && npm run build\r\nnpm prune --omit=dev\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "SECRET",
+            "description": "Admin secret",
+            "env_variable": "SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:8|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "DATA_PATH",
+            "description": "Writable folder for data storage",
+            "env_variable": "DATA_PATH",
+            "default_value": "./data/",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:1|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "REFRESH_TIME_MINUTES",
+            "description": "Game server info refresh interval in minutes",
+            "env_variable": "REFRESH_TIME_MINUTES",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "DISCORD_BOT_TOKEN",
+            "description": "Discord bot token",
+            "env_variable": "DISCORD_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "TELEGRAM_BOT_TOKEN",
+            "description": "Telegram bot token",
+            "env_variable": "TELEGRAM_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "STEAM_WEB_API_KEY",
+            "description": "Steam web API key",
+            "env_variable": "STEAM_WEB_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Debug Mode",
+            "description": "Enable or disable debug mode.",
+            "env_variable": "DBG",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "SLACK_BOT_TOKEN",
+            "description": "Slack bot token",
+            "env_variable": "SLACK_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "SLACK_APP_TOKEN",
+            "description": "Slack app token",
+            "env_variable": "SLACK_APP_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "game-server-watcher-bde701b8eecf",
+        "name": "Game Server Watcher",
+        "description": "A simple discord/telegram/slack bot that can be hosted on a free service to monitor your game servers and players in style. 😎",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/game-server-watcher-bde701b8eecf.json",
+        "sha256": "c3780d3f091acf170849a179b74b3edc24c9acf005467e4fa0ede41fd91e6158",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/game-server-watcher/egg-pterodactyl-game-server-watcher.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "bots/discord/game-server-watcher/egg-game-server-watcher.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--chatbots/bde701b8eecf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:15+00:00",
+        "name": "Game Server Watcher",
+        "author": "a-sync@devs.space",
+        "description": "A simple discord/telegram/slack bot that can be hosted on a free service to monitor your game servers and players in style. 😎",
+        "features": null,
+        "docker_images": {
+          "Node.js 20": "ghcr.io/parkervcp/yolks:nodejs_20"
+        },
+        "file_denylist": [],
+        "startup": "env PORT={{SERVER_PORT}} /usr/local/bin/node /home/container/dist/server.js",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"starting loop...\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "node:20-bookworm-slim",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt-get update && apt-get install ca-certificates git -yq --no-install-suggests --no-install-recommends --allow-downgrades --allow-remove-essential --allow-change-held-packages\r\n\r\n\r\ncd /mnt/server\r\n\r\ngit config --global --add safe.directory /mnt/server\r\ngit clone https://github.com/a-sync/game-server-watcher.git . || git pull\r\n\r\n\r\nnpm install --no-save && npm update gamedig && npm run build\r\nnpm prune --omit=dev\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "SECRET",
+            "description": "Admin secret",
+            "env_variable": "SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:8|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "DATA_PATH",
+            "description": "Writable folder for data storage",
+            "env_variable": "DATA_PATH",
+            "default_value": "./data/",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:1|max:255",
+            "field_type": "text"
+          },
+          {
+            "name": "REFRESH_TIME_MINUTES",
+            "description": "Game server info refresh interval in minutes",
+            "env_variable": "REFRESH_TIME_MINUTES",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "DISCORD_BOT_TOKEN",
+            "description": "Discord bot token",
+            "env_variable": "DISCORD_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "TELEGRAM_BOT_TOKEN",
+            "description": "Telegram bot token",
+            "env_variable": "TELEGRAM_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "STEAM_WEB_API_KEY",
+            "description": "Steam web API key",
+            "env_variable": "STEAM_WEB_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Debug Mode",
+            "description": "Enable or disable debug mode.",
+            "env_variable": "DBG",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "SLACK_BOT_TOKEN",
+            "description": "Slack bot token",
+            "env_variable": "SLACK_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "SLACK_APP_TOKEN",
+            "description": "Slack app token",
+            "env_variable": "SLACK_APP_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "game-server-watcher-d140b28d4403",
+        "name": "Game Server Watcher",
+        "description": "A simple discord/telegram/slack bot that can be hosted on a free service to monitor your game servers and players in style. 😎",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/game-server-watcher-d140b28d4403.json",
+        "sha256": "97a3fcb991c5faca13f41ce2c7ffc94fd09155cdef667b2a325ee3a6e598b06e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/game-server-watcher/egg-game-server-watcher.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/d140b28d4403.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:15+00:00",
+        "name": "Game Server Watcher",
+        "author": "a-sync@devs.space",
+        "uuid": "d163b89a-a9e6-4525-b073-a405eec86fc1",
+        "description": "A simple discord/telegram/slack bot that can be hosted on a free service to monitor your game servers and players in style. 😎",
+        "features": null,
+        "docker_images": {
+          "Node.js 20": "ghcr.io/parkervcp/yolks:nodejs_20"
+        },
+        "file_denylist": [],
+        "startup": "env PORT={{SERVER_PORT}} /usr/local/bin/node /home/container/dist/server.js",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"starting loop...\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt-get update && apt-get install ca-certificates git -yq --no-install-suggests --no-install-recommends --allow-downgrades --allow-remove-essential --allow-change-held-packages\r\n\r\n\r\ncd /mnt/server\r\n\r\ngit config --global --add safe.directory /mnt/server\r\ngit clone https://github.com/a-sync/game-server-watcher.git . || git pull\r\n\r\n\r\nnpm install --no-save && npm update gamedig && npm run build\r\nnpm prune --omit=dev\r\n\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "node:20-bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SECRET",
+            "description": "Admin secret",
+            "env_variable": "SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:8|max:255",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "DATA_PATH",
+            "description": "Writable folder for data storage",
+            "env_variable": "DATA_PATH",
+            "default_value": "./data/",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:1|max:255",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "REFRESH_TIME_MINUTES",
+            "description": "Game server info refresh interval in minutes",
+            "env_variable": "REFRESH_TIME_MINUTES",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "DISCORD_BOT_TOKEN",
+            "description": "Discord bot token",
+            "env_variable": "DISCORD_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "TELEGRAM_BOT_TOKEN",
+            "description": "Telegram bot token",
+            "env_variable": "TELEGRAM_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "STEAM_WEB_API_KEY",
+            "description": "Steam web API key",
+            "env_variable": "STEAM_WEB_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Debug Mode",
+            "description": "Enable or disable debug mode.",
+            "env_variable": "DBG",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|in:0,1",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SLACK_BOT_TOKEN",
+            "description": "Slack bot token",
+            "env_variable": "SLACK_BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "SLACK_APP_TOKEN",
+            "description": "Slack app token",
+            "env_variable": "SLACK_APP_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "jmusicbot-244aa7fca299",
+        "name": "JMusicBot",
+        "description": "A Discord music bot that's easy to set up and run yourself!",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/jmusicbot-244aa7fca299.json",
+        "sha256": "80dbfbfe358a78678c74892f4e473e7f7f06dde27d18b3b8c0a53f05b523ffd1",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/jmusicbot/egg-j-music-bot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/244aa7fca299.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:14+00:00",
+        "name": "JMusicBot",
+        "author": "parker@parkervcp.com",
+        "uuid": "e90f4b6d-e86b-4a0b-8fbb-6f8f2249c7a1",
+        "description": "A Discord music bot that's easy to set up and run yourself!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Dnogui=true -jar JMusicBot.jar",
+        "config": {
+          "files": "{\"config.txt\": {\"parser\": \"file\", \"find\": {\"token =\": \"token = \\\"{{server.build.env.BOT_TOKEN}}\\\"\", \"owner =\": \"owner = {{server.build.env.BOT_OWNER}}\", \"prefix =\": \"prefix = \\\"{{server.build.env.BOT_PREFIX}}\\\"\", \"game =\": \"game = \\\"{{server.build.env.BOT_GAME}}\\\"\", \"status =\": \"status = {{server.build.env.BOT_STATUS}}\", \"songinstatus =\": \"songinstatus = {{server.build.env.BOT_SONG_STATUS}}\", \"altprefix =\": \"altprefix = \\\"{{server.build.env.BOT_ALT_PREFIX}}\\\"\", \"npimages =\": \"npimages = {{server.build.env.BOT_NPIMAGES}}\", \"stayinchannel =\": \"stayinchannel = {{server.build.env.BOT_STAY_IN_CHANNEL}}\", \"maxtime =\": \"maxtime = {{server.build.env.BOT_MAXTIME}}\", \"alonetimeuntilstop =\": \"alonetimeuntilstop = {{server.build.env.BOT_ALONE_TIME}}\"}}}",
+          "startup": "{\"done\": \"Finished Loading\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y jq curl\r\n\r\nCONFIG_LINK=\"https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/jmusicbot/config.txt\"\r\nPLAYLIST_LINK=\"https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/jmusicbot/example_playlist.txt\"\r\n\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/jagrosh/MusicBot/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/jagrosh/MusicBot/releases\")\r\nMATCH=JMusicBot\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n## JMusicBot Setup\r\n[ ! -d /mnt/server ] && mkdir /mnt/server\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating JMusicBot...\\n\"\r\n\r\nif [ -f JMusicBot.jar ]; then\r\n    echo -e \"Updating JMusicBot.jar to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"JMusicBot.jar-old\")'\r\n    mv -f JMusicBot.jar JMusicBot.jar-old\r\nfi\r\n\r\necho -e \"Running: curl -sSLo JMusicBot.jar ${DOWNLOAD_URL}\\n\"\r\ncurl -sSLo JMusicBot.jar ${DOWNLOAD_URL}\r\n\r\nif [ -f config.txt ]; then\r\n    echo -e \"Updating config.txt to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"config.txt-old\")'\r\n    mv -f config.txt config.txt-old\r\nfi\r\necho -e \"Running: curl -sSLo config.txt ${CONFIG_LINK}\\n\"\r\ncurl -sSLo config.txt ${CONFIG_LINK}\r\n\r\n[ ! -d Playlists ] && mkdir Playlists\r\ncd Playlists\r\nif [ -f example_playlist.txt ]; then\r\n    echo -e \"example_playlist.txt already exists. Skipping default download.\"\r\nelse\r\n    echo -e \"example_playlist.txt not found. Downloading default example_playlist...\"\r\n    echo -e \"Running: curl -sSLo example_playlist.txt ${PLAYLIST_LINK}\"\r\n    curl -sSLo example_playlist.txt ${PLAYLIST_LINK}\r\nfi\r\n\r\necho -e \"\\nJMusicBot Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "[REQUIRED] Bot Owner ID",
+            "description": "This is the Discord User ID of the bot owner. Learn how to obtain this ID here: https://jmusicbot.com/finding-your-user-id/",
+            "env_variable": "BOT_OWNER",
+            "default_value": "Change This To Your Discord User ID",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|digits_between:17,18",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Prefix",
+            "description": "This sets the prefix for the bot. The prefix is used to control the commands. If you use !, the play command will be !play. If you do not set this, the prefix will be a mention of the bot (@Botname play).",
+            "env_variable": "BOT_PREFIX",
+            "default_value": "@mention",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Alternate Prefix",
+            "description": "If you set this, the bot will also use this prefix in addition to \"Bot Prefix\". Set to NONE to not have an alternate prefix.",
+            "env_variable": "BOT_ALT_PREFIX",
+            "default_value": "NONE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Default Game",
+            "description": "If you change this, it modifies the default game of the bot. Set this to NONE to have no game. Set this to DEFAULT to use the default game. You can make the game \"Playing X\", \"Listening to X\", or \"Watching X\" where X is the title. If you don't include an action, it will use the default of \"Playing\".",
+            "env_variable": "BOT_GAME",
+            "default_value": "DEFAULT",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Default Status",
+            "description": "[ Accepted Values: ONLINE IDLE DND INVISIBLE ] Will modify the default status of bot.",
+            "env_variable": "BOT_STATUS",
+            "default_value": "ONLINE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:ONLINE,IDLE,DND,INVISIBLE",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Show Song in Status",
+            "description": "If you set this to true, the bot will list the title of the song it is currently playing in its \"Playing\" status. NOTE: This will ONLY work if the bot is playing music on ONE Discord server; if the bot is playing in multiple servers, this will not work!",
+            "env_variable": "BOT_SONG_STATUS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Show Images for \"Now Playing\"",
+            "description": "If set to true, the \"nowplaying\" command will show YouTube thumbnails. NOTE: If you set this to true, the nowplaying boxes will NOT refresh. This is because refreshing the boxes causes the image to be reloaded every time it refreshes.",
+            "env_variable": "BOT_NPIMAGES",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Stay In Channel",
+            "description": "If set to true, the bot will not leave a voice channel after it finishes a queue. Keep in mind that being connected to a voice channel uses additional bandwidth, so this option is not recommended if bandwidth is a concern.",
+            "env_variable": "BOT_STAY_IN_CHANNEL",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Alone Time Until Disconnect",
+            "description": "This sets the amount of seconds the bot will stay alone on a voice channel until it automatically leaves the voice channel and clears the queue. If not set or set to any number less than or equal to zero, the bot won't leave when alone.",
+            "env_variable": "BOT_ALONE_TIME",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Max Song Length",
+            "description": "This sets the maximum amount of seconds any track loaded can be. If not set or set to any number less than or equal to zero, there is no maximum time length. This time restriction applies to songs loaded from any source.",
+            "env_variable": "BOT_MAXTIME",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "jmusicbot-78bcc45217e3",
+        "name": "JMusicBot",
+        "description": "A Discord music bot that's easy to set up and run yourself!",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/jmusicbot-78bcc45217e3.json",
+        "sha256": "4dfcbcafe4e8373e26b5235e78661c6814c6c600b48d07fca17fdeeafdf8b64b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/jmusicbot/egg-pterodactyl-j-music-bot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "bots/discord/jmusicbot/egg-j-music-bot.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--chatbots/78bcc45217e3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:14+00:00",
+        "name": "JMusicBot",
+        "author": "parker@parkervcp.com",
+        "description": "A Discord music bot that's easy to set up and run yourself!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Dnogui=true -jar JMusicBot.jar",
+        "config": {
+          "files": "{\"config.txt\": {\"parser\": \"file\", \"find\": {\"token =\": \"token = \\\"{{server.build.env.BOT_TOKEN}}\\\"\", \"owner =\": \"owner = {{server.build.env.BOT_OWNER}}\", \"prefix =\": \"prefix = \\\"{{server.build.env.BOT_PREFIX}}\\\"\", \"game =\": \"game = \\\"{{server.build.env.BOT_GAME}}\\\"\", \"status =\": \"status = {{server.build.env.BOT_STATUS}}\", \"songinstatus =\": \"songinstatus = {{server.build.env.BOT_SONG_STATUS}}\", \"altprefix =\": \"altprefix = \\\"{{server.build.env.BOT_ALT_PREFIX}}\\\"\", \"npimages =\": \"npimages = {{server.build.env.BOT_NPIMAGES}}\", \"stayinchannel =\": \"stayinchannel = {{server.build.env.BOT_STAY_IN_CHANNEL}}\", \"maxtime =\": \"maxtime = {{server.build.env.BOT_MAXTIME}}\", \"alonetimeuntilstop =\": \"alonetimeuntilstop = {{server.build.env.BOT_ALONE_TIME}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Finished Loading\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash",
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y jq curl\r\n\r\nCONFIG_LINK=\"https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/jmusicbot/config.txt\"\r\nPLAYLIST_LINK=\"https://raw.githubusercontent.com/parkervcp/eggs/master/bots/discord/jmusicbot/example_playlist.txt\"\r\n\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/jagrosh/MusicBot/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/jagrosh/MusicBot/releases\")\r\nMATCH=JMusicBot\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n## JMusicBot Setup\r\n[ ! -d /mnt/server ] && mkdir /mnt/server\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating JMusicBot...\\n\"\r\n\r\nif [ -f JMusicBot.jar ]; then\r\n    echo -e \"Updating JMusicBot.jar to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"JMusicBot.jar-old\")'\r\n    mv -f JMusicBot.jar JMusicBot.jar-old\r\nfi\r\n\r\necho -e \"Running: curl -sSLo JMusicBot.jar ${DOWNLOAD_URL}\\n\"\r\ncurl -sSLo JMusicBot.jar ${DOWNLOAD_URL}\r\n\r\nif [ -f config.txt ]; then\r\n    echo -e \"Updating config.txt to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"config.txt-old\")'\r\n    mv -f config.txt config.txt-old\r\nfi\r\necho -e \"Running: curl -sSLo config.txt ${CONFIG_LINK}\\n\"\r\ncurl -sSLo config.txt ${CONFIG_LINK}\r\n\r\n[ ! -d Playlists ] && mkdir Playlists\r\ncd Playlists\r\nif [ -f example_playlist.txt ]; then\r\n    echo -e \"example_playlist.txt already exists. Skipping default download.\"\r\nelse\r\n    echo -e \"example_playlist.txt not found. Downloading default example_playlist...\"\r\n    echo -e \"Running: curl -sSLo example_playlist.txt ${PLAYLIST_LINK}\"\r\n    curl -sSLo example_playlist.txt ${PLAYLIST_LINK}\r\nfi\r\n\r\necho -e \"\\nJMusicBot Successfully Installed!\""
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[REQUIRED] Bot Owner ID",
+            "description": "This is the Discord User ID of the bot owner. Learn how to obtain this ID here: https://jmusicbot.com/finding-your-user-id/",
+            "env_variable": "BOT_OWNER",
+            "default_value": "Change This To Your Discord User ID",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|digits_between:17,18",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Prefix",
+            "description": "This sets the prefix for the bot. The prefix is used to control the commands. If you use !, the play command will be !play. If you do not set this, the prefix will be a mention of the bot (@Botname play).",
+            "env_variable": "BOT_PREFIX",
+            "default_value": "@mention",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Alternate Prefix",
+            "description": "If you set this, the bot will also use this prefix in addition to \"Bot Prefix\". Set to NONE to not have an alternate prefix.",
+            "env_variable": "BOT_ALT_PREFIX",
+            "default_value": "NONE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Default Game",
+            "description": "If you change this, it modifies the default game of the bot. Set this to NONE to have no game. Set this to DEFAULT to use the default game. You can make the game \"Playing X\", \"Listening to X\", or \"Watching X\" where X is the title. If you don't include an action, it will use the default of \"Playing\".",
+            "env_variable": "BOT_GAME",
+            "default_value": "DEFAULT",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Default Status",
+            "description": "[ Accepted Values: ONLINE IDLE DND INVISIBLE ] Will modify the default status of bot.",
+            "env_variable": "BOT_STATUS",
+            "default_value": "ONLINE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:ONLINE,IDLE,DND,INVISIBLE",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Show Song in Status",
+            "description": "If you set this to true, the bot will list the title of the song it is currently playing in its \"Playing\" status. NOTE: This will ONLY work if the bot is playing music on ONE Discord server; if the bot is playing in multiple servers, this will not work!",
+            "env_variable": "BOT_SONG_STATUS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Show Images for \"Now Playing\"",
+            "description": "If set to true, the \"nowplaying\" command will show YouTube thumbnails. NOTE: If you set this to true, the nowplaying boxes will NOT refresh. This is because refreshing the boxes causes the image to be reloaded every time it refreshes.",
+            "env_variable": "BOT_NPIMAGES",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Stay In Channel",
+            "description": "If set to true, the bot will not leave a voice channel after it finishes a queue. Keep in mind that being connected to a voice channel uses additional bandwidth, so this option is not recommended if bandwidth is a concern.",
+            "env_variable": "BOT_STAY_IN_CHANNEL",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Alone Time Until Disconnect",
+            "description": "This sets the amount of seconds the bot will stay alone on a voice channel until it automatically leaves the voice channel and clears the queue. If not set or set to any number less than or equal to zero, the bot won't leave when alone.",
+            "env_variable": "BOT_ALONE_TIME",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Max Song Length",
+            "description": "This sets the maximum amount of seconds any track loaded can be. If not set or set to any number less than or equal to zero, there is no maximum time length. This time restriction applies to songs loaded from any source.",
+            "env_variable": "BOT_MAXTIME",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "jmusicbot-d81907c72948",
+        "name": "JMusicBot",
+        "description": "A Discord music bot that's easy to set up and run yourself!",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/jmusicbot-d81907c72948.json",
+        "sha256": "141c863031d793f62ff7967bccf5f4c8fa35609d4c9dec69cc1fda3de1bc9645",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "bots/discord/jmusicbot/egg-j-music-bot.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/d81907c72948.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:14+00:00",
+        "name": "JMusicBot",
+        "author": "parker@parkervcp.com",
+        "description": "A Discord music bot that's easy to set up and run yourself!",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Dnogui=true -jar JMusicBot.jar",
+        "config": {
+          "files": "{\"config.txt\": {\"parser\": \"file\", \"find\": {\"token =\": \"token = \\\"{{server.build.env.BOT_TOKEN}}\\\"\", \"owner =\": \"owner = {{server.build.env.BOT_OWNER}}\", \"prefix =\": \"prefix = \\\"{{server.build.env.BOT_PREFIX}}\\\"\", \"game =\": \"game = \\\"{{server.build.env.BOT_GAME}}\\\"\", \"status =\": \"status = {{server.build.env.BOT_STATUS}}\", \"songinstatus =\": \"songinstatus = {{server.build.env.BOT_SONG_STATUS}}\", \"altprefix =\": \"altprefix = \\\"{{server.build.env.BOT_ALT_PREFIX}}\\\"\", \"npimages =\": \"npimages = {{server.build.env.BOT_NPIMAGES}}\", \"stayinchannel =\": \"stayinchannel = {{server.build.env.BOT_STAY_IN_CHANNEL}}\", \"maxtime =\": \"maxtime = {{server.build.env.BOT_MAXTIME}}\", \"alonetimeuntilstop =\": \"alonetimeuntilstop = {{server.build.env.BOT_ALONE_TIME}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Finished Loading\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "/bin/bash",
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y jq curl\r\n\r\nCONFIG_LINK=\"https://raw.githubusercontent.com/ptero-eggs/application-eggs/main/bots/discord/jmusicbot/config.txt\"\r\nPLAYLIST_LINK=\"https://raw.githubusercontent.com/ptero-eggs/application-eggs/main/bots/discord/jmusicbot/example_playlist.txt\"\r\n\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/jagrosh/MusicBot/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/jagrosh/MusicBot/releases\")\r\nMATCH=JMusicBot\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n## JMusicBot Setup\r\n[ ! -d /mnt/server ] && mkdir /mnt/server\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating JMusicBot...\\n\"\r\n\r\nif [ -f JMusicBot.jar ]; then\r\n    echo -e \"Updating JMusicBot.jar to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"JMusicBot.jar-old\")'\r\n    mv -f JMusicBot.jar JMusicBot.jar-old\r\nfi\r\n\r\necho -e \"Running: curl -sSLo JMusicBot.jar ${DOWNLOAD_URL}\\n\"\r\ncurl -sSLo JMusicBot.jar ${DOWNLOAD_URL}\r\n\r\nif [ -f config.txt ]; then\r\n    echo -e \"Updating config.txt to latest version...\"\r\n    echo -e '\\t(Old version can be found at \"config.txt-old\")'\r\n    mv -f config.txt config.txt-old\r\nfi\r\necho -e \"Running: curl -sSLo config.txt ${CONFIG_LINK}\\n\"\r\ncurl -sSLo config.txt ${CONFIG_LINK}\r\n\r\n[ ! -d Playlists ] && mkdir Playlists\r\ncd Playlists\r\nif [ -f example_playlist.txt ]; then\r\n    echo -e \"example_playlist.txt already exists. Skipping default download.\"\r\nelse\r\n    echo -e \"example_playlist.txt not found. Downloading default example_playlist...\"\r\n    echo -e \"Running: curl -sSLo example_playlist.txt ${PLAYLIST_LINK}\"\r\n    curl -sSLo example_playlist.txt ${PLAYLIST_LINK}\r\nfi\r\n\r\necho -e \"\\nJMusicBot Successfully Installed!\""
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "BOT_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[REQUIRED] Bot Owner ID",
+            "description": "This is the Discord User ID of the bot owner. Learn how to obtain this ID here: https://jmusicbot.com/finding-your-user-id/",
+            "env_variable": "BOT_OWNER",
+            "default_value": "Change This To Your Discord User ID",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|digits_between:17,18",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Prefix",
+            "description": "This sets the prefix for the bot. The prefix is used to control the commands. If you use !, the play command will be !play. If you do not set this, the prefix will be a mention of the bot (@Botname play).",
+            "env_variable": "BOT_PREFIX",
+            "default_value": "@mention",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Alternate Prefix",
+            "description": "If you set this, the bot will also use this prefix in addition to \"Bot Prefix\". Set to NONE to not have an alternate prefix.",
+            "env_variable": "BOT_ALT_PREFIX",
+            "default_value": "NONE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Default Game",
+            "description": "If you change this, it modifies the default game of the bot. Set this to NONE to have no game. Set this to DEFAULT to use the default game. You can make the game \"Playing X\", \"Listening to X\", or \"Watching X\" where X is the title. If you don't include an action, it will use the default of \"Playing\".",
+            "env_variable": "BOT_GAME",
+            "default_value": "DEFAULT",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Default Status",
+            "description": "[ Accepted Values: ONLINE IDLE DND INVISIBLE ] Will modify the default status of bot.",
+            "env_variable": "BOT_STATUS",
+            "default_value": "ONLINE",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:ONLINE,IDLE,DND,INVISIBLE",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Show Song in Status",
+            "description": "If you set this to true, the bot will list the title of the song it is currently playing in its \"Playing\" status. NOTE: This will ONLY work if the bot is playing music on ONE Discord server; if the bot is playing in multiple servers, this will not work!",
+            "env_variable": "BOT_SONG_STATUS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Show Images for \"Now Playing\"",
+            "description": "If set to true, the \"nowplaying\" command will show YouTube thumbnails. NOTE: If you set this to true, the nowplaying boxes will NOT refresh. This is because refreshing the boxes causes the image to be reloaded every time it refreshes.",
+            "env_variable": "BOT_NPIMAGES",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Stay In Channel",
+            "description": "If set to true, the bot will not leave a voice channel after it finishes a queue. Keep in mind that being connected to a voice channel uses additional bandwidth, so this option is not recommended if bandwidth is a concern.",
+            "env_variable": "BOT_STAY_IN_CHANNEL",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Alone Time Until Disconnect",
+            "description": "This sets the amount of seconds the bot will stay alone on a voice channel until it automatically leaves the voice channel and clears the queue. If not set or set to any number less than or equal to zero, the bot won't leave when alone.",
+            "env_variable": "BOT_ALONE_TIME",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Bot Max Song Length",
+            "description": "This sets the maximum amount of seconds any track loaded can be. If not set or set to any number less than or equal to zero, there is no maximum time length. This time restriction applies to songs loaded from any source.",
+            "env_variable": "BOT_MAXTIME",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "jts3servermod-2627e02604f0",
+        "name": "JTS3ServerMod",
+        "description": "Setup:\r\n- Install the latest version\r\n- Go into config/server1 and edit JTS3ServerMod_server.cfg\r\n- Save and start the server\r\n\r\nAuthor: https://www.stefan1200.de/forum/index.php?topic=2.0",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/jts3servermod-2627e02604f0.json",
+        "sha256": "38e9244c1d0aa01f3b0b08df2d38549c2f0dc48f6a81ac281779b50b154f89f6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "teamspeak3/jts3servermod/egg-j-t-s3-server-mod.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/2627e02604f0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:16+00:00",
+        "name": "JTS3ServerMod",
+        "author": "teamwuffy@gmail.com",
+        "uuid": "104dfdf6-6b5a-4550-baa1-7a4edfe05943",
+        "description": "Setup:\r\n- Install the latest version\r\n- Go into config/server1 and edit JTS3ServerMod_server.cfg\r\n- Save and start the server\r\n\r\nAuthor: https://www.stefan1200.de/forum/index.php?topic=2.0",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar JTS3ServerMod.jar",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Successful connected to \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# JTS3ServerMod\r\n#\r\n# Server Files: /mnt/server\r\n# All required packages are installed in the used install image ghcr.io/parkervcp/installers:debian\r\n\r\nexport HOME=/mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ -z \"$SERVER_VERSION\" ] || [ \"$SERVER_VERSION\" == \"latest\" ]; then\r\n  echo -e \"Downloading latest version with curl -L \"https://www.stefan1200.de/dlrequest.php?file=jts3servermod &\r\n  type=.zip\" -o JTS3ServerMod.zip\"\r\n  curl -L \"https://www.stefan1200.de/dlrequest.php?file=jts3servermod&type=.zip\" -o JTS3ServerMod.zip\r\nelse\r\n  echo -e \"running curl -L \"https://www.stefan1200.de/downloads/JTS3ServerMod_$SERVER_VERSION.zip\" -o JTS3ServerMod.zip\"\r\n  curl -L \"https://www.stefan1200.de/downloads/JTS3ServerMod_$SERVER_VERSION.zip\" -o JTS3ServerMod.zip\r\nfi\r\n\r\n# no need to continue if we don't have an archive\r\nif [ ! -f JTS3ServerMod.zip ]; then\r\n  echo \"JTS3ServerMod.zip not found. Something went wrong. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nunzip JTS3ServerMod.zip\r\nrm JTS3ServerMod.zip JTS3ServerMod-Windows.exe JTS3ServerMod-Windows_NoWindow.exe jts3servermod_startscript.sh\r\necho -e \"Installation completed.\\nConfiguration of the server must be done in the config folder to proceed.\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Version to download. Use latest to install latest version",
+            "env_variable": "SERVER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "jts3servermod-b374c48955cc",
+        "name": "JTS3ServerMod",
+        "description": "Setup:\r\n- Install the latest version\r\n- Go into config/server1 and edit JTS3ServerMod_server.cfg\r\n- Save and start the server\r\n\r\nAuthor: https://www.stefan1200.de/forum/index.php?topic=2.0",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/jts3servermod-b374c48955cc.json",
+        "sha256": "f12269d9062a480bbcf0d9756ae8d2e2add3188e44104992a9f3df7a8311fbd0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "teamspeak3/jts3servermod/egg-pterodactyl-j-t-s3-server-mod.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "bots/teamspeak3/jts3servermod/egg-j-t-s3-server-mod.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--chatbots/b374c48955cc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:44:16+00:00",
+        "name": "JTS3ServerMod",
+        "author": "teamwuffy@gmail.com",
+        "description": "Setup:\r\n- Install the latest version\r\n- Go into config/server1 and edit JTS3ServerMod_server.cfg\r\n- Save and start the server\r\n\r\nAuthor: https://www.stefan1200.de/forum/index.php?topic=2.0",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar JTS3ServerMod.jar",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Successful connected to \"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# JTS3ServerMod\r\n#\r\n# Server Files: /mnt/server\r\n# All required packages are installed in the used install image ghcr.io/parkervcp/installers:debian\r\n\r\nexport HOME=/mnt/server\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ -z \"$SERVER_VERSION\" ] || [ \"$SERVER_VERSION\" == \"latest\" ]; then\r\n  echo -e \"Downloading latest version with curl -L \"https://www.stefan1200.de/dlrequest.php?file=jts3servermod &\r\n  type=.zip\" -o JTS3ServerMod.zip\"\r\n  curl -L \"https://www.stefan1200.de/dlrequest.php?file=jts3servermod&type=.zip\" -o JTS3ServerMod.zip\r\nelse\r\n  echo -e \"running curl -L \"https://www.stefan1200.de/downloads/JTS3ServerMod_$SERVER_VERSION.zip\" -o JTS3ServerMod.zip\"\r\n  curl -L \"https://www.stefan1200.de/downloads/JTS3ServerMod_$SERVER_VERSION.zip\" -o JTS3ServerMod.zip\r\nfi\r\n\r\n# no need to continue if we don't have an archive\r\nif [ ! -f JTS3ServerMod.zip ]; then\r\n  echo \"JTS3ServerMod.zip not found. Something went wrong. Exiting\"\r\n  exit 2\r\nfi\r\n\r\nunzip JTS3ServerMod.zip\r\nrm JTS3ServerMod.zip JTS3ServerMod-Windows.exe JTS3ServerMod-Windows_NoWindow.exe jts3servermod_startscript.sh\r\necho -e \"Installation completed.\\nConfiguration of the server must be done in the config folder to proceed.\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "Version to download. Use latest to install latest version",
+            "env_variable": "SERVER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "muse-05cc0915985a",
+        "name": "Muse",
+        "description": "Muse is a self-hosted Discord music bot that is made for small to medium-sized Discord servers/guilds.",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/muse-05cc0915985a.json",
+        "sha256": "6808deec5133eb8c1c603076ed8ff85efdc172c3d2bdfd039efc471a8f19ace8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/chatbots",
+          "commit": "28cc89ec0b740ccf05d4e1f32786b76c80a35dcd",
+          "path": "discord/muse/egg-muse.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--chatbots/05cc0915985a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-06-25T15:25:55-07:00",
+        "name": "Muse",
+        "author": "red_thirten@yahoo.com",
+        "uuid": "d0cd727e-3f34-40f2-918e-85556830365c",
+        "description": "Muse is a self-hosted Discord music bot that is made for small to medium-sized Discord servers/guilds.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_22": "ghcr.io/parkervcp/yolks:nodejs_22"
+        },
+        "file_denylist": [],
+        "startup": "yarn start",
+        "config": {
+          "files": "{\".env\": {\"parser\": \"file\", \"find\": {\"DISCORD_TOKEN\": \"DISCORD_TOKEN={{server.environment.BOT_TOKEN}}\", \"YOUTUBE_API_KEY\": \"YOUTUBE_API_KEY={{server.environment.YOUTUBE_API_KEY}}\", \"SPOTIFY_CLIENT_ID\": \"SPOTIFY_CLIENT_ID= {{server.environment.SPOTIFY_CLIENT_ID}}\", \"SPOTIFY_CLIENT_SECRET\": \"SPOTIFY_CLIENT_ID= {{server.environment.SPOTIFY_CLIENT_SECRET}}\"}}}",
+          "startup": "{\"done\": \"Ready!\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## File: Pelican Muse Egg - egg-muse.json\r\n## Authors: David Wolfe (Red-Thirten), TubaApollo, parkervcp\r\n## Date: 2025/06/25\r\n## License: MIT License\r\n\r\nGITHUB_PACKAGE=\"museofficial/muse\"\r\n\r\napt update\r\napt install -y tar curl jq python3 build-essential\r\n\r\n## Muse Install\r\n[ ! -d /mnt/server ] && mkdir /mnt/server\r\ncd /mnt/server\r\necho -e \"\\nInstalling/Updating Muse...\\n\"\r\n\r\n# Remove all existing files/folders, except `data` folder\r\nfind . -mindepth 1 -depth ! -path './data' ! -path './data/*' -exec rm -rf {} +\r\n\r\n# Get download URL\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r .tarball_url)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tarball_url')\r\n    else\r\n        echo -e \"Defaulting to latest release...\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r .tarball_url)\r\n    fi\r\nfi\r\n\r\n# Download tarball & check for success\r\necho -e \"Downloading ${VERSION} from ${DOWNLOAD_URL}...\"\r\ncurl -Lo muse-${VERSION}.tar.gz ${DOWNLOAD_URL}\r\nif [[ ! -f muse-${VERSION}.tar.gz ]]; then\r\n    echo -e \"\\n\\nFailed to download ${VERSION} version of Muse!\"\r\n    echo -e \"\\tTry reinstalling the server again.\\n\"\r\n    exit 1\r\nfi\r\n\r\n# Extract & delete tarball\r\necho -e \"Extracting muse-${VERSION}.tar.gz...\"\r\ntar -xzvf muse-${VERSION}.tar.gz --strip-components=1\r\nrm muse-${VERSION}.tar.gz\r\n\r\n# Install dependencies & clean up\r\necho -e \"Installing dependencies...\"\r\nyarn install --prod || exit 1\r\ncp .env.example .env\r\necho -e \"Removing unneeded files...\"\r\nrm -rf .dockerignore Dockerfile .gitignore .github/ RELEASING.md\r\n\r\necho -e \"\\nMuse successfully installed!\"",
+            "container": "node:lts-bookworm-slim",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Discord Bot Token",
+            "description": "The token for your Discord bot. Learn how to obtain a token and configure your bot application properly here: https://jmusicbot.com/getting-a-bot-token/",
+            "env_variable": "DISCORD_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 1
+          },
+          {
+            "name": "YouTube API Key",
+            "description": "Can be acquired by creating a new project in Google's Developer Console (https://console.developers.google.com/), enabling the YouTube API, and creating an API key under credentials.",
+            "env_variable": "YOUTUBE_API_KEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 2
+          },
+          {
+            "name": "Spotify Client ID",
+            "description": "Can be acquired at https://developer.spotify.com/dashboard/applications with 'Create a Client ID'.",
+            "env_variable": "SPOTIFY_CLIENT_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 3
+          },
+          {
+            "name": "Spotify Client Secret",
+            "description": "Can be acquired at https://developer.spotify.com/dashboard/applications with 'Create a Client ID'.",
+            "env_variable": "SPOTIFY_CLIENT_SECRET",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 4
+          },
+          {
+            "name": "[Advanced] Release Version Tag",
+            "description": "Which release (based on tag) to download from https://github.com/museofficial/muse/releases. To download the latest release version, \"latest\" can be used.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": 5
+          },
+          {
+            "name": "[System] Force Headless Environment",
+            "description": "This should not be changed. It is used by the Egg to tell Ora (a dependency of Muse) that it is running in a Continuous Integration-like environment (ie. headless), which disables loading spinners that break the console output.",
+            "env_variable": "CI",
+            "default_value": "true",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:true",
+            "sort": 6
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "muse-426bbb4a0b04",
+        "name": "Muse",
+        "description": "🎧 a self-hosted midwestern Discord music bot that doesn't suck",
+        "category": "bots",
+        "kind": "preset",
+        "path": "eggs/bots/muse-426bbb4a0b04.json",
+        "sha256": "38bcd0b511a717cb30b31b455a6d432e07fbf7a5df8d0bb1aa5280a16623ec74",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "bots/discord/muse/egg-muse.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/426bbb4a0b04.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T14:42:04+02:00",
+        "name": "Muse",
+        "author": "hello@apollo.moe",
+        "description": "🎧 a self-hosted midwestern Discord music bot that doesn't suck",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:nodejs_20": "ghcr.io/parkervcp/yolks:nodejs_20"
+        },
+        "file_denylist": [],
+        "startup": "npm start",
+        "config": {
+          "files": "{\".env\": {\"parser\": \"file\", \"find\": {\"DISCORD_TOKEN\": \"DISCORD_TOKEN={{env.discord_token}}\", \"DATA_DIR\": \"DATA_DIR={{env.data_dir}}\", \"YOUTUBE_API_KEY\": \"YOUTUBE_API_KEY={{env.api_key}}\", \"SPOTIFY_CLIENT_ID\": \"SPOTIFY_CLIENT_ID={{env.client_id}}\", \"SPOTIFY_CLIENT_SECRET\": \"SPOTIFY_CLIENT_SECRET={{env.client_secret}}\"}}}",
+          "startup": "{\"done\": \"Running version \"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "## Credits: Red-Thirten (https://github.com/lilkingjr1) for providing most of the installation script\r\napt-get update\r\napt-get install git curl jq -y python3 python3-pip make build-essential -qq\r\n\r\nGITHUB_PACKAGE=\"codetheweb/muse\"\r\n\r\n# Find GitHub download URL for Muse for specified version\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/${GITHUB_PACKAGE}/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r '.tarball_url')\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tarball_url')\r\n    else\r\n        echo -e \"Could not find version \\\"${VERSION}\\\" of Muse. Defaulting to latest release...\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq -r '.tarball_url')\r\n    fi\r\nfi\r\n\r\n# Download Muse from GitHub & Extract\r\ncd /mnt/server\r\necho -e \"Downloading Muse from GitHub...\"\r\ncurl -L ${DOWNLOAD_URL} -o muse.tar.gz\r\necho -e \"Extracting Muse from tarball...\"\r\ntar -xvzf muse.tar.gz --strip-components=1\r\nrm muse.tar.gz\r\n\r\n# Verify and clean up Muse installation\r\nif [ ! -f .env.example ]; then\r\n    echo -e \"\\nFailed to download release: ${DOWNLOAD_URL}\\n\"\r\n    exit 1\r\nfi\r\ncp .env.example .env\r\nrm -rf .dockerignore Dockerfile .gitignore .github/\r\nyarn install --prod #--frozen-lockfile\r\n#sed -i 's/of filterWrapper[)]/of filterWrapper|| [])/g' /mnt/server/node_modules/ytsr/lib/utils.js\r\n\r\necho -e \"\\nMuse Successfully Installed!\"",
+            "container": "node:lts-bookworm-slim",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "TOKEN",
+            "description": "Discord Bot Token",
+            "env_variable": "discord_token",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Data directory",
+            "description": "Default: ./data",
+            "env_variable": "data_dir",
+            "default_value": "./data",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "YouTube API Key",
+            "description": "You can get it here: https://console.developers.google.com/",
+            "env_variable": "api_key",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client ID",
+            "description": "You can get it here: https://developer.spotify.com/dashboard/applications",
+            "env_variable": "client_id",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Spotify Client Secret",
+            "description": "You can get it here: https://developer.spotify.com/dashboard/applications",
+            "env_variable": "client_secret",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "Specify a version, for example: \"v2.4.1\"\r\nFor the latest version, type \"latest\"",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

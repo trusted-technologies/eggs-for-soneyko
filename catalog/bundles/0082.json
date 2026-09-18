@@ -1,0 +1,1099 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "tshock-177884964de7",
+        "name": "tshock",
+        "description": "The t-shock modded terraria server. https://tshock.co/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tshock-177884964de7.json",
+        "sha256": "a446fa2cfa39c2c460b32440132e4dc3895c36fda7a92e5fba9bf07491d3c8c8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "terraria/tshock/egg-pterodactyl-tshock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/177884964de7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-22T10:36:06+00:00",
+        "name": "tshock",
+        "author": "parker@parkervcp.com",
+        "description": "The t-shock modded terraria server. https://tshock.co/",
+        "features": [],
+        "docker_images": {
+          "Dotnet 6": "ghcr.io/parkervcp/yolks:dotnet_6",
+          "Dotnet 9": "ghcr.io/parkervcp/yolks:dotnet_9"
+        },
+        "file_denylist": [],
+        "startup": "./TShock.Server -ip 0.0.0.0 -port {{SERVER_PORT}} -maxplayers {{MAX_PLAYERS}} -world {{WORLD_NAME}}.wld -autocreate {{WORLD_SIZE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# Vanilla tModloader Installation Script\n#\n# Server Files: /mnt/server\n## install packages to get version and download links\n\n## get release info and download links\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases/latest\")\nRELEASES=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases\")\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\n\necho ${MATCH}\n\nif [ -z \"$TSHOCK_VERSION\" ] || [ \"$TSHOCK_VERSION\" == \"latest\" ]; then\n    DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH} | head -1 )\nelse\n    VERSION_CHECK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .tag_name')\n    if [ \"$TSHOCK_VERSION\" == \"$VERSION_CHECK\" ]; then\n        DOWNLOAD_LINK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' |  grep -i ${MATCH} | head -1 )\n    else\n        echo -e \"defaulting to latest release\"\n        DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH} | head -1)\n    fi\nfi\n\n## mkdir and cd to /mnt/server/\nmkdir -p /mnt/server\n\ncd /mnt/server\n\n## download release\necho -e \"running: wget $DOWNLOAD_LINK\"\ncurl -sSL $DOWNLOAD_LINK -o TShock.zip\n\nunzip -o TShock.zip\n\ntar xvf TShock-*.tar\n\nrm TShock.zip TShock-*.tar\n\nchmod +x TShock.Server\n\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|alpha_dash|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Tshock Version",
+            "description": "The version on tshock that will be installed. default is latest non-pre-release",
+            "env_variable": "TSHOCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tshock-51cb56d36aea",
+        "name": "tshock",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tshock-51cb56d36aea.json",
+        "sha256": "efc374a61bb41456fe9a1b68a5a4e0bad7826160e03583f3019bd6d6c51eeca4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "terraria/tshock/egg-tshock.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/51cb56d36aea.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-22T10:35:26+00:00",
+        "name": "tshock",
+        "author": "parker@parkervcp.com",
+        "uuid": "abebe204-ef9f-4498-a009-e5a50ed7fffb",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "icon": null,
+        "tags": [],
+        "features": [],
+        "docker_images": {
+          "Dotnet 6": "ghcr.io/parkervcp/yolks:dotnet_6",
+          "Dotnet 9": "ghcr.io/parkervcp/yolks:dotnet_9"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla tModloader Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\necho ${MATCH}\r\n\r\nif [ -z \"$TSHOCK_VERSION\" ] || [ \"$TSHOCK_VERSION\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH} | head -1 )\r\nelse\r\n    VERSION_CHECK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"$TSHOCK_VERSION\" == \"$VERSION_CHECK\" ]; then\r\n        DOWNLOAD_LINK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' |  grep -i ${MATCH} | head -1 )\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH} | head -1)\r\n    fi\r\nfi\r\n\r\n## mkdir and cd to /mnt/server/\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\n## download release\r\necho -e \"running: wget $DOWNLOAD_LINK\"\r\ncurl -sSL $DOWNLOAD_LINK -o TShock.zip\r\n\r\nunzip -o TShock.zip\r\n\r\ntar xvf TShock-*.tar\r\n\r\nrm TShock.zip TShock-*.tar\r\n\r\nchmod +x TShock.Server\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "sort": 1
+          },
+          {
+            "name": "Tshock Version",
+            "description": "The version on tshock that will be installed. default is latest non-pre-release",
+            "env_variable": "TSHOCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": 4
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 2
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|alpha_dash|max:20",
+            "sort": 3
+          }
+        ],
+        "startup": "./TShock.Server -ip 0.0.0.0 -port {{SERVER_PORT}} -maxplayers {{MAX_PLAYERS}} -world {{WORLD_NAME}}.wld -autocreate {{WORLD_SIZE}}"
+      }
+    },
+    {
+      "entry": {
+        "id": "tshock-d2d9b785552e",
+        "name": "tshock",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tshock-d2d9b785552e.json",
+        "sha256": "fa2dbd7634c608777280a89178022fa9369d311ee3708d852d9eb7beb9a4d8bf",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/terraria/tshock/egg-tshock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/d2d9b785552e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-03-19T08:36:18+01:00",
+        "name": "tshock",
+        "author": "parker@parkervcp.com",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "features": null,
+        "docker_images": {
+          "Dotnet 6": "ghcr.io/parkervcp/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./TShock.Server -ip 0.0.0.0 -port {{SERVER_PORT}} -maxplayers {{MAX_PLAYERS}} -world {{WORLD_NAME}}.wld -autocreate {{WORLD_SIZE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla tModloader Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget jq file unzip\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\necho ${MATCH}\r\n\r\nif [ -z \"$TSHOCK_VERSION\" ] || [ \"$TSHOCK_VERSION\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH} | head -1 )\r\nelse\r\n    VERSION_CHECK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"$TSHOCK_VERSION\" == \"$VERSION_CHECK\" ]; then\r\n        DOWNLOAD_LINK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' |  grep -i ${MATCH} | head -1 )\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH} | head -1)\r\n    fi\r\nfi\r\n\r\n## mkdir and cd to /mnt/server/\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\n## download release\r\necho -e \"running: wget $DOWNLOAD_LINK\"\r\nwget $DOWNLOAD_LINK -O TShock.zip\r\n\r\nunzip -o TShock.zip\r\n\r\ntar xvf TShock-*.tar\r\n\r\nrm TShock.zip TShock-*.tar\r\n\r\nchmod +x TShock.Server\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Tshock Version",
+            "description": "The version on tshock that will be installed. default is latest non-pre-release",
+            "env_variable": "TSHOCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tshock-e54e098e08ab",
+        "name": "tshock",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tshock-e54e098e08ab.json",
+        "sha256": "4340110fbee75b3c0bbf834fcef4615a272576c2b278de8cf3b408d92b61496a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "terraria/tshock/egg-tshock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/e54e098e08ab.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-29T02:37:09+00:00",
+        "name": "tshock",
+        "author": "parker@parkervcp.com",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "features": null,
+        "docker_images": {
+          "Dotnet 6": "ghcr.io/ptero-eggs/yolks:dotnet_6"
+        },
+        "file_denylist": [],
+        "startup": "./TShock.Server -ip 0.0.0.0 -port {{SERVER_PORT}} -maxplayers {{MAX_PLAYERS}} -world {{WORLD_NAME}}.wld -autocreate {{WORLD_SIZE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla tModloader Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget jq file unzip\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"(linux-x64|linux-amd64)\" || echo \"linux-arm64\")\r\n\r\necho \"${MATCH}\"\r\n\r\nif [ -z \"$TSHOCK_VERSION\" ] || [ \"$TSHOCK_VERSION\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i -E \"${MATCH}\" | head -1 )\r\nelse\r\n    VERSION_CHECK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"$TSHOCK_VERSION\" == \"$VERSION_CHECK\" ]; then\r\n        DOWNLOAD_LINK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' |  grep -i -E \"${MATCH}\" | head -1 )\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url | grep -i -E \"${MATCH}\" | head -1)\r\n    fi\r\nfi\r\n\r\n## mkdir and cd to /mnt/server/\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\n## download release\r\necho -e \"running: wget $DOWNLOAD_LINK\"\r\nwget $DOWNLOAD_LINK -O TShock.zip\r\n\r\nunzip -o TShock.zip\r\n\r\ntar xvf TShock-*.tar\r\n\r\nrm TShock.zip TShock-*.tar\r\n\r\nchmod +x TShock.Server\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Tshock Version",
+            "description": "The version on tshock that will be installed. default is latest non-pre-release",
+            "env_variable": "TSHOCK_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tshock-legacy-148c5573fae7",
+        "name": "tshock legacy",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tshock-legacy-148c5573fae7.json",
+        "sha256": "564c259a50beff809da5641e3c3d6c01755f35dc0f4be1cb2e16d08d1954f645",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "terraria/tshock/egg-pterodactyl-tshock-legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/terraria/tshock/egg-tshock-legacy.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/148c5573fae7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:19+00:00",
+        "name": "tshock legacy",
+        "author": "parker@parkervcp.com",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "features": null,
+        "docker_images": {
+          "mono": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono TerrariaServer.exe -ip 0.0.0.0 -port {{SERVER_PORT}} -maxplayers {{MAX_PLAYERS}} -world {{WORLD_NAME}}.wld -autocreate {{WORLD_SIZE}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash",
+            "script": "#!/bin/bash\r\n# Vanilla tModloader Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget jq file unzip\r\n\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases\")\r\n\r\nif [ -z \"$TSHOCK_VERSION\" ] || [ \"$TSHOCK_VERSION\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url)\r\nelse\r\n    VERSION_CHECK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"$TSHOCK_VERSION\" == \"$VERSION_CHECK\" ]; then\r\n        DOWNLOAD_LINK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url')\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n## mkdir and cd to /mnt/server/\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\n## download release\r\necho -e \"running: wget $DOWNLOAD_LINK\"\r\nwget $DOWNLOAD_LINK\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exeting\"\r\n    exit 2 \r\nfi\r\n\r\necho -e \"install complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Tshock Version",
+            "description": "The version on tshock that will be installed. \r\n\r\nLatest available is: v4.5.18!",
+            "env_variable": "TSHOCK_VERSION",
+            "default_value": "v4.5.18",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tshock-legacy-6b51f20b0445",
+        "name": "tshock legacy",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tshock-legacy-6b51f20b0445.json",
+        "sha256": "6564866d3a9a72b2ebe109bb2a773f6329765e766b0da137851ef119f743913f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "terraria/tshock/egg-tshock-legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/6b51f20b0445.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-11-06T14:42:12+01:00",
+        "name": "tshock legacy",
+        "author": "parker@parkervcp.com",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "features": null,
+        "docker_images": {
+          "mono": "ghcr.io/ptero-eggs/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono TerrariaServer.exe -ip 0.0.0.0 -port {{SERVER_PORT}} -maxplayers {{MAX_PLAYERS}} -world {{WORLD_NAME}}.wld -autocreate {{WORLD_SIZE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla tModloader Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget jq file unzip\r\n\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases\")\r\n\r\nif [ -z \"$TSHOCK_VERSION\" ] || [ \"$TSHOCK_VERSION\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url)\r\nelse\r\n    VERSION_CHECK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"$TSHOCK_VERSION\" == \"$VERSION_CHECK\" ]; then\r\n        DOWNLOAD_LINK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url')\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n## mkdir and cd to /mnt/server/\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\n## download release\r\necho -e \"running: wget $DOWNLOAD_LINK\"\r\nwget $DOWNLOAD_LINK\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exeting\"\r\n    exit 2 \r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Tshock Version",
+            "description": "The version on tshock that will be installed. \r\n\r\nLatest available is: v4.5.18!",
+            "env_variable": "TSHOCK_VERSION",
+            "default_value": "v4.5.18",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tshock-legacy-d98ccd0a3bc6",
+        "name": "tshock legacy",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/tshock-legacy-d98ccd0a3bc6.json",
+        "sha256": "11ab369961ce7038288ebe8ef693dd71d58b851062318ead4f3e79b982756a92",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "terraria/tshock/egg-tshock-legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/d98ccd0a3bc6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:19+00:00",
+        "name": "tshock legacy",
+        "author": "parker@parkervcp.com",
+        "uuid": "f428a6c6-2315-427e-a3e6-990708e81e7a",
+        "description": "The t-shock modded terraria server.\r\n\r\nhttps://tshock.co/",
+        "features": null,
+        "docker_images": {
+          "mono": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono TerrariaServer.exe -ip 0.0.0.0 -port {{SERVER_PORT}} -maxplayers {{MAX_PLAYERS}} -world {{WORLD_NAME}}.wld -autocreate {{WORLD_SIZE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Type 'help' for a list of commands\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vanilla tModloader Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n## install packages to get version and download links\r\napt update\r\napt install -y curl wget jq file unzip\r\n\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/Pryaxis/TShock/releases\")\r\n\r\nif [ -z \"$TSHOCK_VERSION\" ] || [ \"$TSHOCK_VERSION\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url)\r\nelse\r\n    VERSION_CHECK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"$TSHOCK_VERSION\" == \"$VERSION_CHECK\" ]; then\r\n        DOWNLOAD_LINK=$(echo $RELEASES | jq -r --arg VERSION \"$TSHOCK_VERSION\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url')\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo $LATEST_JSON | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n## mkdir and cd to /mnt/server/\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\n## download release\r\necho -e \"running: wget $DOWNLOAD_LINK\"\r\nwget $DOWNLOAD_LINK\r\n\r\nFILETYPE=$(file -F ',' ${DOWNLOAD_LINK##*/} | cut -d',' -f2 | cut -d' ' -f2)\r\nif [ \"$FILETYPE\" == \"gzip\" ]; then\r\n    tar xzvf ${DOWNLOAD_LINK##*/}\r\nelif [ \"$FILETYPE\" == \"Zip\" ]; then\r\n    unzip -o ${DOWNLOAD_LINK##*/}\r\nelse\r\n    echo -e \"unknown filetype. Exeting\"\r\n    exit 2 \r\nfi\r\n\r\necho -e \"install complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players a server will hold.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Size",
+            "description": "Defines the worlds size. 3 sizes 1 (small), 2 (medium), 3 (large).",
+            "env_variable": "WORLD_SIZE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|numeric|digits_between:1,3",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "The name for the world file.",
+            "env_variable": "WORLD_NAME",
+            "default_value": "world",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Tshock Version",
+            "description": "The version on tshock that will be installed. \r\n\r\nLatest available is: v4.5.18!",
+            "env_variable": "TSHOCK_VERSION",
+            "default_value": "v4.5.18",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "unturned-292bfbc2b830",
+        "name": "Unturned",
+        "description": "Vanilla Unturned with the included RockerMod.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/unturned-292bfbc2b830.json",
+        "sha256": "03e2c12aa0623fed26604a48bb87e7d70219096703b51d3fe30ffe2f1fb091b3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "unturned/egg-unturned.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/292bfbc2b830.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Unturned",
+        "author": "parker@parkervcp.com",
+        "uuid": "4000c33b-91a2-4d50-8a1f-f998b334ad6e",
+        "description": "Vanilla Unturned with the included RockerMod.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Unturned_Headless.x86_64 -batchmode -nographics -bind 0.0.0.0 -port {{SERVER_PORT}} -GSLT {{GSLT}} -Name \"{{SRV_NAME}}\" -Password {{SRV_PW}} +InternetServer/{{SRV_ID}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Loading level: 100%\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## Specific to Unturned\r\ncd /mnt/server/\r\nln -s ../../../steamcmd/linux64/steamclient.so Unturned_Headless_Data/Plugins/x86_64/steamclient.so\r\nln -s ../Extras/Rocket.Unturned/ Modules/\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:50",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "GSLT",
+            "description": "",
+            "env_variable": "GSLT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server ID",
+            "description": "ID of the server for savegames",
+            "env_variable": "SRV_ID",
+            "default_value": "PterodactylUnturned",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID require for install and startup update",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1110390",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1110390",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is needed to load specific libraries",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./Unturned_Headless_Data/Plugins/x86_64/",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "unturned-48ffeee34ae4",
+        "name": "Unturned",
+        "description": "Vanilla Unturned with the included RockerMod.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/unturned-48ffeee34ae4.json",
+        "sha256": "70cb1d25267c425d61d162341949bf792a11315f91c3e6a291fd8e6b13cdc923",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "unturned/egg-unturned.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/48ffeee34ae4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-08-03T09:39:35+02:00",
+        "name": "Unturned",
+        "author": "parker@parkervcp.com",
+        "description": "Vanilla Unturned with the included RockerMod.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Unturned_Headless.x86_64 -batchmode -nographics -bind 0.0.0.0 -port {{SERVER_PORT}} -GSLT {{GSLT}} -Name \"{{SRV_NAME}}\" -Password {{SRV_PW}} +InternetServer/{{SRV_ID}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Loading level: 100%\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## Specific to Unturned\r\ncd /mnt/server/\r\nln -s ../../../steamcmd/linux64/steamclient.so Unturned_Headless_Data/Plugins/x86_64/steamclient.so\r\nln -s ../Extras/Rocket.Unturned/ Modules/\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GSLT",
+            "description": "",
+            "env_variable": "GSLT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server ID",
+            "description": "ID of the server for savegames",
+            "env_variable": "SRV_ID",
+            "default_value": "PterodactylUnturned",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID require for install and startup update",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1110390",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1110390",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is needed to load specific libraries",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./Unturned_Headless_Data/Plugins/x86_64/",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "unturned-777f730940ff",
+        "name": "Unturned",
+        "description": "Vanilla Unturned with the included RockerMod.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/unturned-777f730940ff.json",
+        "sha256": "d13364a2c342e069579d7096828a5123a9dd32a34ef4debb7aa39176a01ca226",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/unturned/egg-unturned.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/777f730940ff.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-08-03T09:39:35+02:00",
+        "name": "Unturned",
+        "author": "parker@parkervcp.com",
+        "description": "Vanilla Unturned with the included RockerMod.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Unturned_Headless.x86_64 -batchmode -nographics -bind 0.0.0.0 -port {{SERVER_PORT}} -GSLT {{GSLT}} -Name \"{{SRV_NAME}}\" -Password {{SRV_PW}} +InternetServer/{{SRV_ID}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Loading level: 100%\"}",
+          "logs": "{}",
+          "stop": "shutdown"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## Specific to Unturned\r\ncd /mnt/server/\r\nln -s ../../../steamcmd/linux64/steamclient.so Unturned_Headless_Data/Plugins/x86_64/steamclient.so\r\nln -s ../Extras/Rocket.Unturned/ Modules/\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SRV_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "",
+            "env_variable": "SRV_PW",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GSLT",
+            "description": "",
+            "env_variable": "GSLT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server ID",
+            "description": "ID of the server for savegames",
+            "env_variable": "SRV_ID",
+            "default_value": "PterodactylUnturned",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "string",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto update",
+            "description": "Auto update on restart",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID require for install and startup update",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1110390",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1110390",
+            "field_type": "text"
+          },
+          {
+            "name": "ld lib path",
+            "description": "This is needed to load specific libraries",
+            "env_variable": "LD_LIBRARY_PATH",
+            "default_value": "./Unturned_Headless_Data/Plugins/x86_64/",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

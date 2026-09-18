@@ -1,0 +1,1111 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "carrier-command-2-277b66dd946e",
+        "name": "Carrier Command 2",
+        "description": "Carrier Command 2 dedicated server (Windows binary, runs on Linux via Wine). Requires Steam ownership of CC2 to install. Uses 4 consecutive UDP ports (default 25565-25568).",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/carrier-command-2-277b66dd946e.json",
+        "sha256": "e6ad8650566281e85aaf8c77c2c219927df38a86f3fcaaf2babbcc7734df707f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "carrier_command_2/egg-carrier-command2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/277b66dd946e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-12T00:10:18+10:00",
+        "name": "Carrier Command 2",
+        "author": "88603725+norto22@users.noreply.github.com",
+        "description": "Carrier Command 2 dedicated server (Windows binary, runs on Linux via Wine). Requires Steam ownership of CC2 to install. Uses 4 consecutive UDP ports (default 25565-25568).",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "cd /home/container && sed -i -e 's%port=\"[^\"]*\"%port=\"'\"${SERVER_PORT}\"'\"%' -e 's%max_players=\"[^\"]*\"%max_players=\"'\"${MAX_PLAYERS}\"'\"%' -e 's%server_name=\"[^\"]*\"%server_name=\"'\"${SERVER_NAME}\"'\"%' -e 's%password=\"[^\"]*\"%password=\"'\"${SERVER_PASSWORD}\"'\"%' -e 's%save_name=\"[^\"]*\"%save_name=\"'\"${SAVE_NAME}\"'\"%' -e 's%island_count=\"[^\"]*\"%island_count=\"'\"${ISLAND_COUNT}\"'\"%' -e 's%island_count_per_team=\"[^\"]*\"%island_count_per_team=\"'\"${ISLAND_COUNT_PER_TEAM}\"'\"%' -e 's%carrier_count_per_team=\"[^\"]*\"%carrier_count_per_team=\"'\"${CARRIER_COUNT_PER_TEAM}\"'\"%' -e 's%team_count_ai=\"[^\"]*\"%team_count_ai=\"'\"${TEAM_COUNT_AI}\"'\"%' -e 's%team_count_human=\"[^\"]*\"%team_count_human=\"'\"${TEAM_COUNT_HUMAN}\"'\"%' -e 's%base_difficulty=\"[^\"]*\"%base_difficulty=\"'\"${BASE_DIFFICULTY}\"'\"%' -e 's%loadout_type=\"[^\"]*\"%loadout_type=\"'\"${LOADOUT_TYPE}\"'\"%' -e 's%blueprints=\"[^\"]*\"%blueprints=\"'\"${BLUEPRINTS}\"'\"%' server_config.xml && WINEPREFIX=/home/container/.wine WINEARCH=win32 WINEDEBUG=-all LD_LIBRARY_PATH=/home/container/linux64:$LD_LIBRARY_PATH SteamAppId=1489630 wine /home/container/dedicated_server.exe",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"connected to Steam\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Carrier Command 2 dedicated server install (Wine + AMP recipe)\r\n# Server Files: /mnt/server\r\n# Install image: ghcr.io/ptero-eggs/installers:debian\r\n#\r\n# Required env vars: STEAM_USER, STEAM_PASS (Steam ownership required, no anon install)\r\n# Optional: STEAM_AUTH (Steam Guard code on first login)\r\n#\r\n# Two SteamCMD downloads:\r\n# 1. App 1489630 (CC2 dedicated server, requires login)\r\n# 2. App 1007 (Steamworks SDK Redistributables, anonymous) - provides\r\n#    steamclient.dll/tier0_s.dll/vstdlib_s.dll that CC2 needs but Geometa\r\n#    didn't ship. This is Valve's official redistributable package.\r\n\r\nif [[ -z \"${STEAM_USER}\" || -z \"${STEAM_PASS}\" ]]; then\r\n    echo \"Carrier Command 2 requires Steam credentials (ownership required).\"\r\n    echo \"Set STEAM_USER and STEAM_PASS on the server before install.\"\r\n    exit 1\r\nfi\r\n\r\n# Fetch SteamCMD\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps\r\ncd /mnt/server/steamcmd\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n# Step 1: Install CC2 (App 1489630, requires login, ownership)\r\necho \"===== Installing Carrier Command 2 (App 1489630) =====\"\r\n./steamcmd.sh \\\r\n  +force_install_dir /mnt/server \\\r\n  +login \"${STEAM_USER}\" \"${STEAM_PASS}\" \"${STEAM_AUTH}\" \\\r\n  +@sSteamCmdForcePlatformType windows \\\r\n  +app_update 1489630 validate \\\r\n  +quit\r\n\r\nif [[ ! -f /mnt/server/dedicated_server.exe ]]; then\r\n    echo \"ERROR: dedicated_server.exe missing after SteamCMD install.\"\r\n    echo \"Likely cause: SteamCMD segfault during client config. Retry the install.\"\r\n    exit 1\r\nfi\r\n\r\n# Step 2: Install Steamworks SDK Redistributables (App 1007, anonymous)\r\n# into a TEMP directory, copy out only the 3 DLLs we need, then delete the\r\n# temp dir. This prevents the runtime image's auto-update from re-validating\r\n# app 1007 against the logged-in account, which pulls the Linux variant and\r\n# wipes the Windows DLLs (causing \"failed to initialise SteamGameServer\").\r\necho \"===== Installing Steamworks SDK Redistributables (App 1007, isolated) =====\"\r\n./steamcmd.sh \\\r\n  +force_install_dir /tmp/sdk_redist \\\r\n  +login anonymous \\\r\n  +@sSteamCmdForcePlatformType windows \\\r\n  +app_update 1007 validate \\\r\n  +quit\r\n\r\necho \"Copying Steamworks SDK DLLs into /mnt/server/...\"\r\nfor dll in steamclient.dll tier0_s.dll vstdlib_s.dll; do\r\n    found=$(find /tmp/sdk_redist -name \"$dll\" -print -quit 2>/dev/null)\r\n    if [[ -n \"$found\" ]]; then\r\n        cp -v \"$found\" /mnt/server/\r\n    else\r\n        echo \"WARN: $dll not found in app 1007 install\"\r\n    fi\r\ndone\r\n\r\n# Clean up temp install dir so no appmanifest_1007.acf exists in\r\n# /home/container/steamapps/ — keeps auto-update away from these DLLs.\r\nrm -rf /tmp/sdk_redist\r\n\r\n# Make Linux steamclient.so available via LD_LIBRARY_PATH at runtime\r\n# (AMP's trick - lets Wine use the .so for SteamGameServer auth)\r\nmkdir -p /mnt/server/linux64\r\ncp -v linux64/steamclient.so /mnt/server/linux64/ 2>/dev/null || true\r\n\r\n# Create server_config.xml with CC2's exact native format so it isn't regenerated.\r\n# Values are placeholders - the startup command's sed updates them on every start.\r\ncat > /mnt/server/server_config.xml <<'EOF'\r\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<data port=\"25565\" max_players=\"4\" server_name=\"A Pterodactyl Hosted Server\" password=\"\" save_name=\"\" island_count=\"16\" island_count_per_team=\"1\" carrier_count_per_team=\"1\" team_count_ai=\"1\" team_count_human=\"1\" base_difficulty=\"1\" loadout_type=\"0\" blueprints=\"0\" game_data_path=\"rom_0\">\r\n    <permissions/>\r\n    <active_mod_folders/>\r\n</data>\r\nEOF\r\n\r\necho \"-----------------------------------------\"\r\necho \"Carrier Command 2 install complete.\"\r\necho \"Server will listen on UDP ${SERVER_PORT} through $((SERVER_PORT + 3)).\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The display name shown to players in the server browser.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Optional password players must enter to join. Leave blank for no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Maximum simultaneous players (1-16).",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,16",
+            "field_type": "text"
+          },
+          {
+            "name": "Save Name",
+            "description": "Folder name under saved_games/ for the save the server loads on launch. Leave blank to start a fresh game. NOTE: CC2 dedicated server cannot WRITE saves — progress is lost on stop.",
+            "env_variable": "SAVE_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Island Count",
+            "description": "Number of islands generated in the world (4-32).",
+            "env_variable": "ISLAND_COUNT",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:4,32",
+            "field_type": "text"
+          },
+          {
+            "name": "AI Team Count",
+            "description": "Number of AI-controlled enemy teams (0-4).",
+            "env_variable": "TEAM_COUNT_AI",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,4",
+            "field_type": "text"
+          },
+          {
+            "name": "Human Team Count",
+            "description": "Number of human-controlled teams (1-4).",
+            "env_variable": "TEAM_COUNT_HUMAN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,4",
+            "field_type": "text"
+          },
+          {
+            "name": "Carriers per Team",
+            "description": "Number of carriers each team gets (1-4).",
+            "env_variable": "CARRIER_COUNT_PER_TEAM",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,4",
+            "field_type": "text"
+          },
+          {
+            "name": "Starting Islands per Team",
+            "description": "Number of islands each team controls at game start (1-8).",
+            "env_variable": "ISLAND_COUNT_PER_TEAM",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,8",
+            "field_type": "text"
+          },
+          {
+            "name": "Base Difficulty",
+            "description": "Difficulty of capturing enemy bases. 0 = easy, 1 = normal, 2 = hard.",
+            "env_variable": "BASE_DIFFICULTY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,2",
+            "field_type": "text"
+          },
+          {
+            "name": "Loadout Type",
+            "description": "Starting carrier loadout. 0 = default, 1 = minimal, 2 = full.",
+            "env_variable": "LOADOUT_TYPE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1,2",
+            "field_type": "text"
+          },
+          {
+            "name": "Blueprints",
+            "description": "Blueprint unlock state. 0 = default (research required), 1 = all unlocked.",
+            "env_variable": "BLUEPRINTS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|in:0,1",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Username",
+            "description": "Steam account that owns Carrier Command 2. Required — CC2 does not allow anonymous SteamCMD install.",
+            "env_variable": "STEAM_USER",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Password",
+            "description": "Password for the Steam account above. The password is stored encrypted but visible in cleartext to anyone with\r\nedit access to the server.",
+            "env_variable": "STEAM_PASS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam Guard Code",
+            "description": "Steam Guard 2FA code. Required on first install only; can be left blank after the account is trusted.",
+            "env_variable": "STEAM_AUTH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID for Carrier Command 2.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1489630",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1489630",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Re-run SteamCMD app_update on every server start. 0 = off, 1 = on.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "citadel-forged-with-fire-2cbd313a5949",
+        "name": "Citadel: Forged with Fire",
+        "description": "Citadel: Forged With Fire is a massive online sandbox RPG set in the mystical world of Ignus. Featuring magic, spellcasting, building, exploring and crafting as you fight to make a name for yourself and achieve notoriety across the land.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/citadel-forged-with-fire-2cbd313a5949.json",
+        "sha256": "7883a2927b9bda5f4e6f932db3e22987af496b357d0d7794ae226509a88bf547",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "citadel/egg-citadel-forged-with-fire.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/2cbd313a5949.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:29:33+02:00",
+        "name": "Citadel: Forged with Fire",
+        "author": "eggs@goover.dev",
+        "description": "Citadel: Forged With Fire is a massive online sandbox RPG set in the mystical world of Ignus. Featuring magic, spellcasting, building, exploring and crafting as you fight to make a name for yourself and achieve notoriety across the land.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/games:source": "ghcr.io/ptero-eggs/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./CitadelServer.sh",
+        "config": {
+          "files": "{\"Config/Game.ini\": {\"parser\": \"file\", \"find\": {\"ConnectionPort=\": \"ConnectionPort={{server.build.default.port}}\", \"QueryPort=\": \"QueryPort={{server.build.env.QPORT}}\", \"Password\": \"Password={{server.build.env.ADMIN_PASSWD}}\"}}}",
+          "startup": "{\"done\": \"Steam Server initialized and registered with UWorks\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n##Copy steamclient.so to correct Dir\r\nmkdir -p $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux\r\nchmod -R a+w,a+x $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux\r\nif [[ ! -f $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux/steamclient.so ]]; then \r\n\tln -s ../../../../../../linux64/steamclient.so $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux/steamclient.so\r\n\r\nfi\r\n\r\n## Create Game.ini\r\nmkdir $HOME/Config\r\n\r\nif [[ -d $HOME/Citadel/Saved/Config/LinuxServer ]]; then \r\n\trm -rf $HOME/Citadel/Saved/Config/LinuxServer\r\nfi\r\n\r\nif [[ -d $HOME/Engine/Saved/Config/LinuxServer ]]; then \r\n\trm -rf $HOME/Engine/Saved/Config/LinuxServer\r\nfi\r\n\r\nmkdir -p $HOME/Citadel/Saved/Config\r\nmkdir -p $HOME/Engine/Saved/Config\r\n\r\nln -s ../../../Config $HOME/Citadel/Saved/Config/LinuxServer\r\nln -s ../../../Config $HOME/Engine/Saved/Config/LinuxServer\r\n\r\n#rm -fR $HOME/Citadel/Saved/Config/LinuxServer/Game.ini\r\ncat <<EOT > $HOME/Config/Game.ini\r\n[UWorks]\r\nConnectionPort=7777\r\nQueryPort=27015\r\n\r\n[/Script/Citadel.SocialManager]\r\nPassword=changeme\r\n\r\n[/Script/Citadel.CitadelGameInstance]\r\nWorldCreationSettings=(ServerName=\"CitadelServer\",Password=\"YourServerPassword\",ServerType=PVP,PlayerLimit=20,bPrivate=true,ExperienceMultiplier=1.000000,InventoryCapacityMultipler=1.000000,KnowledgePointEarnedMultiplier=1.000000,CharacterPointEarnedMultiplier=1.000000,bUnlimitedResources=false,PlayerDamageMultiplier=1.000000,ArmorMultiplier=1.000000,BaseManaRegen=1.000000,bInventoryWeightRestrictions=true,MagicFindMultiplier=1.000000,CraftingMagicFindChanceMultiplier=1.000000,FlyingCostMultiplier=1.000000,FlyingSpeedMultiplier=1.000000,ResourceCollectionMultiplier=1.000000,StructureDamageMultiplier=1.000000,bRespectNoBuildZones=true,MagicStructureManaRegenerationMultiplier=1.000000,MagicStructureManaConsumptionMultiplier=0.000000,bFreeBuildMode=false,TimeOfDayLock=Auto,NPCPopulationMultiplier=1.000000,StructureDecayMultiplier=2.000000,bThronesDecay=true)\r\nEOT\r\n\r\nchmod +x $HOME/CitadelServer.sh\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "489650",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:489650",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "port",
+            "env_variable": "QPORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "citadel-forged-with-fire-a03d6c8e6efa",
+        "name": "Citadel: Forged with Fire",
+        "description": "Citadel: Forged With Fire is a massive online sandbox RPG set in the mystical world of Ignus. Featuring magic, spellcasting, building, exploring and crafting as you fight to make a name for yourself and achieve notoriety across the land.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/citadel-forged-with-fire-a03d6c8e6efa.json",
+        "sha256": "fb4ebfec5f6baca3c66a08f7c1291ae143ef7483754b46557c7930187f494645",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "citadel/egg-pterodactyl-citadel--forged-with-fire.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/steamcmd_servers/citadel/egg-citadel-forged-with-fire.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-steamcmd/a03d6c8e6efa.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:45+00:00",
+        "name": "Citadel: Forged with Fire",
+        "author": "eggs@goover.dev",
+        "description": "Citadel: Forged With Fire is a massive online sandbox RPG set in the mystical world of Ignus. Featuring magic, spellcasting, building, exploring and crafting as you fight to make a name for yourself and achieve notoriety across the land.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./CitadelServer.sh",
+        "config": {
+          "files": "{\"Config/Game.ini\": {\"parser\": \"file\", \"find\": {\"ConnectionPort=\": \"ConnectionPort={{server.build.default.port}}\", \"QueryPort=\": \"QueryPort={{server.build.env.QPORT}}\", \"Password\": \"Password={{server.build.env.ADMIN_PASSWD}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Steam Server initialized and registered with UWorks\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n##Copy steamclient.so to correct Dir\r\nmkdir -p $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux\r\nchmod -R a+w,a+x $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux\r\nif [[ ! -f $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux/steamclient.so ]]; then \r\n\tln -s ../../../../../../linux64/steamclient.so $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux/steamclient.so\r\n\r\nfi\r\n\r\n## Create Game.ini\r\nmkdir $HOME/Config\r\n\r\nif [[ -d $HOME/Citadel/Saved/Config/LinuxServer ]]; then \r\n\trm -rf $HOME/Citadel/Saved/Config/LinuxServer\r\nfi\r\n\r\nif [[ -d $HOME/Engine/Saved/Config/LinuxServer ]]; then \r\n\trm -rf $HOME/Engine/Saved/Config/LinuxServer\r\nfi\r\n\r\nmkdir -p $HOME/Citadel/Saved/Config\r\nmkdir -p $HOME/Engine/Saved/Config\r\n\r\nln -s ../../../Config $HOME/Citadel/Saved/Config/LinuxServer\r\nln -s ../../../Config $HOME/Engine/Saved/Config/LinuxServer\r\n\r\n#rm -fR $HOME/Citadel/Saved/Config/LinuxServer/Game.ini\r\ncat <<EOT > $HOME/Config/Game.ini\r\n[UWorks]\r\nConnectionPort=7777\r\nQueryPort=27015\r\n\r\n[/Script/Citadel.SocialManager]\r\nPassword=changeme\r\n\r\n[/Script/Citadel.CitadelGameInstance]\r\nWorldCreationSettings=(ServerName=\"CitadelServer\",Password=\"YourServerPassword\",ServerType=PVP,PlayerLimit=20,bPrivate=true,ExperienceMultiplier=1.000000,InventoryCapacityMultipler=1.000000,KnowledgePointEarnedMultiplier=1.000000,CharacterPointEarnedMultiplier=1.000000,bUnlimitedResources=false,PlayerDamageMultiplier=1.000000,ArmorMultiplier=1.000000,BaseManaRegen=1.000000,bInventoryWeightRestrictions=true,MagicFindMultiplier=1.000000,CraftingMagicFindChanceMultiplier=1.000000,FlyingCostMultiplier=1.000000,FlyingSpeedMultiplier=1.000000,ResourceCollectionMultiplier=1.000000,StructureDamageMultiplier=1.000000,bRespectNoBuildZones=true,MagicStructureManaRegenerationMultiplier=1.000000,MagicStructureManaConsumptionMultiplier=0.000000,bFreeBuildMode=false,TimeOfDayLock=Auto,NPCPopulationMultiplier=1.000000,StructureDecayMultiplier=2.000000,bThronesDecay=true)\r\nEOT\r\n\r\nchmod +x $HOME/CitadelServer.sh\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "489650",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:489650",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "port",
+            "env_variable": "QPORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "citadel-forged-with-fire-e4f4f5706593",
+        "name": "Citadel: Forged with Fire",
+        "description": "Citadel: Forged With Fire is a massive online sandbox RPG set in the mystical world of Ignus. Featuring magic, spellcasting, building, exploring and crafting as you fight to make a name for yourself and achieve notoriety across the land.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/citadel-forged-with-fire-e4f4f5706593.json",
+        "sha256": "96d157856f2ea700918eb572fcb94728de5d2b68003f1f2a7c5c2cd3dc61023d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "citadel/egg-citadel--forged-with-fire.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/e4f4f5706593.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Citadel: Forged with Fire",
+        "author": "eggs@goover.dev",
+        "uuid": "ff961d60-89cf-4b77-bf97-20254bc465bb",
+        "description": "Citadel: Forged With Fire is a massive online sandbox RPG set in the mystical world of Ignus. Featuring magic, spellcasting, building, exploring and crafting as you fight to make a name for yourself and achieve notoriety across the land.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/games:source": "ghcr.io/parkervcp/games:source"
+        },
+        "file_denylist": [],
+        "startup": "./CitadelServer.sh",
+        "config": {
+          "files": "{\"Config/Game.ini\": {\"parser\": \"file\", \"find\": {\"ConnectionPort=\": \"ConnectionPort={{server.build.default.port}}\", \"QueryPort=\": \"QueryPort={{server.build.env.QPORT}}\", \"Password\": \"Password={{server.build.env.ADMIN_PASSWD}}\"}}}",
+          "startup": "{\"done\": \"Steam Server initialized and registered with UWorks\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n## just in case someone removed the defaults.\r\nif [ \"${STEAM_USER}\" == \"\" ]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} +app_update ${SRCDS_APPID} ${EXTRA_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n##Copy steamclient.so to correct Dir\r\nmkdir -p $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux\r\nchmod -R a+w,a+x $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux\r\nif [[ ! -f $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux/steamclient.so ]]; then \r\n\tln -s ../../../../../../linux64/steamclient.so $HOME/Citadel/Plugins/UWorks/Source/ThirdParty/Linux/steamclient.so\r\n\r\nfi\r\n\r\n## Create Game.ini\r\nmkdir $HOME/Config\r\n\r\nif [[ -d $HOME/Citadel/Saved/Config/LinuxServer ]]; then \r\n\trm -rf $HOME/Citadel/Saved/Config/LinuxServer\r\nfi\r\n\r\nif [[ -d $HOME/Engine/Saved/Config/LinuxServer ]]; then \r\n\trm -rf $HOME/Engine/Saved/Config/LinuxServer\r\nfi\r\n\r\nmkdir -p $HOME/Citadel/Saved/Config\r\nmkdir -p $HOME/Engine/Saved/Config\r\n\r\nln -s ../../../Config $HOME/Citadel/Saved/Config/LinuxServer\r\nln -s ../../../Config $HOME/Engine/Saved/Config/LinuxServer\r\n\r\n#rm -fR $HOME/Citadel/Saved/Config/LinuxServer/Game.ini\r\ncat <<EOT > $HOME/Config/Game.ini\r\n[UWorks]\r\nConnectionPort=7777\r\nQueryPort=27015\r\n\r\n[/Script/Citadel.SocialManager]\r\nPassword=changeme\r\n\r\n[/Script/Citadel.CitadelGameInstance]\r\nWorldCreationSettings=(ServerName=\"CitadelServer\",Password=\"YourServerPassword\",ServerType=PVP,PlayerLimit=20,bPrivate=true,ExperienceMultiplier=1.000000,InventoryCapacityMultipler=1.000000,KnowledgePointEarnedMultiplier=1.000000,CharacterPointEarnedMultiplier=1.000000,bUnlimitedResources=false,PlayerDamageMultiplier=1.000000,ArmorMultiplier=1.000000,BaseManaRegen=1.000000,bInventoryWeightRestrictions=true,MagicFindMultiplier=1.000000,CraftingMagicFindChanceMultiplier=1.000000,FlyingCostMultiplier=1.000000,FlyingSpeedMultiplier=1.000000,ResourceCollectionMultiplier=1.000000,StructureDamageMultiplier=1.000000,bRespectNoBuildZones=true,MagicStructureManaRegenerationMultiplier=1.000000,MagicStructureManaConsumptionMultiplier=0.000000,bFreeBuildMode=false,TimeOfDayLock=Auto,NPCPopulationMultiplier=1.000000,StructureDecayMultiplier=2.000000,bThronesDecay=true)\r\nEOT\r\n\r\nchmod +x $HOME/CitadelServer.sh\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "ID",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "489650",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:489650",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "port",
+            "env_variable": "QPORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PASSWD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "classicube-mgc-0206e816bf4c",
+        "name": "ClassiCube(MGC)",
+        "description": "Debian based MCGalaxy Egg.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/classicube-mgc-0206e816bf4c.json",
+        "sha256": "c4fb566b8ee1379e1588610eede7869ef6d20bd1cea7780bda5d37bc4d880d39",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "classicube/mcgalaxy/egg-classi-cube--m-g-c.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/0206e816bf4c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:29+00:00",
+        "name": "ClassiCube(MGC)",
+        "author": "panel@qoutsy.33mail.com",
+        "uuid": "d12bf043-5835-45eb-9c35-fd7bc7e51561",
+        "description": "Debian based MCGalaxy Egg.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono MCGalaxyCLI.exe",
+        "config": {
+          "files": "{\"/properties/server.properties\": {\"parser\": \"properties\", \"find\": {\"server-name\": \"{{server.build.env.HOSTNAME}}\", \"motd\": \"{{server.build.env.MOTD}}\", \"public\": \"true\", \"port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Finished setting up server\"}",
+          "logs": "{}",
+          "stop": "/shutdown 3 SIGTERM Server shutting down..."
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nMATCH=mcgalaxy_\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/UnknownShadow200/MCGalaxy/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/UnknownShadow200/MCGalaxy/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n\r\necho -e \"Downloading ClassiCube version ${VERSION}\"\r\necho -e \"Download URL is ${DOWNLOAD_URL}\"\r\n\r\ncurl -ssL -o mcgalaxy.zip ${DOWNLOAD_URL}\r\n\r\nunzip -j mcgalaxy.zip\r\nrm mcgalaxy.zip\r\nchmod +X *.dll *.exe\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Install Version",
+            "description": "Specify the version to install from https://github.com/UnknownShadow200/MCGalaxy/releases. Leave latest to install the latest version.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Specify the server name",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Specify the message of the day",
+            "env_variable": "MOTD",
+            "default_value": "Welcome to the server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "classicube-mgc-cc850c15d579",
+        "name": "ClassiCube(MGC)",
+        "description": "Debian based MCGalaxy Egg.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/classicube-mgc-cc850c15d579.json",
+        "sha256": "82510fe8faf7daa464c145915470ed565c91bf74cf7dec8711a323d16c350a9e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "classicube/mcgalaxy/egg-pterodactyl-classi-cube--m-g-c.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/classicube/mcgalaxy/egg-classi-cube--m-g-c.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/cc850c15d579.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:29+00:00",
+        "name": "ClassiCube(MGC)",
+        "author": "panel@qoutsy.33mail.com",
+        "description": "Debian based MCGalaxy Egg.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:mono_latest": "ghcr.io/parkervcp/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono MCGalaxyCLI.exe",
+        "config": {
+          "files": "{\"/properties/server.properties\": {\"parser\": \"properties\", \"find\": {\"server-name\": \"{{server.build.env.HOSTNAME}}\", \"motd\": \"{{server.build.env.MOTD}}\", \"public\": \"true\", \"port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Finished setting up server\"}",
+          "stop": "/shutdown 3 SIGTERM Server shutting down..."
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\nMATCH=mcgalaxy_\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ -z \"${GITHUB_USER}\" ] && [ -z \"${GITHUB_OAUTH_TOKEN}\" ] ; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    echo -e \"user and oauth token set\"\r\n    alias curl='curl -u ${GITHUB_USER}:${GITHUB_OAUTH_TOKEN} '\r\nfi\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/UnknownShadow200/MCGalaxy/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/UnknownShadow200/MCGalaxy/releases\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\n\r\necho -e \"Downloading ClassiCube version ${VERSION}\"\r\necho -e \"Download URL is ${DOWNLOAD_URL}\"\r\n\r\ncurl -ssL -o mcgalaxy.zip ${DOWNLOAD_URL}\r\n\r\nunzip -j mcgalaxy.zip\r\nrm mcgalaxy.zip\r\nchmod +X *.dll *.exe\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Install Version",
+            "description": "Specify the version to install from https://github.com/UnknownShadow200/MCGalaxy/releases. Leave latest to install the latest version.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Specify the server name",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Specify the message of the day",
+            "env_variable": "MOTD",
+            "default_value": "Welcome to the server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "classicube-mgc-d2a3e7d7aec3",
+        "name": "ClassiCube(MGC)",
+        "description": "Debian based MCGalaxy Egg.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/classicube-mgc-d2a3e7d7aec3.json",
+        "sha256": "d8c8f74baacb3ba5293ba2d146f02fc2a814b982dd28075520e141784eaab7de",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "classicube/mcgalaxy/egg-classi-cube--m-g-c.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d2a3e7d7aec3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-01-25T22:40:58+00:00",
+        "name": "ClassiCube(MGC)",
+        "author": "panel@qoutsy.33mail.com",
+        "description": "Debian based MCGalaxy Egg.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:mono_latest": "ghcr.io/ptero-eggs/yolks:mono_latest"
+        },
+        "file_denylist": [],
+        "startup": "mono MCGalaxyCLI.exe",
+        "config": {
+          "files": "{\"/properties/server.properties\": {\"parser\": \"properties\", \"find\": {\"server-name\": \"{{server.build.env.HOSTNAME}}\", \"motd\": \"{{server.build.env.MOTD}}\", \"public\": \"true\", \"port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Finished setting up server\"}",
+          "logs": "{}",
+          "stop": "/shutdown 3 SIGTERM Server shutting down..."
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nDOWNLOAD_URL=\"https://cdn.classicube.net/client/mcg/release/MCGalaxy.zip\"\r\n\r\necho -e \"Downloading MCGalaxy from ${DOWNLOAD_URL}...\"\r\ncurl -ssL -o mcgalaxy.zip \"${DOWNLOAD_URL}\"\r\n\r\nif [ $? -ne 0 ]; then\r\n    echo \"Failed to download the file. Exiting.\"\r\n    exit 1\r\nfi\r\n\r\necho \"Extracting MCGalaxy...\"\r\nunzip -j mcgalaxy.zip\r\nrm mcgalaxy.zip\r\nchmod +x *.dll *.exe\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "Specify the server name",
+            "env_variable": "HOSTNAME",
+            "default_value": "Pterodactyl Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "MOTD",
+            "description": "Specify the message of the day",
+            "env_variable": "MOTD",
+            "default_value": "Welcome to the server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "clone-hero-0955a9f8cffc",
+        "name": "Clone Hero",
+        "description": "Clone Hero is a classic instrument based rhythm game for Windows, Mac, Linux, and Android. It's playable with any 5 or 6 fret guitar controller, any midi drum kit, any game controller and even your keyboard! Jam out with Drums, 5-fret Guitar, or 6-fret Guitar online or local!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/clone-hero-0955a9f8cffc.json",
+        "sha256": "3735fb2b194eed16bd4745efb45fd34ace77881f2731c15248ff54d5ea8aee85",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "clone_hero/egg-clone-hero.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/0955a9f8cffc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:30+00:00",
+        "name": "Clone Hero",
+        "author": "josdekurk@gmail.com",
+        "uuid": "dd9775b6-9a13-441e-af75-a93ba2026ed9",
+        "description": "Clone Hero is a classic instrument based rhythm game for Windows, Mac, Linux, and Android. It's playable with any 5 or 6 fret guitar controller, any midi drum kit, any game controller and even your keyboard! Jam out with Drums, 5-fret Guitar, or 6-fret Guitar online or local!",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Server -l {{LOG_LEVEL}} -n \"{{SERVER_DISPLAY_NAME}}\" -p {{SERVER_PORT}} -a 0.0.0.0 $([[ -z \"${SERVER_PASSWORD}\" ]] && echo -np || echo  \"-ps ${SERVER_PASSWORD}\")",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server running...\"}",
+          "logs": "{}",
+          "stop": "^c"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl unzip jq\r\n\r\n## get release info and download links\r\nV=$(curl -s https://clonehero.net/ | grep -i \"Latest version\" | grep -oP '(?<=<b>).+?(?=<\\/b>)' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//') #v1.0.0.4080\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/clonehero-game/releases/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/clonehero-game/releases/releases\")\r\nMATCH=CloneHero-standalone_server\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i server)\r\n    fi\r\nfi\r\n\r\n\r\nV=$(curl -s https://clonehero.net/ | grep -i \"Latest version\" | grep -oP '(?<=<b>).+?(?=<\\/b>)' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//') #v1.0.0.4080\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho \"Running: curl -sSL -o ChStandaloneServer.zip ${DOWNLOAD_URL}\"\r\ncurl -sSL -o ChStandaloneServer.zip ${DOWNLOAD_URL}\r\n\r\nunzip -o ChStandaloneServer.zip\r\nrm ChStandaloneServer.zip\r\n\r\nmv ChStandaloneServer-${V}-final/${ARCH}/* .\r\nrm -rf ChStandaloneServer-${V}-final/\r\n\r\nchmod +x Server\r\n\r\n\r\nif [ ! -f /mnt/server/settings.ini ]\r\nthen\r\n\tcurl -sSL -o settings.ini https://pastebin.com/raw/rhcv0hvi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_DISPLAY_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:80",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "The password of the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|regex:/^[a-zA-Z0-9_]+$/",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Log level",
+            "description": "Set max logging level",
+            "env_variable": "LOG_LEVEL",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3,4",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version of Clone Hero you want to install.\r\nExample: V1.0.0.4080 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "clone-hero-9e9675658520",
+        "name": "Clone Hero",
+        "description": "Clone Hero is a classic instrument based rhythm game for Windows, Mac, Linux, and Android. It's playable with any 5 or 6 fret guitar controller, any midi drum kit, any game controller and even your keyboard! Jam out with Drums, 5-fret Guitar, or 6-fret Guitar online or local!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/clone-hero-9e9675658520.json",
+        "sha256": "0a673d401147b1a256f528899d3737340e1293125235989cf07ab007b70753c8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "clone_hero/egg-clone-hero.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/9e9675658520.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-30T10:24:33+01:00",
+        "name": "Clone Hero",
+        "author": "josdekurk@gmail.com",
+        "description": "Clone Hero is a classic instrument based rhythm game for Windows, Mac, Linux, and Android. It's playable with any 5 or 6 fret guitar controller, any midi drum kit, any game controller and even your keyboard! Jam out with Drums, 5-fret Guitar, or 6-fret Guitar online or local!",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Server -l {{LOG_LEVEL}} -n \"{{SERVER_DISPLAY_NAME}}\" -p {{SERVER_PORT}} -a 0.0.0.0 $([[ -z \"${SERVER_PASSWORD}\" ]] && echo -np || echo  \"-ps ${SERVER_PASSWORD}\")",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server running...\"}",
+          "logs": "{}",
+          "stop": "^c"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl unzip jq\r\n\r\n## get release info and download links\r\nV=$(curl -s https://clonehero.net/ | grep -i \"Latest version\" | grep -oP '(?<=<b>).+?(?=<\\/b>)' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//') #v1.0.0.4080\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/clonehero-game/releases/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/clonehero-game/releases/releases\")\r\nMATCH=CloneHero-standalone_server\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i server)\r\n    fi\r\nfi\r\n\r\n\r\nV=$(curl -s https://clonehero.net/ | grep -i \"Latest version\" | grep -oP '(?<=<b>).+?(?=<\\/b>)' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//') #v1.0.0.4080\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho \"Running: curl -sSL -o ChStandaloneServer.zip ${DOWNLOAD_URL}\"\r\ncurl -sSL -o ChStandaloneServer.zip ${DOWNLOAD_URL}\r\n\r\nunzip -o ChStandaloneServer.zip\r\nrm ChStandaloneServer.zip\r\n\r\nmv ChStandaloneServer-${V}-final/${ARCH}/* .\r\nrm -rf ChStandaloneServer-${V}-final/\r\n\r\nchmod +x Server\r\n\r\n\r\nif [ ! -f /mnt/server/settings.ini ]\r\nthen\r\n\tcurl -sSL -o settings.ini https://pastebin.com/raw/rhcv0hvi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_DISPLAY_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "The password of the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|regex:/^[a-zA-Z0-9_]+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Log level",
+            "description": "Set max logging level",
+            "env_variable": "LOG_LEVEL",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3,4",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version of Clone Hero you want to install.\r\nExample: V1.0.0.4080 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "clone-hero-b5c5fe478d5d",
+        "name": "Clone Hero",
+        "description": "Clone Hero is a classic instrument based rhythm game for Windows, Mac, Linux, and Android. It's playable with any 5 or 6 fret guitar controller, any midi drum kit, any game controller and even your keyboard! Jam out with Drums, 5-fret Guitar, or 6-fret Guitar online or local!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/clone-hero-b5c5fe478d5d.json",
+        "sha256": "96575237e14b6210f9e6bacf3ab837e4926c2a3e14e41e1e060a99244e8abff8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "clone_hero/egg-pterodactyl-clone-hero.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "game_eggs/clone_hero/egg-clone-hero.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--games-standalone/b5c5fe478d5d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:17:30+00:00",
+        "name": "Clone Hero",
+        "author": "josdekurk@gmail.com",
+        "description": "Clone Hero is a classic instrument based rhythm game for Windows, Mac, Linux, and Android. It's playable with any 5 or 6 fret guitar controller, any midi drum kit, any game controller and even your keyboard! Jam out with Drums, 5-fret Guitar, or 6-fret Guitar online or local!",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Server -l {{LOG_LEVEL}} -n \"{{SERVER_DISPLAY_NAME}}\" -p {{SERVER_PORT}} -a 0.0.0.0 $([[ -z \"${SERVER_PASSWORD}\" ]] && echo -np || echo  \"-ps ${SERVER_PASSWORD}\")",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server running...\"}",
+          "stop": "^c"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt -y install curl unzip jq\r\n\r\n## get release info and download links\r\nV=$(curl -s https://clonehero.net/ | grep -i \"Latest version\" | grep -oP '(?<=<b>).+?(?=<\\/b>)' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//') #v1.0.0.4080\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/clonehero-game/releases/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/clonehero-game/releases/releases\")\r\nMATCH=CloneHero-standalone_server\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i server)\r\n    fi\r\nfi\r\n\r\n\r\nV=$(curl -s https://clonehero.net/ | grep -i \"Latest version\" | grep -oP '(?<=<b>).+?(?=<\\/b>)' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//') #v1.0.0.4080\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"linux-x64\" || echo \"linux-arm64\")\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\necho \"Running: curl -sSL -o ChStandaloneServer.zip ${DOWNLOAD_URL}\"\r\ncurl -sSL -o ChStandaloneServer.zip ${DOWNLOAD_URL}\r\n\r\nunzip -o ChStandaloneServer.zip\r\nrm ChStandaloneServer.zip\r\n\r\nmv ChStandaloneServer-${V}-final/${ARCH}/* .\r\nrm -rf ChStandaloneServer-${V}-final/\r\n\r\nchmod +x Server\r\n\r\n\r\nif [ ! -f /mnt/server/settings.ini ]\r\nthen\r\n\tcurl -sSL -o settings.ini https://pastebin.com/raw/rhcv0hvi\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server name",
+            "description": "The name of the server",
+            "env_variable": "SERVER_DISPLAY_NAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:80",
+            "field_type": "text"
+          },
+          {
+            "name": "Server password",
+            "description": "The password of the server",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|regex:/^[a-zA-Z0-9_]+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Log level",
+            "description": "Set max logging level",
+            "env_variable": "LOG_LEVEL",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:0,1,2,3,4",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "The version of Clone Hero you want to install.\r\nExample: V1.0.0.4080 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

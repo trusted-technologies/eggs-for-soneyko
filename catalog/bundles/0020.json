@@ -1,0 +1,737 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "redis-6-395e5de71455",
+        "name": "Redis-6",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-6-395e5de71455.json",
+        "sha256": "e72308232d71ace3eb7bc2a350104bac9e7b8f3f302c8e8585b8e8b275e59527",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "redis/redis-6/egg-redis-6.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/395e5de71455.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-09T15:43:06+00:00",
+        "name": "Redis-6",
+        "author": "parker@parkervcp.com",
+        "uuid": "f6693b4c-9ea0-4f76-959d-ea180a20ae92",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:redis_6": "ghcr.io/parkervcp/yolks:redis_6"
+        },
+        "file_denylist": [],
+        "startup": "/usr/local/bin/redis-server /home/container/redis.conf --save 60 1 --dir /home/container/ --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass '{{SERVER_PASSWORD}}' --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}}; redis-cli -p {{SERVER_PORT}} -a '{{SERVER_PASSWORD}}' shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napk add --no-cache curl\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ ! -d /mnt/server/redis.conf ]; then\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/database/redis/redis-6/redis.conf -o redis.conf\r\nfi\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-6-910fc19ca18b",
+        "name": "Redis-6",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-6-910fc19ca18b.json",
+        "sha256": "1820b86969ae3dc85c84ff9195f9181fde2866af34671f8553850e4e94513e80",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/redis/redis-6/egg-redis-6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/910fc19ca18b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-03T14:09:26+02:00",
+        "name": "Redis-6",
+        "author": "parker@parkervcp.com",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:redis_6": "ghcr.io/ptero-eggs/yolks:redis_6"
+        },
+        "file_denylist": [],
+        "startup": "/usr/local/bin/redis-server /home/container/redis.conf --save 60 1 --dir /home/container/ --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass {{SERVER_PASSWORD}} --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}}; redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napk add --no-cache curl\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ ! -d /mnt/server/redis.conf ]; then\r\n    curl https://raw.githubusercontent.com/Ptero-Eggs/application-eggs/main/database/redis/redis-6/redis.conf -o redis.conf\r\nfi\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-6-dbc138ea3b26",
+        "name": "Redis-6",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-6-dbc138ea3b26.json",
+        "sha256": "d11b51a65e52eea594b51f1ff11e76ce2e6ba26ae1a218779a4a7c043fd6495e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/redis/redis-6/egg-redis-6.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/dbc138ea3b26.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-07-11T13:18:27+02:00",
+        "name": "Redis-6",
+        "author": "parker@parkervcp.com",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:redis_6": "ghcr.io/parkervcp/yolks:redis_6"
+        },
+        "file_denylist": [],
+        "startup": "/usr/local/bin/redis-server /home/container/redis.conf --save 60 1 --dir /home/container/ --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass {{SERVER_PASSWORD}} --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}}; redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napk add --no-cache curl\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ ! -d /mnt/server/redis.conf ]; then\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/database/redis/redis-6/redis.conf -o redis.conf\r\nfi\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-7-98c40a866fde",
+        "name": "Redis-7",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-7-98c40a866fde.json",
+        "sha256": "b07613d40c37c88962396b15cd696d390638cbdb499bf6655e73f53e8c395e2b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/redis/redis-7/egg-redis-7.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/98c40a866fde.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-10-02T16:30:14+01:00",
+        "name": "Redis-7",
+        "author": "parker@parkervcp.com",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:redis_7": "ghcr.io/parkervcp/yolks:redis_7"
+        },
+        "file_denylist": [],
+        "startup": "/usr/local/bin/redis-server /home/container/redis.conf --save 60 1 --dir /home/container/ --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass {{SERVER_PASSWORD}} --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}}; redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napk add --no-cache curl\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ ! -d /mnt/server/redis.conf ]; then\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/database/redis/redis-7/redis.conf -o redis.conf\r\nfi\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-7-a9c7499beb83",
+        "name": "Redis-7",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-7-a9c7499beb83.json",
+        "sha256": "2dba87131ddf78faf8b643b65190b3fbf7e8f051713cde95bfb82cccf7523b39",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "redis/redis-7/egg-redis-7.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/a9c7499beb83.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-02-09T15:43:04+00:00",
+        "name": "Redis-7",
+        "author": "parker@parkervcp.com",
+        "uuid": "96482492-e3ef-4d3b-9d9c-fd8d618e54b5",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:redis_7": "ghcr.io/parkervcp/yolks:redis_7"
+        },
+        "file_denylist": [],
+        "startup": "/usr/local/bin/redis-server /home/container/redis.conf --save 60 1 --dir /home/container/ --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass '{{SERVER_PASSWORD}}' --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}}; redis-cli -p {{SERVER_PORT}} -a '{{SERVER_PASSWORD}}' shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napk add --no-cache curl\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ ! -d /mnt/server/redis.conf ]; then\r\n    curl https://raw.githubusercontent.com/parkervcp/eggs/master/database/redis/redis-7/redis.conf -o redis.conf\r\nfi\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "redis-7-e95b90b0040c",
+        "name": "Redis-7",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/redis-7-e95b90b0040c.json",
+        "sha256": "bc2f7833fdfc366e3a2ebcaee7be4415445f65b840c0ad011978c84dbb0dd8e7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/redis/redis-7/egg-redis-7.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/e95b90b0040c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-03T14:09:30+02:00",
+        "name": "Redis-7",
+        "author": "parker@parkervcp.com",
+        "description": "Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries and streams.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:redis_7": "ghcr.io/ptero-eggs/yolks:redis_7"
+        },
+        "file_denylist": [],
+        "startup": "/usr/local/bin/redis-server /home/container/redis.conf --save 60 1 --dir /home/container/ --bind 0.0.0.0 --port {{SERVER_PORT}} --requirepass {{SERVER_PASSWORD}} --maxmemory {{SERVER_MEMORY}}mb --daemonize yes && redis-cli -p {{SERVER_PORT}}; redis-cli -p {{SERVER_PORT}} -a {{SERVER_PASSWORD}} shutdown save",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Configuration loaded\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Redis Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\napk add --no-cache curl\r\n\r\nif [ ! -d /mnt/server ]; then\r\n    mkdir /mnt/server/\r\nfi\r\n\r\ncd /mnt/server/\r\n\r\nif [ ! -d /mnt/server/redis.conf ]; then\r\n    curl https://raw.githubusercontent.com/Ptero-Eggs/application-eggs/main/database/redis/redis-7/redis.conf -o redis.conf\r\nfi\r\n\r\nsleep 5\r\necho -e \"Install complete. Made this to not have issues.\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Redis Password",
+            "description": "The password redis should use to secure the server.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "P@55w0rd",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rethinkdb-52e2b0f638a8",
+        "name": "rethinkdb",
+        "description": "The open-source database for the realtime web",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/rethinkdb-52e2b0f638a8.json",
+        "sha256": "82d30ce92dae9a0cef196761be11324e1672b47ef158247222a7409abba437c8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/database",
+          "commit": "879998017b19a513a997a35dc45317f99863a37a",
+          "path": "nosql/rethinkdb/egg-rethinkdb.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--database/52e2b0f638a8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:34:29+00:00",
+        "name": "rethinkdb",
+        "author": "josdekurk@gmail.com",
+        "uuid": "867a5c42-a031-4c3b-9d6e-fa9244882817",
+        "description": "The open-source database for the realtime web",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./rethinkdb --bind 0.0.0.0 --cluster-port {{SERVER_PORT}} --driver-port {{DRIVER_PORT}} --http-port {{HTTP_PORT}} --initial-password auto --no-http-admin",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server ready\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y wget tar binutils xz-utils\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n\r\nmkdir -p /mnt/server\r\n\r\ncd /tmp\r\nwget https://download.rethinkdb.com/repository/debian-bookworm/pool/r/rethinkdb/rethinkdb_${VERSION}~0bookworm_${ARCH}.deb -O rethinkdb.deb\r\n\r\nar xv rethinkdb.deb\r\n\r\ntar xvf data.tar.xz\r\n\r\nmv /tmp/usr/bin/rethinkdb /mnt/server\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "2.4.4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Driver port",
+            "description": "",
+            "env_variable": "DRIVER_PORT",
+            "default_value": "25568",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:10",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Http port",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "25569",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:10",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rethinkdb-53fe37ff7ec8",
+        "name": "rethinkdb",
+        "description": "The open-source database for the realtime web",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/rethinkdb-53fe37ff7ec8.json",
+        "sha256": "4a15dc5c9bd5c0be275c9461682cb434f7dc59fddcf433c24ee7db44d07c1e22",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "database/nosql/rethinkdb/egg-rethinkdb.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/53fe37ff7ec8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T14:35:12+02:00",
+        "name": "rethinkdb",
+        "author": "josdekurk@gmail.com",
+        "description": "The open-source database for the realtime web",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./rethinkdb --bind 0.0.0.0 --cluster-port {{SERVER_PORT}} --driver-port {{DRIVER_PORT}} --http-port {{HTTP_PORT}} --initial-password auto --no-http-admin",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server ready\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y wget tar binutils xz-utils\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n\r\nmkdir -p /mnt/server\r\n\r\ncd /tmp\r\nwget https://download.rethinkdb.com/repository/debian-bookworm/pool/r/rethinkdb/rethinkdb_${VERSION}~0bookworm_${ARCH}.deb -O rethinkdb.deb\r\n\r\nar xv rethinkdb.deb\r\n\r\ntar xvf data.tar.xz\r\n\r\nmv /tmp/usr/bin/rethinkdb /mnt/server\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "2.4.4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Driver port",
+            "description": "",
+            "env_variable": "DRIVER_PORT",
+            "default_value": "25568",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          },
+          {
+            "name": "Http port",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "25569",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rethinkdb-b2fef7525ffb",
+        "name": "rethinkdb",
+        "description": "The open-source database for the realtime web",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/rethinkdb-b2fef7525ffb.json",
+        "sha256": "e8cfdbe14e2ecef7c7c83a957d0edbd9e906f52b04bd01bc9215ec79d5e5a0ee",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "database/nosql/rethinkdb/egg-rethinkdb.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/b2fef7525ffb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T14:35:12+02:00",
+        "name": "rethinkdb",
+        "author": "josdekurk@gmail.com",
+        "description": "The open-source database for the realtime web",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./rethinkdb --bind 0.0.0.0 --cluster-port {{SERVER_PORT}} --driver-port {{DRIVER_PORT}} --http-port {{HTTP_PORT}} --initial-password auto --no-http-admin",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server ready\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\napt update\r\napt install -y wget tar binutils xz-utils\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"arm64\")\r\n\r\nmkdir -p /mnt/server\r\n\r\ncd /tmp\r\nwget https://download.rethinkdb.com/repository/debian-bookworm/pool/r/rethinkdb/rethinkdb_${VERSION}~0bookworm_${ARCH}.deb -O rethinkdb.deb\r\n\r\nar xv rethinkdb.deb\r\n\r\ntar xvf data.tar.xz\r\n\r\nmv /tmp/usr/bin/rethinkdb /mnt/server\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "2.4.4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Driver port",
+            "description": "",
+            "env_variable": "DRIVER_PORT",
+            "default_value": "25568",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          },
+          {
+            "name": "Http port",
+            "description": "",
+            "env_variable": "HTTP_PORT",
+            "default_value": "25569",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "sftp-storage-share-e53602d7da76",
+        "name": "SFTP Storage Share",
+        "description": "A simple \"empty\" egg that acts as a private SFTP storage share by utilizing Pterodactyl's built in SFTP system for servers. Sub-users can be added to the server by the owner to allow additional people to access the share. \"Starting\" the server performs no actions and it should be left off.",
+        "category": "data",
+        "kind": "preset",
+        "path": "eggs/data/sftp-storage-share-e53602d7da76.json",
+        "sha256": "220a200ec311b834a6bed26a3a1e9ff0a56eba6258071f5807acb476fc305128",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/storage",
+          "commit": "689772ac64db90e21a692ebb74a62de327821e72",
+          "path": "sftp_storage_share/egg-pterodactyl-s-f-t-p-storage-share.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/storage",
+            "commit": "689772ac64db90e21a692ebb74a62de327821e72",
+            "path": "sftp_storage_share/egg-s-f-t-p-storage-share.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--storage/e53602d7da76.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:32:01+00:00",
+        "name": "SFTP Storage Share",
+        "author": "red_thirten@yahoo.com",
+        "description": "A simple \"empty\" egg that acts as a private SFTP storage share by utilizing Pterodactyl's built in SFTP system for servers. Sub-users can be added to the server by the owner to allow additional people to access the share. \"Starting\" the server performs no actions and it should be left off.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:alpine": "ghcr.io/parkervcp/yolks:alpine"
+        },
+        "file_denylist": [],
+        "startup": "echo -e \"\\n\\n\\033[0;31mThere is no need to start this server. The SFTP service is always running. Feel free to stop the server now.\\n\\t\\033[0;36m(Sub-users can be added via the Users tab to add/remove access to the share in real time)\\n\\n\"",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"\"}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "alpine:3.4",
+            "entrypoint": "ash",
+            "script": "# Pterodactyl SFTP Storage Share Egg ~ David Wolfe (Red-Thirten) ~ 2023-01-27"
+          }
+        },
+        "variables": []
+      }
+    }
+  ]
+}

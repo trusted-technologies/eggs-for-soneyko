@@ -1,0 +1,749 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "spongevanilla-58a2fc52f217",
+        "name": "SpongeVanilla",
+        "description": "SpongeVanilla is the implementation of the Sponge API on top of Vanilla Minecraft.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/spongevanilla-58a2fc52f217.json",
+        "sha256": "d9a486e4ddd8885339f80da973d7b4a9d3c92709186c292e14b5b291786b8137",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/spongevanilla/egg-sponge-vanilla.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/58a2fc52f217.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "SpongeVanilla",
+        "author": "parker@parkervcp.com",
+        "description": "SpongeVanilla is the implementation of the Sponge API on top of Vanilla Minecraft.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\", \"query.port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \", \"userInteraction\": [\"Go to eula.txt for more info.\"]}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# spongeVanilla Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y jq curl\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n#Adding .jar when not eding by SERVER_JARFILE\r\nif [[ ! ${SERVER_JARFILE} = *\\.jar ]]; then\r\n  SERVER_JARFILE=\"${SERVER_JARFILE}.jar\"\r\nfi\r\n\r\n## check spongevanilla version and default to recommended if it's invalid\r\nif [ -z ${SV_VERSION} ] || [ \"$(curl -s https://dl-api.spongepowered.org/v1/org.spongepowered/spongevanilla/downloads/${SV_VERSION})\" == \"Unknown version\" ]; then\r\n    echo -e \"defaulting to recommended\"\r\n    SV_VERSION=\"recommended\"\r\nfi\r\n\r\n## handle getting download linsk for sponge\r\nif [ \"${SV_VERSION}\" == \"recommended\" ]; then\r\n    echo -e \"using recommended spongevanilla version\"\r\n    SV_VERSION=$(curl -s https://dl-api.spongepowered.org/v1/org.spongepowered/spongevanilla/downloads/recommended | jq -r '.version')\r\n    echo -e \"found spongevanilla Version ${SV_VERSION}\"\r\n    SV_DL_LINK=$(curl -s https://dl-api.spongepowered.org/v1/org.spongepowered/spongevanilla/downloads/recommended | jq -r '.artifacts.\"\".url')\r\nelif [ \"${SV_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"using latest SpongForge version\"\r\n    SV_VERSION=$(curl -s https://dl-api.spongepowered.org/v1/org.spongepowered/spongevanilla | jq -r '.buildTypes.stable.latest.version')\r\n    echo -e \"found spongevanilla Version ${SV_VERSION}\"\r\nelse\r\n    echo -e \"found spongevanilla Version ${SV_VERSION}\"\r\n    SV_DL_LINK=$(curl -s https://dl-api.spongepowered.org/v1/org.spongepowered/spongevanilla/downloads/${SV_VERSION} | jq -r '.artifacts.\"\".url')\r\nfi\r\n\r\nif [ -f ${SERVER_JARFILE} ] && [ $(sha1sum server.jar | awk '{ print $1 }') == $(curl -s https://dl-api.spongepowered.org/v1/org.spongepowered/spongevanilla/downloads/recommended | jq -r '.artifacts.\"\".sha1') ]; then\r\n    echo -e \"Already have the correct spongevanilla version\"\r\nelse\r\n    echo -e \"Downloading spongevanilla version ${SV_VERSION}\"\r\n    echo -e \"running: curl -s ${SV_DL_LINK} -o /mnt/server/mods/spongevanilla-${SV_VERSION}.jar\"\r\n    curl -s ${SV_DL_LINK} -o /mnt/server/${SERVER_JARFILE}\r\nfi\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -s -o server.properties https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/java/server.properties\r\nfi\r\n\r\necho -e \"Install for spongevanilla is complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SpongeVanilla Version",
+            "description": "Example 1.12.2-7.1.6\r\n\r\nIf the version fails it defaults to recommended",
+            "env_variable": "SV_VERSION",
+            "default_value": "recommended",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Jar File",
+            "description": "The name of the Jarfile to use when running Mod.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-057b354d038c",
+        "name": "Tekkit",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-057b354d038c.json",
+        "sha256": "fffaaefea3c5da758d320ba66994c6a33486a979dfc757f827de20813515c7af",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/Tekkit/egg-pterodactyl-tekkit.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/057b354d038c.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:13+00:00",
+        "name": "Tekkit",
+        "author": "contact@zennodes.dk",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "ghcr.io/pelican-eggs/yolks:java_16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Tekkit.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkitmain/Tekkit_Server_$MODPACK_VERSION.zip -o Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nunzip Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm launch.bat\r\n\r\nrm launch.sh\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/java/server.properties\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.2.9g-2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-366d70f447dc",
+        "name": "Tekkit",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-366d70f447dc.json",
+        "sha256": "7c3f3c3773a7141eed7d9e71e2e0e03fbdf647102807b11bb20d253e5041a213",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/technic/Tekkit/egg-tekkit.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/366d70f447dc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T11:15:34+02:00",
+        "name": "Tekkit",
+        "author": "contact@zennodes.dk",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:java_8": "ghcr.io/parkervcp/yolks:java_8",
+          "ghcr.io/parkervcp/yolks:java_11": "ghcr.io/parkervcp/yolks:java_11",
+          "ghcr.io/parkervcp/yolks:java_16": "ghcr.io/parkervcp/yolks:java_16",
+          "ghcr.io/parkervcp/yolks:java_17": "ghcr.io/parkervcp/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Tekkit.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkitmain/Tekkit_Server_$MODPACK_VERSION.zip -o Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nunzip Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm launch.bat\r\n\r\nrm launch.sh\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/java/server.properties\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.2.9g-2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-3c967f92f1a0",
+        "name": "Tekkit",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-3c967f92f1a0.json",
+        "sha256": "d6a10a306b9e2fb0154a296316806bc7ddefc6f0a932d44fda5fc499961d2e4c",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/technic/Tekkit/egg-tekkit.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/3c967f92f1a0.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-11-14T17:57:27+02:00",
+        "name": "Tekkit",
+        "author": "contact@zennodes.dk",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Tekkit.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkitmain/Tekkit_Server_$MODPACK_VERSION.zip -o Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nunzip Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm launch.bat\r\n\r\nrm launch.sh\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/java/server.properties\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.2.9g-2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-6c93e51d51f7",
+        "name": "Tekkit",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-6c93e51d51f7.json",
+        "sha256": "e5298f252aae988437ed7dbada9f88e491f7996f6bc5f7413db6a59a54889e89",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/Tekkit/egg-tekkit.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/6c93e51d51f7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Tekkit",
+        "author": "contact@zennodes.dk",
+        "uuid": "cbcfe400-b57a-4790-b56f-d3233113208c",
+        "description": "Tekkit is set to reignite the same sort of wonder and awe that we all received from booting up Minecraft for the first time. With the skies open, the moon ready to be colonized (by force if need be) and dimensional mysteries to be plied, with tesseracts to be networked, “meat” to be processed, items to be digitized, and power suits to be manufactured, there is virtually limitless engineering projects to be assembled.",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "ghcr.io/pelican-eggs/yolks:java_11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "ghcr.io/pelican-eggs/yolks:java_16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Tekkit.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkitmain/Tekkit_Server_$MODPACK_VERSION.zip -o Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nunzip Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm launch.bat\r\n\r\nrm launch.sh\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/java/server.properties\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.2.9g-2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-2-323219a5a1ce",
+        "name": "Tekkit 2",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-2-323219a5a1ce.json",
+        "sha256": "9931ca2196e872e1f6ac49d9f333bfcfdd89815bde0eeb0e4d1b299233675c7b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/Tekkit-2/egg-pterodactyl-tekkit2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/323219a5a1ce.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:17+00:00",
+        "name": "Tekkit 2",
+        "author": "josdekurk@gmail.com",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "features": [
+          "eula",
+          "java_version"
+        ],
+        "docker_images": {
+          "Java11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java8": "ghcr.io/pelican-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -server  -Xms128M -Xmx{{SERVER_MEMORY}}M -Dfml.queryResult=confirm -jar forge.jar nogui",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Server tick complete! \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/ash\r\n# Tekkit Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl zip unzip\r\n\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkit-2/Tekkit-2_Server_$MODPACK_VERSION.zip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nunzip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm RestoreBackup.bat\r\n\r\nrm LaunchServer.bat\r\n\r\nrm LaunchServer.sh\r\n\r\nrm RestoreBackup.sh\r\n\r\nmv forge-1.12.2-*.jar forge.jar\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/java/server.properties\r\nfi\r\n\r\necho \"done\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.0.5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-2-531df0a5e2af",
+        "name": "Tekkit 2",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-2-531df0a5e2af.json",
+        "sha256": "0bbbc21b4026c7cc9964bce4f22807efd9f0f6833eb5179c3bf6b31a2b68c47b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/technic/Tekkit-2/egg-tekkit2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/531df0a5e2af.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-12-24T13:57:40+00:00",
+        "name": "Tekkit 2",
+        "author": "josdekurk@gmail.com",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "features": [
+          "eula",
+          "java_version"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -server  -Xms128M -Xmx{{SERVER_MEMORY}}M -Dfml.queryResult=confirm -jar forge.jar nogui",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server tick complete! \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Tekkit Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl zip unzip\r\n\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkit-2/Tekkit-2_Server_$MODPACK_VERSION.zip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nunzip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm RestoreBackup.bat\r\n\r\nrm LaunchServer.bat\r\n\r\nrm LaunchServer.sh\r\n\r\nrm RestoreBackup.sh\r\n\r\nmv forge-1.12.2-*.jar forge.jar\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/java/server.properties\r\nfi\r\n\r\necho \"done\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.0.5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-2-a84cf8d62012",
+        "name": "Tekkit 2",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-2-a84cf8d62012.json",
+        "sha256": "9320ed9ff0f720aeb2083b965c0d84428bb744e274a37c16780eb293eefb1419",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/technic/Tekkit-2/egg-tekkit-2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/a84cf8d62012.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-08-29T15:07:44+02:00",
+        "name": "Tekkit 2",
+        "author": "josdekurk@gmail.com",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "features": [
+          "eula",
+          "java_version"
+        ],
+        "docker_images": {
+          "Java8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java11": "ghcr.io/pterodactyl/yolks:java_11"
+        },
+        "file_denylist": [],
+        "startup": "java -server  -Xms128M -Xmx{{SERVER_MEMORY}}M -Dfml.queryResult=confirm -jar forge.jar nogui",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server tick complete! \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Tekkit Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl zip unzip\r\n\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkit-2/Tekkit-2_Server_$MODPACK_VERSION.zip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nunzip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm RestoreBackup.bat\r\n\r\nrm LaunchServer.bat\r\n\r\nrm LaunchServer.sh\r\n\r\nrm RestoreBackup.sh\r\n\r\nmv forge-1.12.2-*.jar forge.jar\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/java/server.properties\r\nfi\r\n\r\necho \"done\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.0.5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-2-e3e9cc40174b",
+        "name": "Tekkit 2",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-2-e3e9cc40174b.json",
+        "sha256": "b175595be1301842c07ddbd59c1e790f4e56c35f269f87e5c08a75f2ebeb1d4f",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/technic/Tekkit-2/egg-tekkit2.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/e3e9cc40174b.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Tekkit 2",
+        "author": "josdekurk@gmail.com",
+        "uuid": "81bf842b-5647-4c83-9254-523b6f8308fb",
+        "description": "Those of you who are nostalgic for the early days of Tekkit (now known as Tekkit Classic), will love what awaits you in Tekkit 2!\r\n\r\nWith a collection of nostalgic mods and plenty of new improvements, Tekkit 2 is sure to capture the feeling of possibility and consequence that you felt while exploring the world of machines and contraptions that made the original fun. Keep an eye out for classics such as IndustrialCraft, ProjectE (Equivalent Exchange), Project Red (RedPower) and BuildCraft, alongside additions such as Galacticraft and Tekkit Jaffa Cakes! The world is yours to bend and exploit to your will, whether through alchemy or sprawling factories and mines.\r\n\r\nWhat fresh horrors will you create?",
+        "tags": [
+          "minecraft"
+        ],
+        "features": [
+          "eula",
+          "java_version"
+        ],
+        "docker_images": {
+          "Java8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java11": "ghcr.io/pelican-eggs/yolks:java_11"
+        },
+        "file_denylist": [],
+        "startup": "java -server  -Xms128M -Xmx{{SERVER_MEMORY}}M -Dfml.queryResult=confirm -jar forge.jar nogui",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Server tick complete! \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Tekkit Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl zip unzip\r\n\r\nmkdir -p /mnt/server\r\n\r\ncd /mnt/server\r\n\r\ncurl -sSL https://servers.technicpack.net/Technic/servers/tekkit-2/Tekkit-2_Server_$MODPACK_VERSION.zip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nunzip -o Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit-2_Server_$MODPACK_VERSION.zip\r\n\r\nrm RestoreBackup.bat\r\n\r\nrm LaunchServer.bat\r\n\r\nrm LaunchServer.sh\r\n\r\nrm RestoreBackup.sh\r\n\r\nmv forge-1.12.2-*.jar forge.jar\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/parkervcp/eggs/master/game_eggs/minecraft/java/server.properties\r\nfi\r\n\r\necho \"done\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "v1.0.5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:10",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "tekkit-classic-5a6c93b7e18d",
+        "name": "Tekkit Classic",
+        "description": "Created by the Technic team, Tekkit Classic is a modpack for the record breaking sandbox construction game Minecraft. \r\nIt brings together some of the best mods from the Minecraft community for automating, industrializing and powering your worlds and bundles them into one easy download!",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/tekkit-classic-5a6c93b7e18d.json",
+        "sha256": "edeee5ea2d5ca9e65b0977aa5863030c1774b25d639b3f6453eff90dd72e1eea",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/technic/tekkit-classic/egg-tekkit-classic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/5a6c93b7e18d.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:16+00:00",
+        "name": "Tekkit Classic",
+        "author": "geoffrey@remedygaming.net",
+        "description": "Created by the Technic team, Tekkit Classic is a modpack for the record breaking sandbox construction game Minecraft. \r\nIt brings together some of the best mods from the Minecraft community for automating, industrializing and powering your worlds and bundles them into one easy download!",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -Xmx{{SERVER_MEMORY}}M -jar Tekkit.jar",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Forge Installation Script\r\n#\r\n# Server Files: /mnt/server\r\ncd /mnt/server\r\n\r\ncurl -sS https://servers.technicpack.net/Technic/servers/tekkit/Tekkit_Server_$MODPACK_VERSION.zip -o Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nunzip Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm -rf Tekkit_Server_$MODPACK_VERSION.zip\r\n\r\nrm launch.bat\r\n\r\nrm launch.sh\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo -e \"Downloading MC server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/ptero-eggs/game-eggs/main/minecraft/java/server.properties\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Modpack Version",
+            "description": "",
+            "env_variable": "MODPACK_VERSION",
+            "default_value": "3.1.2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

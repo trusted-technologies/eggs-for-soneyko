@@ -1,0 +1,1442 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "hurtworld-610fdb29b041",
+        "name": "Hurtworld",
+        "description": "Hurtworld is a hardcore multiplayer survival FPS with a focus on deep survival progression that doesn't become trivial once you establish some basic needs. Built for hardcore gamers, Hurtworld aims to punish.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/hurtworld-610fdb29b041.json",
+        "sha256": "89065dde9fa80b41c324593fe4726a0429e2ed73551504850782967906fbf2c0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "hurtworld/egg-pterodactyl-hurtworld.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/610fdb29b041.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:04:19+00:00",
+        "name": "Hurtworld",
+        "author": "brycea@terrahost.cloud",
+        "description": "Hurtworld is a hardcore multiplayer survival FPS with a focus on deep survival progression that doesn't become trivial once you establish some basic needs. Built for hardcore gamers, Hurtworld aims to punish.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Hurtworld.x86_64 -batchmode -nographics -exec \"host {{SERVER_PORT}};queryport {{QUERY_PORT}};maxplayers {{MAX_PLAYERS}};servername {{HOSTNAME}};creativemode {{CREATIVE_MODE}};addadmin {{ADMINS}}\" -logfile $1",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"orphaned items\"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## copy 32-bit steamclient.so\r\ncp -v linux32/steamclient.so ../Hurtworld_Data/Plugins/x86/steamclient.so\r\n\r\n## copy 64-bit steamclient.so\r\ncp -v linux64/steamclient.so ../Hurtworld_Data/Plugins/x86_64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "405100",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:405100",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Default Port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "13871",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max players allowed on the server at one time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Hurtworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Guid",
+            "description": "Steam id of the server owner.",
+            "env_variable": "ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:17",
+            "field_type": "text"
+          },
+          {
+            "name": "Creative Mode",
+            "description": "Turn creative mode on and off (free build). Value as 0 for off, 1 for on.",
+            "env_variable": "CREATIVE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "Disabling or enabling automated updates on boot.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "hurtworld-9c881c7a68b2",
+        "name": "Hurtworld",
+        "description": "Hurtworld is a hardcore multiplayer survival FPS with a focus on deep survival progression that doesn't become trivial once you establish some basic needs. Built for hardcore gamers, Hurtworld aims to punish.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/hurtworld-9c881c7a68b2.json",
+        "sha256": "80e601f802260f0ce83ca971917f44e1217c7bbc5779ba4b978ebf1c384d1d5e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/hurtworld/egg-hurtworld.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/9c881c7a68b2.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-10-07T22:46:51+08:00",
+        "name": "Hurtworld",
+        "author": "brycea@terrahost.cloud",
+        "description": "Hurtworld is a hardcore multiplayer survival FPS with a focus on deep survival progression that doesn't become trivial once you establish some basic needs. Built for hardcore gamers, Hurtworld aims to punish.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Hurtworld.x86_64 -batchmode -nographics -exec \"host {{SERVER_PORT}};queryport {{QUERY_PORT}};maxplayers {{MAX_PLAYERS}};servername {{HOSTNAME}};creativemode {{CREATIVE_MODE}};addadmin {{ADMINS}}\" -logfile $1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"orphaned items\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## copy 32-bit steamclient.so\r\ncp -v linux32/steamclient.so ../Hurtworld_Data/Plugins/x86/steamclient.so\r\n\r\n## copy 64-bit steamclient.so\r\ncp -v linux64/steamclient.so ../Hurtworld_Data/Plugins/x86_64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "405100",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:405100",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Default Port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "13871",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max players allowed on the server at one time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Hurtworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Guid",
+            "description": "Steam id of the server owner.",
+            "env_variable": "ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:17",
+            "field_type": "text"
+          },
+          {
+            "name": "Creative Mode",
+            "description": "Turn creative mode on and off (free build). Value as 0 for off, 1 for on.",
+            "env_variable": "CREATIVE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "Disabling or enabling automated updates on boot.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "hurtworld-dbf9127d88b8",
+        "name": "Hurtworld",
+        "description": "Hurtworld is a hardcore multiplayer survival FPS with a focus on deep survival progression that doesn't become trivial once you establish some basic needs. Built for hardcore gamers, Hurtworld aims to punish.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/hurtworld-dbf9127d88b8.json",
+        "sha256": "3d114cc1079f76bb89ce83243e0a5389cdf7ab39dd687b4eb08fe83782f8a763",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "hurtworld/egg-hurtworld.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/dbf9127d88b8.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Hurtworld",
+        "author": "brycea@terrahost.cloud",
+        "uuid": "a0574872-4d56-4eb1-8359-ea748c52d1bf",
+        "description": "Hurtworld is a hardcore multiplayer survival FPS with a focus on deep survival progression that doesn't become trivial once you establish some basic needs. Built for hardcore gamers, Hurtworld aims to punish.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Hurtworld.x86_64 -batchmode -nographics -exec \"host {{SERVER_PORT}};queryport {{QUERY_PORT}};maxplayers {{MAX_PLAYERS}};servername {{HOSTNAME}};creativemode {{CREATIVE_MODE}};addadmin {{ADMINS}}\" -logfile $1",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"orphaned items\"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## copy 32-bit steamclient.so\r\ncp -v linux32/steamclient.so ../Hurtworld_Data/Plugins/x86/steamclient.so\r\n\r\n## copy 64-bit steamclient.so\r\ncp -v linux64/steamclient.so ../Hurtworld_Data/Plugins/x86_64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "405100",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|in:405100",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Server Query Default Port.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "13871",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Max players allowed on the server at one time.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "60",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name of your server in the public server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "A Hurtworld Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:50",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Owner Guid",
+            "description": "Steam id of the server owner.",
+            "env_variable": "ADMINS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:17",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Creative Mode",
+            "description": "Turn creative mode on and off (free build). Value as 0 for off, 1 for on.",
+            "env_variable": "CREATIVE_MODE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "Disabling or enabling automated updates on boot.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "hytale-3869615088ec",
+        "name": "Hytale",
+        "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox with the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a variety of creatures, then shape it block by block.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/hytale-3869615088ec.json",
+        "sha256": "4d4f453d5f2196686120abbcb6fc1055d9a49a0655a9eb3f5ed5ad52a40b51bd",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "hytale/egg-hytale.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/3869615088ec.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-22T23:58:04+00:00",
+        "name": "Hytale",
+        "author": "hello@pterodactyl.io",
+        "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox with the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a variety of creatures, then shape it block by block.",
+        "features": [
+          "java_version"
+        ],
+        "docker_images": {
+          "ghcr.io/pterodactyl/games:hytale": "ghcr.io/pterodactyl/games:hytale"
+        },
+        "file_denylist": [],
+        "startup": "java $( ((USE_AOT_CACHE)) && printf %s \"-XX:AOTCache=Server/HytaleServer.aot\" ) -Xms128M $( ((SERVER_MEMORY)) && printf %s \"-Xmx${SERVER_MEMORY}M\" ) -jar Server/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) $( ((HYTALE_ACCEPT_EARLY_PLUGINS)) && printf %s \"--accept-early-plugins\" ) $( ((DISABLE_SENTRY)) && printf %s \"--disable-sentry\" ) --auth-mode ${HYTALE_AUTH_MODE} --assets Assets.zip --bind 0.0.0.0:${SERVER_PORT}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Hytale Server Booted\"}",
+          "logs": "{}",
+          "stop": "/stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\nset -e\n\nmkdir -p /mnt/server\ncd /mnt/server\n\necho -e \"Downloading Hytale Downloader CLI...\"\n\nDOWNLOAD_URL=\"https://downloader.hytale.com/hytale-downloader.zip\"\n\nrm -f hytale-downloader.zip\ncurl -o hytale-downloader.zip $DOWNLOAD_URL\nunzip -o hytale-downloader.zip -d hytale-downloader\nmv hytale-downloader/hytale-downloader-linux-amd64 hytale-downloader/hytale-downloader-linux\nchmod 555 hytale-downloader/hytale-downloader-linux\n\necho -e \"Verifying Hytale Downloader installation...\"\n\necho -e \"Hytale Downloader version: `./hytale-downloader/hytale-downloader-linux -version`\"\n\necho -e \"Hytale Downloader installed successfully.\"",
+            "container": "ghcr.io/pterodactyl/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Accept Early Plugins",
+            "description": "Hytale warns that loading early plugins is unsupported and may cause stability issues.",
+            "env_variable": "HYTALE_ACCEPT_EARLY_PLUGINS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auth Mode",
+            "description": "Authentication mode.",
+            "env_variable": "HYTALE_AUTH_MODE",
+            "default_value": "authenticated",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:authenticated,offline,insecure",
+            "field_type": "text"
+          },
+          {
+            "name": "Patchline",
+            "description": "The branch of Hytale to install.",
+            "env_variable": "HYTALE_PATCHLINE",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:release,pre-release",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable Sentry",
+            "description": "Hytale uses Sentry to track crashes. Disable Sentry during active plugin development.",
+            "env_variable": "DISABLE_SENTRY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Ahead-of-Time Cache",
+            "description": "Hytale provides a pre-trained AOT Java cache which can significantly improve boot times.",
+            "env_variable": "USE_AOT_CACHE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow operators",
+            "description": "Allow operators",
+            "env_variable": "HYTALE_ALLOW_OP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Install Source Query plugin",
+            "description": "Installs the Soruce Query plugin, so that your server responds to Source Query A2S requests (player count, server name, etc.)",
+            "env_variable": "INSTALL_SOURCEQUERY_PLUGIN",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Source Query Port",
+            "description": "The port that the Source Query plugin will use to respond to A2S requests. This should be different from the main server port. Defaults to the game port + 1.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|integer|between:1,65535",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "hytale-8a2244723b19",
+        "name": "Hytale",
+        "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox\nwith the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a\nvariety of creatures, then shape it block by block.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/hytale-8a2244723b19.json",
+        "sha256": "2644b46b2767e6e8db10f1af2f442c5a1ac33e5bd2f4884161c79426969af2d8",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "hytale/pterodactyl-egg-hytale.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/8a2244723b19.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-02T01:40:00+00:00",
+        "name": "Hytale",
+        "author": "161775222+JoanFo1456@users.noreply.github.com",
+        "description": "Set out on an adventure built for both creation and play. Hytale blends the freedom of a sandbox\nwith the momentum of an RPG: explore a procedurally generated world full of dungeons, secrets, and a\nvariety of creatures, then shape it block by block.",
+        "features": null,
+        "docker_images": {
+          "Hytale": "ghcr.io/pelican-eggs/games:hytale"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar HytaleServer.jar --bind 0.0.0.0:{{SERVER_PORT}} --assets ../Assets.zip",
+        "config": {
+          "files": "[]",
+          "startup": "{\"done\": \"Hytale Server Booted!\"}",
+          "logs": "[]",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\nset -e\n\necho '============================================'\necho 'Hytale Server Installation'\necho '============================================'\n\necho '[1/2] Creating directories...'\nmkdir -p /mnt/server/.tmp\nmkdir -p /mnt/server/Backups\nmkdir -p /mnt/server/Server/mods\nmkdir -p /mnt/server/Server/earlyplugins\nmkdir -p /mnt/server/.server-backups/release\nmkdir -p /mnt/server/.server-backups/pre-release\necho '  ✓ Directories created'\n\necho '[2/2] Creating config.json...'\ncat > /mnt/server/Server/config.json << 'EOF'\n{\n  \"Version\": 4,\n  \"ServerName\": \"Hytale Server\",\n  \"MOTD\": \"\",\n  \"Password\": \"\",\n  \"MaxPlayers\": 20,\n  \"MaxViewRadius\": 12,\n  \"Defaults\": {\n    \"World\": \"default\",\n    \"GameMode\": \"Adventure\"\n  },\n  \"ConnectionTimeouts\": {\n    \"InitialTimeout\": \"PT1M\",\n    \"AuthTimeout\": \"PT1M30S\"\n  },\n  \"RateLimit\": {},\n  \"Modules\": {},\n  \"LogLevels\": {\n    \"AssetModule|P\": \"SEVERE\",\n    \"AssetRegistryLoader\": \"SEVERE\",\n    \"AssetStore|AssignmentsAsset\": \"SEVERE\",\n    \"AssetStore|BiomeAsset\": \"SEVERE\",\n    \"AssetStore|BlockType\": \"SEVERE\",\n    \"AssetStore|CustomConnectedBlockTemplateAsset\": \"SEVERE\",\n    \"AssetStore|EntityEffect\": \"SEVERE\",\n    \"AssetStore|Environment\": \"SEVERE\",\n    \"AssetStore|GameplayConfig\": \"SEVERE\",\n    \"AssetStore|Interaction\": \"SEVERE\",\n    \"AssetStore|Item\": \"SEVERE\",\n    \"AssetStore|ModelVFX\": \"SEVERE\",\n    \"AssetStore|ParticleSystem\": \"SEVERE\",\n    \"AssetStore|PrefabListAsset\": \"SEVERE\",\n    \"AssetStore|ScriptedBrushAsset\": \"SEVERE\",\n    \"AssetStore|WorldStructureAsset\": \"SEVERE\",\n    \"BarterShopState\": \"SEVERE\",\n    \"BlockSetModule|P\": \"SEVERE\",\n    \"BuilderToolsPacketHandler\": \"SEVERE\",\n    \"CertificateUtil\": \"SEVERE\",\n    \"CollisionModule|P\": \"SEVERE\",\n    \"CommonAssetModule|P\": \"SEVERE\",\n    \"ConsoleModule|P\": \"SEVERE\",\n    \"EncryptedAuthCredentialStore\": \"SEVERE\",\n    \"Entity\": \"SEVERE\",\n    \"HandshakeHandler\": \"SEVERE\",\n    \"Hytale\": \"SEVERE\",\n    \"HytaleGenerator\": \"SEVERE\",\n    \"HytaleGenerator|P\": \"SEVERE\",\n    \"HytaleServer\": \"INFO\",\n    \"I18nModule|P\": \"SEVERE\",\n    \"JWTValidator\": \"SEVERE\",\n    \"LoginTiming\": \"SEVERE\",\n    \"MacroCommandBase\": \"SEVERE\",\n    \"NPC|P\": \"SEVERE\",\n    \"PasswordPacketHandler\": \"SEVERE\",\n    \"PathWatcherThread\": \"SEVERE\",\n    \"PlayerSavingSystems\": \"SEVERE\",\n    \"PluginExample|P\": \"INFO\",\n    \"PluginManager\": \"INFO\",\n    \"QUICTransport\": \"SEVERE\",\n    \"SERR\": \"SEVERE\",\n    \"ServerAuthManager\": \"SEVERE\",\n    \"ServerManager|P\": \"SEVERE\",\n    \"SessionServiceClient\": \"SEVERE\",\n    \"Shop|P\": \"SEVERE\",\n    \"Spawning|P\": \"SEVERE\",\n    \"Teleport|P\": \"SEVERE\",\n    \"Universe|P\": \"SEVERE\",\n    \"World|default\": \"SEVERE\",\n    \"World|default|M\": \"SEVERE\",\n    \"WorldGenerator\": \"SEVERE\",\n    \"WorldMapTracker\": \"SEVERE\"\n  },\n  \"Mods\": {},\n  \"DisplayTmpTagsInStrings\": false,\n  \"PlayerStorage\": {\n    \"Type\": \"Hytale\"\n  },\n  \"Update\": {}\n}\nEOF\necho '  ✓ config.json created'\n\necho 'Installation complete!'\necho '============================================'\necho 'Installed components:'\necho '  - Base directories'\necho '  - config.json'\necho '============================================'",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto Update",
+            "description": "Automatically update game files on startup.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Patchline",
+            "description": "Server branch preference, Update.Patchline inside the config.json overrides this.",
+            "env_variable": "PATCHLINE",
+            "default_value": "release",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:release,pre-release",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Version",
+            "description": "Version to run: latest, previous or a specific version.",
+            "env_variable": "SERVER_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Pre-Authentication",
+            "description": "Pre-authenticate via OAuth2 before server start.",
+            "env_variable": "HYTALE_API_AUTH",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable World Backups",
+            "description": "Enable automatic world backups by the game server.",
+            "env_variable": "ENABLE_WORLD_BACKUP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Enable Server Backup",
+            "description": "Store a backup of the previous server version on update or patchline change.",
+            "env_variable": "ENABLE_SERVER_BACKUP",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Backup Retention",
+            "description": "Number of server version backups to retain per patchline.",
+            "env_variable": "SERVER_BACKUP_RETENTION",
+            "default_value": "2",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer|required|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Backup Directory",
+            "description": "Directory for world backups.",
+            "env_variable": "BACKUP_DIR",
+            "default_value": "Backups",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Backup Frequency",
+            "description": "Backup interval in minutes.",
+            "env_variable": "BACKUP_FREQUENCY",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer|required",
+            "field_type": "text"
+          },
+          {
+            "name": "Backup Max Count",
+            "description": "Maximum number of world backups.",
+            "env_variable": "BACKUP_MAX_COUNT",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Backup Archive Max Count",
+            "description": "Maximum number of backup archives to retain.",
+            "env_variable": "BACKUP_ARCHIVE_MAX_COUNT",
+            "default_value": "5",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "integer",
+            "field_type": "text"
+          },
+          {
+            "name": "Use AOT Cache",
+            "description": "Enable Ahead-Of-Time compilation cache for faster startup.",
+            "env_variable": "USE_AOT_CACHE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Compact Object Headers",
+            "description": "Enable JVM compact object headers for reduced memory usage.",
+            "env_variable": "USE_COMPACT_HEADERS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Allow Self-OP",
+            "description": "Allow players to use /op self to grant themselves operator permissions.",
+            "env_variable": "ALLOW_OP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Load Early Plugins",
+            "description": "Loads binary injection plugins for the server, enable only if you understand the stability risks.",
+            "env_variable": "ACCEPT_EARLY_PLUGINS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Disable Sentry",
+            "description": "Disable Sentry error reporting and telemetry.",
+            "env_variable": "DISABLE_SENTRY",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Ignore Broken Mods",
+            "description": "Ignore broken mods, allowing the server to boot even if a mod fails to load.",
+            "env_variable": "IGNORE_BROKEN_MODS",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Transport",
+            "description": "Network transport protocol. QUIC (UDP) is default; use TCP if UDP/QUIC is blocked by your host or network.",
+            "env_variable": "TRANSPORT",
+            "default_value": "QUIC",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:QUIC,TCP",
+            "field_type": "text"
+          },
+          {
+            "name": "Profile UUID",
+            "description": "Specify a specific Hytale profile UUID for the servers session.",
+            "env_variable": "HYTALE_PROFILE_UUID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "icarus-4a92f306ba34",
+        "name": "Icarus",
+        "description": "Icarus is a survival game that with dedicated servers as a public beta",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/icarus-4a92f306ba34.json",
+        "sha256": "a8d9cc2f202dc075c5662abfacd03c3abf75e18ba4b5b3c5d4105dac08bd8650",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "icarus/pterodactyl-egg-icarus.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4a92f306ba34.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-06-14T08:23:40+00:00",
+        "name": "Icarus",
+        "author": "bolverblitz@ebg.pw",
+        "description": "Icarus is a survival game that with dedicated servers as a public beta",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/pelican-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./Icarus/Binaries/Win64/IcarusServer-Win64-Shipping.exe -Log -SteamServerName=\"{{SERVER_NAME}}\" -PORT=\"{{SERVER_PORT}}\" -QueryPort=\"{{QUERY_PORT}}\" & ICARUS_PID=$!; tail -c0 -F /home/container/Icarus/Saved/Logs/Icarus.log --pid=$ICARUS_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"(Engine Initialization) Total time:\", \"Game Engine Initialized\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\n## License: MIT License\n## Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\nFILE=/mnt/server/Icarus/Saved/Config/ServerSettings.ini\nif [ -f \"$FILE\" ]; then\n    echo \"Config already exist skipping\"\nelse \n    echo \"Config does not yet exist, making one\"\n    mkdir -p /mnt/server/Icarus/Saved/Config/\n    cd /mnt/server/Icarus/Saved/Config/\n    curl -sSL -o ServerSettings.ini https://raw.githubusercontent.com/RocketWerkz/IcarusDedicatedServer/main/ServerSettings.ini\nfi\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "IcarusEGG",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install Flag",
+            "description": "Required for windows game server installs",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2089300",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2089300",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "icarus-dedicated-1af9f3a14fc4",
+        "name": "Icarus-Dedicated",
+        "description": "Icarus is a survival game that with dedicated servers as a public beta",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/icarus-dedicated-1af9f3a14fc4.json",
+        "sha256": "0a73b33d2cec589b06ac65653bb91bfbe13b50ef2c814e1a475c52bcaeeaa224",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "icarus/egg-icarus--dedicated.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/1af9f3a14fc4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-06-20T12:13:37+00:00",
+        "name": "Icarus-Dedicated",
+        "author": "bolverblitz@ebg.pw",
+        "description": "Icarus is a survival game that with dedicated servers as a public beta",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine ./Icarus/Binaries/Win64/IcarusServer-Win64-Shipping.exe -Log -SteamServerName=${SERVER_NAME} -PORT=\"${SERVER_PORT}\" -QueryPort=\"${QUERY_PORT}\" & ICARUS_PID=$!; tail -c0 -F /home/container/Icarus/Saved/Logs/Icarus.log --pid=$ICARUS_PID",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"(Engine Initialization) Total time:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nFILE=/mnt/server/Icarus/Saved/Config/ServerSettings.ini\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config already exist skipping\"\r\nelse \r\n    echo \"Config does not yet exist, making one\"\r\n    mkdir -p /mnt/server/Icarus/Saved/Config/\r\n    cd /mnt/server/Icarus/Saved/Config/\r\n    curl -sSL -o ServerSettings.ini https://raw.githubusercontent.com/RocketWerkz/IcarusDedicatedServer/main/ServerSettings.ini\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "IcarusServer",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install Flag",
+            "description": "Required for windows game server installs",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "Run installs on software that is required by the server",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2022 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2089300",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2089300",
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "icarus-dedicated-cf8f8fbcf8a4",
+        "name": "Icarus-Dedicated",
+        "description": "Icarus is a survival game that with dedicated servers as a public beta",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/icarus-dedicated-cf8f8fbcf8a4.json",
+        "sha256": "3cc638cda53fb38acfa0661c411ddd64a004d2b1aea6ce1af57b732e6642be94",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/icarus/egg-icarus--dedicated.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/cf8f8fbcf8a4.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-09-03T21:07:28+02:00",
+        "name": "Icarus-Dedicated",
+        "author": "bolverblitz@ebg.pw",
+        "description": "Icarus is a survival game that with dedicated servers as a public beta",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Staging": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine64 ./Icarus/Binaries/Win64/IcarusServer-Win64-Shipping.exe -Log -SteamServerName=${SERVER_NAME} -PORT=\"${SERVER_PORT}\" -QueryPort=\"${QUERY_PORT}\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"(Engine Initialization) Total time:\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## License: MIT License\r\n## Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\nFILE=/mnt/server/Icarus/Saved/Config/ServerSettings.ini\r\nif [ -f \"$FILE\" ]; then\r\n    echo \"Config already exist skipping\"\r\nelse \r\n    echo \"Config does not yet exist, making one\"\r\n    mkdir -p /mnt/server/Icarus/Saved/Config/\r\n    cd /mnt/server/Icarus/Saved/Config/\r\n    curl -sSL -o ServerSettings.ini https://raw.githubusercontent.com/RocketWerkz/IcarusDedicatedServer/main/ServerSettings.ini\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[REQUIRED] Server Query Port",
+            "description": "UDP port for Steam server list features.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27015",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "IcarusEGG",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install Flag",
+            "description": "Required for windows game server installs",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "Run installs on software that is required by the server",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2019 corefonts",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:vcrun2019 corefonts",
+            "field_type": "text"
+          },
+          {
+            "name": "SRCDS_APPID",
+            "description": "steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "2089300",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:2089300",
+            "field_type": "text"
+          },
+          {
+            "name": "AUTO_UPDATE",
+            "description": "Disabling or enabling automated updates on boot",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEARCH",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:win64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "insurgency-4bc839548664",
+        "name": "Insurgency",
+        "description": "Take to the streets for intense close quarters combat, where a team's survival depends upon securing crucial strongholds and destroying enemy supply in this multiplayer and cooperative Source Engine based experience.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/insurgency-4bc839548664.json",
+        "sha256": "cf0716655fe065b301b1aa6ba1d967a4e636941cf3d3a4ab3b2e1888d343fa22",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "insurgency/pterodactyl-egg-insurgency.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4bc839548664.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-06-14T12:16:44+00:00",
+        "name": "Insurgency",
+        "author": "panel@example.com",
+        "description": "Take to the streets for intense close quarters combat, where a team's survival depends upon securing crucial strongholds and destroying enemy supply in this multiplayer and cooperative Source Engine based experience.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "SteamCMD Debian": "ghcr.io/pelican-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./srcds_run -game insurgency -console -port {{SERVER_PORT}} +map {{SRCDS_MAP}} +ip 0.0.0.0 -strictportbind -norestart",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"gameserver Steam ID\"}",
+          "logs": "{}",
+          "stop": "quit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n# steamcmd Base Installation Script\n#\n# Server Files: /mnt/server\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\n\napt -y install dos2unix\n\n## just in case someone removed the defaults.\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\n    echo -e \"steam user is not set.\\n\"\n    echo -e \"Using anonymous user.\\n\"\n    STEAM_USER=anonymous\n    STEAM_PASS=\"\"\n    STEAM_AUTH=\"\"\nelse\n    echo -e \"user set to ${STEAM_USER}\"\nfi\n\n## download and install steamcmd\ncd /tmp\nmkdir -p /mnt/server/steamcmd\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\ncd /mnt/server/steamcmd\n\n# SteamCMD fails otherwise for some reason, even running as root.\n# This is changed at the end of the install process anyways.\nchown -R root:root /mnt\nexport HOME=/mnt/server\n\n## install game using steamcmd\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\n\n## set up 32 bit libraries\nmkdir -p /mnt/server/.steam/sdk32\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\n\n## set up 64 bit libraries\nmkdir -p /mnt/server/.steam/sdk64\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\n\n## add below your custom commands if needed\n## Needed because the devs added windows linebrakes\ncd /mnt/server\ndos2unix srcds_run\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Game ID",
+            "description": "The ID corresponding to the game to download and run using SRCDS.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "237410",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "in:237410",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "The default map to use when starting the server. Example: contact or sinjar",
+            "env_variable": "SRCDS_MAP",
+            "default_value": "contact",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^(\\w{1,20})$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Auto Update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "insurgency-sandstorm-b92cc4c50541",
+        "name": "Insurgency: Sandstorm",
+        "description": "Insurgency: Sandstorm is a team-based, tactical FPS based on lethal close quarters combat and objective-oriented multiplayer gameplay. Experience the intensity of modern combat where skill is rewarded, and teamwork wins the fight.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/insurgency-sandstorm-b92cc4c50541.json",
+        "sha256": "165072fc94c060dceae5960a9fdc30a3f4342d2b6dc022ef7cca0e8c31c6eea2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/insurgency_sandstorm/egg-insurgency--sandstorm.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/b92cc4c50541.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-11-13T18:26:59+01:00",
+        "name": "Insurgency: Sandstorm",
+        "author": "brycea@terrahost.cloud",
+        "description": "Insurgency: Sandstorm is a team-based, tactical FPS based on lethal close quarters combat and objective-oriented multiplayer gameplay. Experience the intensity of modern combat where skill is rewarded, and teamwork wins the fight.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:ubuntu": "ghcr.io/parkervcp/steamcmd:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "/home/container/Insurgency/Binaries/Linux/InsurgencyServer-Linux-Shipping {{MAP_NAME}}?Scenario={{SCENARIO}}?MaxPlayers={{MAX_PLAYERS}} -Port={{SERVER_PORT}} -QueryPort={{QUERY_PORT}} -log -hostname=\"{{HOSTNAME}}\" -GSLTToken={{GSLTT}} -GameStats -GameStatsToken={{GST}} {{ADDSWITCHES}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"LogGameState: Match State Changed from LoadingAssets to WaitingToStart\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\ncp -v /mnt/server/steam/linux32/steamclient.so /mnt/server/.steam/sdk32/steamclient.so\r\nchmod +x /mnt/server/Insurgency/Binaries/Linux/InsurgencyServer-Linux-Shipping\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "The ID corresponding to the game to download and run. Leave blank to avoid auto update.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "581330",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name to appear in the server in the server list.",
+            "env_variable": "HOSTNAME",
+            "default_value": "My Insurgency Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "Query port for your Insurgency server.",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27131",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "Sets the maximum number of players.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "28",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|numeric",
+            "field_type": "text"
+          },
+          {
+            "name": "Default Map",
+            "description": "Default map to run when starting the server. Scenario must be available with the provided map.",
+            "env_variable": "MAP_NAME",
+            "default_value": "Canyon",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Scenario Name",
+            "description": "By default, a server will cycle through all Versus (PVP) scenarios available.",
+            "env_variable": "SCENARIO",
+            "default_value": "Scenario_Crossing_Checkpoint_Insurgents",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Switches",
+            "description": "Please see this guide for available switches https://mod.io/g/insurgencysandstorm/r/server-admin-guide",
+            "env_variable": "ADDSWITCHES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Game Stats Token",
+            "description": "Generate your token here https://gamestats.sandstorm.game/. This is required to have your server show up in the server browser.",
+            "env_variable": "GST",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "GSLT Authentication",
+            "description": "Generate your token here https://steamcommunity.com/dev/managegameservers. This is required to have your server show up in the server browser.",
+            "env_variable": "GSLTT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,1059 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "limbo-20f8fd1d002f",
+        "name": "Limbo",
+        "description": "Standalone server program Limbo.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/limbo-20f8fd1d002f.json",
+        "sha256": "15d814830de2e48f545ba65ba957c7db734417c4f717889e2edd9fb1a5561025",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/limbo/egg-limbo.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/20f8fd1d002f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-17T23:20:29+01:00",
+        "name": "Limbo",
+        "author": "xEfinax@protonmail.com",
+        "description": "Standalone server program Limbo.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Limbo server listening on \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Limbo Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nmkdir -p /mnt/server\r\n\r\nLATEST_LIMBO_NAME=$(curl -s https://ci.loohpjames.com/job/Limbo/lastSuccessfulBuild/api/json | jq -r .artifacts[1].displayPath)\r\n\r\ncd /mnt/server || exit\r\n\r\nif [ -f \"${SERVER_JARFILE}\" ]; then\r\n\tmv \"${SERVER_JARFILE}\" \"${SERVER_JARFILE}\".old\r\nfi\r\n\r\necho \"Downloading Limbo server jar...\"\r\ncurl -o \"${SERVER_JARFILE}\" https://ci.loohpjames.com/job/Limbo/lastSuccessfulBuild/artifact/target/$LATEST_LIMBO_NAME\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo \"Downloading Limbo server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/LOOHP/Limbo/master/src/main/resources/server.properties\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the Limbo server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "Limbo.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "limbo-28f18bd527cf",
+        "name": "Limbo",
+        "description": "Standalone server program Limbo.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/limbo-28f18bd527cf.json",
+        "sha256": "9b09ffdb70f0d23f65bd259985d791244e34f71a4d0184aa3c73346b28c3bfaa",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/limbo/egg-pterodactyl-limbo.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/28f18bd527cf.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:00+00:00",
+        "name": "Limbo",
+        "author": "xEfinax@protonmail.com",
+        "description": "Standalone server program Limbo.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Limbo server listening on \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/ash\r\n# Limbo Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nmkdir -p /mnt/server\r\n\r\nLATEST_LIMBO_NAME=$(curl -s https://ci.loohpjames.com/job/Limbo/lastSuccessfulBuild/api/json | jq -r .artifacts[1].displayPath)\r\n\r\ncd /mnt/server || exit\r\n\r\nif [ -f \"${SERVER_JARFILE}\" ]; then\r\n\tmv \"${SERVER_JARFILE}\" \"${SERVER_JARFILE}\".old\r\nfi\r\n\r\necho \"Downloading Limbo server jar...\"\r\ncurl -o \"${SERVER_JARFILE}\" https://ci.loohpjames.com/job/Limbo/lastSuccessfulBuild/artifact/target/$LATEST_LIMBO_NAME\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo \"Downloading Limbo server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/LOOHP/Limbo/master/src/main/resources/server.properties\r\nfi"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the Limbo server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "Limbo.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "limbo-f00ebe7490e6",
+        "name": "Limbo",
+        "description": "Standalone server program Limbo.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/limbo-f00ebe7490e6.json",
+        "sha256": "86b890f8e5c4d907a21879ad68cff73bd35779ca2a59c790e57f16bc34daced4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/limbo/egg-limbo.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/f00ebe7490e6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Limbo",
+        "author": "xEfinax@protonmail.com",
+        "uuid": "44f91767-0288-4352-a62f-945db51ab922",
+        "description": "Standalone server program Limbo.",
+        "tags": [
+          "minecraft"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:java_17": "ghcr.io/pelican-eggs/yolks:java_17"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Limbo server listening on \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/ash\r\n# Limbo Installation Script\r\n#\r\n# Server Files: /mnt/server\r\nmkdir -p /mnt/server\r\n\r\nLATEST_LIMBO_NAME=$(curl -s https://ci.loohpjames.com/job/Limbo/lastSuccessfulBuild/api/json | jq -r .artifacts[1].displayPath)\r\n\r\ncd /mnt/server || exit\r\n\r\nif [ -f \"${SERVER_JARFILE}\" ]; then\r\n\tmv \"${SERVER_JARFILE}\" \"${SERVER_JARFILE}\".old\r\nfi\r\n\r\necho \"Downloading Limbo server jar...\"\r\ncurl -o \"${SERVER_JARFILE}\" https://ci.loohpjames.com/job/Limbo/lastSuccessfulBuild/artifact/target/$LATEST_LIMBO_NAME\r\n\r\nif [ ! -f server.properties ]; then\r\n    echo \"Downloading Limbo server.properties\"\r\n    curl -o server.properties https://raw.githubusercontent.com/LOOHP/Limbo/master/src/main/resources/server.properties\r\nfi",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the Limbo server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "Limbo.jar",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "liteloader-bedrock-dedicated-server-2f161a55f0c5",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/liteloader-bedrock-dedicated-server-2f161a55f0c5.json",
+        "sha256": "a4a00562321a03cb8f52633f9a32ffe8f97362bd3900c248f7723606ba60781d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/bedrock/LiteLoader-bedrock/egg-LiteLoader-bedrock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/2f161a55f0c5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-17T20:11:37+02:00",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "author": "frizth_tatierra@informatics.edu.ph",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:wine_staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "./lae-ll-launcher bedrock_server_mod.exe",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"max-players\": \"{{server.build.env.MAXPLAYERS}}\", \"level-name\": \"{{server.build.env.WORLDNAME}}\"}}}",
+          "startup": "{\"done\": \"IPv4 supported\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Liteloader First-time Install Script\r\n\r\napk update\r\napk add gzip jq curl wine\r\ncd /mnt/server\r\n\r\nfor file in *; do\r\n    if [ \"$file\" != \"allowlist.json\" ] && [ \"$file\" != \"permissions.json\" ] && [ \"$file\" != \"server.properties\" ] && [ \"$file\" != \"plugins\" ] && [ \"$file\" != \"world\" ]; then\r\n        if [ -d \"$file\" ]; then\r\n            rm -rf \"$file\"  # Remove directories recursively\r\n        else\r\n            rm \"$file\"  # Remove files\r\n        fi\r\n    fi\r\ndone\r\n\r\n# Download Minecraft BDS\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BDS_VERSION}\" ] || [ \"${BDS_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://www.minecraft.net/en-us/download/server/bedrock\r\n    DOWNLOAD_URL=$(zgrep -o 'https://minecraft.azureedge.net/bin-win/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BDS_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://minecraft.azureedge.net/bin-win/bedrock-server-$BDS_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\nrm versions.html.gz\r\n\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases\")\r\n\r\nif [ -z \"${LL_VERSION}\" ] || [ \"${LL_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest LiteLoaderBDS from GitHub\"\r\n    DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${LL_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        echo -e \"\\n Downloading ${LL_VERSION} LiteLoaderBDS from GitHub\"\r\n        DOWNLOAD_GIT_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${LL_VERSION}\" '.[] | select(.tag_name==$LL_VERSION) | .assets[].browser_download_url' | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\ncurl -sSL -o LiteLoader.zip ${DOWNLOAD_GIT_URL}\r\nunzip -o LiteLoader.zip\r\nmv -f LiteLoaderBDS/* /mnt/server\r\nrm LiteLoader.zip\r\ntimeout 30s wine PeEditor.exe\r\nrm -rf '/root/.wine' /mnt/server/LiteLoaderBDS/\r\n\r\n# Downloading Launcher and finishing touches\r\nwget https://io.ivampiresp.com/d/Software/MCServer/BDS/LiteLoader/lae-ll-launcher\r\nchmod +x lae-ll-launcher\r\necho \"Finished Downloading Liteloader...\"",
+            "container": "ghcr.io/parkervcp/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Dedicated Server Version",
+            "description": "Insert BDS Version",
+            "env_variable": "BDS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Liteloader Version",
+            "description": "Insert Liteloader Version from Github Releases",
+            "env_variable": "LL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "Maximum players to join on the server",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "World/Level name to use for the server",
+            "env_variable": "WORLDNAME",
+            "default_value": "Bedrock level",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "liteloader-bedrock-dedicated-server-7b7f7be42ed5",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/liteloader-bedrock-dedicated-server-7b7f7be42ed5.json",
+        "sha256": "e08733475c863aacff68dde9e70c991321633a3980d3675c51f936c6f9d35005",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/LiteLoader-bedrock/egg-pterodactyl-liteloader-bedrock-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/7b7f7be42ed5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:00+00:00",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "author": "frizth_tatierra@informatics.edu.ph",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:wine_staging": "ghcr.io/pelican-eggs/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "./lae-ll-launcher bedrock_server_mod.exe",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"max-players\": \"{{server.build.env.MAXPLAYERS}}\", \"level-name\": \"{{server.build.env.WORLDNAME}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \"IPv4 supported\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash",
+            "script": "#!/bin/bash\r\n# Liteloader First-time Install Script\r\n\r\napk update\r\napk add gzip jq curl wine\r\ncd /mnt/server\r\n\r\nfor file in *; do\r\n    if [ \"$file\" != \"allowlist.json\" ] && [ \"$file\" != \"permissions.json\" ] && [ \"$file\" != \"server.properties\" ] && [ \"$file\" != \"plugins\" ] && [ \"$file\" != \"world\" ]; then\r\n        if [ -d \"$file\" ]; then\r\n            rm -rf \"$file\"  # Remove directories recursively\r\n        else\r\n            rm \"$file\"  # Remove files\r\n        fi\r\n    fi\r\ndone\r\n\r\n# Download Minecraft BDS\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BDS_VERSION}\" ] || [ \"${BDS_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://www.minecraft.net/en-us/download/server/bedrock\r\n    DOWNLOAD_URL=$(zgrep -o 'https://minecraft.azureedge.net/bin-win/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BDS_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://minecraft.azureedge.net/bin-win/bedrock-server-$BDS_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\nrm versions.html.gz\r\n\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases\")\r\n\r\nif [ -z \"${LL_VERSION}\" ] || [ \"${LL_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest LiteLoaderBDS from GitHub\"\r\n    DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${LL_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        echo -e \"\\n Downloading ${LL_VERSION} LiteLoaderBDS from GitHub\"\r\n        DOWNLOAD_GIT_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${LL_VERSION}\" '.[] | select(.tag_name==$LL_VERSION) | .assets[].browser_download_url' | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\ncurl -sSL -o LiteLoader.zip ${DOWNLOAD_GIT_URL}\r\nunzip -o LiteLoader.zip\r\nmv -f LiteLoaderBDS/* /mnt/server\r\nrm LiteLoader.zip\r\ntimeout 30s wine PeEditor.exe\r\nrm -rf '/root/.wine' /mnt/server/LiteLoaderBDS/\r\n\r\n# Downloading Launcher and finishing touches\r\nwget https://io.ivampiresp.com/d/Software/MCServer/BDS/LiteLoader/lae-ll-launcher\r\nchmod +x lae-ll-launcher\r\necho \"Finished Downloading Liteloader...\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Dedicated Server Version",
+            "description": "Insert BDS Version",
+            "env_variable": "BDS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Liteloader Version",
+            "description": "Insert Liteloader Version from Github Releases",
+            "env_variable": "LL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "Maximum players to join on the server",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "World/Level name to use for the server",
+            "env_variable": "WORLDNAME",
+            "default_value": "Bedrock level",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "liteloader-bedrock-dedicated-server-9d34172f8434",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/liteloader-bedrock-dedicated-server-9d34172f8434.json",
+        "sha256": "dcd2bf9177bb11fb1ea9623293b0ffaf988f60d88e96a5d65fd5385c1f6da8fb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "bedrock/LiteLoader-bedrock/egg-liteloader-bedrock-dedicated-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/9d34172f8434.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-21T19:02:00+00:00",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "author": "frizth_tatierra@informatics.edu.ph",
+        "uuid": "d93b1b76-8435-4404-9a7b-309b6b069b9e",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "tags": [
+          "minecraft"
+        ],
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pelican-eggs/yolks:wine_staging": "ghcr.io/pelican-eggs/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "./lae-ll-launcher bedrock_server_mod.exe",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"max-players\": \"{{server.build.env.MAXPLAYERS}}\", \"level-name\": \"{{server.build.env.WORLDNAME}}\"}}}",
+          "startup": "{\"done\": \"IPv4 supported\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Liteloader First-time Install Script\r\n\r\napk update\r\napk add gzip jq curl wine\r\ncd /mnt/server\r\n\r\nfor file in *; do\r\n    if [ \"$file\" != \"allowlist.json\" ] && [ \"$file\" != \"permissions.json\" ] && [ \"$file\" != \"server.properties\" ] && [ \"$file\" != \"plugins\" ] && [ \"$file\" != \"world\" ]; then\r\n        if [ -d \"$file\" ]; then\r\n            rm -rf \"$file\"  # Remove directories recursively\r\n        else\r\n            rm \"$file\"  # Remove files\r\n        fi\r\n    fi\r\ndone\r\n\r\n# Download Minecraft BDS\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BDS_VERSION}\" ] || [ \"${BDS_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://www.minecraft.net/en-us/download/server/bedrock\r\n    DOWNLOAD_URL=$(zgrep -o 'https://minecraft.azureedge.net/bin-win/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BDS_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://minecraft.azureedge.net/bin-win/bedrock-server-$BDS_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\nrm versions.html.gz\r\n\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases\")\r\n\r\nif [ -z \"${LL_VERSION}\" ] || [ \"${LL_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest LiteLoaderBDS from GitHub\"\r\n    DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${LL_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        echo -e \"\\n Downloading ${LL_VERSION} LiteLoaderBDS from GitHub\"\r\n        DOWNLOAD_GIT_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${LL_VERSION}\" '.[] | select(.tag_name==$LL_VERSION) | .assets[].browser_download_url' | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\ncurl -sSL -o LiteLoader.zip ${DOWNLOAD_GIT_URL}\r\nunzip -o LiteLoader.zip\r\nmv -f LiteLoaderBDS/* /mnt/server\r\nrm LiteLoader.zip\r\ntimeout 30s wine PeEditor.exe\r\nrm -rf '/root/.wine' /mnt/server/LiteLoaderBDS/\r\n\r\n# Downloading Launcher and finishing touches\r\nwget https://io.ivampiresp.com/d/Software/MCServer/BDS/LiteLoader/lae-ll-launcher\r\nchmod +x lae-ll-launcher\r\necho \"Finished Downloading Liteloader...\"",
+            "container": "ghcr.io/pelican-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Dedicated Server Version",
+            "description": "Insert BDS Version",
+            "env_variable": "BDS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Liteloader Version",
+            "description": "Insert Liteloader Version from Github Releases",
+            "env_variable": "LL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Wine",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "Maximum players to join on the server",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "World/Level name to use for the server",
+            "env_variable": "WORLDNAME",
+            "default_value": "Bedrock level",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "liteloader-bedrock-dedicated-server-b1f80b99e27a",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/liteloader-bedrock-dedicated-server-b1f80b99e27a.json",
+        "sha256": "cba9712927aac577b59e0b97ccc23fd174999a7891a4e8d41d2910f7a735fdf4",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/bedrock/LiteLoader-bedrock/egg-LiteLoader-bedrock.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/b1f80b99e27a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-05-17T20:11:37+02:00",
+        "name": "Liteloader Bedrock Dedicated Server",
+        "author": "frizth_tatierra@informatics.edu.ph",
+        "description": "LiteLoaderBDS - Epoch-making & Cross-language Bedrock Dedicated Servers Plugin Loader\r\n\r\nLiteLoaderBDS is an unofficial plugin loader that provides basic API support for Bedrock Dedicated Server, with a massive API, lots of packed utility interfaces, a rich event system and powerful basic interface support.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "./lae-ll-launcher bedrock_server_mod.exe",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-port\": \"{{server.build.default.port}}\", \"server-name\": \"{{server.build.env.SERVERNAME}}\", \"gamemode\": \"{{server.build.env.GAMEMODE}}\", \"difficulty\": \"{{server.build.env.DIFFICULTY}}\", \"max-players\": \"{{server.build.env.MAXPLAYERS}}\", \"level-name\": \"{{server.build.env.WORLDNAME}}\"}}}",
+          "startup": "{\"done\": \"IPv4 supported\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Liteloader First-time Install Script\r\n\r\napk update\r\napk add gzip jq curl wine\r\ncd /mnt/server\r\n\r\nfor file in *; do\r\n    if [ \"$file\" != \"allowlist.json\" ] && [ \"$file\" != \"permissions.json\" ] && [ \"$file\" != \"server.properties\" ] && [ \"$file\" != \"plugins\" ] && [ \"$file\" != \"world\" ]; then\r\n        if [ -d \"$file\" ]; then\r\n            rm -rf \"$file\"  # Remove directories recursively\r\n        else\r\n            rm \"$file\"  # Remove files\r\n        fi\r\n    fi\r\ndone\r\n\r\n# Download Minecraft BDS\r\nRANDVERSION=$(echo $((1 + $RANDOM % 4000)))\r\n\r\nif [ -z \"${BDS_VERSION}\" ] || [ \"${BDS_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest Bedrock server\"\r\n    curl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -H \"Accept-Encoding: gzip, deflate\" -o versions.html.gz https://www.minecraft.net/en-us/download/server/bedrock\r\n    DOWNLOAD_URL=$(zgrep -o 'https://minecraft.azureedge.net/bin-win/[^\"]*' versions.html.gz)\r\nelse \r\n    echo -e \"\\n Downloading ${BDS_VERSION} Bedrock server\"\r\n    DOWNLOAD_URL=https://minecraft.azureedge.net/bin-win/bedrock-server-$BDS_VERSION.zip\r\nfi\r\n\r\nDOWNLOAD_FILE=$(echo ${DOWNLOAD_URL} | cut -d\"/\" -f5) # Retrieve archive name\r\n\r\necho -e \"Downloading files from: $DOWNLOAD_URL\"\r\n\r\ncurl -L -A \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.$RANDVERSION.212 Safari/537.36\" -H \"Accept-Language: en\" -o $DOWNLOAD_FILE $DOWNLOAD_URL\r\n\r\necho -e \"Unpacking server files\"\r\nunzip -o $DOWNLOAD_FILE\r\n\r\necho -e \"Cleaning up after installing\"\r\nrm $DOWNLOAD_FILE\r\nrm versions.html.gz\r\n\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases\")\r\n\r\nif [ -z \"${LL_VERSION}\" ] || [ \"${LL_VERSION}\" == \"latest\" ]; then\r\n    echo -e \"\\n Downloading latest LiteLoaderBDS from GitHub\"\r\n    DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${LL_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        echo -e \"\\n Downloading ${LL_VERSION} LiteLoaderBDS from GitHub\"\r\n        DOWNLOAD_GIT_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${LL_VERSION}\" '.[] | select(.tag_name==$LL_VERSION) | .assets[].browser_download_url' | head -1)\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_GIT_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | head -1)\r\n    fi\r\nfi\r\n\r\ncurl -sSL -o LiteLoader.zip ${DOWNLOAD_GIT_URL}\r\nunzip -o LiteLoader.zip\r\nmv -f LiteLoaderBDS/* /mnt/server\r\nrm LiteLoader.zip\r\ntimeout 30s wine PeEditor.exe\r\nrm -rf '/root/.wine' /mnt/server/LiteLoaderBDS/\r\n\r\n# Downloading Launcher and finishing touches\r\nwget https://io.ivampiresp.com/d/Software/MCServer/BDS/LiteLoader/lae-ll-launcher\r\nchmod +x lae-ll-launcher\r\necho \"Finished Downloading Liteloader...\"",
+            "container": "ghcr.io/ptero-eggs/installers:alpine",
+            "entrypoint": "ash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Bedrock Dedicated Server Version",
+            "description": "Insert BDS Version",
+            "env_variable": "BDS_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Liteloader Version",
+            "description": "Insert Liteloader Version from Github Releases",
+            "env_variable": "LL_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "The name for the server",
+            "env_variable": "SERVERNAME",
+            "default_value": "Bedrock Dedicated Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Gamemode",
+            "description": "Allowed values: \"survival\", \"creative\", or \"adventure\"",
+            "env_variable": "GAMEMODE",
+            "default_value": "survival",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Difficulty",
+            "description": "Allowed values: \"peaceful\", \"easy\", \"normal\", or \"hard\"",
+            "env_variable": "DIFFICULTY",
+            "default_value": "easy",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Players",
+            "description": "Maximum players to join on the server",
+            "env_variable": "MAXPLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer",
+            "field_type": "text"
+          },
+          {
+            "name": "World Name",
+            "description": "World/Level name to use for the server",
+            "env_variable": "WORLDNAME",
+            "default_value": "Bedrock level",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "magma-162e4dd64dcd",
+        "name": "Magma",
+        "description": "Magma is most powerful Forge server providing you with Forge mods and Bukkit Plugins using Spigot and Paper for Performance Optimization and Stability. Using: https://github.com/magmamaintained",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/magma-162e4dd64dcd.json",
+        "sha256": "d5c69718500ad0e61ba895424a4afefcc3cad04f77673aa6ab1b3356251f9cd6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/minecraft",
+          "commit": "75bf05db3c6c305e0fa6eef1d38c7e7176121de9",
+          "path": "java/magma/egg-pterodactyl-magma.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--minecraft/162e4dd64dcd.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T19:40:01+00:00",
+        "name": "Magma",
+        "author": "support@pterodactyl.io",
+        "description": "Magma is most powerful Forge server providing you with Forge mods and Bukkit Plugins using Spigot and Paper for Performance Optimization and Stability. Using: https://github.com/magmamaintained",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pelican-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/pelican-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/pelican-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/pelican-eggs/yolks:java_17",
+          "Java 21": "ghcr.io/pelican-eggs/yolks:java_21",
+          "Java 25": "ghcr.io/pelican-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/magmamaintained/Magma-${MC_VERSION}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/magmamaintained/Magma-${MC_VERSION}/releases\")\r\n\r\nif [ -z \"${TAG_VERSION}\" ] || [ \"${TAG_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url )\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${TAG_VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${TAG_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${TAG_VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url')\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_LINK}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_LINK}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\n\r\necho \"Download Link: '${DOWNLOAD_LINK}'\"\r\n\r\n# Check we found a download link\r\n\r\n# Download server.jar\r\necho -e \"running: curl -sSL -o ${SERVER_JARFILE} ${DOWNLOAD_LINK}\"\r\ncurl -sSL -o ${SERVER_JARFILE} -sSL ${DOWNLOAD_LINK}\r\necho -e \"Install Complete\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "",
+            "env_variable": "MC_VERSION",
+            "default_value": "1.20.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:1.20.1,1.19.3,1.18.2,1.12.2",
+            "field_type": "text"
+          },
+          {
+            "name": "Tag Version",
+            "description": "Optional.\r\n\r\nSpecify the tag version to install. Set latest to install latest",
+            "env_variable": "TAG_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "magma-910b36d7f0a6",
+        "name": "Magma",
+        "description": "Magma is most powerful Forge server providing you with Forge mods and Bukkit Plugins using Spigot and Paper for Performance Optimization and Stability. Using: https://github.com/magmamaintained",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/magma-910b36d7f0a6.json",
+        "sha256": "b3b561480783da821b7a7a356b0556303f2aba59a682cdc2b4f4c30b7a9866d7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/minecraft/java/magma/egg-magma.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/910b36d7f0a6.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-23T20:05:07+01:00",
+        "name": "Magma",
+        "author": "support@pterodactyl.io",
+        "description": "Magma is most powerful Forge server providing you with Forge mods and Bukkit Plugins using Spigot and Paper for Performance Optimization and Stability. Using: https://github.com/magmamaintained",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/pterodactyl/yolks:java_8",
+          "Java 11": "ghcr.io/pterodactyl/yolks:java_11",
+          "Java 16": "ghcr.io/pterodactyl/yolks:java_16",
+          "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
+          "Java 18": "ghcr.io/pterodactyl/yolks:java_18"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"enable-query\": \"true\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/magmamaintained/Magma-${MC_VERSION}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/magmamaintained/Magma-${MC_VERSION}/releases\")\r\n\r\nif [ -z \"${TAG_VERSION}\" ] || [ \"${TAG_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url )\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${TAG_VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${TAG_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${TAG_VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url')\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_LINK}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_LINK}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\n\r\necho \"Download Link: '${DOWNLOAD_LINK}'\"\r\n\r\n# Check we found a download link\r\n\r\n# Download server.jar\r\necho -e \"running: curl -sSL -o ${SERVER_JARFILE} ${DOWNLOAD_LINK}\"\r\ncurl -sSL -o ${SERVER_JARFILE} -sSL ${DOWNLOAD_LINK}\r\necho -e \"Install Complete\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "",
+            "env_variable": "MC_VERSION",
+            "default_value": "1.20.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:1.20.1,1.19.3,1.18.2,1.12.2",
+            "field_type": "text"
+          },
+          {
+            "name": "Tag Version",
+            "description": "Optional.\r\n\r\nSpecify the tag version to install. Set latest to install latest",
+            "env_variable": "TAG_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "magma-d2f105819f18",
+        "name": "Magma",
+        "description": "Magma is most powerful Forge server providing you with Forge mods and Bukkit Plugins using Spigot and Paper for Performance Optimization and Stability. Using: https://github.com/magmamaintained",
+        "category": "minecraft",
+        "kind": "preset",
+        "path": "eggs/minecraft/magma-d2f105819f18.json",
+        "sha256": "dc4290bc429c7bc190960c491454581c7468dfdb3ab8bce9b9aea2c36efe0e78",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "minecraft/java/magma/egg-magma.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d2f105819f18.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-26T20:16:38+02:00",
+        "name": "Magma",
+        "author": "support@pterodactyl.io",
+        "description": "Magma is most powerful Forge server providing you with Forge mods and Bukkit Plugins using Spigot and Paper for Performance Optimization and Stability. Using: https://github.com/magmamaintained",
+        "features": [
+          "eula",
+          "java_version",
+          "pid_limit"
+        ],
+        "docker_images": {
+          "Java 8": "ghcr.io/ptero-eggs/yolks:java_8",
+          "Java 11": "ghcr.io/ptero-eggs/yolks:java_11",
+          "Java 16": "ghcr.io/ptero-eggs/yolks:java_16",
+          "Java 17": "ghcr.io/ptero-eggs/yolks:java_17",
+          "java 21": "ghcr.io/ptero-eggs/yolks:java_21",
+          "java 22": "ghcr.io/ptero-eggs/yolks:java_22",
+          "Java 25": "ghcr.io/ptero-eggs/yolks:java_25"
+        },
+        "file_denylist": [],
+        "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
+        "config": {
+          "files": "{\"server.properties\": {\"parser\": \"properties\", \"find\": {\"server-ip\": \"0.0.0.0\", \"server-port\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \")! For help, type \"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## get release info and download links\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/magmamaintained/Magma-${MC_VERSION}/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/magmamaintained/Magma-${MC_VERSION}/releases\")\r\n\r\nif [ -z \"${TAG_VERSION}\" ] || [ \"${TAG_VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url )\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${TAG_VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${TAG_VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_LINK=$(echo ${RELEASES} | jq -r --arg VERSION \"${TAG_VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url')\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_LINK=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\nif [ ! -z \"${DOWNLOAD_LINK}\" ]; then \r\n    if curl --output /dev/null --silent --head --fail ${DOWNLOAD_LINK}; then\r\n        echo -e \"link is valid. setting download link to ${DOWNLOAD_LINK}\"\r\n        DOWNLOAD_LINK=${DOWNLOAD_LINK}\r\n    else        \r\n        echo -e \"link is invalid closing out\"\r\n        exit 2\r\n    fi\r\nfi\r\n\r\n\r\necho \"Download Link: '${DOWNLOAD_LINK}'\"\r\n\r\n# Check we found a download link\r\n\r\n# Download server.jar\r\necho -e \"running: curl -sSL -o ${SERVER_JARFILE} ${DOWNLOAD_LINK}\"\r\ncurl -sSL -o ${SERVER_JARFILE} -sSL ${DOWNLOAD_LINK}\r\necho -e \"Install Complete\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Jar File",
+            "description": "The name of the server jarfile to run the server with.",
+            "env_variable": "SERVER_JARFILE",
+            "default_value": "server.jar",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|regex:/^([\\w\\d._-]+)(\\.jar)$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Minecraft Version",
+            "description": "",
+            "env_variable": "MC_VERSION",
+            "default_value": "1.20.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|in:1.20.1,1.19.3,1.18.2,1.12.2",
+            "field_type": "text"
+          },
+          {
+            "name": "Tag Version",
+            "description": "Optional.\r\n\r\nSpecify the tag version to install. Set latest to install latest",
+            "env_variable": "TAG_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

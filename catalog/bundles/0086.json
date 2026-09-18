@@ -1,0 +1,1376 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "veloren-fc9b69fd1ec9",
+        "name": "Veloren",
+        "description": "Veloren is a multiplayer voxel RPG written in Rust. It is inspired by games such as Cube World, Legend of Zelda: Breath of the Wild, Dwarf Fortress and Minecraft.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/veloren-fc9b69fd1ec9.json",
+        "sha256": "dcc102af21f4ec52d23ecc09118f55d663b71fa2c76d8c74cba212e08d0f254a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "veloren/egg-veloren.json",
+          "format": "PLCN_v1"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/fc9b69fd1ec9.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-10-19T18:43:29+02:00",
+        "name": "Veloren",
+        "author": "parker@parkervcp.com",
+        "uuid": "3b814b4e-a86d-4eca-ad00-1cdfe4a2baca",
+        "description": "Veloren is a multiplayer voxel RPG written in Rust. It is inspired by games such as Cube World, Legend of Zelda: Breath of the Wild, Dwarf Fortress and Minecraft.",
+        "features": null,
+        "docker_images": {
+          "Ubuntu": "ghcr.io/pelican-eggs/yolks:ubuntu"
+        },
+        "file_denylist": [],
+        "startup": "./veloren-server-cli",
+        "config": {
+          "files": "{\"userdata/server/server_config/settings.ron\": {\"parser\": \"file\", \"find\": {\"    metrics_address\": \"    metrics_address: \\\"0.0.0.0:{{server.environment.METRICS_PORT}}\\\",\", \"    server_name\": \"    server_name: \\\"{{server.environment.SERVER_NAME}}\\\",\"}}}",
+          "startup": "{\"done\": \"Server is ready to accept connections\"}",
+          "logs": "{}",
+          "stop": "shutdown graceful 10"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"x86_64\" || echo \"aarch64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"weekly\" ]; then\r\n    echo -e \"weekly\"\r\n    DOWNLOAD_URL=https://download.veloren.net/latest/linux/${ARCH}/weekly\r\nelif [ \"${VERSION}\" == \"nightly\" ]; then\r\n    echo -e \"nightly\"\r\n    DOWNLOAD_URL=https://download.veloren.net/latest/linux/${ARCH}/nightly\r\nelse\r\n    echo -e  \"something went wrong\"\r\nfi\r\n\r\necho -e \"download url: ${DOWNLOAD_URL}\"\r\nwget ${DOWNLOAD_URL} -O files.zip\r\n\r\nunzip -o files.zip\r\nrm files.zip\r\n\r\nchmod +x veloren-server-cli\r\n\r\n## generate config because there is no better way to get it.\r\nmkdir -p /mnt/server/userdata/server/server_config/\r\nif [ ! -f /mnt/server/userdata/server/server_config/settings.ron ]; then\r\n    wget https://raw.githubusercontent.com/pelican-eggs/games-standalone/refs/heads/main/veloren/settings.ron -O /tmp/settings.ron\r\n    sed \"s/14004/${SERVER_PORT}/g\" /tmp/settings.ron > /mnt/server/userdata/server/server_config/settings.ron\r\n    rm /tmp/settings.ron\r\n    echo \"config file pulled\"\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "weekly = download the latest weekly build.\r\nnightly = download the latest nightly build.",
+            "env_variable": "VERSION",
+            "default_value": "weekly",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:weekly,nightly",
+            "sort": 1
+          },
+          {
+            "name": "Server name",
+            "description": "The name your server will be displaying",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A pterodactyl hosted server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 2
+          },
+          {
+            "name": "Metrics port",
+            "description": "Game port +1",
+            "env_variable": "METRICS_PORT",
+            "default_value": "14005",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer",
+            "sort": 3
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "venice-unleashed-90b21f915202",
+        "name": "Venice Unleashed",
+        "description": "Venice Unleashed (VU) is a community-oriented Battlefield 3 custom server & modding platform that gives you back control of your gaming experience. This Egg requires a valid VU `server.key` file, and requires Battlefield 3 client files (from a legal copy of the game) to be internally mounted to `/bf3`.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/venice-unleashed-90b21f915202.json",
+        "sha256": "609b066dd90c68a85c262a292214a6bf526f9bb3c650bd4c11f857e5c29c124e",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "venice_unleashed/egg-pterodactyl-venice-unleashed.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/90b21f915202.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-05-09T05:07:31+00:00",
+        "name": "Venice Unleashed",
+        "author": "red_thirten@yahoo.com",
+        "description": "Venice Unleashed (VU) is a community-oriented Battlefield 3 custom server & modding platform that gives you back control of your gaming experience. This Egg requires a valid VU `server.key` file, and requires Battlefield 3 client files (from a legal copy of the game) to be internally mounted to `/bf3`.",
+        "features": [],
+        "docker_images": {
+          "Wine Latest (Recommended)": "ghcr.io/parkervcp/yolks:wine_latest",
+          "Wine Staging": "ghcr.io/parkervcp/yolks:wine_staging"
+        },
+        "file_denylist": [],
+        "startup": "[ -f /bf3/bf3.exe ] || { echo \"BF3 is not mounted properly! Exiting.\"; exit 1; }; [ -f ./vu/instance/server.key ] || { echo \"Missing 'vu/instance/server.key'! Exiting.\"; exit 1; }; tok=\"$LIC_PATH\"/token.txt; [ \"$(cat \"$tok\" 2>/dev/null)\" != \"$EA_TOKEN\" ] && { rm -f \"$LIC_PATH\"/*.dlf; echo \"$EA_TOKEN\" > \"$tok\"; }; if ! compgen -G \"$LIC_PATH\"/*.dlf >/dev/null; then wine ./vu/client/vu.com -gamepath /bf3 -activate -ea_token \"$EA_TOKEN\"; fi; wine ./vu/client/vu.com -gamepath /bf3 -serverInstancePath \"$(winepath -w ~/vu/instance)\" -server -dedicated -headless $( [ {{AUTO_UPDATE}} = 0 ] && echo -noUpdate ) -{{SERVER_FREQUENCY}} -maxPlayers {{MAX_PLAYERS}} -listen 0.0.0.0:{{SERVER_PORT}} -mHarmonyPort {{HARMONY_PORT}} ${RCON_PORT:+-RemoteAdminPort 0.0.0.0:{{RCON_PORT}}} ${JOIN_HOST:+-joinhost {{JOIN_HOST}}} $( [ {{UNLISTED}} = 1 ] && echo -unlisted ) $( [ {{HIGH_RES_TERRAIN}} = 1 ] && echo -highResTerrain ) $( [ {{DISABLE_TERRAIN_INTERP}} = 1 ] && echo -disableTerrainInterp ) $( [ {{SKIP_CHECKSUM}} = 1 ] && echo -skipChecksum )",
+        "config": {
+          "files": "{\"vu/instance/Admin/Startup.txt\": {\"parser\": \"file\", \"find\": {\"admin.password\": \"admin.password \\\"{{server.build.env.RCON_PASSWORD}}\\\"\", \"vars.serverName\": \"vars.serverName \\\"{{server.build.env.SERVER_NAME}}\\\"\", \"vars.gamePassword\": \"vars.gamePassword \\\"{{server.build.env.SERVER_PASSWORD}}\\\"\"}}}",
+          "startup": "{\"_comment\": \"'now accepting connections' with required Wine control characters\", \"done\": \"n\\u001b[?25h\\u001b[?25lo\\u001b[?25h\\u001b[?25lw\\u001b[?25h\\u001b[?25l\\u001b[K\\u001b[1C\\u001b[?25h\\u001b[?25la\\u001b[?25h\\u001b[?25lc\\u001b[?25h\\u001b[?25lc\\u001b[?25h\\u001b[?25le\\u001b[?25h\\u001b[?25lp\\u001b[?25h\\u001b[?25lt\\u001b[?25h\\u001b[?25li\\u001b[?25h\\u001b[?25ln\\u001b[?25h\\u001b[?25lg\\u001b[?25h\\u001b[?25l\\u001b[K\\u001b[1C\\u001b[?25h\\u001b[?25lc\\u001b[?25h\\u001b[?25lo\\u001b[?25h\\u001b[?25ln\\u001b[?25h\\u001b[?25ln\\u001b[?25h\\u001b[?25le\\u001b[?25h\\u001b[?25lc\\u001b[?25h\\u001b[?25lt\\u001b[?25h\\u001b[?25li\\u001b[?25h\\u001b[?25lo\\u001b[?25h\\u001b[?25ln\\u001b[?25h\\u001b[?25ls\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\n\n# File: Pterodactyl Venice Unleashed Egg - egg-pterodactyl-venice-unleashed.json\n# Authors: Red-Thirten\n# Date: 2026/05/08\n# License: MIT License\n\nexport HOME=/mnt/server\n\n[ ! -d $HOME ] && mkdir $HOME\ncd $HOME\n\n# Remove old installation if present (except for VU instance folder to keep configs)\n[ -d .cache ] && rm -rf .cache\n[ -d .config ] && rm -rf .config\n[ -d .local ] && rm -rf .local\n[ -d .wine ] && rm -rf .wine\n[ -f .wget-hsts ] && rm .wget-hsts\n[ -d vu/client ] && rm -rf vu/client\n\n# Make VU required directories\nmkdir -p vu/{client,instance}\nmkdir -p \"${LIC_PATH}\"\n\n# Validate VU download URL\nif ! curl --silent --head --fail ${DOWNLOAD_URL} > /dev/null; then\n    echo -e \"\\nThe VU Server Download URL is unreachable: ${DOWNLOAD_URL}\\n\"\n    exit 1\nfi\n\n# Download, unzip, and verify VU server files\ncd $HOME/vu/client\necho -e \"Downloading VU server files...\"\ncurl -L ${DOWNLOAD_URL} -o ${DOWNLOAD_URL##*/}\necho -e \"Unzipping VU server files...\"\nunzip ${DOWNLOAD_URL##*/}\nif [ ! -f vu.com ]; then\n    echo -e \"\\nFailed to download/install VU server files from: ${DOWNLOAD_URL}\\n\"\n    exit 1\nelse\n    rm ${DOWNLOAD_URL##*/}\nfi\n\n# Create default config files if they are missing\ncd $HOME/vu/instance\nmkdir -p Admin/Mods\ncd Admin\n[ ! -f BanList.txt ] && touch BanList.txt\n[ ! -f ModList.txt ] && touch ModList.txt\nif [[ ! -f MapList.txt ]]; then\n    cat > MapList.txt <<EOF\n# -------------------------------------------------------------------------------------------------------------------------\n# This file defines the map rotation of the server. This means that it tells the server which map to load first and\n# on which gamemode, how many rounds to run, and what's the next map to load once the game ends.\n# \n# Every map is specified in a new line in the following format:\n# MapID GamemodeID Rounds\n# \n# Full list of the map and gamemode IDs:\n# https://docs.veniceunleashed.net/hosting/maps\n# -------------------------------------------------------------------------------------------------------------------------\n\nMP_Subway ConquestLarge0 1\nMP_013 TeamDeathMatch0 1\nEOF\nfi\nif [[ ! -f Startup.txt ]]; then\n    cat > Startup.txt <<EOF\n# -------------------------------------------------------------------------------------------------------------------------\n# This file is used to configure to the server upon startup. This is done by using specific configuration variables\n# followed by a relevant value. Each variable is specified in a new line.\n# \n# Full list of configuration variables and commands:\n# https://docs.veniceunleashed.net/hosting/commands\n# https://github.com/dcodeIO/BattleCon/blob/master/eadocs/BF3/BF3%20PC%20Server%20Remote%20Administration%20Protocol.pdf\n# -------------------------------------------------------------------------------------------------------------------------\n\n# These variables are managed by the panel. Do not change or remove them!\nadmin.password \"${RCON_PASSWORD}\"\nvars.serverName \"${SERVER_NAME}\"\nvars.gamePassword \"${SERVER_PASSWORD}\"\n\n# Add additional variables below if desired\n\nEOF\nfi\n\n\necho -e \"\\nVU Successfully Installed!\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "/bin/bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "[Host] Harmony Port",
+            "description": "Required port the VU server should listen for Monitored Harmony connections on.",
+            "env_variable": "HARMONY_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[Host] Join Host",
+            "description": "Specifies a hostname clients will use to connect to this server (advertised by the Zeus master server). Useful for hosts utilizing DDNS, and/or for LAN clients connecting via DNS redirection (only way to connect locally). Hostname should NOT include \"http[s]://\" prefix. Leave blank to use public IP instead.",
+            "env_variable": "JOIN_HOST",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "EA Auth Token",
+            "description": "Can be obtained on your local Windows computer that has: EA App / Origin installed & running, BF3 installed, VU installed and VU account linked to EA/Origin account. Run the \"Activate BF3\" shortcut in the Start Menu, or run `vu.exe -activate -lsx` in a Command Prompt (current working directory must be the VU client folder). Copy the displayed token and paste it here. NOTE: This token will occasionally expire, causing the server to crash on startup. If this happens, simply regenerate a new token and paste it here.",
+            "env_variable": "EA_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Automatic Updates",
+            "description": "Enables VU automatic updater. (Use with caution; there have been reports of this sometimes crashing the server on startup if there is an update)",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "Name of the server, as it will appear in the master server list.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "My incredible VU server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:63",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "Password clients must enter to join the server. Leave blank to have no password.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "Maximum Player Count",
+            "description": "Sets the maximum players that are allowed to set with vars.maxPlayers & vars.maxSpectators combined.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "64",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|min:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Frequency",
+            "description": "'30' = 30Hz (Default) | 'high60' = 60Hz High frequency mode | 'high120' = 120Hz High frequency mode",
+            "env_variable": "SERVER_FREQUENCY",
+            "default_value": "30",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:30,high60,high120",
+            "field_type": "text"
+          },
+          {
+            "name": "[RCON] RCON Port",
+            "description": "Optional port used to connect to the server via RCON (recommended client is Procon). Leave blank to disable RCON.",
+            "env_variable": "RCON_PORT",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "[RCON] RCON Password",
+            "description": "Password used to authenticate with RCON. (No username is required and can be left blank when connecting with a client).",
+            "env_variable": "RCON_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:16",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Disable Server Listing",
+            "description": "Makes the server not show up in the master server list. Unlisted servers can only be joined by the `connect` console command or via the `vu://join/server-id` URL scheme, which can also be added as a launch argument to vu.exe to auto-join as soon as the client loads.",
+            "env_variable": "UNLISTED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Enable High Resolution Terrain",
+            "description": "Useful for extending maps beyond their original play area.",
+            "env_variable": "HIGH_RES_TERRAIN",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Disable Terrain Interpolation",
+            "description": "Disables interpolation between different terrain LODs.",
+            "env_variable": "DISABLE_TERRAIN_INTERP",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[Advanced] Skip Checksum",
+            "description": "Disables level checksum validation on client connection.",
+            "env_variable": "SKIP_CHECKSUM",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] VU Server Download URL",
+            "description": "Official URL provided by VU to download zipped server files. (Should not be changed unless you know what you are doing)",
+            "env_variable": "DOWNLOAD_URL",
+            "default_value": "https://veniceunleashed.net/files/vu.zip",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] EA License Path",
+            "description": "Path to where EA `.dlf` license files are stored for use in VU server activation. Should not be changed.",
+            "env_variable": "LIC_PATH",
+            "default_value": "./.wine/drive_c/ProgramData/Electronic Arts/EA Services/License",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:./.wine/drive_c/ProgramData/Electronic Arts/EA Services/License",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEDEBUG",
+            "description": "Sets the Wine debug level. Rarely needs to be changed.",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINETRICKS_RUN",
+            "description": "Installs the required Visual C++ 2008 runtime via winetricks. Should not be changed.",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "vcrun2008",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:vcrun2008",
+            "field_type": "text"
+          },
+          {
+            "name": "[System] WINEARCH",
+            "description": "Sets the Wine prefix to use WoW64 (Windows 32-bit on Windows 64-bit), which is required by VU. Should not be changed.",
+            "env_variable": "WINEARCH",
+            "default_value": "wow64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:wow64",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vintage-story-1a7046d15b53",
+        "name": "Vintage Story",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/vintage-story-1a7046d15b53.json",
+        "sha256": "e1a2832398808271dbe253e175f8736e8c07748a40ccbde8f746a677be978835",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "vintage_story/egg-pterodactyl-vintage-story.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/1a7046d15b53.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-10T14:32:54+00:00",
+        "name": "Vintage Story",
+        "author": "mail@wuffy.eu",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "features": null,
+        "docker_images": {
+          "Dotnet 10": "ghcr.io/pelican-eggs/yolks:dotnet_10",
+          "Dotnet 8": "ghcr.io/pelican-eggs/yolks:dotnet_8",
+          "Dotnet 7": "ghcr.io/pelican-eggs/yolks:dotnet_7"
+        },
+        "file_denylist": [],
+        "startup": "./VintagestoryServer --dataPath ./data --port={{SERVER_PORT}} --maxclients={{MAX_CLIENTS}} {{OPTIONS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Dedicated Server now running on Port \"}",
+          "logs": "{}",
+          "stop": "/stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vintage Story Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl jq\r\n\r\ndeclare -A API_URLS=(\r\n  [\"stable\"]=\"http://api.vintagestory.at/stable.json\"\r\n  [\"unstable\"]=\"http://api.vintagestory.at/unstable.json\"\r\n)\r\n\r\ndeclare -A DOWNLOAD_URLS=(\r\n  [\"stable\"]=\"https://cdn.vintagestory.at/gamefiles/stable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"unstable\"]=\"https://cdn.vintagestory.at/gamefiles/unstable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"pre\"]=\"https://cdn.vintagestory.at/gamefiles/pre/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n)\r\n\r\nBRANCH=\"${FILES_BRANCH}\"\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ] && [ \"${BRANCH}\" == \"pre\" ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please specify the version when using RELEASE BRANCH: pre\"\r\n  echo \"-----------------------------------------\"  \r\n  exit\r\nfi\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ]; then\r\n  API_URL=\"${API_URLS[$BRANCH]}\"\r\n  echo \"API URL: $API_URL\"\r\n  DOWNLOAD_URL=$(curl -SsL \"$API_URL\" | jq -r 'if ([.[]] | .[0].linuxserver.urls.cdn) != null then [.[]] | .[0].linuxserver.urls.cdn else [.[]] | .[0].linuxserver.urls.local end')\r\nelse\r\n  DOWNLOAD_URL=\"${DOWNLOAD_URLS[$BRANCH]}\"\r\nfi\r\n\r\necho \"Download URL: $DOWNLOAD_URL\"\r\n\r\ncd /mnt/server/ || exit\r\n\r\n# make sure to cleanup the prior installation else this might cause issue with old asset files that do not exist in the new version\r\nif [ -d \"assets\" ]; then\r\n  echo \"Removing old installation files\"\r\n  rm -rf assets/\r\n  rm -rf Lib/\r\nfi\r\ncurl -o vs_server.tar.gz \"${DOWNLOAD_URL}\"\r\ntar -xzf vs_server.tar.gz\r\n\r\nif [ $? -ne 0 ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please make sure the specified version exists: $RELEASE_VERSION\"\r\n  echo \"-----------------------------------------\"\r\n  rm vs_server.tar.gz\r\n  exit\r\nfi\r\n\r\nrm vs_server.tar.gz\r\nrm server.sh\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Start options",
+            "description": "",
+            "env_variable": "OPTIONS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Release branch",
+            "description": "",
+            "env_variable": "FILES_BRANCH",
+            "default_value": "stable",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:stable,unstable,pre",
+            "field_type": "text"
+          },
+          {
+            "name": "Release version",
+            "description": "",
+            "env_variable": "RELEASE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Sqlite temporary files directory",
+            "description": "Defines the location for the temporary files in sqlite. This is needed for the \"/db vacuum\" command (added in 1.19) since else it will use the /tmp folder which by default only has 100MB and is in memory.",
+            "env_variable": "SQLITE_TMPDIR",
+            "default_value": "/home/container/data/Backups",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vintage-story-69bba1327d0a",
+        "name": "Vintage Story",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/vintage-story-69bba1327d0a.json",
+        "sha256": "22287f8589697855ff0bf19ac8b5038cf290ba826a6ed8e4e6cb9aab5fafd8ba",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/vintage_story/egg-vintage-story.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/69bba1327d0a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-01-19T10:09:42-05:00",
+        "name": "Vintage Story",
+        "author": "mail@wuffy.eu",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "features": null,
+        "docker_images": {
+          "Dotnet 7": "ghcr.io/parkervcp/yolks:dotnet_7"
+        },
+        "file_denylist": [],
+        "startup": "./VintagestoryServer --dataPath ./data --port={{SERVER_PORT}} --maxclients={{MAX_CLIENTS}} {{OPTIONS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Dedicated Server now running on Port \"}",
+          "logs": "{}",
+          "stop": "/stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vintage Story Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl jq\r\n\r\ndeclare -A API_URLS=(\r\n  [\"stable\"]=\"http://api.vintagestory.at/stable.json\"\r\n  [\"unstable\"]=\"http://api.vintagestory.at/unstable.json\"\r\n)\r\n\r\ndeclare -A DOWNLOAD_URLS=(\r\n  [\"stable\"]=\"https://cdn.vintagestory.at/gamefiles/stable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"unstable\"]=\"https://cdn.vintagestory.at/gamefiles/unstable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"pre\"]=\"https://cdn.vintagestory.at/gamefiles/pre/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n)\r\n\r\nBRANCH=\"${FILES_BRANCH}\"\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ] && [ \"${BRANCH}\" == \"pre\" ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please specify the version when using RELEASE BRANCH: pre\"\r\n  echo \"-----------------------------------------\"  \r\n  exit\r\nfi\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ]; then\r\n  API_URL=\"${API_URLS[$BRANCH]}\"\r\n  echo \"API URL: $API_URL\"\r\n  DOWNLOAD_URL=$(curl -SsL \"$API_URL\" | jq -r 'if ([.[]] | .[0].linuxserver.urls.cdn) != null then [.[]] | .[0].linuxserver.urls.cdn else [.[]] | .[0].linuxserver.urls.local end')\r\nelse\r\n  DOWNLOAD_URL=\"${DOWNLOAD_URLS[$BRANCH]}\"\r\nfi\r\n\r\necho \"Download URL: $DOWNLOAD_URL\"\r\n\r\ncd /mnt/server/ || exit\r\n\r\n# make sure to cleanup the prior installation else this might cause issue with old asset files that do not exist in the new version\r\nif [ -d \"assets\" ]; then\r\n  echo \"Removing old installation files\"\r\n  rm -rf assets/\r\n  rm -rf Lib/\r\nfi\r\ncurl -o vs_server.tar.gz \"${DOWNLOAD_URL}\"\r\ntar -xzf vs_server.tar.gz\r\n\r\nif [ $? -ne 0 ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please make sure the specified version exists: $RELEASE_VERSION\"\r\n  echo \"-----------------------------------------\"\r\n  rm vs_server.tar.gz\r\n  exit\r\nfi\r\n\r\nrm vs_server.tar.gz\r\nrm server.sh\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Start options",
+            "description": "",
+            "env_variable": "OPTIONS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Release branch",
+            "description": "",
+            "env_variable": "FILES_BRANCH",
+            "default_value": "stable",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:stable,unstable,pre",
+            "field_type": "text"
+          },
+          {
+            "name": "Release version",
+            "description": "",
+            "env_variable": "RELEASE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Sqlite temporary files directory",
+            "description": "Defines the location for the temporary files in sqlite. This is needed for the \"/db vacuum\" command (added in 1.19) since else it will use the /tmp folder which by default only has 100MB and is in memory.",
+            "env_variable": "SQLITE_TMPDIR",
+            "default_value": "/home/container/data/Backups",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "vintage-story-840d62b4e9ec",
+        "name": "Vintage Story",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/vintage-story-840d62b4e9ec.json",
+        "sha256": "973298cb859ea497d36ca0284dd9534951d747984cf6c5ac6410de5f5aa9504a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "vintage_story/egg-vintage-story.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/840d62b4e9ec.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-02-10T14:32:54+00:00",
+        "name": "Vintage Story",
+        "author": "mail@wuffy.eu",
+        "uuid": "270ab8c0-d108-4c05-a362-62d81e8063a5",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "image": "data:image/webp;base64,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",
+        "tags": [],
+        "features": [],
+        "docker_images": {
+          "Dotnet 10": "ghcr.io/pelican-eggs/yolks:dotnet_10",
+          "Dotnet 8": "ghcr.io/pelican-eggs/yolks:dotnet_8",
+          "Dotnet 7": "ghcr.io/pelican-eggs/yolks:dotnet_7"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Dedicated Server now running on Port \"}",
+          "logs": "{}",
+          "stop": "/stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vintage Story Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl jq\r\n\r\ndeclare -A API_URLS=(\r\n  [\"stable\"]=\"http://api.vintagestory.at/stable.json\"\r\n  [\"unstable\"]=\"http://api.vintagestory.at/unstable.json\"\r\n)\r\n\r\ndeclare -A DOWNLOAD_URLS=(\r\n  [\"stable\"]=\"https://cdn.vintagestory.at/gamefiles/stable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"unstable\"]=\"https://cdn.vintagestory.at/gamefiles/unstable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"pre\"]=\"https://cdn.vintagestory.at/gamefiles/pre/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n)\r\n\r\nBRANCH=\"${FILES_BRANCH}\"\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ] && [ \"${BRANCH}\" == \"pre\" ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please specify the version when using RELEASE BRANCH: pre\"\r\n  echo \"-----------------------------------------\"  \r\n  exit\r\nfi\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ]; then\r\n  API_URL=\"${API_URLS[$BRANCH]}\"\r\n  echo \"API URL: $API_URL\"\r\n  DOWNLOAD_URL=$(curl -SsL \"$API_URL\" | jq -r 'if ([.[]] | .[0].linuxserver.urls.cdn) != null then [.[]] | .[0].linuxserver.urls.cdn else [.[]] | .[0].linuxserver.urls.local end')\r\nelse\r\n  DOWNLOAD_URL=\"${DOWNLOAD_URLS[$BRANCH]}\"\r\nfi\r\n\r\necho \"Download URL: $DOWNLOAD_URL\"\r\n\r\ncd /mnt/server/ || exit\r\n\r\n# make sure to cleanup the prior installation else this might cause issue with old asset files that do not exist in the new version\r\nif [ -d \"assets\" ]; then\r\n  echo \"Removing old installation files\"\r\n  rm -rf assets/\r\n  rm -rf Lib/\r\nfi\r\ncurl -o vs_server.tar.gz \"${DOWNLOAD_URL}\"\r\ntar -xzf vs_server.tar.gz\r\n\r\nif [ $? -ne 0 ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please make sure the specified version exists: $RELEASE_VERSION\"\r\n  echo \"-----------------------------------------\"\r\n  rm vs_server.tar.gz\r\n  exit\r\nfi\r\n\r\nrm vs_server.tar.gz\r\nrm server.sh\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Start options",
+            "description": "",
+            "env_variable": "OPTIONS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "sort": 1
+          },
+          {
+            "name": "Release branch",
+            "description": "",
+            "env_variable": "FILES_BRANCH",
+            "default_value": "stable",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:stable,unstable,pre",
+            "sort": 2
+          },
+          {
+            "name": "Release version",
+            "description": "",
+            "env_variable": "RELEASE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": 3
+          },
+          {
+            "name": "Max Clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:256",
+            "sort": 4
+          },
+          {
+            "name": "Sqlite temporary files directory",
+            "description": "Defines the location for the temporary files in sqlite. This is needed for the \"/db vacuum\" command (added in 1.19) since else it will use the /tmp folder which by default only has 100MB and is in memory.",
+            "env_variable": "SQLITE_TMPDIR",
+            "default_value": "/home/container/data/Backups",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:40",
+            "sort": 5
+          }
+        ],
+        "startup": "./VintagestoryServer --dataPath ./data --port={{SERVER_PORT}} --maxclients={{MAX_CLIENTS}} {{OPTIONS}}"
+      }
+    },
+    {
+      "entry": {
+        "id": "vintage-story-8786495fd904",
+        "name": "Vintage Story",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/vintage-story-8786495fd904.json",
+        "sha256": "2bd96fe9a3242f75078b8b2bc4a9cef9ed2b16414496a32c10dce81e0056daf7",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "vintage_story/egg-vintage-story.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/8786495fd904.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-03-03T16:39:53+01:00",
+        "name": "Vintage Story",
+        "author": "mail@wuffy.eu",
+        "description": "Vintage Story is an uncompromising wilderness survival sandbox game inspired by lovecraftian horror themes. Find yourself in a ruined world reclaimed by nature and permeated by unnerving temporal disturbances. Relive the advent of human civilization, or take your own path.",
+        "features": [],
+        "docker_images": {
+          "Dotnet 8": "ghcr.io/ptero-eggs/yolks:dotnet_8",
+          "Dotnet 9": "ghcr.io/ptero-eggs/yolks:dotnet_9",
+          "Dotnet 10": "ghcr.io/ptero-eggs/yolks:dotnet_10"
+        },
+        "file_denylist": [],
+        "startup": "./VintagestoryServer --dataPath ./data --port={{SERVER_PORT}} --maxclients={{MAX_CLIENTS}} {{OPTIONS}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Dedicated Server now running on Port \"}",
+          "logs": "{}",
+          "stop": "/stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Vintage Story Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt -y install curl jq\r\n\r\ndeclare -A API_URLS=(\r\n  [\"stable\"]=\"http://api.vintagestory.at/stable.json\"\r\n  [\"unstable\"]=\"http://api.vintagestory.at/unstable.json\"\r\n)\r\n\r\ndeclare -A DOWNLOAD_URLS=(\r\n  [\"stable\"]=\"https://cdn.vintagestory.at/gamefiles/stable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"unstable\"]=\"https://cdn.vintagestory.at/gamefiles/unstable/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n  [\"pre\"]=\"https://cdn.vintagestory.at/gamefiles/pre/vs_server_linux-x64_${RELEASE_VERSION}.tar.gz\"\r\n)\r\n\r\nBRANCH=\"${FILES_BRANCH}\"\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ] && [ \"${BRANCH}\" == \"pre\" ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please specify the version when using RELEASE BRANCH: pre\"\r\n  echo \"-----------------------------------------\"  \r\n  exit\r\nfi\r\n\r\nif [ -z \"${RELEASE_VERSION}\" ] || [ \"${RELEASE_VERSION}\" == \"latest\" ]; then\r\n  API_URL=\"${API_URLS[$BRANCH]}\"\r\n  echo \"API URL: $API_URL\"\r\n  DOWNLOAD_URL=$(curl -SsL \"$API_URL\" | jq -r 'if ([.[]] | .[0].linuxserver.urls.cdn) != null then [.[]] | .[0].linuxserver.urls.cdn else [.[]] | .[0].linuxserver.urls.local end')\r\nelse\r\n  DOWNLOAD_URL=\"${DOWNLOAD_URLS[$BRANCH]}\"\r\nfi\r\n\r\necho \"Download URL: $DOWNLOAD_URL\"\r\n\r\ncd /mnt/server/ || exit\r\n\r\n# make sure to cleanup the prior installation else this might cause issue with old asset files that do not exist in the new version\r\nif [ -d \"assets\" ]; then\r\n  echo \"Removing old installation files\"\r\n  rm -rf assets/\r\n  rm -rf Lib/\r\nfi\r\ncurl -o vs_server.tar.gz \"${DOWNLOAD_URL}\"\r\ntar -xzf vs_server.tar.gz\r\n\r\nif [ $? -ne 0 ]; then\r\n  echo \"-----------------------------------------\"\r\n  echo \"Installation failed...\"\r\n  echo \"Please make sure the specified version exists: $RELEASE_VERSION\"\r\n  echo \"-----------------------------------------\"\r\n  rm vs_server.tar.gz\r\n  exit\r\nfi\r\n\r\nrm vs_server.tar.gz\r\nrm server.sh\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Start options",
+            "description": "",
+            "env_variable": "OPTIONS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:200",
+            "field_type": "text"
+          },
+          {
+            "name": "Release branch",
+            "description": "",
+            "env_variable": "FILES_BRANCH",
+            "default_value": "stable",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:stable,unstable,pre",
+            "field_type": "text"
+          },
+          {
+            "name": "Release version",
+            "description": "",
+            "env_variable": "RELEASE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Clients",
+            "description": "",
+            "env_variable": "MAX_CLIENTS",
+            "default_value": "16",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:256",
+            "field_type": "text"
+          },
+          {
+            "name": "Sqlite temporary files directory",
+            "description": "Defines the location for the temporary files in sqlite. This is needed for the \"/db vacuum\" command (added in 1.19) since else it will use the /tmp folder which by default only has 100MB and is in memory.",
+            "env_variable": "SQLITE_TMPDIR",
+            "default_value": "/home/container/data/Backups",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "voyagers-of-nera-4a034882a82f",
+        "name": "Voyagers of Nera",
+        "description": " Voyagers of Nera is a cooperative survival-crafting game where you must survive a magical ocean world brimming with lost spirits and deadly monsters. Sail to distant islands, build beautiful villages and surf across the waves with up to 10 players. ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/voyagers-of-nera-4a034882a82f.json",
+        "sha256": "10c133ab646195b40ae4284c9dcc9b52259e13bcb7d18c9601c8cf209c6c9297",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "voyagers_of_nera/egg-voyagers-of-nera.json",
+          "format": "PLCN_v3"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/4a034882a82f.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Voyagers of Nera",
+        "author": "quinten@pelican.dev",
+        "uuid": "ea67d6c6-3b4b-4987-b0ca-5514d86e3c16",
+        "description": " Voyagers of Nera is a cooperative survival-crafting game where you must survive a magical ocean world brimming with lost spirits and deadly monsters. Sail to distant islands, build beautiful villages and surf across the waves with up to 10 players. ",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "config": {
+          "files": "{\"Saved/PersistedData/CustomConfig/CustomHostServerUserSettings.ini\": {\"parser\": \"file\", \"find\": {\"HostServerDisplayName=\": \"HostServerDisplayName={{server.environment.DISPLAY_NAME}}\", \"HostServerPassword=\": \"HostServerPassword={{server.environment.SERVER_PASSWORD}}\", \"MaxPlayers=\": \"MaxPlayers={{server.environment.MAX_PLAYERS}}\", \"AutosaveTimerSeconds=\": \"AutosaveTimerSeconds={{server.environment.{AUTO_SAVE_TIMER_SECONDS}}\"}}}",
+          "startup": "{\"done\": \"Game Server API initialized\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n#They need it here ..\r\n./steamcmd.sh +force_install_dir /mnt/server/BoatGame/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n# Define the file path\r\nFILE=\"/mnt/server/BoatGame/Saved/PersistedData/CustomConfig/CustomHostServerUserSettings.ini\"\r\n\r\n# Create the directory if it doesn't exist\r\nDIR=$(dirname \"$FILE\")\r\nif [ ! -d \"$DIR\" ]; then\r\n    echo \"Directory $DIR not found. Creating it...\"\r\n    mkdir -p \"$DIR\"\r\nfi\r\n\r\n# Check if the file exists\r\nif [ ! -f \"$FILE\" ]; then\r\n    echo \"File not found. Creating $FILE...\"\r\n\r\n    cat <<EOF > \"$FILE\"\r\n[/Script/BoatGame.BGCustomHostServerSettings]\r\nHostServerDisplayName=${DISPLAY_NAME}\r\nHostServerPassword=${SERVER_PASSWORD}\r\nMaxPlayers=${MAX_PLAYERS}\r\nAutosaveTimerSeconds=${AUTO_SAVE_TIMER_SECONDS}\r\nEOF\r\n\r\n    echo \"File created and settings written to $FILE.\"\r\nelse\r\n    echo \"File already exists: $FILE\"\r\nfi\r\n\r\nif [ ! -f \"/mnt/server/BoatGame/Binaries/Win64/steam_appid.txt\" ]; then\r\n    echo \"3937860\" > /mnt/server/BoatGame/Binaries/Win64/steam_appid.txt\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "sort": 7,
+            "name": "Auto saveTimer Seconds",
+            "description": "How often your server will automatically save. It’s not recommended to adjust this setting unless you specifically have a reason to.",
+            "env_variable": "AUTO_SAVE_TIMER_SECONDS",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:10,900"
+          },
+          {
+            "sort": 3,
+            "name": "Auto Update",
+            "description": "Automatically update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean"
+          },
+          {
+            "sort": 4,
+            "name": "Display Name",
+            "description": "The public name of your server other players will see when browsing servers.",
+            "env_variable": "DISPLAY_NAME",
+            "default_value": "My_Super_Cool_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:30"
+          },
+          {
+            "sort": 6,
+            "name": "Max Players",
+            "description": "The maximum number of players allowed to be connected to your server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:0,10"
+          },
+          {
+            "sort": 5,
+            "name": "Server Password",
+            "description": "The password required for players to join your game.\n\nA blank value means the server will not be password-protected and is joinable by any player.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "noonewilleverguessthis",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash"
+          },
+          {
+            "sort": 1,
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3937860",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:3937860"
+          },
+          {
+            "sort": 2,
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1"
+          }
+        ],
+        "startup": "wine BoatGame/Binaries/Win64/BoatGameServer-Win64-Shipping.exe -log  -port={{SERVER_PORT}} & BG_PID=$!; tail -c0 -F ./BoatGame/Saved/Logs/BoatGame.log --pid=$BG_PID"
+      }
+    },
+    {
+      "entry": {
+        "id": "voyagers-of-nera-c347a29b97fc",
+        "name": "Voyagers of Nera",
+        "description": "Voyagers of Nera is a cooperative survival-crafting game for up to 10 players set in a vast ocean full of ancient ruins and diverse biomes. Nera is a magical ocean world full of beauty, magic, and danger. You are an Echo, descendants of the long-extinct protectors of this world.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/voyagers-of-nera-c347a29b97fc.json",
+        "sha256": "c06124c674a5402b4580036adcfb04336c0520f20c2c37fe6779de5cb58e557b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "voyagers_of_nera/egg-voyagers-of-nera.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/c347a29b97fc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-09-25T11:15:09+00:00",
+        "name": "Voyagers of Nera",
+        "author": "eggs@purpleflaghosting.com",
+        "description": "Voyagers of Nera is a cooperative survival-crafting game for up to 10 players set in a vast ocean full of ancient ruins and diverse biomes. Nera is a magical ocean world full of beauty, magic, and danger. You are an Echo, descendants of the long-extinct protectors of this world.",
+        "features": [],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine BoatGame/Binaries/Win64/BoatGameServer-Win64-Shipping.exe -Port={{SERVER_PORT}} -log -LoggingInShippingEnabled=true & tail -c0 --pid=$? -F BoatGame/Saved/Logs/BoatGame.log",
+        "config": {
+          "files": "{\"BoatGame/Saved/PersistedData/CustomConfig/CustomHostServerUserSettings.ini\": {\"parser\": \"ini\", \"find\": {\"[/Script/BoatGame.BGCustomHostServerSettings].HostServerDisplayName\": \"{{server.build.env.SERVER_NAME}}\", \"[/Script/BoatGame.BGCustomHostServerSettings].HostServerPassword\": \"{{server.build.env.SERVER_PASSWORD}}\", \"[/Script/BoatGame.BGCustomHostServerSettings].MaxPlayers\": \"{{server.build.env.MAX_PLAYERS}}\", \"[/Script/BoatGame.BGCustomHostServerSettings].AutosaveTimerSeconds\": \"{{server.build.env.AUTOSAVE_TIMER_SECONDS}}\"}}}",
+          "startup": "{\"done\": \"Successfully created session\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The public name of your server other players will see when browsing servers.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "A Pterodactyl Hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|max:50|regex:/^[A-Za-z0-9\\-_ ]+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password required for players to join your game.\r\n\r\nA blank value means the server will not be password-protected and is joinable by any player.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed to be connected to your server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Autosave Timer",
+            "description": "How often your server will automatically save. It’s not recommended to adjust this setting unless you specifically have a reason to.",
+            "env_variable": "AUTOSAVE_TIMER_SECONDS",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:10,900",
+            "field_type": "text"
+          },
+          {
+            "name": "Steam App ID",
+            "description": "Steam App ID to install",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3937860",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|numeric|in:3937860",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "Install Windows version of App from steam",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:1",
+            "field_type": "text"
+          },
+          {
+            "name": "Wine Debug",
+            "description": "Disable wine debug messages",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "XVFB",
+            "description": "Disable X virtual framebuffer",
+            "env_variable": "XVFB",
+            "default_value": "0",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean|in:0,1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "voyagers-of-nera-ee327f1ed650",
+        "name": "Voyagers of Nera",
+        "description": " Voyagers of Nera is a cooperative survival-crafting game where you must survive a magical ocean world brimming with lost spirits and deadly monsters. Sail to distant islands, build beautiful villages and surf across the waves with up to 10 players. ",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/voyagers-of-nera-ee327f1ed650.json",
+        "sha256": "281018e1f338d5935fa9f633f8d5ffc0372353d1069f55a1a3a89ddff0b7935a",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "voyagers_of_nera/pterodactyl-egg-voyagers-of-nera.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/ee327f1ed650.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-11-02T10:25:41+00:00",
+        "name": "Voyagers of Nera",
+        "author": "quinten@pelican.dev",
+        "description": " Voyagers of Nera is a cooperative survival-crafting game where you must survive a magical ocean world brimming with lost spirits and deadly monsters. Sail to distant islands, build beautiful villages and surf across the waves with up to 10 players. ",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "Wine Latest": "ghcr.io/parkervcp/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine BoatGame/Binaries/Win64/BoatGameServer-Win64-Shipping.exe -log  -port={{SERVER_PORT}} & BG_PID=$!; tail -c0 -F ./BoatGame/Saved/Logs/BoatGame.log --pid=$BG_PID",
+        "config": {
+          "files": "{\"Saved/PersistedData/CustomConfig/CustomHostServerUserSettings.ini\": {\"parser\": \"file\", \"find\": {\"HostServerDisplayName=\": \"HostServerDisplayName={{server.build.env.DISPLAY_NAME}}\", \"HostServerPassword=\": \"HostServerPassword={{server.build.env.SERVER_PASSWORD}}\", \"MaxPlayers=\": \"MaxPlayers={{server.build.env.MAX_PLAYERS}}\", \"AutosaveTimerSeconds=\": \"AutosaveTimerSeconds={{server.build.env.{AUTO_SAVE_TIMER_SECONDS}}\"}}}",
+          "startup": "{\"done\": \"Game Server API initialized\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n#They need it here ..\r\n./steamcmd.sh +force_install_dir /mnt/server/BoatGame/Binaries/Win64/ +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n# Define the file path\r\nFILE=\"/mnt/server/BoatGame/Saved/PersistedData/CustomConfig/CustomHostServerUserSettings.ini\"\r\n\r\n# Create the directory if it doesn't exist\r\nDIR=$(dirname \"$FILE\")\r\nif [ ! -d \"$DIR\" ]; then\r\n    echo \"Directory $DIR not found. Creating it...\"\r\n    mkdir -p \"$DIR\"\r\nfi\r\n\r\n# Check if the file exists\r\nif [ ! -f \"$FILE\" ]; then\r\n    echo \"File not found. Creating $FILE...\"\r\n\r\n    cat <<EOF > \"$FILE\"\r\n[/Script/BoatGame.BGCustomHostServerSettings]\r\nHostServerDisplayName=${DISPLAY_NAME}\r\nHostServerPassword=${SERVER_PASSWORD}\r\nMaxPlayers=${MAX_PLAYERS}\r\nAutosaveTimerSeconds=${AUTO_SAVE_TIMER_SECONDS}\r\nEOF\r\n\r\n    echo \"File created and settings written to $FILE.\"\r\nelse\r\n    echo \"File already exists: $FILE\"\r\nfi\r\n\r\nif [ ! -f \"/mnt/server/BoatGame/Binaries/Win64/steam_appid.txt\" ]; then\r\n    echo \"3937860\" > /mnt/server/BoatGame/Binaries/Win64/steam_appid.txt\r\nfi\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Auto saveTimer Seconds",
+            "description": "How often your server will automatically save. It’s not recommended to adjust this setting unless you specifically have a reason to.",
+            "env_variable": "AUTO_SAVE_TIMER_SECONDS",
+            "default_value": "300",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:10,900",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Automatically update the server on startup",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Display Name",
+            "description": "The public name of your server other players will see when browsing servers.",
+            "env_variable": "DISPLAY_NAME",
+            "default_value": "My_Super_Cool_Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|alpha_dash|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed to be connected to your server at once.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "10",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|int|between:0,10",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The password required for players to join your game.\n\nA blank value means the server will not be password-protected and is joinable by any player.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "noonewilleverguessthis",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|alpha_dash",
+            "field_type": "text"
+          },
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "3937860",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|in:3937860",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows Install",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "boolean|in:1",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "windrose-d89d76132ffb",
+        "name": "Windrose",
+        "description": "Embark on a PvE survival adventure in the Age of Piracy. Fight on land and sea, solo or with friends. Build, craft and explore vast open world filled with dark secrets. Master soulslite combat and take on challenging bosses, command your ship and plunder unspoken treasures!",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/windrose-d89d76132ffb.json",
+        "sha256": "c3a40f57764e64c620a886664eb15bf5827661fc52a6ddcfca1442872784598b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "windrose/egg-windrose.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/d89d76132ffb.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-19T15:11:15+02:00",
+        "name": "Windrose",
+        "author": "ptero@redbananaofficial.com",
+        "description": "Embark on a PvE survival adventure in the Age of Piracy. Fight on land and sea, solo or with friends. Build, craft and explore vast open world filled with dark secrets. Master soulslite combat and take on challenging bosses, command your ship and plunder unspoken treasures!",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:wine_latest": "ghcr.io/ptero-eggs/yolks:wine_latest"
+        },
+        "file_denylist": [],
+        "startup": "wine /home/container/R5/Binaries/Win64/WindroseServer-Win64-Shipping.exe -log & WINDROSE_PID=$!; tail -c0 -F /home/container/R5/Saved/Logs/R5.log --pid=$WINDROSE_PID",
+        "config": {
+          "files": "{\"R5/ServerDescription.json\": {\"parser\": \"json\", \"find\": {\"ServerDescription_Persistent.ServerName\": \"{{server.build.env.SERVER_NAME}}\", \"ServerDescription_Persistent.InviteCode\": \"{{server.build.env.INVITE_CODE}}\", \"ServerDescription_Persistent.IsPasswordProtected\": \"{{server.build.env.SERVER_PASSWORD_PROTECTED}}\", \"ServerDescription_Persistent.Password\": \"{{server.build.env.SERVER_PASSWORD}}\", \"ServerDescription_Persistent.MaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\", \"ServerDescription_Persistent.P2pProxyAddress\": \"{{server.build.env.P2P_PROXY}}\", \"ServerDescription_Persistent.UseDirectConnection\": \"{{server.build.env.USE_DIRECT_CONNECTION}}\", \"ServerDescription_Persistent.DirectConnectionServerAddress\": \"{{server.build.default.ip}}\", \"ServerDescription_Persistent.DirectConnectionServerPort\": \"{{server.build.default.port}}\"}}}",
+          "startup": "{\"done\": \"Bringing up level for play took\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The server name",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl Windrose Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:40",
+            "field_type": "text"
+          },
+          {
+            "name": "Use Direct Connection",
+            "description": "Enable direct connection instead of invite codes, when set to 1 (enabled) it will disable the use of the Invite Code.",
+            "env_variable": "USE_DIRECT_CONNECTION",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Password",
+            "description": "The server password",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:30",
+            "field_type": "text"
+          },
+          {
+            "name": "Max players",
+            "description": "Maximum allowed players",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Decide if you want to update your server",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Invite code",
+            "description": "Invite code (0-9, a-z, A-Z). Min 6 chars, case sensitive. Leave empty to generate a random code on each server start. Ignored when Direct Connection is enabled.",
+            "env_variable": "INVITE_CODE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "nullable|string|min:6|max:32|regex:/^[a-zA-Z0-9]+$/",
+            "field_type": "text"
+          },
+          {
+            "name": "Password Protected",
+            "description": "Off by default, enable this when using a server password",
+            "env_variable": "SERVER_PASSWORD_PROTECTED",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "P2P PROXY",
+            "description": "Don't change this",
+            "env_variable": "P2P_PROXY",
+            "default_value": "127.0.0.1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:127.0.0.1",
+            "field_type": "text"
+          },
+          {
+            "name": "App id",
+            "description": "The ID corresponding to the game to download.",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "4129620",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:4129620",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEDEBUG",
+            "description": "",
+            "env_variable": "WINEDEBUG",
+            "default_value": "-all",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINEPATH",
+            "description": "",
+            "env_variable": "WINEPATH",
+            "default_value": "/home/container",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "WINETRICKS_RUN",
+            "description": "",
+            "env_variable": "WINETRICKS_RUN",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "nullable|string|",
+            "field_type": "text"
+          },
+          {
+            "name": "Windows",
+            "description": "",
+            "env_variable": "WINDOWS_INSTALL",
+            "default_value": "1",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Winearch",
+            "description": "",
+            "env_variable": "WINEARCH",
+            "default_value": "win64",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

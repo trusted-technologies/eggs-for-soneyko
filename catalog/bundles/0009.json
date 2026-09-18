@@ -1,0 +1,992 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "python-generic-881c37e3c25a",
+        "name": "python generic",
+        "description": "A Generic Python Egg for Pterodactyl\r\n\r\nTested with: https://github.com/Ispira/pixel-bot",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/python-generic-881c37e3c25a.json",
+        "sha256": "0412b132d7c8d43b3b855892cdba871795ed9be37670ebcbccd5f04118c05837",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "generic/python/egg-python-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/881c37e3c25a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-02T14:11:47+02:00",
+        "name": "python generic",
+        "author": "parker@parkervcp.com",
+        "description": "A Generic Python Egg for Pterodactyl\r\n\r\nTested with: https://github.com/Ispira/pixel-bot",
+        "features": null,
+        "docker_images": {
+          "Python 3.12": "ghcr.io/parkervcp/yolks:python_3.12",
+          "Python 3.11": "ghcr.io/parkervcp/yolks:python_3.11",
+          "Python 3.10": "ghcr.io/parkervcp/yolks:python_3.10",
+          "Python 3.9": "ghcr.io/parkervcp/yolks:python_3.9",
+          "Python 3.8": "ghcr.io/parkervcp/yolks:python_3.8",
+          "Python 3.7": "ghcr.io/parkervcp/yolks:python_3.7",
+          "Python 2.7": "ghcr.io/parkervcp/yolks:python_2.7"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ \"{{AUTO_UPDATE}}\" == \"1\" ]]; then git pull; fi; if [[ ! -z \"{{PY_PACKAGES}}\" ]]; then pip install -U --prefix .local {{PY_PACKAGES}}; fi; if [[ -f /home/container/${REQUIREMENTS_FILE} ]]; then pip install -U --prefix .local -r ${REQUIREMENTS_FILE}; fi; /usr/local/bin/python /home/container/{{PY_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Python App Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl jq file unzip make gcc g++ libtool\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git python repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\nexport HOME=/mnt/server\r\n\r\necho \"Installing python requirements into folder\"\r\nif [[ ! -z ${PY_PACKAGES} ]]; then\r\n    pip install -U --prefix .local ${PY_PACKAGES}\r\nfi\r\n\r\nif [ -f /mnt/server/requirements.txt ]; then\r\n    pip install -U --prefix .local -r ${REQUIREMENTS_FILE}\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "python:3.8-slim-bookworm",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "Git repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App py file",
+            "description": "The file that starts the App.",
+            "env_variable": "PY_FILE",
+            "default_value": "app.py",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Python packages",
+            "description": "Install additional python packages.\r\n\r\nUse spaces to separate",
+            "env_variable": "PY_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Requirements file",
+            "description": "if there are other requirements files to choose from.",
+            "env_variable": "REQUIREMENTS_FILE",
+            "default_value": "requirements.txt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "python-generic-f9620069d9f7",
+        "name": "python generic",
+        "description": "A Generic Python Egg for Pterodactyl\r\n\r\nTested with: https://github.com/Ispira/pixel-bot",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/python-generic-f9620069d9f7.json",
+        "sha256": "811ac34640b0a95c99eab07b200c3d7a250f30afc66386b1cbc723d660bba6a6",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "python/egg-python-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/f9620069d9f7.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2025-05-03T00:23:00+00:00",
+        "name": "python generic",
+        "author": "parker@parkervcp.com",
+        "description": "A Generic Python Egg for Pterodactyl\r\n\r\nTested with: https://github.com/Ispira/pixel-bot",
+        "features": null,
+        "docker_images": {
+          "Python 3.13": "ghcr.io/ptero-eggs/yolks:python_3.13",
+          "Python 3.12": "ghcr.io/ptero-eggs/yolks:python_3.12",
+          "Python 3.11": "ghcr.io/ptero-eggs/yolks:python_3.11",
+          "Python 3.10": "ghcr.io/ptero-eggs/yolks:python_3.10",
+          "Python 3.9": "ghcr.io/ptero-eggs/yolks:python_3.9",
+          "Python 3.8": "ghcr.io/ptero-eggs/yolks:python_3.8",
+          "Python 3.7": "ghcr.io/ptero-eggs/yolks:python_3.7",
+          "Python 2.7": "ghcr.io/ptero-eggs/yolks:python_2.7"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ \"{{AUTO_UPDATE}}\" == \"1\" ]]; then git pull; fi; if [[ ! -z \"{{PY_PACKAGES}}\" ]]; then pip install -U --prefix .local {{PY_PACKAGES}}; fi; if [[ -f /home/container/${REQUIREMENTS_FILE} ]]; then pip install -U --prefix .local -r ${REQUIREMENTS_FILE}; fi; /usr/local/bin/python /home/container/{{PY_FILE}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"change this part\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Python App Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git curl jq file unzip make gcc g++ libtool\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nif [ \"${USER_UPLOAD}\" == \"true\" ] || [ \"${USER_UPLOAD}\" == \"1\" ]; then\r\n    echo -e \"assuming user knows what they are doing have a good day.\"\r\n    exit 0\r\nfi\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git python repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\nexport HOME=/mnt/server\r\n\r\necho \"Installing python requirements into folder\"\r\nif [[ ! -z ${PY_PACKAGES} ]]; then\r\n    pip install -U --prefix .local ${PY_PACKAGES}\r\nfi\r\n\r\nif [ -f /mnt/server/requirements.txt ]; then\r\n    pip install -U --prefix .local -r ${REQUIREMENTS_FILE}\r\nfi\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "python:3.8-slim-bookworm",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "Git repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "User Uploaded Files",
+            "description": "Skip all the install stuff if you are letting a user upload files.\r\n\r\n0 = false (default)\r\n1 = true",
+            "env_variable": "USER_UPLOAD",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "App py file",
+            "description": "The file that starts the App.",
+            "env_variable": "PY_FILE",
+            "default_value": "app.py",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Additional Python packages",
+            "description": "Install additional python packages.\r\n\r\nUse spaces to separate",
+            "env_variable": "PY_PACKAGES",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Requirements file",
+            "description": "if there are other requirements files to choose from.",
+            "env_variable": "REQUIREMENTS_FILE",
+            "default_value": "requirements.txt",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rathole-20a05698bba3",
+        "name": "Rathole",
+        "description": "A lightweight and high-performance reverse proxy for NAT traversal, written in Rust. An alternative to frp and ngrok.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/rathole-20a05698bba3.json",
+        "sha256": "b2b79c512e0859a59baa8f22d782240366d1c061fbfa12148bb193ae61751ec3",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "rathole/egg-pterodactyl-rathole.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/20a05698bba3.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-01-03T15:04:48+00:00",
+        "name": "Rathole",
+        "author": "tunayada@gmail.com",
+        "description": "A lightweight and high-performance reverse proxy for NAT traversal, written in Rust. An alternative to frp and ngrok.",
+        "features": null,
+        "docker_images": {
+          "Rust_latest": "ghcr.io/pelican-eggs/yolks:rust_latest"
+        },
+        "file_denylist": [],
+        "startup": "./rathole server.toml",
+        "config": {
+          "files": "{\"server.toml\": {\"parser\": \"file\", \"find\": {\"token = \\\"(.*)\\\"\": \"token = \\\"{{server.build.env.TOKEN}}\\\"\", \"bind_addr = \\\"0.0.0.0:(.*)\\\"\": \"bind_addr = \\\"0.0.0.0:{{server.build.default.port}}\\\"\"}}}",
+          "startup": "{\"done\": [\"Listening at \"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\ncd /mnt/server\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/rathole-org/rathole/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/rathole-org/rathole/releases\")\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"aarch64\")\r\n\r\nif [ \"${ARCH}\" == \"aarch64\" ]; then\r\n    MATCH=rathole-aarch64-unknown-linux-musl.zip\r\nelse\r\n    MATCH=rathole-x86_64-unknown-linux-gnu.zip\r\nfi\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo \"${LATEST_JSON}\" | jq -r \".assets[].browser_download_url\" | grep -i \"${MATCH}\")\r\n    fi\r\nfi\r\n\r\necho \"Download url: ${DOWNLOAD_URL}\"\r\ncurl -ssL -o rathole.zip ${DOWNLOAD_URL}\r\nunzip -o rathole.zip\r\nrm rathole.zip\r\n\r\ncat <<EOF > server.toml\r\n[server]\r\nbind_addr = \"0.0.0.0:${SERVER_PORT}\"\r\n\r\n[server.services.my_nas_ssh]\r\ntoken = \"${TOKEN}\"\r\nbind_addr = \"0.0.0.0:${SERVER_PORT}\"\r\nEOF\r\n\r\nchmod +x rathole\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/pelican-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Secret",
+            "description": "Your random token",
+            "env_variable": "TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:5|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rathole-2d833f75cd22",
+        "name": "Rathole",
+        "description": "A lightweight and high-performance reverse proxy for NAT traversal, written in Rust. An alternative to frp and ngrok.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/rathole-2d833f75cd22.json",
+        "sha256": "1dd383a5ec7bcf88e373ff46b95e43899d6b6ac35e43ab03f21dabff901d0ebb",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "rathole/egg-rathole.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/2d833f75cd22.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:53+00:00",
+        "name": "Rathole",
+        "author": "tunayada@gmail.com",
+        "description": "A lightweight and high-performance reverse proxy for NAT traversal, written in Rust. An alternative to frp and ngrok.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:rust_latest": "ghcr.io/ptero-eggs/yolks:rust_latest"
+        },
+        "file_denylist": [],
+        "startup": "./rathole server.toml",
+        "config": {
+          "files": "{\"server.toml\": {\"parser\": \"ini\", \"find\": {\"server.bind_addr\": \"\\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"server.services.test.token\": \"\\\"{{server.build.env.TOKEN}}\\\"\", \"server.services.test.bind_addr\": \"\\\"0.0.0.0:{{server.build.default.port}}\\\"\"}}}",
+          "logs": "{}",
+          "startup": "{\"done\": [\"Listening at \"]}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/rapiz1/rathole/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/rapiz1/rathole/releases\")\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"aarch64\")\r\n\r\nif [\"${ARCH}\" == \"aarch64\"]; then\r\n    MATCH=rathole-aarch64-unknown-linux-musl.zip\r\nelse\r\n    MATCH=rathole-x86_64-unknown-linux-gnu.zip\r\nfi\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho \"Download url: ${DOWNLOAD_URL}\"\r\ncurl -ssL -o rathole.zip ${DOWNLOAD_URL}\r\nunzip rathole.zip\r\nrm rathole.zip\r\ntouch server.toml\r\n\r\nprintf \"[server]\\nbind_addr=\\\"0.0.0.0:${SERVER_PORT}\\\"\\n\\n[server.services.test]\\ntoken=\\\"${TOKEN}\\\"\\nbind_addr=\\\"0.0.0.0:${SERVER_PORT}\\\"\" > server.toml\r\nchmod +x rathole\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Secret",
+            "description": "Your random token",
+            "env_variable": "TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:5|max:60",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rathole-77d0fbc09c31",
+        "name": "Rathole",
+        "description": "A lightweight and high-performance reverse proxy for NAT traversal, written in Rust. An alternative to frp and ngrok.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/rathole-77d0fbc09c31.json",
+        "sha256": "6c9304541dae13a999f72fc1cddefe32b0c4c8c34020f430570b79034815a398",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "software/rathole/egg-rathole.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/77d0fbc09c31.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-12-16T14:03:42+01:00",
+        "name": "Rathole",
+        "author": "tunayada@gmail.com",
+        "description": "A lightweight and high-performance reverse proxy for NAT traversal, written in Rust. An alternative to frp and ngrok.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:rust_latest": "ghcr.io/parkervcp/yolks:rust_latest"
+        },
+        "file_denylist": [],
+        "startup": "./rathole server.toml",
+        "config": {
+          "files": "{\"server.toml\": {\"parser\": \"ini\", \"find\": {\"server.bind_addr\": \"\\\"0.0.0.0:{{server.build.default.port}}\\\"\", \"server.services.test.token\": \"\\\"{{server.build.env.TOKEN}}\\\"\", \"server.services.test.bind_addr\": \"\\\"0.0.0.0:{{server.build.default.port}}\\\"\"}}}",
+          "startup": "{\"done\": [\"Listening at \"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n\r\n## get release info and download links\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/rapiz1/rathole/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/rapiz1/rathole/releases\")\r\nARCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"amd64\" || echo \"aarch64\")\r\n\r\nif [\"${ARCH}\" == \"aarch64\"]; then\r\n    MATCH=rathole-aarch64-unknown-linux-musl.zip\r\nelse\r\n    MATCH=rathole-x86_64-unknown-linux-gnu.zip\r\nfi\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i ${MATCH})\r\nelse\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i ${MATCH})\r\n    else\r\n        echo -e \"defaulting to latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url)\r\n    fi\r\nfi\r\n\r\necho \"Download url: ${DOWNLOAD_URL}\"\r\ncurl -ssL -o rathole.zip ${DOWNLOAD_URL}\r\nunzip rathole.zip\r\nrm rathole.zip\r\ntouch server.toml\r\n\r\nprintf \"[server]\\nbind_addr=\\\"0.0.0.0:${SERVER_PORT}\\\"\\n\\n[server.services.test]\\ntoken=\\\"${TOKEN}\\\"\\nbind_addr=\\\"0.0.0.0:${SERVER_PORT}\\\"\" > server.toml\r\nchmod +x rathole\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Version",
+            "description": "",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          },
+          {
+            "name": "Secret",
+            "description": "Your random token",
+            "env_variable": "TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:5|max:60",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "reposilite-5c316367737a",
+        "name": "Reposilite",
+        "description": "Lightweight and easy-to-use repository management software dedicated for Maven based artifacts in the JVM ecosystem.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/reposilite-5c316367737a.json",
+        "sha256": "eb53aa5560a710550a4a2cda8915cc5b785aa76b60aa481219db25425d8ac334",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/application-eggs",
+          "commit": "122086603fce7b6582ad8cce7982c4367e2ea572",
+          "path": "reposilite/egg-reposilite.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--application-eggs/5c316367737a.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:54+00:00",
+        "name": "Reposilite",
+        "author": "mk@kcra.me",
+        "description": "Lightweight and easy-to-use repository management software dedicated for Maven based artifacts in the JVM ecosystem.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_11": "ghcr.io/pterodactyl/yolks:java_11",
+          "ghcr.io/pterodactyl/yolks:java_16": "ghcr.io/pterodactyl/yolks:java_16",
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17",
+          "ghcr.io/pterodactyl/yolks:java_21": "ghcr.io/pterodactyl/yolks:java_21",
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xmx{{SERVER_MEMORY}}M -Dreposilite.port={{SERVER_PORT}} -jar reposilite.jar --port {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Done (\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/sh\r\n# Switch to mounted directory\r\ncd /mnt/server\r\n# Find latest Reposilite version, if needed\r\nif [ \"$REPOSILITE_VERSION\" == \"latest\" ]; then\r\n    REPOSILITE_VERSION=$(grep -oPm1 \"(?<=<latest>)[^<]+\" <<< \"$(curl -s https://maven.reposilite.com/releases/com/reposilite/reposilite/maven-metadata.xml)\")\r\nfi\r\n# Check if -all suffixed jar is available\r\nstatus_code=$(curl --write-out '%{http_code}' -X HEAD -s -o /dev/null https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}-all.jar)\r\n# Download new Reposilite\r\nif [ \"$status_code\" == 200 ]; then\r\n    curl -o reposilite.jar https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}-all.jar\r\nelse\r\n    curl -o reposilite.jar https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}.jar\r\nfi"
+          }
+        },
+        "variables": [
+          {
+            "name": "Reposilite version",
+            "description": "The version of Reposilite.",
+            "env_variable": "REPOSILITE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "reposilite-94d2dab191fd",
+        "name": "Reposilite",
+        "description": "Lightweight and easy-to-use repository management software dedicated for Maven based artifacts in the JVM ecosystem.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/reposilite-94d2dab191fd.json",
+        "sha256": "dee846555bd79861f60bd19097de56d46d8023c7a6e79ce8d6fcdc7d057326b2",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "reposilite/egg-reposilite.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--software/94d2dab191fd.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:54+00:00",
+        "name": "Reposilite",
+        "author": "mk@kcra.me",
+        "uuid": "0510b522-bea9-4c5c-a726-22f5ca8ea583",
+        "description": "Lightweight and easy-to-use repository management software dedicated for Maven based artifacts in the JVM ecosystem.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8",
+          "ghcr.io/pterodactyl/yolks:java_11": "ghcr.io/pterodactyl/yolks:java_11",
+          "ghcr.io/pterodactyl/yolks:java_16": "ghcr.io/pterodactyl/yolks:java_16",
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17",
+          "ghcr.io/pterodactyl/yolks:java_21": "ghcr.io/pterodactyl/yolks:java_21"
+        },
+        "file_denylist": [],
+        "startup": "java -Xmx{{SERVER_MEMORY}}M -Dreposilite.port={{SERVER_PORT}} -jar reposilite.jar --port {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Done (\"}",
+          "logs": "{}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/sh\r\n# Switch to mounted directory\r\ncd /mnt/server\r\n# Find latest Reposilite version, if needed\r\nif [ \"$REPOSILITE_VERSION\" == \"latest\" ]; then\r\n    REPOSILITE_VERSION=$(grep -oPm1 \"(?<=<latest>)[^<]+\" <<< \"$(curl -s https://maven.reposilite.com/releases/com/reposilite/reposilite/maven-metadata.xml)\")\r\nfi\r\n# Check if -all suffixed jar is available\r\nstatus_code=$(curl --write-out '%{http_code}' -X HEAD -s -o /dev/null https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}-all.jar)\r\n# Download new Reposilite\r\nif [ \"$status_code\" == 200 ]; then\r\n    curl -o reposilite.jar https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}-all.jar\r\nelse\r\n    curl -o reposilite.jar https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}.jar\r\nfi",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Reposilite version",
+            "description": "The version of Reposilite.",
+            "env_variable": "REPOSILITE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "reposilite-eefa773e4899",
+        "name": "Reposilite",
+        "description": "Lightweight and easy-to-use repository management software dedicated for Maven based artifacts in the JVM ecosystem.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/reposilite-eefa773e4899.json",
+        "sha256": "69b3e4af33f1281a68b7e2adc9902ebc07c54fe256a5f936ac333abb66dd53ce",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/software",
+          "commit": "c9407659fa8a99a97966bfe91cc4eede58a25a87",
+          "path": "reposilite/egg-pterodactyl-reposilite.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "software/reposilite/egg-reposilite.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--software/eefa773e4899.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:40:54+00:00",
+        "name": "Reposilite",
+        "author": "mk@kcra.me",
+        "description": "Lightweight and easy-to-use repository management software dedicated for Maven based artifacts in the JVM ecosystem.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/pterodactyl/yolks:java_11": "ghcr.io/pterodactyl/yolks:java_11",
+          "ghcr.io/pterodactyl/yolks:java_16": "ghcr.io/pterodactyl/yolks:java_16",
+          "ghcr.io/pterodactyl/yolks:java_17": "ghcr.io/pterodactyl/yolks:java_17",
+          "ghcr.io/pterodactyl/yolks:java_21": "ghcr.io/pterodactyl/yolks:java_21",
+          "ghcr.io/pterodactyl/yolks:java_8": "ghcr.io/pterodactyl/yolks:java_8"
+        },
+        "file_denylist": [],
+        "startup": "java -Xmx{{SERVER_MEMORY}}M -Dreposilite.port={{SERVER_PORT}} -jar reposilite.jar --port {{SERVER_PORT}}",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \"Done (\"}",
+          "stop": "stop"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/sh\r\n# Switch to mounted directory\r\ncd /mnt/server\r\n# Find latest Reposilite version, if needed\r\nif [ \"$REPOSILITE_VERSION\" == \"latest\" ]; then\r\n    REPOSILITE_VERSION=$(grep -oPm1 \"(?<=<latest>)[^<]+\" <<< \"$(curl -s https://maven.reposilite.com/releases/com/reposilite/reposilite/maven-metadata.xml)\")\r\nfi\r\n# Check if -all suffixed jar is available\r\nstatus_code=$(curl --write-out '%{http_code}' -X HEAD -s -o /dev/null https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}-all.jar)\r\n# Download new Reposilite\r\nif [ \"$status_code\" == 200 ]; then\r\n    curl -o reposilite.jar https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}-all.jar\r\nelse\r\n    curl -o reposilite.jar https://maven.reposilite.com/releases/com/reposilite/reposilite/${REPOSILITE_VERSION}/reposilite-${REPOSILITE_VERSION}.jar\r\nfi"
+          }
+        },
+        "variables": [
+          {
+            "name": "Reposilite version",
+            "description": "The version of Reposilite.",
+            "env_variable": "REPOSILITE_VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-generic-9bc67b73a7ed",
+        "name": "rust generic",
+        "description": "Creates a container that runs rust with cargo.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/rust-generic-9bc67b73a7ed.json",
+        "sha256": "40be7b27bc8bbfcddb1710ea6bfc5c4e6f86ff7254a899d49e7ec03b54a98674",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pelican-eggs/generic",
+          "commit": "18aeeb4bb54e04ccaf3410623afcccaec5efab82",
+          "path": "rust/egg-pterodactyl-rust-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [
+          {
+            "repository": "pelican-eggs/eggs",
+            "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+            "path": "generic/rust/egg-rust-generic.json",
+            "format": "PTDL_v2"
+          }
+        ],
+        "original_path": "originals/pelican-eggs--generic/9bc67b73a7ed.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-02T14:43:53+00:00",
+        "name": "rust generic",
+        "author": "ethan@ethancoward.dev",
+        "description": "Creates a container that runs rust with cargo.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/parkervcp/yolks:rust_1.31": "ghcr.io/parkervcp/yolks:rust_1.31",
+          "ghcr.io/parkervcp/yolks:rust_1.56": "ghcr.io/parkervcp/yolks:rust_1.56",
+          "ghcr.io/parkervcp/yolks:rust_1.60": "ghcr.io/parkervcp/yolks:rust_1.60",
+          "ghcr.io/parkervcp/yolks:rust_latest": "ghcr.io/parkervcp/yolks:rust_latest"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; cargo run --release",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": [\"change this part\"]}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# Rust Bot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\nexport HOME=/mnt/server\r\n\r\necho -e \"install complete\"\r\nexit 0"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "Git repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "rust-generic-b95c7e9f14f1",
+        "name": "rust generic",
+        "description": "Creates a container that runs rust with cargo.",
+        "category": "applications",
+        "kind": "preset",
+        "path": "eggs/applications/rust-generic-b95c7e9f14f1.json",
+        "sha256": "48dc8d4650224b6aad312618ccaee93b88f087b9bcc9719b51b4e3069c157c56",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 512,
+          "disk_mb": 5120
+        },
+        "upstream": {
+          "repository": "pterodactyl/generic-eggs",
+          "commit": "6e8d2546e493937ede885a17d64b7c4a368cacec",
+          "path": "rust/egg-rust-generic.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--generic-eggs/b95c7e9f14f1.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2022-10-01T18:32:46+01:00",
+        "name": "rust generic",
+        "author": "ethan@ethancoward.dev",
+        "description": "Creates a container that runs rust with cargo.",
+        "features": null,
+        "docker_images": {
+          "ghcr.io/ptero-eggs/yolks:rust_latest": "ghcr.io/ptero-eggs/yolks:rust_latest",
+          "ghcr.io/ptero-eggs/yolks:rust_1.60": "ghcr.io/ptero-eggs/yolks:rust_1.60",
+          "ghcr.io/ptero-eggs/yolks:rust_1.56": "ghcr.io/ptero-eggs/yolks:rust_1.56",
+          "ghcr.io/ptero-eggs/yolks:rust_1.31": "ghcr.io/ptero-eggs/yolks:rust_1.31"
+        },
+        "file_denylist": [],
+        "startup": "if [[ -d .git ]] && [[ {{AUTO_UPDATE}} == \"1\" ]]; then git pull; fi; cargo run --release",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": [\"change this part\"]}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# Rust Bot Installation Script\r\n#\r\n# Server Files: /mnt/server\r\napt update\r\napt install -y git\r\n\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n## add git ending if it's not on the address\r\nif [[ ${GIT_ADDRESS} != *.git ]]; then\r\n    GIT_ADDRESS=${GIT_ADDRESS}.git\r\nfi\r\n\r\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\r\n    echo -e \"using anon api call\"\r\nelse\r\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\r\nfi\r\n\r\n## pull git js bot repo\r\nif [ \"$(ls -A /mnt/server)\" ]; then\r\n    echo -e \"/mnt/server directory is not empty.\"\r\n    if [ -d .git ]; then\r\n        echo -e \".git directory exists\"\r\n        if [ -f .git/config ]; then\r\n            echo -e \"loading info from git config\"\r\n            ORIGIN=$(git config --get remote.origin.url)\r\n        else\r\n            echo -e \"files found with no git config\"\r\n            echo -e \"closing out without touching things to not break anything\"\r\n            exit 10\r\n        fi\r\n    fi\r\n\r\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\r\n        echo \"pulling latest from github\"\r\n        git pull\r\n    fi\r\nelse\r\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\r\n    if [ -z ${BRANCH} ]; then\r\n        echo -e \"cloning default branch\"\r\n        git clone ${GIT_ADDRESS} .\r\n    else\r\n        echo -e \"cloning ${BRANCH}'\"\r\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\r\n    fi\r\n\r\nfi\r\n\r\nexport HOME=/mnt/server\r\n\r\necho -e \"install complete\"\r\nexit 0",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Git Repo Address",
+            "description": "Git repo to clone\r\n\r\nI.E. https://github.com/parkervcp/repo_name",
+            "env_variable": "GIT_ADDRESS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Branch",
+            "description": "What branch to pull from github.\r\n\r\nDefault is blank to pull the repo default branch",
+            "env_variable": "BRANCH",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Pull the latest files on startup when using a GitHub repo.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Username",
+            "description": "Username to auth with git.",
+            "env_variable": "USERNAME",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          },
+          {
+            "name": "Git Access Token",
+            "description": "Password to use with git.\r\n\r\nIt's best practice to use a Personal Access Token.\r\nhttps://github.com/settings/tokens\r\nhttps://gitlab.com/-/profile/personal_access_tokens",
+            "env_variable": "ACCESS_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}

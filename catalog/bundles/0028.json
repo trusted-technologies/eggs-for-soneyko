@@ -1,0 +1,1212 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "entry": {
+        "id": "barotrauma-7f1b71d34b79",
+        "name": "Barotrauma",
+        "description": "Barotrauma is a 2D co-op survival horror submarine simulator, inspired by games like FTL: Faster Than Light, Rimworld, Dwarf Fortress and Space Station 13. It’s a Sci-Fi game that combines ragdoll physics and alien sea monsters with teamwork and existential fear.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/barotrauma-7f1b71d34b79.json",
+        "sha256": "f138c93dda201db64e68ef9b302e12085cc60c19726f34cbf0583228dc598a70",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "barotrauma/egg-barotrauma.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/7f1b71d34b79.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-02-02T10:11:29+01:00",
+        "name": "Barotrauma",
+        "author": "admin@softwarenoob.com",
+        "description": "Barotrauma is a 2D co-op survival horror submarine simulator, inspired by games like FTL: Faster Than Light, Rimworld, Dwarf Fortress and Space Station 13. It’s a Sci-Fi game that combines ragdoll physics and alien sea monsters with teamwork and existential fear.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./DedicatedServer -batchmode 2>&1 | sed -r \"s/\\x1B\\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1026340",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1026340",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "barotrauma-c8d1cb2e6803",
+        "name": "Barotrauma",
+        "description": "Barotrauma is a 2D co-op survival horror submarine simulator, inspired by games like FTL: Faster Than Light, Rimworld, Dwarf Fortress and Space Station 13. It’s a Sci-Fi game that combines ragdoll physics and alien sea monsters with teamwork and existential fear.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/barotrauma-c8d1cb2e6803.json",
+        "sha256": "20264c73f317e9b6933806acfe06b3239f0bde2ef6ada4110a29f9734b43f338",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "barotrauma/egg-barotrauma.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/c8d1cb2e6803.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "Barotrauma",
+        "author": "admin@softwarenoob.com",
+        "uuid": "6ef6233c-a525-47c9-9e7a-f3a40258c3bf",
+        "description": "Barotrauma is a 2D co-op survival horror submarine simulator, inspired by games like FTL: Faster Than Light, Rimworld, Dwarf Fortress and Space Station 13. It’s a Sci-Fi game that combines ragdoll physics and alien sea monsters with teamwork and existential fear.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./DedicatedServer -batchmode 2>&1 | sed -r \"s/\\x1B\\[([0-9]{1,3}(;[0-9]{1,2})?)?[mGK]//g\"",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \"Server started\"}",
+          "logs": "{}",
+          "stop": "^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "SRCDS_APPID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "1026340",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|in:1026340",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "1 = on; 0 = off",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "battalion-legacy-039432e8db57",
+        "name": "BATTALION: Legacy",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/battalion-legacy-039432e8db57.json",
+        "sha256": "57e86f8437efd66fdd91833fb139c2cece2a61a58dbe6210714fd6531daf5c84",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "battalion_legacy/egg-pterodactyl-b-a-t-t-a-l-i-o-n--legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/039432e8db57.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-06-01T00:03:44+00:00",
+        "name": "BATTALION: Legacy",
+        "author": "diedyesterdaywashere@gmail.com",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Battalion/Binaries/Linux/BattalionServer-Linux-Shipping Battalion -QueryPort={{QUERY_PORT}} -SteamServerName=\"{{SERVER_NAME}]\" -Queue=\"Wartide\" -AdminPassword=\"{{ADMIN_PW}}\" -Log",
+        "config": {
+          "files": "{}",
+          "logs": "{}",
+          "startup": "{\"done\": \" OnCreateSessionComplete \"}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash",
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\""
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "805140",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:805140",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Server will check for updates on every restart. Use 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "battalion-legacy-40c8ced096bc",
+        "name": "BATTALION: Legacy",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/battalion-legacy-40c8ced096bc.json",
+        "sha256": "c927958736ac28cbc89905de7f60a6d55d6769a7c621d38831b4b48677fe9571",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/steamcmd_servers/battalion_legacy/egg-b-a-t-t-a-l-i-o-n--legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/40c8ced096bc.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-13T20:14:32+03:00",
+        "name": "BATTALION: Legacy",
+        "author": "diedyesterdaywashere@gmail.com",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Battalion/Binaries/Linux/BattalionServer-Linux-Shipping Battalion -QueryPort={{QUERY_PORT}} -SteamServerName=\"{{SERVER_NAME}]\" -Queue=\"Wartide\" -AdminPassword=\"{{ADMIN_PW}}\" -Log",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \" OnCreateSessionComplete \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "805140",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:805140",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Server will check for updates on every restart. Use 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "battalion-legacy-f11bbd8d2e55",
+        "name": "BATTALION: Legacy",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/battalion-legacy-f11bbd8d2e55.json",
+        "sha256": "9a0292b0f8e18a854225e7deb988e439391e2cf43190847abf5201f7413b6335",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-steamcmd",
+          "commit": "e17e2c3db36aaf1ddecbc227803dd6cdbb0e6b1f",
+          "path": "battalion_legacy/egg-b-a-t-t-a-l-i-o-n--legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-steamcmd/f11bbd8d2e55.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2026-04-06T02:01:23+00:00",
+        "name": "BATTALION: Legacy",
+        "author": "diedyesterdaywashere@gmail.com",
+        "uuid": "d1a66298-9b14-4a95-a182-c93fc1d33e22",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "tags": [
+          "steamcmd"
+        ],
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/parkervcp/steamcmd:debian": "ghcr.io/parkervcp/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Battalion/Binaries/Linux/BattalionServer-Linux-Shipping Battalion -QueryPort={{QUERY_PORT}} -SteamServerName=\"{{SERVER_NAME}]\" -Queue=\"Wartide\" -AdminPassword=\"{{ADMIN_PW}}\" -Log",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \" OnCreateSessionComplete \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/parkervcp/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "805140",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:805140",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Server will check for updates on every restart. Use 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "boolean",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "sort": null,
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "sort": null,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "battalion-legacy-f6bd9479206e",
+        "name": "BATTALION: Legacy",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/battalion-legacy-f6bd9479206e.json",
+        "sha256": "712e0c834ba91d45f9b7e89fd0ef44bbae532dc0423a244123d23e8079dc97f0",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "battalion_legacy/egg-b-a-t-t-a-l-i-o-n--legacy.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/f6bd9479206e.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2023-07-13T20:14:32+03:00",
+        "name": "BATTALION: Legacy",
+        "author": "diedyesterdaywashere@gmail.com",
+        "description": "BATTALION: Legacy recaptures the core of classic shooters in the final iteration of Battalion 1944. Return to the simple days of playing first person shooters with your friends. Grab your bolt action rifle in 'rifles only' mode or compete in 5v5 Search and Destroy.",
+        "features": [
+          "steam_disk_space"
+        ],
+        "docker_images": {
+          "ghcr.io/ptero-eggs/steamcmd:debian": "ghcr.io/ptero-eggs/steamcmd:debian"
+        },
+        "file_denylist": [],
+        "startup": "./Battalion/Binaries/Linux/BattalionServer-Linux-Shipping Battalion -QueryPort={{QUERY_PORT}} -SteamServerName=\"{{SERVER_NAME}]\" -Queue=\"Wartide\" -AdminPassword=\"{{ADMIN_PW}}\" -Log",
+        "config": {
+          "files": "{}",
+          "startup": "{\"done\": \" OnCreateSessionComplete \"}",
+          "logs": "{}",
+          "stop": "^^C"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n# steamcmd Base Installation Script\r\n#\r\n# Server Files: /mnt/server\r\n# Image to install with is 'ghcr.io/ptero-eggs/installers:debian'\r\n\r\n##\r\n#\r\n# Variables\r\n# STEAM_USER, STEAM_PASS, STEAM_AUTH - Steam user setup. If a user has 2fa enabled it will most likely fail due to timeout. Leave blank for anon install.\r\n# WINDOWS_INSTALL - if it's a windows server you want to install set to 1\r\n# SRCDS_APPID - steam app id found here - https://developer.valvesoftware.com/wiki/Dedicated_Servers_List\r\n# SRCDS_BETAID - beta branch of a steam app. Leave blank to install normal branch\r\n# SRCDS_BETAPASS - password for a beta branch should one be required during private or closed testing phases.. Leave blank for no password.\r\n# INSTALL_FLAGS - Any additional SteamCMD  flags to pass during install.. Keep in mind that steamcmd auto update process in the docker image might overwrite or ignore these when it performs update on server boot.\r\n# AUTO_UPDATE - Adding this variable to the egg allows disabling or enabling automated updates on boot. Boolean value. 0 to disable and 1 to enable.\r\n#\r\n ##\r\n\r\n# Install packages. Default packages below are not required if using our existing install image thus speeding up the install process.\r\n#apt -y update\r\n#apt -y --no-install-recommends install curl lib32gcc-s1 ca-certificates\r\n\r\n## just in case someone removed the defaults.\r\nif [[ \"${STEAM_USER}\" == \"\" ]] || [[ \"${STEAM_PASS}\" == \"\" ]]; then\r\n    echo -e \"steam user is not set.\\n\"\r\n    echo -e \"Using anonymous user.\\n\"\r\n    STEAM_USER=anonymous\r\n    STEAM_PASS=\"\"\r\n    STEAM_AUTH=\"\"\r\nelse\r\n    echo -e \"user set to ${STEAM_USER}\"\r\nfi\r\n\r\n## download and install steamcmd\r\ncd /tmp\r\nmkdir -p /mnt/server/steamcmd\r\ncurl -sSL -o steamcmd.tar.gz https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz\r\ntar -xzvf steamcmd.tar.gz -C /mnt/server/steamcmd\r\nmkdir -p /mnt/server/steamapps # Fix steamcmd disk write error when this folder is missing\r\ncd /mnt/server/steamcmd\r\n\r\n# SteamCMD fails otherwise for some reason, even running as root.\r\n# This is changed at the end of the install process anyways.\r\nchown -R root:root /mnt\r\nexport HOME=/mnt/server\r\n\r\n## install game using steamcmd\r\n./steamcmd.sh +force_install_dir /mnt/server +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ \"${WINDOWS_INSTALL}\" == \"1\" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s \"-beta ${SRCDS_BETAID}\" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s \"-betapassword ${SRCDS_BETAPASS}\" ) ${INSTALL_FLAGS} validate +quit ## other flags may be needed depending on install. looking at you cs 1.6\r\n\r\n## set up 32 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk32\r\ncp -v linux32/steamclient.so ../.steam/sdk32/steamclient.so\r\n\r\n## set up 64 bit libraries\r\nmkdir -p /mnt/server/.steam/sdk64\r\ncp -v linux64/steamclient.so ../.steam/sdk64/steamclient.so\r\n\r\n## add below your custom commands if needed\r\n\r\n## install end\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "App ID",
+            "description": "",
+            "env_variable": "SRCDS_APPID",
+            "default_value": "805140",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:805140",
+            "field_type": "text"
+          },
+          {
+            "name": "Auto Update",
+            "description": "Server will check for updates on every restart. Use 0 to disable.",
+            "env_variable": "AUTO_UPDATE",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|boolean",
+            "field_type": "text"
+          },
+          {
+            "name": "Query Port",
+            "description": "",
+            "env_variable": "QUERY_PORT",
+            "default_value": "27016",
+            "user_viewable": true,
+            "user_editable": false,
+            "rules": "required|integer|between:1024,65536",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Name",
+            "description": "",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Pterodactyl hosted Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:60",
+            "field_type": "text"
+          },
+          {
+            "name": "Admin Password",
+            "description": "",
+            "env_variable": "ADMIN_PW",
+            "default_value": "changeme",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:20",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "beammp-servers-0bbd1b40f7c5",
+        "name": "BeamMP Servers",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/beammp-servers-0bbd1b40f7c5.json",
+        "sha256": "13a7617bd5c0b4376b1ff85be937d25f3779ed561fee09dc33920a88cd6c51ca",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "beamng/beammp/egg-beam-m-p-servers.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/0bbd1b40f7c5.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PANEL",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-08-03T04:06:03+00:00",
+        "name": "BeamMP Servers",
+        "author": "noah@noahserver.online",
+        "uuid": "6c0281af-ee73-46d9-bc4e-222cc4ecf1ab",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "features": [],
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./BeamMP-Server",
+        "config": {
+          "files": "{\"ServerConfig.toml\": {\"parser\": \"file\", \"find\": {\"Name =\": \"Name = \\\"{{env.NAME}}\\\"\", \"Port =\": \"Port = {{server.allocations.default.port}}\", \"AuthKey =\": \"AuthKey = \\\"{{env.AUTHKEY}}\\\"\", \"Private =\": \"Private = {{env.PRIVATE}}\", \"MaxPlayers =\": \"MaxPlayers = {{server.environment.MAX_PLAYERS}}\", \"Description =\": \"Description = \\\"{{env.DESCRIPTION}}\\\"\", \"MaxCars =\": \"MaxCars = {{env.MAX_CARS}}\", \"Map =\": \"Map = \\\"{{env.MAP}}\\\"\", \"LogChat =\": \"LogChat = {{env.LOGCHAT}}\"}}}",
+          "startup": "{\"done\": \"[INFO] Vehicle data network online\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n#Remove any old versions\r\nrm -f BeamMP-Server\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"Server.debian.12.x86_64\" || echo \"Server.debian.12.arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Using latest BeamMP server version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1)\r\nelse\r\n    echo -e \"Chosen version :${VERSION}. Verifying version from releases\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"No valid versions found. Defaulting to the latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"Server\" | grep -i \"debian\" | grep -i \"12\" |  grep -i \"x\" | grep -i \"64\" | head -1)\r\n    fi\r\nfi\r\n\r\n#Download the BeamMP server binary\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\"\r\ncurl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\r\nchmod +x BeamMP-Server\r\n\r\n#Create a default configuration file\r\ncat > ServerConfig.toml << EOF\r\n# This is the BeamMP-Server config file.\r\n# Help & Documentation: https://wiki.beammp.com/en/home/server-maintenance\r\n# IMPORTANT: Fill in the AuthKey with the key you got from https://keymaster.beammp.com/ on the left under 'Keys'\r\n\r\n[General]\r\nName = 'BeamMP Server'\r\nPort = 30814\r\n# AuthKey has to be filled out in order to run the server\r\nAuthKey = ''\r\n# Whether to log chat messages in the console / log\r\nLogChat = true\r\n# Add custom identifying tags to your server to make it easier to find. Format should be TagA,TagB,TagC. Note the comma seperation.\r\nTags = 'Freeroam'\r\nDebug = false\r\nPrivate = true\r\nMaxCars = 1\r\nMaxPlayers = 8\r\nMap = '/levels/gridmap_v2/info.json'\r\nDescription = 'BeamMP Default Description'\r\nResourceFolder = 'Resources'\r\n\r\n[Misc]\r\n# Hides the periodic update message which notifies you of a new server version. You should really keep this on and always update as soon as possible. For more information visit https://wiki.beammp.com/en/home/server-maintenance#updating-the-server. An update message will always appear at startup regardless.\r\nImScaredOfUpdates = false\r\n# You can turn on/off the SendErrors message you get on startup here\r\nSendErrorsShowMessage = true\r\n# If SendErrors is 'true', the server will send helpful info about crashes and other issues back to the BeamMP developers. This info may include your config, who is on your server at the time of the error, and similar general information. This kind of data is vital in helping us diagnose and fix issues faster. This has no impact on server performance. You can opt-out of this system by setting this to 'false'\r\nSendErrors = true\r\n\r\nEOF\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of your server. This is what appears on the server list.",
+            "env_variable": "NAME",
+            "default_value": "BeamMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": 1,
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Sets the server description",
+            "env_variable": "DESCRIPTION",
+            "default_value": "BeamMP Default Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "sort": 2,
+            "field_type": "text"
+          },
+          {
+            "name": "BeamMP Server Version",
+            "description": "The BeamMP server version to be installed. Latest or invalid versions will default to latest. See all available versions at https://github.com/BeamMP/BeamMP-Server/releases\r\n\r\nexample: v3.1.0 or  v2.2.0 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:12",
+            "sort": 3,
+            "field_type": "text"
+          },
+          {
+            "name": "Authentication Key",
+            "description": "The authentication key for your server. A key can be obtained from the BeamMP keymaster at https://keymaster.beammp.com",
+            "env_variable": "AUTHKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 4,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "sort": 5,
+            "field_type": "text"
+          },
+          {
+            "name": "Private",
+            "description": "Should the server be private?",
+            "env_variable": "PRIVATE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 6,
+            "field_type": "text"
+          },
+          {
+            "name": "Max Cars",
+            "description": "The maximum number of cars allowed to be spawned per player.",
+            "env_variable": "MAX_CARS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:10",
+            "sort": 7,
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The map for your server. Stock maps are listed below.\r\n\r\n/levels/gridmap_v2/info.json\r\n/levels/automation_test_track/info.json\r\n/levels/east_coast_usa/info.json\r\n/levels/hirochi_raceway/info.json\r\n/levels/italy/info.json\r\n/levels/jungle_rock_island/info.json\r\n/levels/industrial/info.json\r\n/levels/small_island/info.json\r\n/levels/smallgrid/info.json\r\n/levels/utah/info.json\r\n/levels/west_coast_usa/info.json\r\n/levels/driver_training/info.json\r\n/levels/derby/info.json",
+            "env_variable": "MAP",
+            "default_value": "/levels/gridmap_v2/info.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "sort": 8,
+            "field_type": "text"
+          },
+          {
+            "name": "Chat logging",
+            "description": "Enable chat logging by the server",
+            "env_variable": "LOGCHAT",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "sort": 9,
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "beammp-servers-48ac27c388da",
+        "name": "BeamMP Servers",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/beammp-servers-48ac27c388da.json",
+        "sha256": "35566cdf7913a98a8f312697c789e7b8d5aee44ed206298974aa023bd3f19de5",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/games-standalone",
+          "commit": "3caf3cf09c3fe36d54cef90ef51c1f2b59e676ff",
+          "path": "beamng/beammp/egg-pterodactyl-beam-m-p-servers.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--games-standalone/48ac27c388da.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-08-03T06:04:16+02:00",
+        "name": "BeamMP Servers",
+        "author": "noah@noahserver.online",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./BeamMP-Server",
+        "config": {
+          "files": "{\"ServerConfig.toml\": {\"parser\": \"file\", \"find\": {\"Name =\": \"Name = \\\"{{env.NAME}}\\\"\", \"Port =\": \"Port = {{server.build.default.port}}\", \"AuthKey =\": \"AuthKey = \\\"{{env.AUTHKEY}}\\\"\", \"Private =\": \"Private = {{env.PRIVATE}}\", \"MaxPlayers =\": \"MaxPlayers = {{server.build.env.MAX_PLAYERS}}\", \"Description =\": \"Description = \\\"{{env.DESCRIPTION}}\\\"\", \"MaxCars =\": \"MaxCars = {{env.MAX_CARS}}\", \"Map =\": \"Map = \\\"{{env.MAP}}\\\"\", \"LogChat =\": \"LogChat = {{env.LOGCHAT}}\"}}}",
+          "startup": "{\"done\": \"[INFO] Vehicle data network online\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n#Remove any old versions\r\nrm -f BeamMP-Server\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"Server.debian.12.x86_64\" || echo \"Server.debian.12.arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Using latest BeamMP server version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1)\r\nelse\r\n    echo -e \"Chosen version :${VERSION}. Verifying version from releases\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"No valid versions found. Defaulting to the latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"Server\" | grep -i \"debian\" | grep -i \"12\" |  grep -i \"x\" | grep -i \"64\" | head -1)\r\n    fi\r\nfi\r\n\r\n#Download the BeamMP server binary\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\"\r\ncurl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\r\nchmod +x BeamMP-Server\r\n\r\n#Create a default configuration file\r\ncat > ServerConfig.toml << EOF\r\n# This is the BeamMP-Server config file.\r\n# Help & Documentation: https://wiki.beammp.com/en/home/server-maintenance\r\n# IMPORTANT: Fill in the AuthKey with the key you got from https://keymaster.beammp.com/ on the left under 'Keys'\r\n\r\n[General]\r\nName = 'BeamMP Server'\r\nPort = 30814\r\n# AuthKey has to be filled out in order to run the server\r\nAuthKey = ''\r\n# Whether to log chat messages in the console / log\r\nLogChat = true\r\n# Add custom identifying tags to your server to make it easier to find. Format should be TagA,TagB,TagC. Note the comma seperation.\r\nTags = 'Freeroam'\r\nDebug = false\r\nPrivate = true\r\nMaxCars = 1\r\nMaxPlayers = 8\r\nMap = '/levels/gridmap_v2/info.json'\r\nDescription = 'BeamMP Default Description'\r\nResourceFolder = 'Resources'\r\n\r\n[Misc]\r\n# Hides the periodic update message which notifies you of a new server version. You should really keep this on and always update as soon as possible. For more information visit https://wiki.beammp.com/en/home/server-maintenance#updating-the-server. An update message will always appear at startup regardless.\r\nImScaredOfUpdates = false\r\n# You can turn on/off the SendErrors message you get on startup here\r\nSendErrorsShowMessage = true\r\n# If SendErrors is 'true', the server will send helpful info about crashes and other issues back to the BeamMP developers. This info may include your config, who is on your server at the time of the error, and similar general information. This kind of data is vital in helping us diagnose and fix issues faster. This has no impact on server performance. You can opt-out of this system by setting this to 'false'\r\nSendErrors = true\r\n\r\nEOF\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of your server. This is what appears on the server list.",
+            "env_variable": "NAME",
+            "default_value": "BeamMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Sets the server description",
+            "env_variable": "DESCRIPTION",
+            "default_value": "BeamMP Default Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "BeamMP Server Version",
+            "description": "The BeamMP server version to be installed. Latest or invalid versions will default to latest. See all available versions at https://github.com/BeamMP/BeamMP-Server/releases\r\n\r\nexample: v3.1.0 or  v2.2.0 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:12",
+            "field_type": "text"
+          },
+          {
+            "name": "Authentication Key",
+            "description": "The authentication key for your server. A key can be obtained from the BeamMP keymaster at https://keymaster.beammp.com",
+            "env_variable": "AUTHKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Private",
+            "description": "Should the server be private?",
+            "env_variable": "PRIVATE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Cars",
+            "description": "The maximum number of cars allowed to be spawned per player.",
+            "env_variable": "MAX_CARS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The map for your server. Stock maps are listed below.\r\n\r\n/levels/gridmap_v2/info.json\r\n/levels/automation_test_track/info.json\r\n/levels/east_coast_usa/info.json\r\n/levels/hirochi_raceway/info.json\r\n/levels/italy/info.json\r\n/levels/jungle_rock_island/info.json\r\n/levels/industrial/info.json\r\n/levels/small_island/info.json\r\n/levels/smallgrid/info.json\r\n/levels/utah/info.json\r\n/levels/west_coast_usa/info.json\r\n/levels/driver_training/info.json\r\n/levels/derby/info.json",
+            "env_variable": "MAP",
+            "default_value": "/levels/gridmap_v2/info.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Chat logging",
+            "description": "Enable chat logging by the server",
+            "env_variable": "LOGCHAT",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "beammp-servers-6ae13a4c8b59",
+        "name": "BeamMP Servers",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/beammp-servers-6ae13a4c8b59.json",
+        "sha256": "e4b60dd7ce5cc4b89b51af485cbf42546cee534052a089474593838a0b46551b",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pelican-eggs/eggs",
+          "commit": "fcfd5a3549769ade15127a7577d6d3c397e83b05",
+          "path": "game_eggs/beamng/beammp/egg-beam-m-p-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pelican-eggs--eggs/6ae13a4c8b59.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-05T12:07:19+02:00",
+        "name": "BeamMP Servers",
+        "author": "noah@noahserver.online",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/parkervcp/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./BeamMP-Server",
+        "config": {
+          "files": "{\"ServerConfig.toml\": {\"parser\": \"file\", \"find\": {\"Name =\": \"Name = \\\"{{env.NAME}}\\\"\", \"Port =\": \"Port = {{server.build.default.port}}\", \"AuthKey =\": \"AuthKey = \\\"{{env.AUTHKEY}}\\\"\", \"Private =\": \"Private = {{env.PRIVATE}}\", \"MaxPlayers =\": \"MaxPlayers = {{server.build.env.MAX_PLAYERS}}\", \"Description =\": \"Description = \\\"{{env.DESCRIPTION}}\\\"\", \"MaxCars =\": \"MaxCars = {{env.MAX_CARS}}\", \"Map =\": \"Map = \\\"{{env.MAP}}\\\"\", \"LogChat =\": \"LogChat = {{env.LOGCHAT}}\"}}}",
+          "startup": "{\"done\": \"[INFO] Vehicle data network online\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n#Remove any old versions\r\nrm -f BeamMP-Server\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"Server.debian.12.x86_64\" || echo \"Server.debian.12.arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Using latest BeamMP server version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1)\r\nelse\r\n    echo -e \"Chosen version :${VERSION}. Verifying version from releases\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"No valid versions found. Defaulting to the latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"Server\" | grep -i \"debian\" | grep -i \"12\" |  grep -i \"x\" | grep -i \"64\" | head -1)\r\n    fi\r\nfi\r\n\r\n#Download the BeamMP server binary\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\"\r\ncurl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\r\nchmod +x BeamMP-Server\r\n\r\n#Create a default configuration file\r\necho \"# This is the BeamMP-Server config file.\r\n# Help & Documentation: `https://wiki.beammp.com/en/home/server-maintenance`\r\n# IMPORTANT: Fill in the AuthKey with the key you got from `https://keymaster.beammp.com/` on the left under 'Keys'\r\n\r\n[General]\r\nName = 'BeamMP Server'\r\nPort = 30814\r\n# AuthKey has to be filled out in order to run the server\r\nAuthKey = ''\r\n# Whether to log chat messages in the console / log\r\nLogChat = true\r\n# Add custom identifying tags to your server to make it easier to find. Format should be TagA,TagB,TagC. Note the comma seperation.\r\nTags = 'Freeroam'\r\nDebug = false\r\nPrivate = true\r\nMaxCars = 1\r\nMaxPlayers = 8\r\nMap = '/levels/gridmap_v2/info.json'\r\nDescription = 'BeamMP Default Description'\r\nResourceFolder = 'Resources'\r\n\r\n[Misc]\r\n# Hides the periodic update message which notifies you of a new server version. You should really keep this on and always update as soon as possible. For more information visit https://wiki.beammp.com/en/home/server-maintenance#updating-the-server. An update message will always appear at startup regardless.\r\nImScaredOfUpdates = false\r\n# You can turn on/off the SendErrors message you get on startup here\r\nSendErrorsShowMessage = true\r\n# If SendErrors is 'true', the server will send helpful info about crashes and other issues back to the BeamMP developers. This info may include your config, who is on your server at the time of the error, and similar general information. This kind of data is vital in helping us diagnose and fix issues faster. This has no impact on server performance. You can opt-out of this system by setting this to 'false'\r\nSendErrors = true\" > ServerConfig.toml\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/parkervcp/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of your server. This is what appears on the server list.",
+            "env_variable": "NAME",
+            "default_value": "BeamMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Sets the server description",
+            "env_variable": "DESCRIPTION",
+            "default_value": "BeamMP Default Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "BeamMP Server Version",
+            "description": "The BeamMP server version to be installed. Latest or invalid versions will default to latest. See all available versions at https://github.com/BeamMP/BeamMP-Server/releases\r\n\r\nexample: v3.1.0 or  v2.2.0 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:12",
+            "field_type": "text"
+          },
+          {
+            "name": "Authentication Key",
+            "description": "The authentication key for your server. A key can be obtained from the BeamMP keymaster at https://keymaster.beammp.com",
+            "env_variable": "AUTHKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Private",
+            "description": "Should the server be private?",
+            "env_variable": "PRIVATE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Cars",
+            "description": "The maximum number of cars allowed to be spawned per player.",
+            "env_variable": "MAX_CARS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The map for your server. Stock maps are listed below.\r\n\r\n/levels/gridmap_v2/info.json\r\n/levels/automation_test_track/info.json\r\n/levels/east_coast_usa/info.json\r\n/levels/hirochi_raceway/info.json\r\n/levels/italy/info.json\r\n/levels/jungle_rock_island/info.json\r\n/levels/industrial/info.json\r\n/levels/small_island/info.json\r\n/levels/smallgrid/info.json\r\n/levels/utah/info.json\r\n/levels/west_coast_usa/info.json\r\n/levels/driver_training/info.json\r\n/levels/derby/info.json",
+            "env_variable": "MAP",
+            "default_value": "/levels/gridmap_v2/info.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Chat logging",
+            "description": "Enable chat logging by the server",
+            "env_variable": "LOGCHAT",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    },
+    {
+      "entry": {
+        "id": "beammp-servers-e73b57b5eb49",
+        "name": "BeamMP Servers",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "category": "games",
+        "kind": "preset",
+        "path": "eggs/games/beammp-servers-e73b57b5eb49.json",
+        "sha256": "b2c8a3f9b4b7053ecbdd337a42bc9c133c27035aa8429e51accaf8e1f3510f3d",
+        "resources": {
+          "cpu": 100,
+          "memory_mb": 2048,
+          "disk_mb": 10240
+        },
+        "upstream": {
+          "repository": "pterodactyl/game-eggs",
+          "commit": "c637a6d1e0449b167efeff81bb9a0177aa3df6c2",
+          "path": "beamng/beammp/egg-beam-m-p-server.json",
+          "format": "PTDL_v2"
+        },
+        "upstream_aliases": [],
+        "original_path": "originals/pterodactyl--game-eggs/e73b57b5eb49.json",
+        "runtime_tested": false
+      },
+      "egg": {
+        "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+        "meta": {
+          "version": "PTDL_v2",
+          "update_url": null
+        },
+        "exported_at": "2024-04-05T12:07:19+02:00",
+        "name": "BeamMP Servers",
+        "author": "noah@noahserver.online",
+        "description": "This is the server for the multiplayer mod BeamMP for the game BeamNG.drive. The server is the point through which all clients communicate. You can write lua mods for the server, detailed instructions on the BeamMP Wiki.",
+        "features": null,
+        "docker_images": {
+          "Debian": "ghcr.io/ptero-eggs/yolks:debian"
+        },
+        "file_denylist": [],
+        "startup": "./BeamMP-Server",
+        "config": {
+          "files": "{\"ServerConfig.toml\": {\"parser\": \"file\", \"find\": {\"Name =\": \"Name = \\\"{{env.NAME}}\\\"\", \"Port =\": \"Port = {{server.build.default.port}}\", \"AuthKey =\": \"AuthKey = \\\"{{env.AUTHKEY}}\\\"\", \"Private =\": \"Private = {{env.PRIVATE}}\", \"MaxPlayers =\": \"MaxPlayers = {{server.build.env.MAX_PLAYERS}}\", \"Description =\": \"Description = \\\"{{env.DESCRIPTION}}\\\"\", \"MaxCars =\": \"MaxCars = {{env.MAX_CARS}}\", \"Map =\": \"Map = \\\"{{env.MAP}}\\\"\", \"LogChat =\": \"LogChat = {{env.LOGCHAT}}\"}}}",
+          "startup": "{\"done\": \"[INFO] Vehicle data network online\"}",
+          "logs": "{}",
+          "stop": "exit"
+        },
+        "scripts": {
+          "installation": {
+            "script": "#!/bin/bash\r\n#Create the server directory\r\nmkdir -p /mnt/server\r\ncd /mnt/server\r\n\r\n#Remove any old versions\r\nrm -f BeamMP-Server\r\n\r\n#Check for latest release & download URLs\r\nLATEST_JSON=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases/latest\")\r\nRELEASES=$(curl --silent \"https://api.github.com/repos/BeamMP/BeamMP-Server/releases\")\r\nMATCH=$([[ \"$(uname -m)\" == \"x86_64\" ]] && echo \"Server.debian.12.x86_64\" || echo \"Server.debian.12.arm64\")\r\n\r\nif [ -z \"${VERSION}\" ] || [ \"${VERSION}\" == \"latest\" ]; then\r\n    echo -e \"Using latest BeamMP server version\"\r\n    DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"${MATCH}\" | head -1)\r\nelse\r\n    echo -e \"Chosen version :${VERSION}. Verifying version from releases\"\r\n    VERSION_CHECK=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .tag_name')\r\n    if [ \"${VERSION}\" == \"${VERSION_CHECK}\" ]; then\r\n        DOWNLOAD_URL=$(echo ${RELEASES} | jq -r --arg VERSION \"${VERSION}\" '.[] | select(.tag_name==$VERSION) | .assets[].browser_download_url' | grep -i \"${MATCH}\" | head -1)\r\n    else\r\n        echo -e \"No valid versions found. Defaulting to the latest release\"\r\n        DOWNLOAD_URL=$(echo ${LATEST_JSON} | jq .assets | jq -r .[].browser_download_url | grep -i \"Server\" | grep -i \"debian\" | grep -i \"12\" |  grep -i \"x\" | grep -i \"64\" | head -1)\r\n    fi\r\nfi\r\n\r\n#Download the BeamMP server binary\r\necho -e \"Running curl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\"\r\ncurl -sSL ${DOWNLOAD_URL} -o BeamMP-Server\r\nchmod +x BeamMP-Server\r\n\r\n#Create a default configuration file\r\necho \"# This is the BeamMP-Server config file.\r\n# Help & Documentation: `https://wiki.beammp.com/en/home/server-maintenance`\r\n# IMPORTANT: Fill in the AuthKey with the key you got from `https://keymaster.beammp.com/` on the left under 'Keys'\r\n\r\n[General]\r\nName = 'BeamMP Server'\r\nPort = 30814\r\n# AuthKey has to be filled out in order to run the server\r\nAuthKey = ''\r\n# Whether to log chat messages in the console / log\r\nLogChat = true\r\n# Add custom identifying tags to your server to make it easier to find. Format should be TagA,TagB,TagC. Note the comma seperation.\r\nTags = 'Freeroam'\r\nDebug = false\r\nPrivate = true\r\nMaxCars = 1\r\nMaxPlayers = 8\r\nMap = '/levels/gridmap_v2/info.json'\r\nDescription = 'BeamMP Default Description'\r\nResourceFolder = 'Resources'\r\n\r\n[Misc]\r\n# Hides the periodic update message which notifies you of a new server version. You should really keep this on and always update as soon as possible. For more information visit https://wiki.beammp.com/en/home/server-maintenance#updating-the-server. An update message will always appear at startup regardless.\r\nImScaredOfUpdates = false\r\n# You can turn on/off the SendErrors message you get on startup here\r\nSendErrorsShowMessage = true\r\n# If SendErrors is 'true', the server will send helpful info about crashes and other issues back to the BeamMP developers. This info may include your config, who is on your server at the time of the error, and similar general information. This kind of data is vital in helping us diagnose and fix issues faster. This has no impact on server performance. You can opt-out of this system by setting this to 'false'\r\nSendErrors = true\" > ServerConfig.toml\r\n\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installation completed...\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io/ptero-eggs/installers:debian",
+            "entrypoint": "bash"
+          }
+        },
+        "variables": [
+          {
+            "name": "Server Name",
+            "description": "The name of your server. This is what appears on the server list.",
+            "env_variable": "NAME",
+            "default_value": "BeamMP Server",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "Server Description",
+            "description": "Sets the server description",
+            "env_variable": "DESCRIPTION",
+            "default_value": "BeamMP Default Description",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:128",
+            "field_type": "text"
+          },
+          {
+            "name": "BeamMP Server Version",
+            "description": "The BeamMP server version to be installed. Latest or invalid versions will default to latest. See all available versions at https://github.com/BeamMP/BeamMP-Server/releases\r\n\r\nexample: v3.1.0 or  v2.2.0 or latest",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:12",
+            "field_type": "text"
+          },
+          {
+            "name": "Authentication Key",
+            "description": "The authentication key for your server. A key can be obtained from the BeamMP keymaster at https://keymaster.beammp.com",
+            "env_variable": "AUTHKEY",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Players",
+            "description": "The maximum number of players allowed on the server.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "6",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:100",
+            "field_type": "text"
+          },
+          {
+            "name": "Private",
+            "description": "Should the server be private?",
+            "env_variable": "PRIVATE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          },
+          {
+            "name": "Max Cars",
+            "description": "The maximum number of cars allowed to be spawned per player.",
+            "env_variable": "MAX_CARS",
+            "default_value": "1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|max:10",
+            "field_type": "text"
+          },
+          {
+            "name": "Map",
+            "description": "The map for your server. Stock maps are listed below.\r\n\r\n/levels/gridmap_v2/info.json\r\n/levels/automation_test_track/info.json\r\n/levels/east_coast_usa/info.json\r\n/levels/hirochi_raceway/info.json\r\n/levels/italy/info.json\r\n/levels/jungle_rock_island/info.json\r\n/levels/industrial/info.json\r\n/levels/small_island/info.json\r\n/levels/smallgrid/info.json\r\n/levels/utah/info.json\r\n/levels/west_coast_usa/info.json\r\n/levels/driver_training/info.json\r\n/levels/derby/info.json",
+            "env_variable": "MAP",
+            "default_value": "/levels/gridmap_v2/info.json",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+          },
+          {
+            "name": "Chat logging",
+            "description": "Enable chat logging by the server",
+            "env_variable": "LOGCHAT",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+          }
+        ]
+      }
+    }
+  ]
+}
